@@ -3,235 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطبيق READY - متابعة الطلب والدفع</title>
-  
-  <!-- Tailwind CSS CDN -->
+  <title>READY OS - اطلب طعامك طازجاً</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
-  <!-- Leaflet CSS & JS (الخريطة) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 flex flex-col items-center">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-20">
 
-  <!-- الهيدر العلوي -->
-  <header class="w-full max-w-lg bg-slate-800 p-4 rounded-2xl shadow-lg mb-6 flex justify-between items-center border border-slate-700">
-    <div class="flex items-center gap-3">
-      <div class="bg-amber-500 text-slate-900 p-2 rounded-xl font-bold text-xl">READY</div>
-      <div>
-        <h1 class="font-bold text-base">تطبيق READY 🍔</h1>
-        <p class="text-xs text-slate-400">متابعة حالة الطلب وموقع السائق</p>
-      </div>
-    </div>
-    <span id="connection-badge" class="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/30">متصل الآن</span>
-  </header>
-
-  <main class="w-full max-w-lg space-y-6">
-
-    <!-- كارت حالة الطلب والإجمالي -->
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl text-center space-y-4">
-      <div>
-        <p class="text-xs text-slate-400 mb-1">رقم الطلب الحالي:</p>
-        <h2 id="order-id-display" class="text-2xl font-black text-amber-400 tracking-wider">#6573</h2>
-      </div>
-
-      <!-- تفاصيل الإجمالي -->
-      <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 text-xs flex justify-between items-center">
-        <span class="text-slate-400">إجمالي المطلوب سداده:</span>
-        <span class="text-amber-400 font-extrabold text-sm">2002.20 ج.م</span>
-      </div>
-
-      <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-        <p class="text-xs text-slate-400 mb-2">حالة الطلب الحالية:</p>
-        <span id="order-status-badge" class="inline-block bg-amber-500/20 text-amber-300 font-bold px-4 py-2 rounded-xl text-sm border border-amber-500/30 animate-pulse">
-          بانتظار التحديث...
+  <!-- الهيدر -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 p-4 shadow-lg">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-black text-amber-400">READY OS 🍕</h1>
+      <div class="flex items-center space-x-4 space-x-reverse">
+        <span id="cart-count" class="bg-amber-500 text-slate-900 font-bold px-3 py-1 rounded-full text-xs">
+          السلة (0)
         </span>
       </div>
-
-      <!-- أزرار الإجراءات (إنشاء طلب + دفع إلكتروني) -->
-      <div class="space-y-2 pt-2">
-        <button onclick="createNewOrder()" id="create-order-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm flex items-center justify-center gap-2">
-          <span>➕</span> إنشاء طلب تجريبي جديد
-        </button>
-
-        <button onclick="payOrderOnline()" id="pay-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-600/20 text-sm flex items-center justify-center gap-2">
-          <span>💳</span> الدفع الإلكتروني (فيزا / ماستر كارد)
-        </button>
-      </div>
     </div>
+  </header>
 
-    <!-- كارت الخريطة لتتبع حركة الكابتن -->
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-3">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
-          <span>🛵</span> تتبع موقع الكابتن المباشر
-        </h3>
-        <span class="text-xs text-amber-400 font-medium">تحديث لحظي</span>
+  <main class="max-w-4xl mx-auto p-4 space-y-8 mt-4">
+    <!-- قائمة المأكولات (Menu) -->
+    <section>
+      <h2 class="text-lg font-bold text-slate-200 mb-4">قائمة الوجبات المتاحة 🔥</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="menu-container">
+        
+        <!-- صنف 1 -->
+        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-100">جمبري بلدي جامبو</h3>
+            <p class="text-xs text-slate-400 mt-1">مشوي بالخلطة الخاصة 500 جرام</p>
+            <span class="text-emerald-400 font-bold text-sm block mt-2">1200 ج.م</span>
+          </div>
+          <button onclick="addToCart('جمبري بلدي جامبو', 1200)" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-2 rounded-xl transition">
+            + إضافة
+          </button>
+        </div>
+
+        <!-- صنف 2 -->
+        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-100">دنيس طازج مشوي</h3>
+            <p class="text-xs text-slate-400 mt-1">سمكة دنيس طازجة مع الأرز والسلطة</p>
+            <span class="text-emerald-400 font-bold text-sm block mt-2">802.20 ج.م</span>
+          </div>
+          <button onclick="addToCart('دنيس طازج مشوي', 802.20)" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-2 rounded-xl transition">
+            + إضافة
+          </button>
+        </div>
+
       </div>
+    </section>
+
+    <!-- ملخص السلة والتأكيد -->
+    <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
+      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700 pb-2">تفاصيل الطلب 🛒</h2>
       
-      <div id="map" class="w-full h-64 rounded-xl border border-slate-700 z-10"></div>
-    </div>
+      <div id="cart-items" class="space-y-2 text-sm text-slate-300">
+        <p class="text-xs text-slate-500">السلة فارغة حالياً..</p>
+      </div>
 
+      <div class="flex justify-between items-center pt-4 border-t border-slate-700 font-bold">
+        <span>الإجمالي:</span>
+        <span id="total-price" class="text-emerald-400 text-lg">0 ج.م</span>
+      </div>
+
+      <button onclick="submitOrder()" id="checkout-btn" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition cursor-not-allowed">
+        تأكيد الطلب والدفع 🚀
+      </button>
+    </section>
   </main>
 
   <script>
     const socket = io();
-    let currentOrderId = '6573';
-    const totalOrderAmount = 2002.20;
+    let cart = [];
 
-    // 1. تهيئة الخريطة التفاعلية
-    const map = L.map('map').setView([30.0444, 31.2357], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    const driverMarker = L.marker([30.0444, 31.2357]).addTo(map).bindPopup('الكابتن في الطريق إليك 🛵');
-
-    // الانضمام لغرفة الطلب
-    socket.emit('join_order', currentOrderId);
-
-    // التحقق من نتائج الدفع بعد العودة من بوابة الدفع
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('status') === 'success') {
-      alert('✅ تم عملية الدفع الإلكتروني بنجاح! شكرًا لك.');
-    } else if (urlParams.get('status') === 'cancelled') {
-      alert('⚠️ تم إلغاء عملية الدفع.');
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCartUI();
     }
 
-    // 2. استقبال تحديثات حالة الطلب اللحظية
-    socket.on('order_status_updated', (data) => {
-      if (data.orderId === currentOrderId || !data.orderId) {
-        updateStatusUI(data.status);
-      }
-    });
+    function updateCartUI() {
+      const cartContainer = document.getElementById('cart-items');
+      const cartCount = document.getElementById('cart-count');
+      const totalPrice = document.getElementById('total-price');
+      const checkoutBtn = document.getElementById('checkout-btn');
 
-    // 3. استقبال موقع السائق اللحظي وتحديث الخريطة
-    socket.on('driver_location_updated', (data) => {
-      if (data.lat && data.lng) {
-        const newPos = [data.lat, data.lng];
-        driverMarker.setLatLng(newPos);
-        map.panTo(newPos);
-        driverMarker.openPopup();
-      }
-    });
+      cartCount.textContent = `السلة (${cart.length})`;
 
-    // تحديث شكل بادج الحالة
-    function updateStatusUI(status) {
-      const badge = document.getElementById('order-status-badge');
-      badge.textContent = status;
-
-      if (status === 'تم التسليم للعميل' || status === 'تم التسليم') {
-        badge.className = "inline-block bg-emerald-500/20 text-emerald-400 font-bold px-4 py-2 rounded-xl text-sm border border-emerald-500/30";
-      } else if (status === 'الكابتن استلم الطلب') {
-        badge.className = "inline-block bg-blue-500/20 text-blue-300 font-bold px-4 py-2 rounded-xl text-sm border border-blue-500/30 animate-pulse";
-      } else {
-        badge.className = "inline-block bg-amber-500/20 text-amber-300 font-bold px-4 py-2 rounded-xl text-sm border border-amber-500/30 animate-pulse";
+      if (cart.length === 0) {
+        cartContainer.innerHTML = '<p class="text-xs text-slate-500">السلة فارغة حالياً..</p>';
+        totalPrice.textContent = '0 ج.م';
+        checkoutBtn.disabled = true;
+        checkoutBtn.className = "w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition cursor-not-allowed";
+        return;
       }
+
+      let total = 0;
+      cartContainer.innerHTML = cart.map(item => {
+        total += item.price;
+        return `<div class="flex justify-between"><span>${item.name}</span><span class="font-mono text-emerald-400">${item.price} ج.م</span></div>`;
+      }).join('');
+
+      totalPrice.textContent = `${total.toFixed(2)} ج.م`;
+      checkoutBtn.disabled = false;
+      checkoutBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl transition cursor-pointer shadow-lg";
     }
 
-    // 4. دالة إنشاء طلب جديد
-    function createNewOrder() {
-      const btn = document.getElementById('create-order-btn');
-      btn.disabled = true;
-      btn.textContent = 'جاري إرسال الطلب...';
+    async function submitOrder() {
+      if (cart.length === 0) return;
 
-      fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName: 'عميل جديد',
-          items: ['1x جمبري بلدي', '1x سمك دنيس'],
-          totalAmount: totalOrderAmount,
-          status: 'تم التأكيد'
-        })
-      })
-      .then(res => res.json())
-      .then(resData => {
-        btn.disabled = false;
-        btn.innerHTML = '<span>➕</span> إنشاء طلب تجريبي جديد';
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      const orderData = {
+        customerName: "عميل تجريبي",
+        items: cart,
+        totalAmount: total
+      };
 
-        if (resData.success) {
-          currentOrderId = resData.data._id;
-          document.getElementById('order-id-display').textContent = `#${currentOrderId.slice(-6)}`;
-          updateStatusUI(resData.data.status);
-          socket.emit('join_order', currentOrderId);
-          alert('تم إنشاء الطلب بنجاح ومشاركته مع الكابتن!');
-        } else {
-          alert('حدث خطأ أثناء إنشاء الطلب: ' + resData.error);
+      try {
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        const res = await response.json();
+        if (res.success) {
+          alert('✅ تم إرسال الطلب بنجاح وهو قيد التحضير الآن!');
+          cart = [];
+          updateCartUI();
         }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = '<span>➕</span> إنشاء طلب تجريبي جديد';
-        alert('حدث خطأ أثناء الاتصال بالسيرفر');
-      });
-    }
-
-    // 5. دالة التوجيه لـ بوابة الدفع الإلكتروني
-    function payOrderOnline() {
-      const payBtn = document.getElementById('pay-btn');
-      payBtn.disabled = true;
-      payBtn.textContent = 'جاري تجهيز بوابة الدفع...';
-
-      fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: currentOrderId,
-          amount: totalOrderAmount
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        payBtn.disabled = false;
-        payBtn.innerHTML = '<span>💳</span> الدفع الإلكتروني (فيزا / ماستر كارد)';
-
-        if (data.success && data.url) {
-          // التوجيه لصفحة الدفع الآمنة
-          window.location.href = data.url;
-        } else {
-          alert('تعذر فتح بوابة الدفع: ' + (data.error || 'تأكد من ضبط مفاتيح Stripe'));
-        }
-      })
-      .catch(err => {
-        payBtn.disabled = false;
-        payBtn.innerHTML = '<span>💳</span> الدفع الإلكتروني (فيزا / ماستر كارد)';
-        alert('حدث خطأ أثناء الاتصال بإنشاء جلسة الدفع');
-      });
+      } catch (err) {
+        alert('❌ حدث خطأ أثناء إرسال الطلب');
+      }
     }
   </script>
 </body>
 </html>
-// 1. إنشاء صوت التنبيه برمجياً
-const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-
-// 2. طلب إذن الإشعارات من العميل عند تحميل الصفحة
-if ("Notification" in window) {
-  Notification.requestPermission();
-}
-
-// 3. دالة تشغيل الصوت والتنبيه
-function triggerNotification(title, body) {
-  // تشغيل الصوت
-  notificationSound.play().catch(e => console.log('تعذر تشغيل الصوت حتى يتفاعل المستخدم أولاً'));
-
-  // إشعار المتصفح
-  if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, {
-      body: body,
-      icon: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'
-    });
-  }
-}
-
-// 4. تشغيل التنبيه والصوت عند تغيير حالة الطلب
-socket.on('order_status_updated', (data) => {
-  if (data.orderId === currentOrderId || !data.orderId) {
-    updateStatusUI(data.status);
-    
-    // إطلاق الصوت والإشعار
-    triggerNotification('تحديث الطلب READY 🍔', `حالة طلبك الجديدة هي: ${data.status}`);
-  }
-});
