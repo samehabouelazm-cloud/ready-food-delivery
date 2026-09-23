@@ -3,26 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY - متابعة الطلب</title>
+  <title>READY - متابعة الطلب والخرائط</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- استدعاء مكتبة Socket.io -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <!-- مكتبة الخرائط المجانية Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style> #map { height: 250px; width: 100%; border-radius: 12px; } </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4">
 
   <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700 text-center">
     <h1 class="text-2xl font-bold text-amber-500 mb-2">تطبيق READY 🍔</h1>
-    <p class="text-slate-400 text-sm mb-6">متابعة حالة الطلب اللحظية</p>
+    <p class="text-slate-400 text-sm mb-4">متابعة حالة الطلب وموقع السائق</p>
 
-    <!-- بطاقة عرض حالة الطلب -->
     <div id="order-card" class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-4">
       <p class="text-xs text-slate-500 mb-1">رقم الطلب:</p>
       <p id="order-id" class="font-mono text-sm text-slate-300 mb-3">لم يتم إنشاء طلب بعد</p>
       
       <p class="text-xs text-slate-500 mb-1">حالة الطلب الحالية:</p>
-      <span id="order-status" class="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-slate-700 text-slate-300">
+      <span id="order-status" class="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-slate-700 text-slate-300 mb-4">
         بانتظار الطلب...
       </span>
+
+      <!-- الخريطة -->
+      <div id="map" class="hidden"></div>
     </div>
 
     <button id="btn-create-order" onclick="createOrder()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-xl transition">
@@ -33,12 +38,34 @@
   <script>
     const socket = io(); 
     let currentOrderId = null;
+    let map, driverMarker;
 
-    // استقبال التحديث اللحظي المباشر بدلاً من الـ Polling
+    // تهيئة الخريطة
+    function initMap(lat = 30.0444, lng = 31.2357) {
+      document.getElementById('map').classList.remove('hidden');
+      if (!map) {
+        map = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'READY Delivery'
+        }).addTo(map);
+        driverMarker = L.marker([lat, lng]).addTo(map).bindPopup('موقع السائق 🛵').openPopup();
+      } else {
+        driverMarker.setLatLng([lat, lng]);
+        map.panTo([lat, lng]);
+      }
+    }
+
+    // استقبال تحديث الحالة
     socket.on('order_status_updated', (data) => {
-      console.log('تحديث حالة وصل:', data);
       if (data.orderId === currentOrderId) {
         updateStatusUI(data.status);
+      }
+    });
+
+    // استقبال حركة السائق اللحظية
+    socket.on('driver_location_updated', (data) => {
+      if (data.orderId === currentOrderId) {
+        initMap(data.lat, data.lng);
       }
     });
 
@@ -65,8 +92,6 @@
           currentOrderId = result.data._id;
           document.getElementById('order-id').innerText = currentOrderId;
           updateStatusUI(result.data.status);
-
-          // الانضمام لغرفة هذا الطلب لاستقبال تحديثاته
           socket.emit('join_order', currentOrderId);
         }
       } catch (err) {
@@ -80,19 +105,14 @@
     function updateStatusUI(status) {
       const statusElement = document.getElementById('order-status');
       statusElement.innerText = status;
-
       statusElement.className = "inline-block px-3 py-1 rounded-full text-sm font-bold ";
-      if (status === 'معلق') {
-        statusElement.className += "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
-      } else if (status === 'قيد التحضير') {
-        statusElement.className += "bg-blue-500/20 text-blue-400 border border-blue-500/30";
-      } else if (status === 'جاري التوصيل') {
+
+      if (status === 'معلق') statusElement.className += "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+      else if (status === 'قيد التحضير') statusElement.className += "bg-blue-500/20 text-blue-400 border border-blue-500/30";
+      else if (status === 'جاري التوصيل') {
         statusElement.className += "bg-purple-500/20 text-purple-400 border border-purple-500/30";
-      } else if (status === 'تم التسليم') {
-        statusElement.className += "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-      } else {
-        statusElement.className += "bg-slate-700 text-slate-300";
-      }
+        initMap(); // إظهار الخريطة فوراً عند التوصيل
+      } else if (status === 'تم التسليم') statusElement.className += "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
     }
   </script>
 </body>

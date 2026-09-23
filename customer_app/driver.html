@@ -3,41 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY - تطبيق السائق</title>
+  <title>READY - تطبيق السائق والخرائط</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- استدعاء مكتبة Socket.io -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4">
 
   <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700 text-center">
     <h1 class="text-2xl font-bold text-emerald-500 mb-2">لوحة السائق 🚗</h1>
-    <p class="text-slate-400 text-sm mb-6">تحديث حالات الطلبات لحظياً</p>
+    <p class="text-slate-400 text-sm mb-6">تحديث الحالة وإرسال الموقع اللحظي</p>
 
-    <!-- إدخال رقم الطلب لتحديثه -->
     <div class="mb-4 text-right">
       <label class="block text-xs text-slate-400 mb-1">رقم الطلب (Order ID):</label>
       <input id="driver-order-id" type="text" placeholder="أدخل رقم الطلب هنا..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-100 text-sm font-mono focus:outline-none focus:border-emerald-500">
     </div>
 
-    <!-- أزرار التحديث اللحظي -->
-    <div class="space-y-2">
+    <div class="space-y-2 mb-4">
       <button onclick="updateOrderStatus('قيد التحضير')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition">
         👨‍🍳 قيد التحضير
       </button>
       <button onclick="updateOrderStatus('جاري التوصيل')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition">
-        🛵 جاري التوصيل
+        🛵 جاري التوصيل (بدء التتبع)
       </button>
       <button onclick="updateOrderStatus('تم التسليم')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition">
         ✅ تم التسليم
       </button>
     </div>
 
+    <!-- زر محاكاة تحرك السائق -->
+    <button onclick="simulateMovement()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-xl transition border border-amber-500/30">
+      📍 محاكاة تحرك السائق على الخريطة
+    </button>
+
     <div id="status-message" class="mt-4 text-sm font-semibold hidden"></div>
   </div>
 
   <script>
     const socket = io();
+    let currentLat = 30.0444;
+    let currentLng = 31.2357;
 
     async function updateOrderStatus(newStatus) {
       const orderId = document.getElementById('driver-order-id').value.trim();
@@ -58,20 +62,40 @@
         const result = await response.json();
 
         if (result.success) {
-          // إرسال التحديث عبر Socket.io للعميل
           socket.emit('update_status', { orderId: orderId, status: newStatus });
-
           messageEl.className = "mt-4 text-sm font-semibold text-emerald-400";
           messageEl.innerText = `تم تحديث الحالة إلى: "${newStatus}" بنجاح!`;
           messageEl.classList.remove('hidden');
-        } else {
-          throw new Error(result.error || 'فشل التحديث');
         }
       } catch (err) {
         messageEl.className = "mt-4 text-sm font-semibold text-red-400";
-        messageEl.innerText = 'حدث خطأ أثناء تحديث حالة الطلب';
+        messageEl.innerText = 'حدث خطأ أثناء التحديث';
         messageEl.classList.remove('hidden');
       }
+    }
+
+    // إرسال موقع السائق اللحظي للعميل
+    function simulateMovement() {
+      const orderId = document.getElementById('driver-order-id').value.trim();
+      if (!orderId) {
+        alert('يرجى إدخال رقم الطلب أولاً');
+        return;
+      }
+
+      // إزاحة بسيطة في الإحداثيات لمحاكاة الحركة
+      currentLat += 0.0015;
+      currentLng += 0.0015;
+
+      socket.emit('driver_location_updated', {
+        orderId: orderId,
+        lat: currentLat,
+        lng: currentLng
+      });
+
+      const messageEl = document.getElementById('status-message');
+      messageEl.className = "mt-4 text-sm font-semibold text-amber-400";
+      messageEl.innerText = 'تم تحديث موقع السائق على الخريطة! 📍';
+      messageEl.classList.remove('hidden');
     }
   </script>
 </body>
