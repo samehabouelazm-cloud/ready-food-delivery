@@ -159,3 +159,7 @@ server.listen(PORT, () => {
 });
 
 module.exports = app;
+// مسار لوحة تحكم الأدمن
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'customer_app', 'admin.html'));
+});
