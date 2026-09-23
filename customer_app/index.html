@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-20">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-20 select-none">
 
   <!-- الهيدر -->
   <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 p-4 shadow-lg">
@@ -34,7 +34,7 @@
             <p class="text-xs text-slate-400 mt-1">مشوي بالخلطة الخاصة 500 جرام</p>
             <span class="text-emerald-400 font-bold text-sm block mt-2">1200 ج.م</span>
           </div>
-          <button onclick="addToCart('جمبري بلدي جامبو', 1200)" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-2 rounded-xl transition">
+          <button data-name="جمبري بلدي جامبو" data-price="1200" class="add-btn bg-amber-500 active:bg-amber-700 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-3 rounded-xl transition touch-manipulation">
             + إضافة
           </button>
         </div>
@@ -46,7 +46,7 @@
             <p class="text-xs text-slate-400 mt-1">سمكة دنيس طازجة مع الأرز والسلطة</p>
             <span class="text-emerald-400 font-bold text-sm block mt-2">802.20 ج.م</span>
           </div>
-          <button onclick="addToCart('دنيس طازج مشوي', 802.20)" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-2 rounded-xl transition">
+          <button data-name="دنيس طازج مشوي" data-price="802.20" class="add-btn bg-amber-500 active:bg-amber-700 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-3 rounded-xl transition touch-manipulation">
             + إضافة
           </button>
         </div>
@@ -67,15 +67,28 @@
         <span id="total-price" class="text-emerald-400 text-lg">0 ج.م</span>
       </div>
 
-      <button onclick="submitOrder()" id="checkout-btn" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition cursor-not-allowed">
+      <button id="checkout-btn" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition cursor-not-allowed">
         تأكيد الطلب والدفع 🚀
       </button>
     </section>
   </main>
 
   <script>
-    const socket = io();
     let cart = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // ربط جميع أزرار الإضافة بحدث الضغط بأمان
+      document.querySelectorAll('.add-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          const name = button.getAttribute('data-name');
+          const price = parseFloat(button.getAttribute('data-price'));
+          addToCart(name, price);
+        });
+      });
+
+      document.getElementById('checkout-btn').addEventListener('click', submitOrder);
+    });
 
     function addToCart(name, price) {
       cart.push({ name, price });
@@ -101,12 +114,12 @@
       let total = 0;
       cartContainer.innerHTML = cart.map(item => {
         total += item.price;
-        return `<div class="flex justify-between"><span>${item.name}</span><span class="font-mono text-emerald-400">${item.price} ج.م</span></div>`;
+        return `<div class="flex justify-between py-1 border-b border-slate-700/50"><span>${item.name}</span><span class="font-mono text-emerald-400">${item.price} ج.م</span></div>`;
       }).join('');
 
       totalPrice.textContent = `${total.toFixed(2)} ج.م`;
       checkoutBtn.disabled = false;
-      checkoutBtn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl transition cursor-pointer shadow-lg";
+      checkoutBtn.className = "w-full bg-emerald-500 active:bg-emerald-700 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl transition cursor-pointer shadow-lg touch-manipulation";
     }
 
     async function submitOrder() {
