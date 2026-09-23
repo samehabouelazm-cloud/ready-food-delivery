@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم الأدمن - READY OS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-6">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+    <!-- الهيدر الرئيسي -->
+    <header class="flex justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+      <div>
+        <h1 class="text-2xl font-black text-amber-400">لوحة تحكم إدارة READY 📊</h1>
+        <p class="text-xs text-slate-400 mt-1">إحصائيات المبيعات ومتابعة التشغيل اللحظي</p>
+      </div>
+      <span class="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-500/30">
+        المحرك يعمل 🟢
+      </span>
+    </header>
+
+    <!-- كروت الإحصائيات السريعة -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+        <p class="text-xs text-slate-400 font-semibold">إجمالي عدد الطلبات اليوم</p>
+        <h3 id="total-orders-count" class="text-3xl font-black text-slate-100 mt-2">1</h3>
+      </div>
+      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+        <p class="text-xs text-slate-400 font-semibold">إجمالي قيمة المبيعات</p>
+        <h3 id="total-sales-amount" class="text-3xl font-black text-emerald-400 mt-2">2002.20 ج.م</h3>
+      </div>
+      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+        <p class="text-xs text-slate-400 font-semibold">الطلبات النشطة حالياً</p>
+        <h3 id="active-orders-count" class="text-3xl font-black text-amber-400 mt-2">1</h3>
+      </div>
+    </div>
+
+    <!-- جدول الطلبات والمتابعة المباشرة -->
+    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-base font-bold text-slate-200">سجل الطلبات اللحظي</h2>
+        <span class="text-xs text-slate-400">تحديث تلقائي عبر Socket.io</span>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs md:text-sm">
+          <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
+            <tr>
+              <th class="p-3">رقم الطلب</th>
+              <th class="p-3">تفاصيل الأصناف</th>
+              <th class="p-3">المبلغ</th>
+              <th class="p-3">الحالة الحالية</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table-body" class="divide-y divide-slate-700">
+            <tr class="hover:bg-slate-700/50 transition">
+              <td class="p-3 font-mono font-bold text-amber-400">#6573</td>
+              <td class="p-3 text-slate-300">جمبري بلدي + دنيس طازج</td>
+              <td class="p-3 font-bold text-emerald-400">2002.20 ج.م</td>
+              <td class="p-3">
+                <span id="admin-order-status" class="bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-lg border border-amber-500/30 font-bold">
+                  بانتظار التحديث...
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    // الاستماع اللحظي لتحديثات حالة الطلب المرفوعة من السائق أو العميل
+    socket.on('order_status_updated', (data) => {
+      const statusBadge = document.getElementById('admin-order-status');
+      if (statusBadge) {
+        statusBadge.textContent = data.status;
+        
+        if (data.status === 'تم التسليم للعميل') {
+          statusBadge.className = "bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-lg border border-emerald-500/30 font-bold";
+        } else if (data.status === 'الكابتن استلم الطلب') {
+          statusBadge.className = "bg-blue-500/20 text-blue-300 text-xs px-3 py-1 rounded-lg border border-blue-500/30 font-bold";
+        } else {
+          statusBadge.className = "bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-lg border border-amber-500/30 font-bold";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
