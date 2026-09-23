@@ -3,152 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - اطلب طعامك طازجاً</title>
+  <title>READY OS - تطبيق العميل</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { primary: '#f59e0b', dark: '#0f172a' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+  </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-20 select-none">
 
-  <!-- الهيدر -->
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 p-4 shadow-lg">
-    <div class="max-w-4xl mx-auto flex justify-between items-center">
-      <h1 class="text-xl font-black text-amber-400">READY OS 🍕</h1>
-      <div class="flex items-center space-x-4 space-x-reverse">
-        <span id="cart-count" class="bg-amber-500 text-slate-900 font-bold px-3 py-1 rounded-full text-xs">
-          السلة (0)
-        </span>
-      </div>
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">🍕</span>
+      <h1 class="font-bold text-xl text-amber-500">READY OS</h1>
+    </div>
+    <div class="bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full text-sm font-semibold border border-amber-500/20">
+      السلة (<span id="cart-count">0</span>)
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto p-4 space-y-8 mt-4">
-    <!-- قائمة المأكولات (Menu) -->
+  <!-- Main Content -->
+  <main class="max-w-md mx-auto p-4 space-y-6">
+
+    <!-- Menu Section -->
     <section>
-      <h2 class="text-lg font-bold text-slate-200 mb-4">قائمة الوجبات المتاحة 🔥</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="menu-container">
-        
-        <!-- صنف 1 -->
-        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
-          <div>
-            <h3 class="font-bold text-slate-100">جمبري بلدي جامبو</h3>
-            <p class="text-xs text-slate-400 mt-1">مشوي بالخلطة الخاصة 500 جرام</p>
-            <span class="text-emerald-400 font-bold text-sm block mt-2">1200 ج.م</span>
-          </div>
-          <button data-name="جمبري بلدي جامبو" data-price="1200" class="add-btn bg-amber-500 active:bg-amber-700 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-3 rounded-xl transition touch-manipulation">
-            + إضافة
-          </button>
-        </div>
-
-        <!-- صنف 2 -->
-        <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center">
-          <div>
-            <h3 class="font-bold text-slate-100">دنيس طازج مشوي</h3>
-            <p class="text-xs text-slate-400 mt-1">سمكة دنيس طازجة مع الأرز والسلطة</p>
-            <span class="text-emerald-400 font-bold text-sm block mt-2">802.20 ج.م</span>
-          </div>
-          <button data-name="دنيس طازج مشوي" data-price="802.20" class="add-btn bg-amber-500 active:bg-amber-700 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-3 rounded-xl transition touch-manipulation">
-            + إضافة
-          </button>
-        </div>
-
+      <h2 class="text-lg font-bold mb-3 text-amber-400 flex items-center gap-2">
+        <span>🔥</span> قائمة الوجبات المتاحة
+      </h2>
+      <div id="menu-list" class="grid grid-cols-1 gap-3">
+        <!-- Meals will be rendered here dynamically -->
       </div>
     </section>
 
-    <!-- ملخص السلة والتأكيد -->
-    <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
-      <h2 class="text-base font-bold text-slate-200 border-b border-slate-700 pb-2">تفاصيل الطلب 🛒</h2>
-      
-      <div id="cart-items" class="space-y-2 text-sm text-slate-300">
-        <p class="text-xs text-slate-500">السلة فارغة حالياً..</p>
+    <!-- Cart Details Section -->
+    <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700 shadow-lg space-y-4">
+      <h3 class="font-bold text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2">
+        <span>🛒</span> تفاصيل الطلب
+      </h3>
+
+      <!-- Cart Items Container -->
+      <div id="cart-items" class="space-y-3 min-h-[60px]">
+        <p class="text-sm text-slate-400 text-center py-4" id="empty-cart-msg">السلة فارغة حالياً..</p>
       </div>
 
-      <div class="flex justify-between items-center pt-4 border-t border-slate-700 font-bold">
+      <!-- Payment Method Selection -->
+      <div class="border-t border-slate-700 pt-3 space-y-2">
+        <label class="block text-sm font-semibold text-slate-300">طريقة الدفع:</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="selectPayment('cash')" id="pay-cash" class="pay-btn active bg-amber-500 text-slate-950 font-bold py-2 rounded-xl text-xs border border-amber-500 transition">💵 كاش</button>
+          <button type="button" onclick="selectPayment('card')" id="pay-card" class="pay-btn bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs border border-slate-600 transition">💳 فيزا</button>
+          <button type="button" onclick="selectPayment('wallet')" id="pay-wallet" class="pay-btn bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs border border-slate-600 transition">📱 محفظة</button>
+        </div>
+      </div>
+
+      <!-- Customer Details Input -->
+      <div class="border-t border-slate-700 pt-3 space-y-2">
+        <input type="text" id="customer-name" placeholder="اسم العميل (اختياري)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500">
+        <input type="text" id="customer-phone" placeholder="رقم الهاتف (اختياري)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500">
+      </div>
+
+      <!-- Total & Submit -->
+      <div class="border-t border-slate-700 pt-3 flex items-center justify-between font-bold">
         <span>الإجمالي:</span>
-        <span id="total-price" class="text-emerald-400 text-lg">0 ج.م</span>
+        <span class="text-emerald-400 text-lg" id="cart-total">0 ج.م</span>
       </div>
 
-      <button id="checkout-btn" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition cursor-not-allowed">
+      <button id="submit-btn" onclick="submitOrder()" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
         تأكيد الطلب والدفع 🚀
       </button>
     </section>
+
   </main>
 
   <script>
+    // Available Meals Catalog
+    const mealsCatalog = [
+      { id: '1', name: 'جمبري بلدي جامبو', description: 'مشوي بالخلطة الخاصة 500 جرام', price: 1200 },
+      { id: '2', name: 'دنيس طازج مشوي', description: 'سمكة دنيس طازجة مع الأرز والسلطة', price: 802.20 },
+      { id: '3', name: 'وجبة سي فود ميكس', description: 'جمبري، كابوريا، وسمك فيليه مع أرز وسلطات', price: 650 },
+      { id: '4', name: 'طاجن جمبري بالكريمة', description: 'طاجن جمبري فرن بالكريمة والجبنة الموزاريلا', price: 480 }
+    ];
+
     let cart = [];
+    let selectedPaymentMethod = 'cash';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // ربط جميع أزرار الإضافة بحدث الضغط بأمان
-      document.querySelectorAll('.add-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-          e.preventDefault();
-          const name = button.getAttribute('data-name');
-          const price = parseFloat(button.getAttribute('data-price'));
-          addToCart(name, price);
-        });
-      });
+    // Render Meals
+    function renderMenu() {
+      const container = document.getElementById('menu-list');
+      container.innerHTML = mealsCatalog.map(meal => `
+        <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center justify-between gap-3 shadow-sm">
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm">${meal.name}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">${meal.description}</p>
+            <p class="text-emerald-400 font-bold text-sm mt-1">${meal.price.toFixed(2)} ج.م</p>
+          </div>
+          <button onclick="addToCart('${meal.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shrink-0 transition">
+            + إضافة
+          </button>
+        </div>
+      `).join('');
+    }
 
-      document.getElementById('checkout-btn').addEventListener('click', submitOrder);
-    });
+    // Add Meal to Cart or Increase Quantity
+    function addToCart(mealId) {
+      const meal = mealsCatalog.find(m => m.id === mealId);
+      if (!meal) return;
 
-    function addToCart(name, price) {
-      cart.push({ name, price });
+      const existingItem = cart.find(item => item.id === mealId);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ ...meal, quantity: 1 });
+      }
+
       updateCartUI();
     }
 
-    function updateCartUI() {
-      const cartContainer = document.getElementById('cart-items');
-      const cartCount = document.getElementById('cart-count');
-      const totalPrice = document.getElementById('total-price');
-      const checkoutBtn = document.getElementById('checkout-btn');
+    // Change Item Quantity (+ / -)
+    function changeQuantity(mealId, delta) {
+      const itemIndex = cart.findIndex(item => item.id === mealId);
+      if (itemIndex === -1) return;
 
-      cartCount.textContent = `السلة (${cart.length})`;
-
-      if (cart.length === 0) {
-        cartContainer.innerHTML = '<p class="text-xs text-slate-500">السلة فارغة حالياً..</p>';
-        totalPrice.textContent = '0 ج.م';
-        checkoutBtn.disabled = true;
-        checkoutBtn.className = "w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition cursor-not-allowed";
-        return;
+      cart[itemIndex].quantity += delta;
+      if (cart[itemIndex].quantity <= 0) {
+        cart.splice(itemIndex, 1);
       }
 
-      let total = 0;
-      cartContainer.innerHTML = cart.map(item => {
-        total += item.price;
-        return `<div class="flex justify-between py-1 border-b border-slate-700/50"><span>${item.name}</span><span class="font-mono text-emerald-400">${item.price} ج.م</span></div>`;
-      }).join('');
-
-      totalPrice.textContent = `${total.toFixed(2)} ج.م`;
-      checkoutBtn.disabled = false;
-      checkoutBtn.className = "w-full bg-emerald-500 active:bg-emerald-700 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl transition cursor-pointer shadow-lg touch-manipulation";
+      updateCartUI();
     }
 
-    async function submitOrder() {
-      if (cart.length === 0) return;
+    // Payment Method Selection UI Toggle
+    function selectPayment(method) {
+      selectedPaymentMethod = method;
+      document.querySelectorAll('.pay-btn').forEach(btn => {
+        btn.className = 'pay-btn bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs border border-slate-600 transition';
+      });
+      const activeBtn = document.getElementById(`pay-${method}`);
+      if (activeBtn) {
+        activeBtn.className = 'pay-btn active bg-amber-500 text-slate-950 font-bold py-2 rounded-xl text-xs border border-amber-500 transition';
+      }
+    }
 
-      const total = cart.reduce((sum, item) => sum + item.price, 0);
-      const orderData = {
-        customerName: "عميل تجريبي",
-        items: cart,
-        totalAmount: total
-      };
+    // Update Cart Interface
+    function updateCartUI() {
+      const itemsContainer = document.getElementById('cart-items');
+      const cartCountEl = document.getElementById('cart-count');
+      const totalEl = document.getElementById('cart-total');
+      const submitBtn = document.getElementById('submit-btn');
+
+      const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      cartCountEl.textContent = totalItemsCount;
+      totalEl.textContent = `${totalAmount.toFixed(2)} ج.م`;
+
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = '<p class="text-sm text-slate-400 text-center py-4" id="empty-cart-msg">السلة فارغة حالياً..</p>';
+        submitBtn.disabled = true;
+        submitBtn.className = 'w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed';
+      } else {
+        itemsContainer.innerHTML = cart.map(item => `
+          <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 text-xs">
+            <div class="flex-1">
+              <p class="font-semibold text-slate-200">${item.name}</p>
+              <p class="text-emerald-400">${(item.price * item.quantity).toFixed(2)} ج.م</p>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">
+              <button onclick="changeQuantity('${item.id}', -1)" class="w-5 h-5 flex items-center justify-center bg-slate-700 text-amber-400 font-bold rounded hover:bg-slate-600">-</button>
+              <span class="font-bold px-1 text-slate-100">${item.quantity}</span>
+              <button onclick="changeQuantity('${item.id}', 1)" class="w-5 h-5 flex items-center justify-center bg-slate-700 text-amber-400 font-bold rounded hover:bg-slate-600">+</button>
+            </div>
+          </div>
+        `).join('');
+
+        submitBtn.disabled = false;
+        submitBtn.className = 'w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg';
+      }
+    }
+
+    // Submit Order to Serverless API
+    async function submitOrder() {
+      if (cart.length === 0) return alert('السلة فارغة!');
+
+      const customerName = document.getElementById('customer-name').value.trim() || "عميل تجريبي";
+      const customerPhone = document.getElementById('customer-phone').value.trim() || "";
+      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري إرسال الطلب... ⏳';
 
       try {
         const response = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderData)
+          body: JSON.stringify({
+            customerName,
+            customerPhone,
+            paymentMethod: selectedPaymentMethod,
+            items: cart.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
+            totalAmount
+          })
         });
 
-        const res = await response.json();
-        if (res.success) {
-          alert('✅ تم إرسال الطلب بنجاح وهو قيد التحضير الآن!');
+        const data = await response.json().catch(() => ({ success: false, error: 'استجابة غير صحيحة من السيرفر' }));
+
+        if (response.ok && data.success) {
+          alert('تم إرسال الطلب بنجاح! 🚀');
           cart = [];
+          document.getElementById('customer-name').value = '';
+          document.getElementById('customer-phone').value = '';
           updateCartUI();
+        } else {
+          throw new Error(data.error || `خطأ سيرفر رمز (${response.status})`);
         }
       } catch (err) {
-        alert('❌ حدث خطأ أثناء إرسال الطلب');
+        console.error('Order Submission Error:', err);
+        alert(`❌ فشل إرسال الطلب:\n${err.message}`);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'تأكيد الطلب والدفع 🚀';
+        updateCartUI();
       }
     }
+
+    // Initialize
+    renderMenu();
   </script>
 </body>
 </html>
