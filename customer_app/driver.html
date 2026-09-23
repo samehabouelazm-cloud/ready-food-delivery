@@ -3,170 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY - تطبيق الكابتن</title>
+  <title>READY - تطبيق السائق</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 400: '#f59e0b', 500: '#f97316', 600: '#ea580c' }
-          }
-        }
-      }
-    }
-  </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- استدعاء مكتبة Socket.io -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen antialiased">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="bg-gradient-to-tr from-brand-600 to-amber-400 p-2 rounded-xl text-white">
-          <i class="fa-solid fa-motorcycle text-xl"></i>
-        </div>
-        <span class="text-xl font-black tracking-wider text-slate-100">READY <span class="text-xs text-brand-400 font-normal">لوحة الكابتن</span></span>
-      </div>
-      <div class="flex items-center gap-2 text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-full">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        متصل ومتوفر
-      </div>
-    </div>
-  </header>
+  <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700 text-center">
+    <h1 class="text-2xl font-bold text-emerald-500 mb-2">لوحة السائق 🚗</h1>
+    <p class="text-slate-400 text-sm mb-6">تحديث حالات الطلبات لحظياً</p>
 
-  <!-- Main Content -->
-  <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
-
-    <!-- Status Overview -->
-    <div class="grid grid-cols-2 gap-4">
-      <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-        <span class="text-xs text-slate-400 block mb-1">الطلبات المكتملة</span>
-        <span id="completed-count" class="text-2xl font-black text-slate-100">0</span>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-        <span class="text-xs text-slate-400 block mb-1">أرباح اليوم</span>
-        <span id="total-earnings" class="text-2xl font-black text-emerald-400">0 <small class="text-xs text-slate-400">ج.م</small></span>
-      </div>
+    <!-- إدخال رقم الطلب لتحديثه -->
+    <div class="mb-4 text-right">
+      <label class="block text-xs text-slate-400 mb-1">رقم الطلب (Order ID):</label>
+      <input id="driver-order-id" type="text" placeholder="أدخل رقم الطلب هنا..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-100 text-sm font-mono focus:outline-none focus:border-emerald-500">
     </div>
 
-    <!-- Tabs -->
-    <div class="flex border-b border-slate-800 gap-4 text-sm font-bold">
-      <button onclick="setTab('pending')" id="tab-pending" class="pb-2 text-brand-400 border-b-2 border-brand-500">الطلبات المتاحة</button>
-      <button onclick="setTab('in_delivery')" id="tab-in_delivery" class="pb-2 text-slate-400 hover:text-slate-200">جاري التوصيل</button>
-      <button onclick="setTab('completed')" id="tab-completed" class="pb-2 text-slate-400 hover:text-slate-200">المكتملة</button>
+    <!-- أزرار التحديث اللحظي -->
+    <div class="space-y-2">
+      <button onclick="updateOrderStatus('قيد التحضير')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition">
+        👨‍🍳 قيد التحضير
+      </button>
+      <button onclick="updateOrderStatus('جاري التوصيل')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition">
+        🛵 جاري التوصيل
+      </button>
+      <button onclick="updateOrderStatus('تم التسليم')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition">
+        ✅ تم التسليم
+      </button>
     </div>
 
-    <!-- Orders List Container -->
-    <div id="orders-list" class="space-y-4">
-      <div class="text-center py-12 text-slate-500 bg-slate-900/50 rounded-2xl border border-slate-800">
-        <i class="fa-solid fa-box-open text-3xl mb-2 block"></i>
-        جاري جلب الطلبات...
-      </div>
-    </div>
-
-  </main>
+    <div id="status-message" class="mt-4 text-sm font-semibold hidden"></div>
+  </div>
 
   <script>
-    let currentTab = 'pending';
+    const socket = io();
 
-    function setTab(tab) {
-      currentTab = tab;
-      ['pending', 'in_delivery', 'completed'].forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        if (btn) {
-          if (t === tab) {
-            btn.className = 'pb-2 text-brand-400 border-b-2 border-brand-500 font-bold';
-          } else {
-            btn.className = 'pb-2 text-slate-400 hover:text-slate-200';
-          }
-        }
-      });
-      fetchOrders();
-    }
+    async function updateOrderStatus(newStatus) {
+      const orderId = document.getElementById('driver-order-id').value.trim();
+      const messageEl = document.getElementById('status-message');
 
-    async function fetchOrders() {
+      if (!orderId) {
+        alert('يرجى إدخال رقم الطلب أولاً');
+        return;
+      }
+
       try {
-        const response = await fetch('/api/orders');
-        const orders = await response.json();
+        const response = await fetch(`/api/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
 
-        const completed = orders.filter(o => o.status === 'completed');
-        document.getElementById('completed-count').innerText = completed.length;
-        document.getElementById('total-earnings').innerHTML = `${completed.length * 20} <small class="text-xs text-slate-400">ج.م</small>`;
+        const result = await response.json();
 
-        const filtered = orders.filter(o => (o.status || 'pending') === currentTab);
-        const container = document.getElementById('orders-list');
+        if (result.success) {
+          // إرسال التحديث عبر Socket.io للعميل
+          socket.emit('update_status', { orderId: orderId, status: newStatus });
 
-        if (!filtered || filtered.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-12 text-slate-500 bg-slate-900/50 rounded-2xl border border-slate-800">
-              <i class="fa-solid fa-box-open text-3xl mb-2 block"></i>
-              لا توجد طلبات في هذا القسم.
-            </div>`;
-          return;
+          messageEl.className = "mt-4 text-sm font-semibold text-emerald-400";
+          messageEl.innerText = `تم تحديث الحالة إلى: "${newStatus}" بنجاح!`;
+          messageEl.classList.remove('hidden');
+        } else {
+          throw new Error(result.error || 'فشل التحديث');
         }
-
-        container.innerHTML = filtered.map(order => `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div>
-                <span class="text-xs font-bold text-brand-400">طلب #${order._id ? order._id.slice(-4) : '0000'}</span>
-                <h3 class="font-bold text-slate-100">${order.customerName || 'عميل'}</h3>
-              </div>
-              <span class="text-lg font-black text-amber-400">${order.totalAmount || 0} ج.م</span>
-            </div>
-
-            <div class="space-y-2 text-sm text-slate-300">
-              <div class="flex items-start gap-2">
-                <i class="fa-solid fa-location-dot text-brand-500 mt-1"></i>
-                <div>
-                  <span class="text-xs text-slate-500 block">العنوان:</span>
-                  ${order.address || 'عنوان غير محدد'}
-                </div>
-              </div>
-              <div class="flex items-start gap-2">
-                <i class="fa-solid fa-utensils text-slate-500 mt-1"></i>
-                <div>
-                  <span class="text-xs text-slate-500 block">الوجبات:</span>
-                  ${(order.items || []).map(i => `${i.title} (x${i.quantity})`).join(', ')}
-                </div>
-              </div>
-            </div>
-
-            ${(order.status || 'pending') === 'pending' ? `
-              <button onclick="updateStatus('${order._id}', 'in_delivery')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-check"></i> قبول الطلب وبدء التوصيل
-              </button>
-            ` : order.status === 'in_delivery' ? `
-              <button onclick="updateStatus('${order._id}', 'completed')" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-house-circle-check"></i> تم التوصيل للعميل
-              </button>
-            ` : `
-              <div class="text-center text-xs text-emerald-400 font-bold bg-emerald-500/10 py-2 rounded-xl">
-                ✅ تم إكمال هذا الطلب بنجاح
-              </div>
-            `}
-          </div>
-        `).join('');
-
-      } catch (error) {
-        console.error('Error fetching orders:', error);
+      } catch (err) {
+        messageEl.className = "mt-4 text-sm font-semibold text-red-400";
+        messageEl.innerText = 'حدث خطأ أثناء تحديث حالة الطلب';
+        messageEl.classList.remove('hidden');
       }
     }
-
-    async function updateStatus(id, status) {
-      await fetch(`/api/orders/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      fetchOrders();
-    }
-
-    fetchOrders();
-    setInterval(fetchOrders, 3000);
   </script>
 </body>
 </html>
