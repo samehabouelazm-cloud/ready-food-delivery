@@ -3,173 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - لوحة السائق وإدارة الطلبات</title>
-  
-  <!-- Tailwind CSS CDN -->
+  <title>READY OS - تطبيق الكابتن</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
-  <!-- Leaflet CSS & JS (الخريطة) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 flex flex-col items-center">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4">
 
-  <!-- الهيدر الرئيسي -->
-  <header class="w-full max-w-4xl bg-slate-800 p-4 rounded-2xl shadow-lg mb-6 flex justify-between items-center border border-slate-700">
-    <div class="flex items-center gap-3">
-      <div class="bg-amber-500 text-slate-900 p-2 rounded-xl font-bold text-xl">READY</div>
-      <div>
-        <h1 class="font-bold text-lg">لوحة الكابتن وإدارة التشغيل</h1>
-        <p class="text-xs text-slate-400">تحديث الحالات والموقع اللحظي</p>
-      </div>
-    </div>
-    <span class="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/30">متصل الآن</span>
+  <header class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6 flex justify-between items-center shadow-lg">
+    <h1 class="text-lg font-black text-amber-400">لوحة الكابتن 🚴‍♂️</h1>
+    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-bold">
+      متصل بالشبكة
+    </span>
   </header>
 
-  <main class="w-full max-w-4xl space-y-6">
-
-    <!-- كارت التحكم بالطلب رقم #6573 -->
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-      <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-700 pb-4">
-        <div>
-          <span class="text-amber-400 text-xs font-bold">طلب جديد</span>
-          <h2 class="text-xl font-extrabold text-white">رقم الطلب: #6573</h2>
-          <p class="text-xs text-slate-400">العنوان: الكفر الشرقي | الهاتف: 01034101822</p>
-        </div>
-        
-        <!-- زر طباعة الفاتورة -->
-        <button onclick="printInvoice('6573', '01034101822', '1x جمبري جامبو بلدي<br>1x سمك دنيس ممتاز طازج<br>1x لحم كنداوز بلدي', '2002.20')" 
-                class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-          <span>🖨️</span> طباعة الفاتورة
-        </button>
-      </div>
-
-      <!-- الأصناف والحساب -->
-      <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 text-xs text-slate-300 space-y-1">
-        <p><strong class="text-slate-100">الأصناف:</strong> 1x جمبري جامبو بلدي، 1x سمك دنيس ممتاز طازج، 1x لحم كنداوز بلدي فاخر، 1x ريش ضاني بلدي طازجة</p>
-        <p class="text-amber-400 font-bold text-sm pt-1">الحساب الإجمالي: 2002.20 ج.م</p>
-      </div>
-
-      <!-- أزرار تحديث حالة التنفيذ السريعة (1 إلى 4) -->
-      <div>
-        <label class="block text-xs font-bold text-slate-400 mb-2">تحديث حالة التنفيذ:</label>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <button onclick="updateStage('6573', 'تم التأكيد')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 px-3 rounded-xl text-xs font-semibold transition border border-slate-600">
-            1. تم التأكيد
-          </button>
-          <button onclick="updateStage('6573', 'التجميع والتعبئة')" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 py-2 px-3 rounded-xl text-xs font-semibold transition border border-amber-500/30">
-            2. التجميع والتعبئة
-          </button>
-          <button onclick="updateStage('6573', 'الكابتن استلم الطلب')" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-3 rounded-xl text-xs font-semibold transition border border-blue-500/30">
-            3. الكابتن استلم الطلب
-          </button>
-          <button onclick="updateStage('6573', 'تم التسليم للعميل')" class="bg-emerald-600 hover:bg-emerald-500 text-white py-2 px-3 rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20">
-            4. تم التسليم للعميل
-          </button>
-        </div>
-      </div>
+  <main class="max-w-2xl mx-auto space-y-4">
+    <h2 class="text-sm font-bold text-slate-400">الطلبات المتاحة للتوصيل 📦</h2>
+    <div id="orders-container" class="space-y-4">
+      <p class="text-xs text-slate-500 text-center py-8">في انتظار طلبات جديدة...</p>
     </div>
-
-    <!-- كارت خريطة التتبع المباشر للطرفين -->
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-slate-100 text-sm">خريطة التتبع والموقع اللحظي</h3>
-        <button onclick="startSimulation()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-amber-500/20">
-          🚀 بدء محاكاة تحرك السائق
-        </button>
-      </div>
-      
-      <div id="map" class="w-full h-64 rounded-xl border border-slate-700 z-10"></div>
-    </div>
-
   </main>
 
   <script>
     const socket = io();
-    const orderId = '6573';
 
-    // 1. إعداد الخريطة
-    const map = L.map('map').setView([30.0444, 31.2357], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
+    // الاستماع للطلبات الجديدة اللحظية
+    socket.on('new_order_available', (order) => {
+      renderOrderCard(order);
+      alert('🔔 طلب جديد وصل!');
+    });
 
-    const driverMarker = L.marker([30.0444, 31.2357]).addTo(map).bindPopup('موقع السائق الحالي').openPopup();
+    // الاستماع لتحديثات الحالة
+    socket.on('order_status_updated', (data) => {
+      const statusElement = document.getElementById(`status-${data.orderId}`);
+      if (statusElement) {
+        statusElement.textContent = data.status;
+      }
+    });
 
-    // 2. تحديث حالة الطلب
-    function updateStage(id, status) {
-      fetch(`/api/orders/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      })
-      .then(res => res.json())
-      .then(data => {
-        socket.emit('update_status', { orderId: id, status: status });
-        alert(`تم تحديث حالة الطلب إلى: ${status}`);
-      })
-      .catch(err => {
-        socket.emit('update_status', { orderId: id, status: status });
-        alert(`تم تحديث الحالة محلياً إلى: ${status}`);
-      });
+    function renderOrderCard(order) {
+      const container = document.getElementById('orders-container');
+      
+      // إزالة رسالة الانتظار عند أول طلب
+      if (container.querySelector('p')) {
+        container.innerHTML = '';
+      }
+
+      const card = document.createElement('div');
+      card.className = "bg-slate-800 p-5 rounded-2xl border border-slate-700 space-y-3 shadow-md";
+      card.id = `order-card-${order._id}`;
+
+      card.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+          <span class="font-bold text-amber-400">طلب #${order._id.slice(-6)}</span>
+          <span id="status-${order._id}" class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs px-2.5 py-1 rounded-lg font-bold">
+            ${order.status}
+          </span>
+        </div>
+
+        <div class="text-xs text-slate-300 space-y-1">
+          <p><strong class="text-slate-400">العميل:</strong> ${order.customerName || 'عميل تجريبي'}</p>
+          <p><strong class="text-slate-400">المبلغ:</strong> <span class="text-emerald-400 font-mono font-bold">${order.totalAmount} ج.م</span></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="updateStatus('${order._id}', 'جاري التوصيل')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 rounded-xl transition">
+            🚴‍♂️ جاري التوصيل
+          </button>
+          <button onclick="updateStatus('${order._id}', 'تم التسليم')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl transition">
+            ✅ تم التسليم
+          </button>
+        </div>
+      `;
+
+      container.prepend(card);
     }
 
-    // 3. طباعة الفاتورة الحرارية
-    function printInvoice(id, phone, items, total) {
-      const w = window.open('', '', 'width=400,height=600');
-      w.document.write(`
-        <html dir="rtl">
-        <head>
-          <title>فاتورة #${id}</title>
-          <style>
-            body { font-family: monospace; padding: 15px; text-align: center; font-size: 12px; }
-            .header { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-            .line { border-bottom: 1px dashed #000; margin: 10px 0; }
-            .total { font-size: 14px; font-weight: bold; margin-top: 10px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">READY ENTERPRISE OS 🍔</div>
-          <p>رقم الطلب: #${id}</p>
-          <p>الهاتف: ${phone}</p>
-          <div class="line"></div>
-          <div>${items}</div>
-          <div class="line"></div>
-          <div class="total">الإجمالي: ${total} ج.م</div>
-          <p style="margin-top:15px;">شكراً لاستخدامكم تطبيق READY!</p>
-        </body>
-        </html>
-      `);
-      w.document.close();
-      w.focus();
-      w.print();
-      w.close();
-    }
-
-    // 4. محاكاة تحرك السائق على الخريطة
-    function startSimulation() {
-      let lat = 30.0444;
-      let lng = 31.2357;
-      let steps = 0;
-
-      const interval = setInterval(() => {
-        lat += 0.0005;
-        lng += 0.0005;
-        steps++;
-
-        driverMarker.setLatLng([lat, lng]);
-        map.panTo([lat, lng]);
-
-        // إرسال الموقع اللحظي عبر السوكت للعميل
-        socket.emit('driver_location_updated', { orderId, lat, lng });
-
-        if (steps >= 15) {
-          clearInterval(interval);
-          alert('وصل السائق للوجهة!');
+    async function updateStatus(orderId, status) {
+      try {
+        const response = await fetch(`/api/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const res = await response.json();
+        if (!res.success) {
+          alert('❌ فشل تحديث الحالة');
         }
-      }, 1500);
+      } catch (err) {
+        console.error(err);
+      }
     }
   </script>
 </body>
