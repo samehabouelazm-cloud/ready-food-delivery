@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تطبيق READY - متابعة الطلب</title>
+  <title>تطبيق READY - متابعة الطلب والدفع</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -29,11 +29,17 @@
 
   <main class="w-full max-w-lg space-y-6">
 
-    <!-- كارت حالة الطلب -->
+    <!-- كارت حالة الطلب والإجمالي -->
     <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl text-center space-y-4">
       <div>
         <p class="text-xs text-slate-400 mb-1">رقم الطلب الحالي:</p>
         <h2 id="order-id-display" class="text-2xl font-black text-amber-400 tracking-wider">#6573</h2>
+      </div>
+
+      <!-- تفاصيل الإجمالي -->
+      <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 text-xs flex justify-between items-center">
+        <span class="text-slate-400">إجمالي المطلوب سداده:</span>
+        <span class="text-amber-400 font-extrabold text-sm">2002.20 ج.م</span>
       </div>
 
       <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
@@ -43,10 +49,16 @@
         </span>
       </div>
 
-      <!-- زر إنشاء طلب تجريبي جديد -->
-      <button onclick="createNewOrder()" id="create-order-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm">
-        ➕ إنشاء طلب تجريبي جديد
-      </button>
+      <!-- أزرار الإجراءات (إنشاء طلب + دفع إلكتروني) -->
+      <div class="space-y-2 pt-2">
+        <button onclick="createNewOrder()" id="create-order-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm flex items-center justify-center gap-2">
+          <span>➕</span> إنشاء طلب تجريبي جديد
+        </button>
+
+        <button onclick="payOrderOnline()" id="pay-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-600/20 text-sm flex items-center justify-center gap-2">
+          <span>💳</span> الدفع الإلكتروني (فيزا / ماستر كارد)
+        </button>
+      </div>
     </div>
 
     <!-- كارت الخريطة لتتبع حركة الكابتن -->
@@ -66,6 +78,7 @@
   <script>
     const socket = io();
     let currentOrderId = '6573';
+    const totalOrderAmount = 2002.20;
 
     // 1. تهيئة الخريطة التفاعلية
     const map = L.map('map').setView([30.0444, 31.2357], 13);
@@ -74,13 +87,20 @@
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // إضافة ماركر الكابتن على الخريطة
     const driverMarker = L.marker([30.0444, 31.2357]).addTo(map).bindPopup('الكابتن في الطريق إليك 🛵');
 
     // الانضمام لغرفة الطلب
     socket.emit('join_order', currentOrderId);
 
-    // 2. استقبال تحديثات حالة الطلب اللحظية من السائق/الإدارة
+    // التحقق من نتائج الدفع بعد العودة من بوابة الدفع
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('status') === 'success') {
+      alert('✅ تم عملية الدفع الإلكتروني بنجاح! شكرًا لك.');
+    } else if (urlParams.get('status') === 'cancelled') {
+      alert('⚠️ تم إلغاء عملية الدفع.');
+    }
+
+    // 2. استقبال تحديثات حالة الطلب اللحظية
     socket.on('order_status_updated', (data) => {
       if (data.orderId === currentOrderId || !data.orderId) {
         updateStatusUI(data.status);
@@ -123,14 +143,14 @@
         body: JSON.stringify({
           customerName: 'عميل جديد',
           items: ['1x جمبري بلدي', '1x سمك دنيس'],
-          totalAmount: 2002.20,
+          totalAmount: totalOrderAmount,
           status: 'تم التأكيد'
         })
       })
       .then(res => res.json())
       .then(resData => {
         btn.disabled = false;
-        btn.textContent = '➕ إنشاء طلب تجريبي جديد';
+        btn.innerHTML = '<span>➕</span> إنشاء طلب تجريبي جديد';
 
         if (resData.success) {
           currentOrderId = resData.data._id;
@@ -144,8 +164,41 @@
       })
       .catch(err => {
         btn.disabled = false;
-        btn.textContent = '➕ إنشاء طلب تجريبي جديد';
+        btn.innerHTML = '<span>➕</span> إنشاء طلب تجريبي جديد';
         alert('حدث خطأ أثناء الاتصال بالسيرفر');
+      });
+    }
+
+    // 5. دالة التوجيه لـ بوابة الدفع الإلكتروني
+    function payOrderOnline() {
+      const payBtn = document.getElementById('pay-btn');
+      payBtn.disabled = true;
+      payBtn.textContent = 'جاري تجهيز بوابة الدفع...';
+
+      fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: currentOrderId,
+          amount: totalOrderAmount
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        payBtn.disabled = false;
+        payBtn.innerHTML = '<span>💳</span> الدفع الإلكتروني (فيزا / ماستر كارد)';
+
+        if (data.success && data.url) {
+          // التوجيه لصفحة الدفع الآمنة
+          window.location.href = data.url;
+        } else {
+          alert('تعذر فتح بوابة الدفع: ' + (data.error || 'تأكد من ضبط مفاتيح Stripe'));
+        }
+      })
+      .catch(err => {
+        payBtn.disabled = false;
+        payBtn.innerHTML = '<span>💳</span> الدفع الإلكتروني (فيزا / ماستر كارد)';
+        alert('حدث خطأ أثناء الاتصال بإنشاء جلسة الدفع');
       });
     }
   </script>

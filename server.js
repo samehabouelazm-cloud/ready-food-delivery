@@ -121,6 +121,39 @@ io.on('connection', (socket) => {
 
 // تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
+// استدعاء مكتبة Stripe واستخدام مفتاح السر (Secret Key)
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+// API إنشاء رابط دفع إلكتروني للطلب
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const { orderId, amount } = req.body;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'egp', // العملة: الجنيه المصري
+            product_data: {
+              name: `فاتورة طلب READY #${orderId}`,
+            },
+            unit_amount: Math.round(amount * 100), // المبلغ بالقروش (الضرب في 100)
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${req.headers.origin}/?status=success&orderId=${orderId}`,
+      cancel_url: `${req.headers.origin}/?status=cancelled`,
+    });
+
+    res.json({ success: true, url: session.url });
+  } catch (error) {
+    console.error('خطأ في بوابة الدفع:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 server.listen(PORT, () => {
   console.log(`🚀 السيرفر يعمل بنجاح على المنفذ: ${PORT}`);
 });
