@@ -3,255 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY - تطبيق العميل</title>
+  <title>READY - متابعة الطلب</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 400: '#f59e0b', 500: '#f97316', 600: '#ea580c' }
-          }
-        }
-      }
-    }
-  </script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- استدعاء مكتبة Socket.io -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen antialiased relative pb-24">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="bg-gradient-to-tr from-brand-600 to-amber-400 p-2 rounded-xl text-white">
-          <i class="fa-solid fa-utensils text-xl"></i>
-        </div>
-        <span class="text-xl font-black tracking-wider text-slate-100">READY</span>
-      </div>
-      <button onclick="toggleCart()" class="relative bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl border border-slate-700 transition">
-        <i class="fa-solid fa-cart-shopping text-brand-400"></i>
-        <span id="cart-badge" class="absolute -top-1 -right-1 bg-brand-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
-      </button>
-    </div>
-  </header>
+  <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700 text-center">
+    <h1 class="text-2xl font-bold text-amber-500 mb-2">تطبيق READY 🍔</h1>
+    <p class="text-slate-400 text-sm mb-6">متابعة حالة الطلب اللحظية</p>
 
-  <!-- Main Menu -->
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-    <h2 class="text-2xl font-black text-slate-100">القائمة المميزة 🍕🍔</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="menu-items">
-      <!-- Item 1 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl p-4 flex flex-col justify-between">
-        <div>
-          <div class="h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-4xl">🍕</div>
-          <h3 class="text-lg font-bold">بيتزا ببروني</h3>
-          <p class="text-xs text-slate-400 mt-1">بيتزا إيطالية مع جبنة موزاريللا وقطع الببروني الفاخرة.</p>
-        </div>
-        <div class="flex items-center justify-between mt-4">
-          <span class="text-lg font-black text-amber-400">140 ج.م</span>
-          <button onclick="addToCart('بيتزا ببروني', 140)" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition">إضافة +</button>
-        </div>
-      </div>
-
-      <!-- Item 2 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl p-4 flex flex-col justify-between">
-        <div>
-          <div class="h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-4xl">🍔</div>
-          <h3 class="text-lg font-bold">دبل تشيز برجر</h3>
-          <p class="text-xs text-slate-400 mt-1">شريحتين لحم بقر مشوي مع جبنة شيدر وصوص خاص.</p>
-        </div>
-        <div class="flex items-center justify-between mt-4">
-          <span class="text-lg font-black text-amber-400">155 ج.م</span>
-          <button onclick="addToCart('دبل تشيز برجر', 155)" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition">إضافة +</button>
-        </div>
-      </div>
-
-      <!-- Item 3 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl p-4 flex flex-col justify-between">
-        <div>
-          <div class="h-40 bg-slate-800 rounded-xl mb-4 flex items-center justify-center text-4xl">🍟</div>
-          <h3 class="text-lg font-bold">بطاطس ويدجز مقرمشة</h3>
-          <p class="text-xs text-slate-400 mt-1">أصابع بطاطس متبلة بأعشاب خاصة ومقرمشة.</p>
-        </div>
-        <div class="flex items-center justify-between mt-4">
-          <span class="text-lg font-black text-amber-400">50 ج.م</span>
-          <button onclick="addToCart('بطاطس ويدجز مقرمشة', 50)" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition">إضافة +</button>
-        </div>
-      </div>
+    <!-- بطاقة عرض حالة الطلب -->
+    <div id="order-card" class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-4">
+      <p class="text-xs text-slate-500 mb-1">رقم الطلب:</p>
+      <p id="order-id" class="font-mono text-sm text-slate-300 mb-3">لم يتم إنشاء طلب بعد</p>
+      
+      <p class="text-xs text-slate-500 mb-1">حالة الطلب الحالية:</p>
+      <span id="order-status" class="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-slate-700 text-slate-300">
+        بانتظار الطلب...
+      </span>
     </div>
 
-    <!-- Active Tracking Section -->
-    <div id="tracking-section" class="hidden bg-slate-900 border border-brand-500/30 rounded-2xl p-6 space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left text-brand-400"></i> حالة طلبك الأخير
-        </h3>
-        <span id="order-id-badge" class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full font-mono">#0000</span>
-      </div>
-
-      <!-- Status Steps -->
-      <div class="grid grid-cols-3 gap-2 text-center text-xs pt-2">
-        <div id="step-pending" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold">
-          <i class="fa-solid fa-receipt text-base block mb-1"></i> قيد الانتظار
-        </div>
-        <div id="step-delivery" class="p-3 rounded-xl bg-slate-800 text-slate-500">
-          <i class="fa-solid fa-motorcycle text-base block mb-1"></i> جاري التوصيل
-        </div>
-        <div id="step-completed" class="p-3 rounded-xl bg-slate-800 text-slate-500">
-          <i class="fa-solid fa-circle-check text-base block mb-1"></i> تم التوصيل
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Cart Modal / Slide-over -->
-  <div id="cart-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-end hidden">
-    <div class="bg-slate-900 w-full max-w-md h-full p-6 flex flex-col justify-between overflow-y-auto">
-      <div>
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-          <h3 class="text-xl font-bold">سلة الطلبات</h3>
-          <button onclick="toggleCart()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </div>
-
-        <div id="cart-items" class="space-y-3">
-          <!-- Items injected here -->
-        </div>
-      </div>
-
-      <div class="border-t border-slate-800 pt-4 space-y-4">
-        <!-- Customer Details -->
-        <div class="space-y-2">
-          <input type="text" id="cust-name" placeholder="الاسم الكامل" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
-          <input type="text" id="cust-phone" placeholder="رقم الهاتف" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
-          <input type="text" id="cust-address" placeholder="عنوان التوصيل بالتفصيل" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
-        </div>
-
-        <div class="flex items-center justify-between text-lg font-black">
-          <span>الإجمالي:</span>
-          <span id="cart-total" class="text-amber-400">0 ج.م</span>
-        </div>
-
-        <button onclick="submitOrder()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition">
-          تأكيد وإرسال الطلب 🚀
-        </button>
-      </div>
-    </div>
+    <button id="btn-create-order" onclick="createOrder()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-xl transition">
+      إنشاء طلب تجريبي جديد 🚀
+    </button>
   </div>
 
   <script>
-    let cart = [];
-    let activeOrderId = null;
+    const socket = io(); 
+    let currentOrderId = null;
 
-    function addToCart(title, price) {
-      const existing = cart.find(item => item.title === title);
-      if (existing) {
-        existing.quantity++;
-      } else {
-        cart.push({ title, price, quantity: 1 });
+    // استقبال التحديث اللحظي المباشر بدلاً من الـ Polling
+    socket.on('order_status_updated', (data) => {
+      console.log('تحديث حالة وصل:', data);
+      if (data.orderId === currentOrderId) {
+        updateStatusUI(data.status);
       }
-      updateCartUI();
-    }
+    });
 
-    function updateCartUI() {
-      const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      const badge = document.getElementById('cart-badge');
-      badge.innerText = cartCount;
-      badge.classList.toggle('hidden', cartCount === 0);
-
-      document.getElementById('cart-total').innerText = `${total} ج.م`;
-
-      const container = document.getElementById('cart-items');
-      if (cart.length === 0) {
-        container.innerHTML = '<p class="text-center text-slate-500 py-6">السلة فارغة حالياً</p>';
-        return;
-      }
-
-      container.innerHTML = cart.map(item => `
-        <div class="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-800">
-          <div>
-            <h4 class="font-bold text-sm text-slate-200">${item.title}</h4>
-            <span class="text-xs text-amber-400">${item.price} ج.م × ${item.quantity}</span>
-          </div>
-          <div class="font-black text-slate-100">${item.price * item.quantity} ج.م</div>
-        </div>
-      `).join('');
-    }
-
-    function toggleCart() {
-      document.getElementById('cart-modal').classList.toggle('hidden');
-    }
-
-    async function submitOrder() {
-      const name = document.getElementById('cust-name').value.trim();
-      const phone = document.getElementById('cust-phone').value.trim();
-      const address = document.getElementById('cust-address').value.trim();
-
-      if (cart.length === 0) return alert('السلة فارغة!');
-      if (!name || !address) return alert('يرجى إدخال الاسم والعنوان!');
-
-      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    async function createOrder() {
+      const btn = document.getElementById('btn-create-order');
+      btn.disabled = true;
+      btn.innerText = 'جاري إرسال الطلب...';
 
       try {
         const response = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            customerName: `${name} (${phone})`,
-            address: address,
-            items: cart,
-            totalAmount: totalAmount
+            customerName: "عميل تجريبي",
+            items: [{ name: "وجبة برجر ممتازة", quantity: 1, price: 150 }],
+            totalAmount: 150,
+            status: "معلق"
           })
         });
 
-        const data = await response.json();
-        if (response.ok) {
-          activeOrderId = data.order._id;
-          cart = [];
-          updateCartUI();
-          toggleCart();
-          document.getElementById('tracking-section').classList.remove('hidden');
-          document.getElementById('order-id-badge').innerText = `#${activeOrderId.slice(-4)}`;
-          trackOrder();
+        const result = await response.json();
+        
+        if (result.success) {
+          currentOrderId = result.data._id;
+          document.getElementById('order-id').innerText = currentOrderId;
+          updateStatusUI(result.data.status);
+
+          // الانضمام لغرفة هذا الطلب لاستقبال تحديثاته
+          socket.emit('join_order', currentOrderId);
         }
       } catch (err) {
-        alert('تعذر إرسال الطلب!');
+        alert('حدث خطأ أثناء إنشاء الطلب');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'إنشاء طلب تجريبي جديد 🚀';
       }
     }
 
-    async function trackOrder() {
-      if (!activeOrderId) return;
-      try {
-        const res = await fetch('/api/orders');
-        const orders = await res.json();
-        const myOrder = orders.find(o => o._id === activeOrderId);
+    function updateStatusUI(status) {
+      const statusElement = document.getElementById('order-status');
+      statusElement.innerText = status;
 
-        if (myOrder) {
-          const p = document.getElementById('step-pending');
-          const d = document.getElementById('step-delivery');
-          const c = document.getElementById('step-completed');
-
-          if (myOrder.status === 'pending') {
-            p.className = 'p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold';
-            d.className = 'p-3 rounded-xl bg-slate-800 text-slate-500';
-            c.className = 'p-3 rounded-xl bg-slate-800 text-slate-500';
-          } else if (myOrder.status === 'in_delivery') {
-            p.className = 'p-3 rounded-xl bg-slate-800 text-slate-500';
-            d.className = 'p-3 rounded-xl bg-amber-500/20 border border-amber-500 text-amber-400 font-bold animate-pulse';
-            c.className = 'p-3 rounded-xl bg-slate-800 text-slate-500';
-          } else if (myOrder.status === 'completed') {
-            p.className = 'p-3 rounded-xl bg-slate-800 text-slate-500';
-            d.className = 'p-3 rounded-xl bg-slate-800 text-slate-500';
-            c.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500 text-emerald-400 font-bold';
-          }
-        }
-      } catch (e) {}
+      statusElement.className = "inline-block px-3 py-1 rounded-full text-sm font-bold ";
+      if (status === 'معلق') {
+        statusElement.className += "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+      } else if (status === 'قيد التحضير') {
+        statusElement.className += "bg-blue-500/20 text-blue-400 border border-blue-500/30";
+      } else if (status === 'جاري التوصيل') {
+        statusElement.className += "bg-purple-500/20 text-purple-400 border border-purple-500/30";
+      } else if (status === 'تم التسليم') {
+        statusElement.className += "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      } else {
+        statusElement.className += "bg-slate-700 text-slate-300";
+      }
     }
-
-    setInterval(trackOrder, 3000);
   </script>
 </body>
 </html>
