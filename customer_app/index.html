@@ -3,116 +3,150 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY - متابعة الطلب والخرائط</title>
+  <title>تطبيق READY - متابعة الطلب</title>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <!-- مكتبة الخرائط المجانية Leaflet -->
+  <!-- Socket.io -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Leaflet CSS & JS (الخريطة) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style> #map { height: 250px; width: 100%; border-radius: 12px; } </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 flex flex-col items-center">
 
-  <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-700 text-center">
-    <h1 class="text-2xl font-bold text-amber-500 mb-2">تطبيق READY 🍔</h1>
-    <p class="text-slate-400 text-sm mb-4">متابعة حالة الطلب وموقع السائق</p>
+  <!-- الهيدر العلوي -->
+  <header class="w-full max-w-lg bg-slate-800 p-4 rounded-2xl shadow-lg mb-6 flex justify-between items-center border border-slate-700">
+    <div class="flex items-center gap-3">
+      <div class="bg-amber-500 text-slate-900 p-2 rounded-xl font-bold text-xl">READY</div>
+      <div>
+        <h1 class="font-bold text-base">تطبيق READY 🍔</h1>
+        <p class="text-xs text-slate-400">متابعة حالة الطلب وموقع السائق</p>
+      </div>
+    </div>
+    <span id="connection-badge" class="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/30">متصل الآن</span>
+  </header>
 
-    <div id="order-card" class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-4">
-      <p class="text-xs text-slate-500 mb-1">رقم الطلب:</p>
-      <p id="order-id" class="font-mono text-sm text-slate-300 mb-3">لم يتم إنشاء طلب بعد</p>
-      
-      <p class="text-xs text-slate-500 mb-1">حالة الطلب الحالية:</p>
-      <span id="order-status" class="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-slate-700 text-slate-300 mb-4">
-        بانتظار الطلب...
-      </span>
+  <main class="w-full max-w-lg space-y-6">
 
-      <!-- الخريطة -->
-      <div id="map" class="hidden"></div>
+    <!-- كارت حالة الطلب -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl text-center space-y-4">
+      <div>
+        <p class="text-xs text-slate-400 mb-1">رقم الطلب الحالي:</p>
+        <h2 id="order-id-display" class="text-2xl font-black text-amber-400 tracking-wider">#6573</h2>
+      </div>
+
+      <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+        <p class="text-xs text-slate-400 mb-2">حالة الطلب الحالية:</p>
+        <span id="order-status-badge" class="inline-block bg-amber-500/20 text-amber-300 font-bold px-4 py-2 rounded-xl text-sm border border-amber-500/30 animate-pulse">
+          بانتظار التحديث...
+        </span>
+      </div>
+
+      <!-- زر إنشاء طلب تجريبي جديد -->
+      <button onclick="createNewOrder()" id="create-order-btn" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm">
+        ➕ إنشاء طلب تجريبي جديد
+      </button>
     </div>
 
-    <button id="btn-create-order" onclick="createOrder()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 rounded-xl transition">
-      إنشاء طلب تجريبي جديد 🚀
-    </button>
-  </div>
+    <!-- كارت الخريطة لتتبع حركة الكابتن -->
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-3">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <span>🛵</span> تتبع موقع الكابتن المباشر
+        </h3>
+        <span class="text-xs text-amber-400 font-medium">تحديث لحظي</span>
+      </div>
+      
+      <div id="map" class="w-full h-64 rounded-xl border border-slate-700 z-10"></div>
+    </div>
+
+  </main>
 
   <script>
-    const socket = io(); 
-    let currentOrderId = null;
-    let map, driverMarker;
+    const socket = io();
+    let currentOrderId = '6573';
 
-    // تهيئة الخريطة
-    function initMap(lat = 30.0444, lng = 31.2357) {
-      document.getElementById('map').classList.remove('hidden');
-      if (!map) {
-        map = L.map('map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: 'READY Delivery'
-        }).addTo(map);
-        driverMarker = L.marker([lat, lng]).addTo(map).bindPopup('موقع السائق 🛵').openPopup();
-      } else {
-        driverMarker.setLatLng([lat, lng]);
-        map.panTo([lat, lng]);
-      }
-    }
+    // 1. تهيئة الخريطة التفاعلية
+    const map = L.map('map').setView([30.0444, 31.2357], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-    // استقبال تحديث الحالة
+    // إضافة ماركر الكابتن على الخريطة
+    const driverMarker = L.marker([30.0444, 31.2357]).addTo(map).bindPopup('الكابتن في الطريق إليك 🛵');
+
+    // الانضمام لغرفة الطلب
+    socket.emit('join_order', currentOrderId);
+
+    // 2. استقبال تحديثات حالة الطلب اللحظية من السائق/الإدارة
     socket.on('order_status_updated', (data) => {
-      if (data.orderId === currentOrderId) {
+      if (data.orderId === currentOrderId || !data.orderId) {
         updateStatusUI(data.status);
       }
     });
 
-    // استقبال حركة السائق اللحظية
+    // 3. استقبال موقع السائق اللحظي وتحديث الخريطة
     socket.on('driver_location_updated', (data) => {
-      if (data.orderId === currentOrderId) {
-        initMap(data.lat, data.lng);
+      if (data.lat && data.lng) {
+        const newPos = [data.lat, data.lng];
+        driverMarker.setLatLng(newPos);
+        map.panTo(newPos);
+        driverMarker.openPopup();
       }
     });
 
-    async function createOrder() {
-      const btn = document.getElementById('btn-create-order');
-      btn.disabled = true;
-      btn.innerText = 'جاري إرسال الطلب...';
+    // تحديث شكل بادج الحالة
+    function updateStatusUI(status) {
+      const badge = document.getElementById('order-status-badge');
+      badge.textContent = status;
 
-      try {
-        const response = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerName: "عميل تجريبي",
-            items: [{ name: "وجبة برجر ممتازة", quantity: 1, price: 150 }],
-            totalAmount: 150,
-            status: "معلق"
-          })
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          currentOrderId = result.data._id;
-          document.getElementById('order-id').innerText = currentOrderId;
-          updateStatusUI(result.data.status);
-          socket.emit('join_order', currentOrderId);
-        }
-      } catch (err) {
-        alert('حدث خطأ أثناء إنشاء الطلب');
-      } finally {
-        btn.disabled = false;
-        btn.innerText = 'إنشاء طلب تجريبي جديد 🚀';
+      if (status === 'تم التسليم للعميل' || status === 'تم التسليم') {
+        badge.className = "inline-block bg-emerald-500/20 text-emerald-400 font-bold px-4 py-2 rounded-xl text-sm border border-emerald-500/30";
+      } else if (status === 'الكابتن استلم الطلب') {
+        badge.className = "inline-block bg-blue-500/20 text-blue-300 font-bold px-4 py-2 rounded-xl text-sm border border-blue-500/30 animate-pulse";
+      } else {
+        badge.className = "inline-block bg-amber-500/20 text-amber-300 font-bold px-4 py-2 rounded-xl text-sm border border-amber-500/30 animate-pulse";
       }
     }
 
-    function updateStatusUI(status) {
-      const statusElement = document.getElementById('order-status');
-      statusElement.innerText = status;
-      statusElement.className = "inline-block px-3 py-1 rounded-full text-sm font-bold ";
+    // 4. دالة إنشاء طلب جديد
+    function createNewOrder() {
+      const btn = document.getElementById('create-order-btn');
+      btn.disabled = true;
+      btn.textContent = 'جاري إرسال الطلب...';
 
-      if (status === 'معلق') statusElement.className += "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
-      else if (status === 'قيد التحضير') statusElement.className += "bg-blue-500/20 text-blue-400 border border-blue-500/30";
-      else if (status === 'جاري التوصيل') {
-        statusElement.className += "bg-purple-500/20 text-purple-400 border border-purple-500/30";
-        initMap(); // إظهار الخريطة فوراً عند التوصيل
-      } else if (status === 'تم التسليم') statusElement.className += "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: 'عميل جديد',
+          items: ['1x جمبري بلدي', '1x سمك دنيس'],
+          totalAmount: 2002.20,
+          status: 'تم التأكيد'
+        })
+      })
+      .then(res => res.json())
+      .then(resData => {
+        btn.disabled = false;
+        btn.textContent = '➕ إنشاء طلب تجريبي جديد';
+
+        if (resData.success) {
+          currentOrderId = resData.data._id;
+          document.getElementById('order-id-display').textContent = `#${currentOrderId.slice(-6)}`;
+          updateStatusUI(resData.data.status);
+          socket.emit('join_order', currentOrderId);
+          alert('تم إنشاء الطلب بنجاح ومشاركته مع الكابتن!');
+        } else {
+          alert('حدث خطأ أثناء إنشاء الطلب: ' + resData.error);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.textContent = '➕ إنشاء طلب تجريبي جديد';
+        alert('حدث خطأ أثناء الاتصال بالسيرفر');
+      });
     }
   </script>
 </body>
