@@ -1,101 +1,133 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
 const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
 
+// Middlewares
+app.use(cors());
 app.use(express.json());
 
-// مسار المجلد الاستاتيكي بشكل مطلق وصحيح لـ Vercel
-const publicPath = path.join(process.cwd(), 'customer_app');
-app.use(express.static(publicPath));
+// MongoDB Connection Cache Helper for Vercel
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// تهيئة Stripe بدون التسبب في توقف السيرفر
-let stripe;
-if (process.env.STRIPE_SECRET_KEY) {
-  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-}
-
-// دالة اتصال MongoDB آمنة
-const connectDB = async () => {
-  if (mongoose.connection.readyState >= 1) return;
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    console.warn('⚠️ MONGODB_URI غير مضاف في متغيّرات البيئة');
+async function connectToDatabase() {
+  if (mongoose.connection.readyState >= 1) {
     return;
   }
-  return mongoose.connect(uri);
-};
-
-// Middleware مرن للاتصال بقاعدة البيانات
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-  } catch (err) {
-    console.error('❌ Database connection error:', err);
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is missing!');
   }
-  next();
-});
-
-// Mongoose Schema
-const orderSchema = new mongoose.Schema({
-  customerName: String,
-  items: Array,
-  totalAmount: Number,
-  status: { type: String, default: 'تم التأكيد' },
-  createdAt: { type: Date, default: Date.now }
-});
-const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
-
-// المسارات (Routes)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(publicPath, 'index.html'));
-});
-
-app.get('/driver', (req, res) => {
-  res.sendFile(path.join(publicPath, 'driver.html'));
-});
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(publicPath, 'admin.html'));
-});
-
-app.post('/api/orders', async (req, res) => {
-  try {
-    const newOrder = new Order(req.body);
-    await newOrder.save();
-    io.emit('new_order_available', newOrder);
-    res.status(201).json({ success: true, data: newOrder });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.patch('/api/orders/:id', async (req, res) => {
-  try {
-    const updatedOrder = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
-    io.emit('order_status_updated', { orderId: req.params.id, status: req.body.status });
-    res.json({ success: true, data: updatedOrder });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Socket.io Events
-io.on('connection', (socket) => {
-  socket.on('join_order', (id) => socket.join(id));
-  socket.on('driver_location_updated', (data) => io.emit('driver_location_updated', data));
-  socket.on('update_status', (data) => io.emit('order_status_updated', data));
-});
-
-// التشغيل والتصدير لـ Vercel
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 3000;
-  server.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));
+  await mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 }
 
+// Order Schema & Model
+const orderSchema = new mongoose.Schema({
+  customerName: { type: String, default: 'عميل تجريبي' },
+  customerPhone: { type: String, default: '' },
+  paymentMethod: { type: String, default: 'cash' },
+  items: [
+    {
+      id: String,
+      name: String,
+      price: Number,
+      quantity: { type: Number, default: 1 }
+    }
+  ],
+  totalAmount: { type: Number, required: true },
+  status: { type: String, default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
+
+// Root Health Check Route
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'API is running successfully! 🚀' });
+});
+
+// GET /api/orders - Fetch All Orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const orders = await Order.find().sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error('Fetch Orders Error:', error);
+    return res.status(500).json({ success: false, error: error.message || 'فشل جلب الطلبات' });
+  }
+});
+
+// POST /api/orders - Create New Order
+app.post('/api/orders', async (req, res) => {
+  try {
+    await connectToDatabase();
+
+    const { customerName, customerPhone, paymentMethod, items, totalAmount } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, error: 'السلة فارغة، لا يمكن إرسال طلب فارغ' });
+    }
+
+    const newOrder = new Order({
+      customerName: customerName || 'عميل تجريبي',
+      customerPhone: customerPhone || '',
+      paymentMethod: paymentMethod || 'cash',
+      items: items,
+      totalAmount: Number(totalAmount) || 0,
+      status: 'pending',
+      createdAt: new Date()
+    });
+
+    await newOrder.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'تم تسجيل الطلب بنجاح 🚀',
+      order: newOrder
+    });
+  } catch (error) {
+    console.error('Create Order Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'حدث خطأ في السيرفر أثناء إرسال الطلب'
+    });
+  }
+});
+
+// PATCH /api/orders/:id - Update Order Status
+app.patch('/api/orders/:id', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { status } = req.body;
+    const { id } = req.params;
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
+    }
+
+    return res.status(200).json({ success: true, order: updatedOrder });
+  } catch (error) {
+    console.error('Update Order Error:', error);
+    return res.status(500).json({ success: false, error: error.message || 'فشل تحديث حالة الطلب' });
+  }
+});
+
+// Start Local Server (for local testing)
+const PORT = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => console.log(`Server running locally on port ${PORT}`));
+}
+
+// Export for Vercel Serverless
 module.exports = app;
