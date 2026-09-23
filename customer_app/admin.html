@@ -3,92 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم الأدمن - READY OS</title>
+  <title>READY OS - لوحة تحكم الأدمن</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-6">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
 
-  <div class="max-w-6xl mx-auto space-y-6">
-    <!-- الهيدر الرئيسي -->
-    <header class="flex justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+  <!-- الهيدر والإحصائيات السريعة -->
+  <header class="max-w-6xl mx-auto mb-8 space-y-4">
+    <div class="flex justify-between items-center bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl">
       <div>
-        <h1 class="text-2xl font-black text-amber-400">لوحة تحكم إدارة READY 📊</h1>
-        <p class="text-xs text-slate-400 mt-1">إحصائيات المبيعات ومتابعة التشغيل اللحظي</p>
+        <h1 class="text-xl font-black text-amber-400">لوحة إدارة المطعم 👑</h1>
+        <p class="text-xs text-slate-400 mt-1">متابعة الطلبات المباشرة والعمليات</p>
       </div>
-      <span class="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-500/30">
-        المحرك يعمل 🟢
+      <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-bold">
+        النظام يعمل أونلاين 🟢
       </span>
-    </header>
-
-    <!-- كروت الإحصائيات السريعة -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-        <p class="text-xs text-slate-400 font-semibold">إجمالي عدد الطلبات اليوم</p>
-        <h3 id="total-orders-count" class="text-3xl font-black text-slate-100 mt-2">1</h3>
-      </div>
-      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-        <p class="text-xs text-slate-400 font-semibold">إجمالي قيمة المبيعات</p>
-        <h3 id="total-sales-amount" class="text-3xl font-black text-emerald-400 mt-2">2002.20 ج.م</h3>
-      </div>
-      <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-        <p class="text-xs text-slate-400 font-semibold">الطلبات النشطة حالياً</p>
-        <h3 id="active-orders-count" class="text-3xl font-black text-amber-400 mt-2">1</h3>
-      </div>
     </div>
 
-    <!-- جدول الطلبات والمتابعة المباشرة -->
-    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-base font-bold text-slate-200">سجل الطلبات اللحظي</h2>
-        <span class="text-xs text-slate-400">تحديث تلقائي عبر Socket.io</span>
+    <!-- كروت الإحصائيات -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-bold">إجمالي الطلبات</span>
+        <p id="total-orders-count" class="text-2xl font-black text-amber-400 mt-1">0</p>
       </div>
-      
-      <div class="overflow-x-auto">
-        <table class="w-full text-right text-xs md:text-sm">
-          <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
-            <tr>
-              <th class="p-3">رقم الطلب</th>
-              <th class="p-3">تفاصيل الأصناف</th>
-              <th class="p-3">المبلغ</th>
-              <th class="p-3">الحالة الحالية</th>
-            </tr>
-          </thead>
-          <tbody id="orders-table-body" class="divide-y divide-slate-700">
-            <tr class="hover:bg-slate-700/50 transition">
-              <td class="p-3 font-mono font-bold text-amber-400">#6573</td>
-              <td class="p-3 text-slate-300">جمبري بلدي + دنيس طازج</td>
-              <td class="p-3 font-bold text-emerald-400">2002.20 ج.م</td>
-              <td class="p-3">
-                <span id="admin-order-status" class="bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-lg border border-amber-500/30 font-bold">
-                  بانتظار التحديث...
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-bold">الطلبات النشطة</span>
+        <p id="active-orders-count" class="text-2xl font-black text-blue-400 mt-1">0</p>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-xs text-slate-400 font-bold">إجمالي المبيعات</span>
+        <p id="total-revenue" class="text-2xl font-black text-emerald-400 mt-1">0 ج.م</p>
       </div>
     </div>
-  </div>
+  </header>
+
+  <!-- جدول الطلبات -->
+  <main class="max-w-6xl mx-auto bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl overflow-x-auto">
+    <h2 class="text-base font-bold text-slate-200 mb-4">سجل الطلبات الحية 📋</h2>
+    
+    <table class="w-full text-right text-xs text-slate-300">
+      <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
+        <tr>
+          <th class="p-3">رقم الطلب</th>
+          <th class="p-3">العميل</th>
+          <th class="p-3">الإجمالي</th>
+          <th class="p-3">الحالة</th>
+          <th class="p-3 text-center">إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="admin-orders-table" class="divide-y divide-slate-700/50">
+        <tr>
+          <td colspan="5" class="p-8 text-center text-slate-500">لا توجد طلبات جارية حتى الآن..</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
 
   <script>
     const socket = io();
+    let ordersList = [];
 
-    // الاستماع اللحظي لتحديثات حالة الطلب المرفوعة من السائق أو العميل
+    // استقبال الطلبات الجديدة
+    socket.on('new_order_available', (order) => {
+      ordersList.unshift(order);
+      updateDashboardUI();
+    });
+
+    // تحديث حالة الطلب
     socket.on('order_status_updated', (data) => {
-      const statusBadge = document.getElementById('admin-order-status');
-      if (statusBadge) {
-        statusBadge.textContent = data.status;
-        
-        if (data.status === 'تم التسليم للعميل') {
-          statusBadge.className = "bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-lg border border-emerald-500/30 font-bold";
-        } else if (data.status === 'الكابتن استلم الطلب') {
-          statusBadge.className = "bg-blue-500/20 text-blue-300 text-xs px-3 py-1 rounded-lg border border-blue-500/30 font-bold";
-        } else {
-          statusBadge.className = "bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-lg border border-amber-500/30 font-bold";
-        }
+      const target = ordersList.find(o => o._id === data.orderId);
+      if (target) {
+        target.status = data.status;
+        updateDashboardUI();
       }
     });
+
+    function updateDashboardUI() {
+      const tbody = document.getElementById('admin-orders-table');
+      const totalOrdersCount = document.getElementById('total-orders-count');
+      const activeOrdersCount = document.getElementById('active-orders-count');
+      const totalRevenue = document.getElementById('total-revenue');
+
+      if (ordersList.length === 0) return;
+
+      totalOrdersCount.textContent = ordersList.length;
+      
+      const activeCount = ordersList.filter(o => o.status !== 'تم التسليم' && o.status !== 'ملغي').length;
+      activeOrdersCount.textContent = activeCount;
+
+      const revenue = ordersList.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+      totalRevenue.textContent = `${revenue.toFixed(2)} ج.م`;
+
+      tbody.innerHTML = ordersList.map(order => `
+        <tr class="hover:bg-slate-700/30 transition">
+          <td class="p-3 font-mono text-amber-400">#${order._id.slice(-6)}</td>
+          <td class="p-3 font-bold">${order.customerName || 'عميل تجريبي'}</td>
+          <td class="p-3 font-mono text-emerald-400 font-bold">${order.totalAmount} ج.م</td>
+          <td class="p-3">
+            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg text-[11px] font-bold">
+              ${order.status}
+            </span>
+          </td>
+          <td class="p-3 text-center space-x-1 space-x-reverse">
+            <button onclick="changeStatus('${order._id}', 'قيد التحضير')" class="bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded-lg text-[10px] transition">قيد التحضير</button>
+            <button onclick="changeStatus('${order._id}', 'جاري التوصيل')" class="bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 px-2.5 py-1 rounded-lg text-[10px] transition">توصيل</button>
+            <button onclick="changeStatus('${order._id}', 'تم التسليم')" class="bg-emerald-600/30 text-emerald-300 hover:bg-emerald-600/50 px-2.5 py-1 rounded-lg text-[10px] transition">تم التسليم</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function changeStatus(orderId, status) {
+      try {
+        await fetch(`/api/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
   </script>
 </body>
 </html>
