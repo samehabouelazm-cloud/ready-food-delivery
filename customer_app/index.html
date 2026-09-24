@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY OS - القائمة</title>
+    <title>READY OS - طلب الطعام المباشر</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -214,7 +214,6 @@
     </div>
 
     <script>
-        // قائمة الطعام التجريبية
         const menuItems = [
             { id: "1", name: "طاجن جمبري الكريمة", price: 480 },
             { id: "2", name: "وجبة سي فود ميكس", price: 650 },
@@ -225,7 +224,6 @@
         let cart = [];
         let selectedPayment = 'cash';
 
-        // عرض قائمة الطعام
         function renderMenu() {
             const container = document.getElementById('menu-container');
             container.innerHTML = menuItems.map(item => `
@@ -281,7 +279,7 @@
             btn.classList.add('selected');
         }
 
-        // ==================== دالة إرسال الطلب المعدلة والمضمونة ====================
+        // ==================== دالة إرسال الطلب المعالجة لتفادي الانهيار ====================
         async function submitOrder() {
             if (cart.length === 0) {
                 alert("برجاء إضافة عناصر إلى السلة أولاً!");
@@ -313,9 +311,16 @@
                     body: JSON.stringify(orderData)
                 });
 
-                const result = await response.json();
+                // قراءة الاستجابة كنص أولاً لتجنب Unexpected token 'A'
+                const rawText = await response.text();
+                let result;
 
-                // التوافق التام مع استجابة السيرفر مهما اختلفت صياغتها
+                try {
+                    result = JSON.parse(rawText);
+                } catch (e) {
+                    throw new Error("استجابة غير المتوقعة من السيرفر: " + rawText.substring(0, 80));
+                }
+
                 if (response.ok && (result.success || result._id || result.order)) {
                     alert("🎉 تم إرسال الطلب بنجاح!");
                     cart = [];
@@ -324,7 +329,7 @@
                     document.getElementById('customer-name').value = '';
                     document.getElementById('customer-phone').value = '';
                 } else {
-                    const errorMsg = result.error || result.message || "فشل الاتصال بالسيرفر";
+                    const errorMsg = result.error || result.message || "حدث خطأ في حفظ الطلب";
                     throw new Error(errorMsg);
                 }
             } catch (error) {
