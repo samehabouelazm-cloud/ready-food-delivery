@@ -1,246 +1,343 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - تطبيق العميل</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { primary: '#f59e0b', dark: '#0f172a' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>READY OS - القائمة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #f59e0b;
+            --accent-hover: #d97706;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --success-color: #10b981;
         }
-      }
-    }
-  </script>
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; }
-  </style>
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 80px; }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-size: 22px; font-weight: 800; color: var(--accent-color); }
+
+        .cart-btn-header {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .menu-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .item-title { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+        .item-price { color: var(--accent-color); font-weight: 800; margin-bottom: 15px; }
+
+        .add-btn {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover { background-color: var(--accent-color); color: #000; }
+
+        /* Modal / Cart Drawer */
+        .cart-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+
+        .cart-modal.active { display: flex; }
+
+        .cart-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .cart-title { font-size: 18px; font-weight: 800; margin-bottom: 15px; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 5px; }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pay-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .pay-btn.selected {
+            border-color: var(--accent-color);
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--accent-color);
+        }
+
+        .submit-order-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--success-color);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-order-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .close-cart {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            float: left;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-20 select-none">
+<body>
 
-  <!-- Header -->
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <span class="text-2xl">🍕</span>
-      <h1 class="font-bold text-xl text-amber-500">READY OS</h1>
+    <header>
+        <div class="logo">READY OS 🍕</div>
+        <button class="cart-btn-header" onclick="toggleCart()">السلة (<span id="cart-count">0</span>)</button>
+    </header>
+
+    <div class="container">
+        <h2 style="margin-bottom: 20px;">القائمة المميزة</h2>
+        <div class="menu-grid" id="menu-container"></div>
     </div>
-    <div class="bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full text-sm font-semibold border border-amber-500/20">
-      السلة (<span id="cart-count">0</span>)
+
+    <!-- نافذة السلة وتأكيد الطلب -->
+    <div class="cart-modal" id="cart-modal">
+        <div class="cart-content">
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+            <div class="cart-title">تفاصيل الطلب والدفع</div>
+
+            <div id="cart-items-list" style="margin-bottom: 15px;"></div>
+
+            <div class="form-group">
+                <label>اسم العميل (اختياري)</label>
+                <input type="text" id="customer-name" class="form-control" placeholder="أدخل اسمك">
+            </div>
+
+            <div class="form-group">
+                <label>رقم الهاتف</label>
+                <input type="tel" id="customer-phone" class="form-control" placeholder="01000000000">
+            </div>
+
+            <div class="form-group">
+                <label>طريقة الدفع:</label>
+                <div class="payment-methods">
+                    <button class="pay-btn selected" onclick="selectPayment('cash', this)">💵 كاش</button>
+                    <button class="pay-btn" onclick="selectPayment('visa', this)">💳 فيزا</button>
+                    <button class="pay-btn" onclick="selectPayment('wallet', this)">📱 محفظة</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 18px; margin: 15px 0;">
+                <span>الإجمالي:</span>
+                <span id="cart-total-price">0.00 ج.م</span>
+            </div>
+
+            <button class="submit-order-btn" id="submit-btn" onclick="submitOrder()">تأكيد الطلب والدفع 🚀</button>
+        </div>
     </div>
-  </header>
 
-  <!-- Main Content -->
-  <main class="max-w-md mx-auto p-4 space-y-6">
+    <script>
+        // قائمة الطعام التجريبية
+        const menuItems = [
+            { id: "1", name: "طاجن جمبري الكريمة", price: 480 },
+            { id: "2", name: "وجبة سي فود ميكس", price: 650 },
+            { id: "3", name: "بيتزا مأكولات بحرية", price: 320 },
+            { id: "4", name: "وجبة سمك دنيس مشوي", price: 400 }
+        ];
 
-    <!-- Menu Section -->
-    <section>
-      <h2 class="text-lg font-bold mb-3 text-amber-400 flex items-center gap-2">
-        <span>🔥</span> قائمة الوجبات المتاحة
-      </h2>
-      <div id="menu-list" class="grid grid-cols-1 gap-3">
-        <!-- Meals will be rendered here dynamically -->
-      </div>
-    </section>
+        let cart = [];
+        let selectedPayment = 'cash';
 
-    <!-- Cart Details Section -->
-    <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700 shadow-lg space-y-4">
-      <h3 class="font-bold text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2">
-        <span>🛒</span> تفاصيل الطلب
-      </h3>
-
-      <!-- Cart Items Container -->
-      <div id="cart-items" class="space-y-3 min-h-[60px]">
-        <p class="text-sm text-slate-400 text-center py-4" id="empty-cart-msg">السلة فارغة حالياً..</p>
-      </div>
-
-      <!-- Payment Method Selection -->
-      <div class="border-t border-slate-700 pt-3 space-y-2">
-        <label class="block text-sm font-semibold text-slate-300">طريقة الدفع:</label>
-        <div class="grid grid-cols-3 gap-2">
-          <button type="button" onclick="selectPayment('cash')" id="pay-cash" class="pay-btn active bg-amber-500 text-slate-950 font-bold py-2 rounded-xl text-xs border border-amber-500 transition">💵 كاش</button>
-          <button type="button" onclick="selectPayment('card')" id="pay-card" class="pay-btn bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs border border-slate-600 transition">💳 فيزا</button>
-          <button type="button" onclick="selectPayment('wallet')" id="pay-wallet" class="pay-btn bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs border border-slate-600 transition">📱 محفظة</button>
-        </div>
-      </div>
-
-      <!-- Customer Details Input -->
-      <div class="border-t border-slate-700 pt-3 space-y-2">
-        <input type="text" id="customer-name" placeholder="اسم العميل (اختياري)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500">
-        <input type="text" id="customer-phone" placeholder="رقم الهاتف (اختياري)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-500">
-      </div>
-
-      <!-- Total & Submit -->
-      <div class="border-t border-slate-700 pt-3 flex items-center justify-between font-bold">
-        <span>الإجمالي:</span>
-        <span class="text-emerald-400 text-lg" id="cart-total">0 ج.م</span>
-      </div>
-
-      <button id="submit-btn" onclick="submitOrder()" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed">
-        تأكيد الطلب والدفع 🚀
-      </button>
-    </section>
-
-  </main>
-
-  <script>
-    // Available Meals Catalog
-    const mealsCatalog = [
-      { id: '1', name: 'جمبري بلدي جامبو', description: 'مشوي بالخلطة الخاصة 500 جرام', price: 1200 },
-      { id: '2', name: 'دنيس طازج مشوي', description: 'سمكة دنيس طازجة مع الأرز والسلطة', price: 802.20 },
-      { id: '3', name: 'وجبة سي فود ميكس', description: 'جمبري، كابوريا، وسمك فيليه مع أرز وسلطات', price: 650 },
-      { id: '4', name: 'طاجن جمبري بالكريمة', description: 'طاجن جمبري فرن بالكريمة والجبنة الموزاريلا', price: 480 }
-    ];
-
-    let cart = [];
-    let selectedPaymentMethod = 'cash';
-
-    // Render Meals
-    function renderMenu() {
-      const container = document.getElementById('menu-list');
-      container.innerHTML = mealsCatalog.map(meal => `
-        <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center justify-between gap-3 shadow-sm">
-          <div>
-            <h3 class="font-bold text-slate-100 text-sm">${meal.name}</h3>
-            <p class="text-xs text-slate-400 mt-0.5">${meal.description}</p>
-            <p class="text-emerald-400 font-bold text-sm mt-1">${meal.price.toFixed(2)} ج.م</p>
-          </div>
-          <button onclick="addToCart('${meal.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-xl text-xs shrink-0 transition">
-            + إضافة
-          </button>
-        </div>
-      `).join('');
-    }
-
-    // Add Meal to Cart or Increase Quantity
-    function addToCart(mealId) {
-      const meal = mealsCatalog.find(m => m.id === mealId);
-      if (!meal) return;
-
-      const existingItem = cart.find(item => item.id === mealId);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        cart.push({ ...meal, quantity: 1 });
-      }
-
-      updateCartUI();
-    }
-
-    // Change Item Quantity (+ / -)
-    function changeQuantity(mealId, delta) {
-      const itemIndex = cart.findIndex(item => item.id === mealId);
-      if (itemIndex === -1) return;
-
-      cart[itemIndex].quantity += delta;
-      if (cart[itemIndex].quantity <= 0) {
-        cart.splice(itemIndex, 1);
-      }
-
-      updateCartUI();
-    }
-
-    // Payment Method Selection UI Toggle
-    function selectPayment(method) {
-      selectedPaymentMethod = method;
-      document.querySelectorAll('.pay-btn').forEach(btn => {
-        btn.className = 'pay-btn bg-slate-700 text-slate-300 font-bold py-2 rounded-xl text-xs border border-slate-600 transition';
-      });
-      const activeBtn = document.getElementById(`pay-${method}`);
-      if (activeBtn) {
-        activeBtn.className = 'pay-btn active bg-amber-500 text-slate-950 font-bold py-2 rounded-xl text-xs border border-amber-500 transition';
-      }
-    }
-
-    // Update Cart Interface
-    function updateCartUI() {
-      const itemsContainer = document.getElementById('cart-items');
-      const cartCountEl = document.getElementById('cart-count');
-      const totalEl = document.getElementById('cart-total');
-      const submitBtn = document.getElementById('submit-btn');
-
-      const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-      cartCountEl.textContent = totalItemsCount;
-      totalEl.textContent = `${totalAmount.toFixed(2)} ج.م`;
-
-      if (cart.length === 0) {
-        itemsContainer.innerHTML = '<p class="text-sm text-slate-400 text-center py-4" id="empty-cart-msg">السلة فارغة حالياً..</p>';
-        submitBtn.disabled = true;
-        submitBtn.className = 'w-full bg-slate-700 text-slate-400 font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-not-allowed';
-      } else {
-        itemsContainer.innerHTML = cart.map(item => `
-          <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50 text-xs">
-            <div class="flex-1">
-              <p class="font-semibold text-slate-200">${item.name}</p>
-              <p class="text-emerald-400">${(item.price * item.quantity).toFixed(2)} ج.م</p>
-            </div>
-            <div class="flex items-center gap-2 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">
-              <button onclick="changeQuantity('${item.id}', -1)" class="w-5 h-5 flex items-center justify-center bg-slate-700 text-amber-400 font-bold rounded hover:bg-slate-600">-</button>
-              <span class="font-bold px-1 text-slate-100">${item.quantity}</span>
-              <button onclick="changeQuantity('${item.id}', 1)" class="w-5 h-5 flex items-center justify-center bg-slate-700 text-amber-400 font-bold rounded hover:bg-slate-600">+</button>
-            </div>
-          </div>
-        `).join('');
-
-        submitBtn.disabled = false;
-        submitBtn.className = 'w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg';
-      }
-    }
-
-    // Submit Order to Serverless API
-    async function submitOrder() {
-      if (cart.length === 0) return alert('السلة فارغة!');
-
-      const customerName = document.getElementById('customer-name').value.trim() || "عميل تجريبي";
-      const customerPhone = document.getElementById('customer-phone').value.trim() || "";
-      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-      const submitBtn = document.getElementById('submit-btn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'جاري إرسال الطلب... ⏳';
-
-      try {
-        const response = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerName,
-            customerPhone,
-            paymentMethod: selectedPaymentMethod,
-            items: cart.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
-            totalAmount
-          })
-        });
-
-        const data = await response.json().catch(() => ({ success: false, error: 'استجابة غير صحيحة من السيرفر' }));
-
-        if (response.ok && data.success) {
-          alert('تم إرسال الطلب بنجاح! 🚀');
-          cart = [];
-          document.getElementById('customer-name').value = '';
-          document.getElementById('customer-phone').value = '';
-          updateCartUI();
-        } else {
-          throw new Error(data.error || `خطأ سيرفر رمز (${response.status})`);
+        // عرض قائمة الطعام
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = menuItems.map(item => `
+                <div class="menu-card">
+                    <div>
+                        <div class="item-title">${item.name}</div>
+                        <div class="item-price">${item.price.toFixed(2)} ج.م</div>
+                    </div>
+                    <button class="add-btn" onclick="addToCart('${item.id}')">إضافة للسلة +</button>
+                </div>
+            `).join('');
         }
-      } catch (err) {
-        console.error('Order Submission Error:', err);
-        alert(`❌ فشل إرسال الطلب:\n${err.message}`);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'تأكيد الطلب والدفع 🚀';
-        updateCartUI();
-      }
-    }
 
-    // Initialize
-    renderMenu();
-  </script>
+        function addToCart(id) {
+            const item = menuItems.find(m => m.id === id);
+            const existing = cart.find(c => c.id === id);
+
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...item, quantity: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            document.getElementById('cart-count').innerText = count;
+            document.getElementById('cart-total-price').innerText = total.toFixed(2) + " ج.م";
+
+            const listContainer = document.getElementById('cart-items-list');
+            if (cart.length === 0) {
+                listContainer.innerHTML = '<p style="color: var(--text-secondary); text-align:center;">السلة فارغة</p>';
+            } else {
+                listContainer.innerHTML = cart.map(i => `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                        <span>${i.name} (x${i.quantity})</span>
+                        <span>${(i.price * i.quantity).toFixed(2)} ج.م</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-modal').classList.toggle('active');
+        }
+
+        function selectPayment(method, btn) {
+            selectedPayment = method;
+            document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        // ==================== دالة إرسال الطلب المعدلة والمضمونة ====================
+        async function submitOrder() {
+            if (cart.length === 0) {
+                alert("برجاء إضافة عناصر إلى السلة أولاً!");
+                return;
+            }
+
+            const nameInput = document.getElementById('customer-name').value.trim();
+            const phoneInput = document.getElementById('customer-phone').value.trim();
+            const submitBtn = document.getElementById('submit-btn');
+
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            const orderData = {
+                customerName: nameInput || 'عميل جديد',
+                customerPhone: phoneInput || '',
+                paymentMethod: selectedPayment,
+                items: cart,
+                totalAmount: totalAmount,
+                status: 'pending'
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "جاري إرسال الطلب... ⏳";
+
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+
+                // التوافق التام مع استجابة السيرفر مهما اختلفت صياغتها
+                if (response.ok && (result.success || result._id || result.order)) {
+                    alert("🎉 تم إرسال الطلب بنجاح!");
+                    cart = [];
+                    updateCartUI();
+                    toggleCart();
+                    document.getElementById('customer-name').value = '';
+                    document.getElementById('customer-phone').value = '';
+                } else {
+                    const errorMsg = result.error || result.message || "فشل الاتصال بالسيرفر";
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                console.error("خطأ في إرسال الطلب:", error);
+                alert("❌ فشل إرسال الطلب: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "تأكيد الطلب والدفع 🚀";
+            }
+        }
+
+        renderMenu();
+        updateCartUI();
+    </script>
 </body>
 </html>
