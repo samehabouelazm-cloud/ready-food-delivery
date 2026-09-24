@@ -104,3 +104,44 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
         console.log(`Server running on http://localhost:${PORT}`);
     });
 }
+// 1. تحديث الـ Schema ليشمل بيانات الكابتن
+const orderSchema = new mongoose.Schema({
+    customerName: { type: String, default: 'عميل تجريبي' },
+    customerPhone: { type: String, default: '' },
+    paymentMethod: { type: String, default: 'cash' },
+    items: [
+        {
+            id: String,
+            name: String,
+            price: Number,
+            quantity: { type: Number, default: 1 }
+        }
+    ],
+    totalAmount: { type: Number, required: true },
+    status: { type: String, default: 'pending' }, // pending, accepted, delivering, rejected
+    driverName: { type: String, default: '' },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// 2. إضافة Endpoint استلام الكابتن للطلب
+app.patch('/api/orders/:id/assign', async (req, res) => {
+    try {
+        await connectToDatabase();
+        const { id } = req.params;
+        const { driverName } = req.body;
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+            id,
+            { 
+                driverName: driverName || 'كابتن التوصيل',
+                status: 'delivering' // تغيير الحالة إلى جاري التوصيل
+            },
+            { new: true }
+        );
+
+        res.status(200).json({ success: true, order: updatedOrder });
+    } catch (error) {
+        console.error("خطأ في إسناد الطلب للكابتن:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
