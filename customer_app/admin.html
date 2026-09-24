@@ -240,7 +240,6 @@
     </div>
 
     <script>
-        // دالة جلب كافة الطلبات من السيرفر
         async function loadOrders() {
             try {
                 const response = await fetch('/api/orders');
@@ -249,71 +248,67 @@
                 const orders = await response.json();
                 renderDashboard(orders);
             } catch (error) {
-                console.error("خطأ أثناء جلب الطلبات:", error);
+                console.error("خطأ في جلب الطلبات:", error);
             }
         }
 
-        // رسم وعرض الطلبات والإحصائيات
         function renderDashboard(orders) {
             const tableBody = document.getElementById('orders-table-body');
             
-            // تحديث الإحصائيات
             document.getElementById('total-orders-count').innerText = orders.length;
             
             const activeOrders = orders.filter(o => o.status !== 'accepted' && o.status !== 'rejected');
             document.getElementById('active-orders-count').innerText = activeOrders.length;
 
             const totalSales = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-            document.getElementById('total-sales-amount').innerText = `${totalSales.toFixed(2)} ج.م`;
+            document.getElementById('total-sales-amount').innerText = totalSales.toFixed(2) + " ج.م";
 
             if (!orders || orders.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد طلبات جارية حتى الآن..</td></tr>`;
+                tableBody.innerHTML = '<tr><td colspan="6" class="empty-state">لا توجد طلبات جارية حتى الآن..</td></tr>';
                 return;
             }
 
             tableBody.innerHTML = orders.map(order => {
                 const itemsHtml = order.items && order.items.length > 0 
-                    ? `<ul class="items-list">${order.items.map(i => `<li>• ${i.name \vert{}\vert{} 'عنصر'} (x${i.quantity || 1})</li>`).join('')}</ul>`
+                    ? '<ul class="items-list">' + order.items.map(i => '<li>• ' + (i.name || 'عنصر') + ' (x' + (i.quantity || 1) + ')</li>').join('') + '</ul>'
                     : '<span style="color:#64748b;">لا توجد تفاصيل</span>';
 
-                const statusBadge = order.status === 'accepted' 
-                    ? '<span class="badge badge-accepted">مقبول</span>' 
-                    : order.status === 'rejected'
-                    ? '<span class="badge badge-rejected">ملغي</span>'
-                    : '<span class="badge badge-pending">قيد الانتظار</span>';
+                let statusBadge = '<span class="badge badge-pending">قيد الانتظار</span>';
+                if (order.status === 'accepted') {
+                    statusBadge = '<span class="badge badge-accepted">مقبول</span>';
+                } else if (order.status === 'rejected') {
+                    statusBadge = '<span class="badge badge-rejected">ملغي</span>';
+                }
 
-                const actionsHtml = order.status === 'accepted' || order.status === 'rejected' 
+                const actionsHtml = (order.status === 'accepted' || order.status === 'rejected') 
                     ? '<span style="color:#64748b; font-size:12px;">تم الاتخاذ</span>'
-                    : `<button class="btn-action btn-accept" onclick="updateOrderStatus('${order._id}', 'accepted')">موافقة</button>
-                       <button class="btn-action btn-reject" onclick="updateOrderStatus('${order._id}', 'rejected')">إلغاء</button>`;
+                    : '<button class="btn-action btn-accept" onclick="updateOrderStatus(\'' + order._id + '\', \'accepted\')">موافقة</button>' +
+                      '<button class="btn-action btn-reject" onclick="updateOrderStatus(\'' + order._id + '\', \'rejected\')">إلغاء</button>';
 
-                return `
-                    <tr>
-                        <td><strong>#${(order._id || '').slice(-5)}</strong></td>
-                        <td>
-                            <div>${order.customerName || 'عميل تجريبي'}</div>
-                            <small style="color:#64748b">${order.customerPhone || ''}</small>
-                        </td>
-                        <td>${itemsHtml}</td>
-                        <td><strong>${(order.totalAmount || 0).toFixed(2)} ج.م</strong></td>
-                        <td>${statusBadge}</td>
-                        <td>${actionsHtml}</td>
-                    </tr>
-                `;
+                const orderIdShort = order._id ? order._id.slice(-5) : '----';
+                const totalAmt = order.totalAmount ? order.totalAmount.toFixed(2) : '0.00';
+
+                return '<tr>' +
+                    '<td><strong>#' + orderIdShort + '</strong></td>' +
+                    '<td><div>' + (order.customerName || 'عميل تجريبي') + '</div><small style="color:#64748b">' + (order.customerPhone || '') + '</small></td>' +
+                    '<td>' + itemsHtml + '</td>' +
+                    '<td><strong>' + totalAmt + ' ج.م</strong></td>' +
+                    '<td>' + statusBadge + '</td>' +
+                    '<td>' + actionsHtml + '</td>' +
+                '</tr>';
             }).join('');
         }
 
-        // دالة تحديث حالة الطلب
         async function updateOrderStatus(orderId, newStatus) {
             try {
-                const response = await fetch(`/api/orders/${orderId}`, {
+                const response = await fetch('/api/orders/' + orderId, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
                 });
 
                 if (response.ok) {
-                    loadOrders(); // إعادة جلب فورية للبيانات
+                    loadOrders();
                 } else {
                     alert("تعذر تحديث حالة الطلب");
                 }
@@ -322,9 +317,7 @@
             }
         }
 
-        // التشغيل التلقائي
         loadOrders();
-        // تحديث أوتوماتيكي كل 3 ثوانٍ
         setInterval(loadOrders, 3000);
     </script>
 </body>
