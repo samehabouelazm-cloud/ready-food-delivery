@@ -1,120 +1,106 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
 
 const app = express();
-
-// Middlewares
-app.use(cors());
 app.use(express.json());
 
-const FALLBACK_MONGODB_URI = "mongodb+srv://samehabouelazm_db_user:Ss1234567890@cluster0.nqeqi1n.mongodb.net/ready_db?retryWrites=true&w=majority";
+// تقديم الملفات الثابتة (HTML, CSS, JS)
+app.use(express.static(path.join(__dirname, 'customer_app')));
 
-const MONGODB_URI = process.env.MONGODB_URI || FALLBACK_MONGODB_URI;
+// الاتصال بقاعدة البيانات
+const MONGODB_URI = process.env.MONGODB_URI;
+
+let isConnected = false;
 async function connectToDatabase() {
-  if (mongoose.connection.readyState >= 1) {
-    return;
-  }
-
-  await mongoose.connect(MONGODB_URI);
-}// Order Schema & Model
-const orderSchema = new mongoose.Schema({
-  customerName: { type: String, default: 'عميل تجريبي' },
-  customerPhone: { type: String, default: '' },
-  paymentMethod: { type: String, default: 'cash' },
-  items: [
-    {
-      id: String,
-      name: String,
-      price: Number,
-      quantity: { type: Number, default: 1 }
+    if (isConnected && mongoose.connection.readyState === 1) {
+        return;
     }
-  ],
-  totalAmount: { type: Number, required: true },
-  status: { type: String, default: 'pending' },
-  createdAt: { type: Date, default: Date.now }
+    if (!MONGODB_URI) {
+        throw new Error("متغير البيئة MONGODB_URI غير معرف!");
+    }
+    await mongoose.connect(MONGODB_URI);
+    isConnected = true;
+}
+
+// Order Schema & Model
+const orderSchema = new mongoose.Schema({
+    customerName: { type: String, default: 'عميل تجريبي' },
+    customerPhone: { type: String, default: '' },
+    paymentMethod: { type: String, default: 'cash' },
+    items: [
+        {
+            id: String,
+            name: String,
+            price: Number,
+            quantity: { type: Number, default: 1 }
+        }
+    ],
+    totalAmount: { type: Number, required: true },
+    status: { type: String, default: 'pending' }, // pending, accepted, rejected
+    createdAt: { type: Date, default: Date.now }
 });
 
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 
-// Root Health Check Route
-app.get('/', (req, res) => {
-  res.status(200).json({ status: 'API is running successfully! 🚀' });
-});
+// ==================== ENDPOINTS / API ====================
 
-// GET /api/orders - Fetch All Orders
-app.get('/api/orders', async (req, res) => {
-  try {
-    await connectToDatabase();
-    const orders = await Order.find().sort({ createdAt: -1 });
-    return res.status(200).json({ success: true, orders });
-  } catch (error) {
-    console.error('Fetch Orders Error:', error);
-    return res.status(500).json({ success: false, error: error.message || 'فشل جلب الطلبات' });
-  }
-});
-
-// POST /api/orders - Create New Order
+// 1. استقبال طلب جديد من العميل
 app.post('/api/orders', async (req, res) => {
-  try {
-    await connectToDatabase();
-
-    const { customerName, customerPhone, paymentMethod, items, totalAmount } = req.body;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ success: false, error: 'السلة فارغة، لا يمكن إرسال طلب فارغ' });
+    try {
+        await connectToDatabase();
+        const newOrder = new Order(req.body);
+        await newOrder.save();
+        res.status(201).json({ success: true, message: 'تم إرسال الطلب بنجاح', order: newOrder });
+    } catch (error) {
+        console.error("خطأ في حفظ الطلب:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    const newOrder = new Order({
-      customerName: customerName || 'عميل تجريبي',
-      customerPhone: customerPhone || '',
-      paymentMethod: paymentMethod || 'cash',
-      items: items,
-      totalAmount: Number(totalAmount) || 0,
-      status: 'pending',
-      createdAt: new Date()
-    });
-
-    await newOrder.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'تم تسجيل الطلب بنجاح 🚀',
-      order: newOrder
-    });
-  } catch (error) {
-    console.error('Create Order Error:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.message || 'حدث خطأ في السيرفر أثناء إرسال الطلب'
-    });
-  }
 });
 
-// PATCH /api/orders/:id - Update Order Status
+// 2. جلب جميع الطلبات للوحة الإدارة
+app.get('/api/orders', async (req, res) => {
+    try {
+        await connectToDatabase();
+        const orders = await Order.find().sort({ createdAt: -1 }); // الأحدث أولاً
+        res.status(200).json(orders);
+    } catch (error) {
+        console.error("خطأ في جلب الطلبات:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 3. تحديث حالة الطلب من الإدارة (موافقة / إلغاء)
 app.patch('/api/orders/:id', async (req, res) => {
-  try {
-    await connectToDatabase();
-    const { status } = req.body;
-    const { id } = req.params;
+    try {
+        await connectToDatabase();
+        const { id } = req.params;
+        const { status } = req.body;
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+        const updatedOrder = await Order.findByIdAndUpdate(
+            id,
+            { status: status },
+            { new: true }
+        );
 
-    if (!updatedOrder) {
-      return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+        }
+
+        res.status(200).json({ success: true, order: updatedOrder });
+    } catch (error) {
+        console.error("خطأ في تحديث الحالة:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    return res.status(200).json({ success: true, order: updatedOrder });
-  } catch (error) {
-    console.error('Update Order Error:', error);
-    return res.status(500).json({ success: false, error: error.message || 'فشل تحديث حالة الطلب' });
-  }
 });
 
-// Export for Vercel Serverless
+// التوافق مع Vercel Serverless Functions
 module.exports = app;
+
+// التشغيل المحلي فقط
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
