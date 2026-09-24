@@ -117,3 +117,30 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`Server on port ${PORT}`));
 }
+// Endpoint: حذف طلب معين
+app.delete('/api/orders/:id', async (req, res) => {
+    try {
+        await connectToDatabase();
+        const deletedOrder = await Order.findByIdAndDelete(req.params.id);
+        if (!deletedOrder) {
+            return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+        }
+        return res.status(200).json({ success: true, message: 'تم حذف الطلب بنجاح' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Endpoint: تحديث حالة الطلب أو بياناته
+app.patch('/api/orders/:id', async (req, res) => {
+    try {
+        await connectToDatabase();
+        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+        }
+        return res.status(200).json({ success: true, message: 'تم تحديث الطلب بنجاح', order: updatedOrder });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+});

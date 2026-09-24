@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY OS - لوحة إدارة المطعم</title>
+    <title>READY OS - لوحة إدارة المطعم والطلبات</title>
     <style>
         * {
             box-sizing: border-box;
@@ -50,10 +50,12 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: relative;
         }
         .order-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 12px;
         }
         .order-id {
@@ -71,7 +73,7 @@
         .status-completed { background: #10b98122; color: #10b981; border: 1px solid #10b981; }
         
         .customer-info, .items-list {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-size: 14px;
             color: #cbd5e1;
         }
@@ -86,11 +88,16 @@
             border: 1px dashed #10b981;
             padding: 10px;
             border-radius: 6px;
-            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .driver-box p {
             font-size: 13px;
             margin-bottom: 4px;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         .btn-auto-assign {
             background: #f59e0b;
@@ -101,17 +108,38 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
         }
-        .btn-auto-assign:hover {
-            background: #d97706;
+        .btn-delete {
+            background: #ef444422;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-unassign {
+            background: #64748b;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>📦 READY OS - لوحة التحكم وإسناد الكباتن</h1>
+        <h1>📦 READY OS - لوحة التحكم وإسناد الطلبات</h1>
         <button class="refresh-btn" onclick="fetchOrders()">تحديث الطلبات 🔄</button>
     </div>
 
@@ -152,7 +180,7 @@
                                 <span class="badge ${statusClass}">${statusText}</span>
                             </div>
                             <div class="customer-info">
-                                <strong>العميل:</strong> ${order.customerName || 'عميل READY'}<br>
+                                <strong>العميل:</strong> ${order.customerName || 'عميل جديد'}<br>
                                 <strong>الهاتف:</strong> ${order.customerPhone || 'غير مسجل'}
                             </div>
                             <div class="items-list">
@@ -168,12 +196,19 @@
                                 <div class="driver-box">
                                     <p>🚴 <strong>الكابتن:</strong> ${order.driverName}</p>
                                     <p>📞 <strong>جوال الكابتن:</strong> <a href="tel:${order.driverPhone}" style="color: #38bdf8;">${order.driverPhone || 'غير متوفر'}</a></p>
+                                    <button class="btn-unassign" onclick="unassignDriver('${order._id}')">إلغاء إسناد الكابتن (إبقاء الطلب)</button>
                                 </div>
                             ` : `
-                                <button class="btn-auto-assign" onclick="autoAssign('${order._id}')">
+                                <button class="btn-auto-assign" style="margin-bottom:8px;" onclick="autoAssign('${order._id}')">
                                     ⚡ إسناد تلقائي للكابتن الأقرب
                                 </button>
                             `}
+
+                            <div class="action-buttons">
+                                <button class="btn-delete" onclick="deleteOrder('${order._id}')">
+                                    🗑️ حذف الطلب
+                                </button>
+                            </div>
                         </div>
                     `;
                     container.appendChild(card);
@@ -184,26 +219,56 @@
             }
         }
 
+        // إسناد كابتن تلقائي
         async function autoAssign(orderId) {
             try {
-                const res = await fetch(`/api/orders/${orderId}/auto-assign`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const res = await fetch(`/api/orders/${orderId}/auto-assign`, { method: 'POST' });
                 const data = await res.json();
-                
                 if (data.success) {
                     alert(data.message);
                     fetchOrders();
                 } else {
-                    alert('تعذر الإسناد: ' + (data.message || 'لا يوجد كباتن متاحون'));
+                    alert('تعذر الإسناد: ' + (data.message || 'خطأ بالسيرفر'));
                 }
             } catch (err) {
                 alert('حدث خطأ أثناء الاتصال بالسيرفر');
             }
         }
 
-        // جلب الطلبات فور فتح الصفحة وتحديثها تلقائياً كل 8 ثوانٍ
+        // إلغاء إسناد الكابتن مع إبقاء الطلب
+        async function unassignDriver(orderId) {
+            if (!confirm('هل تريد إزالة الكابتن من الطلب وإبقاؤه في قائمة الانتظار؟')) return;
+            try {
+                const res = await fetch(`/api/orders/${orderId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ driverName: '', driverPhone: '', status: 'pending' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    fetchOrders();
+                }
+            } catch (err) {
+                alert('فشل التعديل على الطلب');
+            }
+        }
+
+        // حذف الطلب بشكل نهائي
+        async function deleteOrder(orderId) {
+            if (!confirm('هل أنت تأكد من رغبتك في حذف هذا الطلب نهائياً؟')) return;
+            try {
+                const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    fetchOrders();
+                } else {
+                    alert('فشل حذف الطلب');
+                }
+            } catch (err) {
+                alert('حدث خطأ أثناء تنفيذ عملية الحذف');
+            }
+        }
+
         fetchOrders();
         setInterval(fetchOrders, 8000);
     </script>
