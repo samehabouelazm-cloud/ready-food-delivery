@@ -1,130 +1,331 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - لوحة تحكم الأدمن</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/socket.io/socket.io.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>READY OS - لوحة إدارة المطعم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #f59e0b;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .orders-section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            background-color: rgba(15, 23, 42, 0.4);
+        }
+
+        td {
+            font-size: 15px;
+        }
+
+        .items-list {
+            font-size: 13px;
+            color: var(--text-secondary);
+            list-style: none;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-pending { background-color: rgba(245, 158, 11, 0.2); color: var(--accent-color); }
+        .badge-accepted { background-color: rgba(16, 185, 129, 0.2); color: var(--success-color); }
+        .badge-rejected { background-color: rgba(239, 68, 68, 0.2); color: var(--danger-color); }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            margin-left: 5px;
+            transition: all 0.2s;
+        }
+
+        .btn-accept { background-color: var(--success-color); color: #fff; }
+        .btn-accept:hover { background-color: #059669; }
+
+        .btn-reject { background-color: var(--danger-color); color: #fff; }
+        .btn-reject:hover { background-color: #dc2626; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+<body>
 
-  <!-- الهيدر والإحصائيات السريعة -->
-  <header class="max-w-6xl mx-auto mb-8 space-y-4">
-    <div class="flex justify-between items-center bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl">
-      <div>
-        <h1 class="text-xl font-black text-amber-400">لوحة إدارة المطعم 👑</h1>
-        <p class="text-xs text-slate-400 mt-1">متابعة الطلبات المباشرة والعمليات</p>
-      </div>
-      <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-bold">
-        النظام يعمل أونلاين 🟢
-      </span>
+    <div class="container">
+        <header>
+            <h1>👑 لوحة إدارة المطعم - READY OS</h1>
+            <div class="status-badge">
+                <span class="status-dot"></span> النظام يعمل أونلاين
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">إجمالي الطلبات</div>
+                <div class="stat-value" id="total-orders-count">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">الطلبات النشطة</div>
+                <div class="stat-value" id="active-orders-count" style="color: var(--accent-color);">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">إجمالي المبيعات</div>
+                <div class="stat-value" id="total-sales-amount" style="color: var(--success-color);">0 ج.م</div>
+            </div>
+        </div>
+
+        <div class="orders-section">
+            <div class="section-header">
+                <div class="section-title">📋 سجل الطلبات الحية</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>العميل</th>
+                        <th>التفاصيل والعناصر</th>
+                        <th>الإجمالي</th>
+                        <th>الحالة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                    <tr>
+                        <td colspan="6" class="empty-state">جاري جلب الطلبات...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- كروت الإحصائيات -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-bold">إجمالي الطلبات</span>
-        <p id="total-orders-count" class="text-2xl font-black text-amber-400 mt-1">0</p>
-      </div>
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-bold">الطلبات النشطة</span>
-        <p id="active-orders-count" class="text-2xl font-black text-blue-400 mt-1">0</p>
-      </div>
-      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <span class="text-xs text-slate-400 font-bold">إجمالي المبيعات</span>
-        <p id="total-revenue" class="text-2xl font-black text-emerald-400 mt-1">0 ج.م</p>
-      </div>
-    </div>
-  </header>
+    <script>
+        // دالة جلب كافة الطلبات من السيرفر
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/orders');
+                if (!response.ok) throw new Error("فشل الجلب");
+                
+                const orders = await response.json();
+                renderDashboard(orders);
+            } catch (error) {
+                console.error("خطأ أثناء جلب الطلبات:", error);
+            }
+        }
 
-  <!-- جدول الطلبات -->
-  <main class="max-w-6xl mx-auto bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl overflow-x-auto">
-    <h2 class="text-base font-bold text-slate-200 mb-4">سجل الطلبات الحية 📋</h2>
-    
-    <table class="w-full text-right text-xs text-slate-300">
-      <thead class="bg-slate-900/50 text-slate-400 border-b border-slate-700">
-        <tr>
-          <th class="p-3">رقم الطلب</th>
-          <th class="p-3">العميل</th>
-          <th class="p-3">الإجمالي</th>
-          <th class="p-3">الحالة</th>
-          <th class="p-3 text-center">إجراءات</th>
-        </tr>
-      </thead>
-      <tbody id="admin-orders-table" class="divide-y divide-slate-700/50">
-        <tr>
-          <td colspan="5" class="p-8 text-center text-slate-500">لا توجد طلبات جارية حتى الآن..</td>
-        </tr>
-      </tbody>
-    </table>
-  </main>
+        // رسم وعرض الطلبات والإحصائيات
+        function renderDashboard(orders) {
+            const tableBody = document.getElementById('orders-table-body');
+            
+            // تحديث الإحصائيات
+            document.getElementById('total-orders-count').innerText = orders.length;
+            
+            const activeOrders = orders.filter(o => o.status !== 'accepted' && o.status !== 'rejected');
+            document.getElementById('active-orders-count').innerText = activeOrders.length;
 
-  <script>
-    const socket = io();
-    let ordersList = [];
+            const totalSales = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            document.getElementById('total-sales-amount').innerText = `${totalSales.toFixed(2)} ج.م`;
 
-    // استقبال الطلبات الجديدة
-    socket.on('new_order_available', (order) => {
-      ordersList.unshift(order);
-      updateDashboardUI();
-    });
+            if (!orders || orders.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">لا توجد طلبات جارية حتى الآن..</td></tr>`;
+                return;
+            }
 
-    // تحديث حالة الطلب
-    socket.on('order_status_updated', (data) => {
-      const target = ordersList.find(o => o._id === data.orderId);
-      if (target) {
-        target.status = data.status;
-        updateDashboardUI();
-      }
-    });
+            tableBody.innerHTML = orders.map(order => {
+                const itemsHtml = order.items && order.items.length > 0 
+                    ? `<ul class="items-list">${order.items.map(i => `<li>• ${i.name \vert{}\vert{} 'عنصر'} (x${i.quantity || 1})</li>`).join('')}</ul>`
+                    : '<span style="color:#64748b;">لا توجد تفاصيل</span>';
 
-    function updateDashboardUI() {
-      const tbody = document.getElementById('admin-orders-table');
-      const totalOrdersCount = document.getElementById('total-orders-count');
-      const activeOrdersCount = document.getElementById('active-orders-count');
-      const totalRevenue = document.getElementById('total-revenue');
+                const statusBadge = order.status === 'accepted' 
+                    ? '<span class="badge badge-accepted">مقبول</span>' 
+                    : order.status === 'rejected'
+                    ? '<span class="badge badge-rejected">ملغي</span>'
+                    : '<span class="badge badge-pending">قيد الانتظار</span>';
 
-      if (ordersList.length === 0) return;
+                const actionsHtml = order.status === 'accepted' || order.status === 'rejected' 
+                    ? '<span style="color:#64748b; font-size:12px;">تم الاتخاذ</span>'
+                    : `<button class="btn-action btn-accept" onclick="updateOrderStatus('${order._id}', 'accepted')">موافقة</button>
+                       <button class="btn-action btn-reject" onclick="updateOrderStatus('${order._id}', 'rejected')">إلغاء</button>`;
 
-      totalOrdersCount.textContent = ordersList.length;
-      
-      const activeCount = ordersList.filter(o => o.status !== 'تم التسليم' && o.status !== 'ملغي').length;
-      activeOrdersCount.textContent = activeCount;
+                return `
+                    <tr>
+                        <td><strong>#${(order._id || '').slice(-5)}</strong></td>
+                        <td>
+                            <div>${order.customerName || 'عميل تجريبي'}</div>
+                            <small style="color:#64748b">${order.customerPhone || ''}</small>
+                        </td>
+                        <td>${itemsHtml}</td>
+                        <td><strong>${(order.totalAmount || 0).toFixed(2)} ج.م</strong></td>
+                        <td>${statusBadge}</td>
+                        <td>${actionsHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
 
-      const revenue = ordersList.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-      totalRevenue.textContent = `${revenue.toFixed(2)} ج.م`;
+        // دالة تحديث حالة الطلب
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
 
-      tbody.innerHTML = ordersList.map(order => `
-        <tr class="hover:bg-slate-700/30 transition">
-          <td class="p-3 font-mono text-amber-400">#${order._id.slice(-6)}</td>
-          <td class="p-3 font-bold">${order.customerName || 'عميل تجريبي'}</td>
-          <td class="p-3 font-mono text-emerald-400 font-bold">${order.totalAmount} ج.م</td>
-          <td class="p-3">
-            <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-lg text-[11px] font-bold">
-              ${order.status}
-            </span>
-          </td>
-          <td class="p-3 text-center space-x-1 space-x-reverse">
-            <button onclick="changeStatus('${order._id}', 'قيد التحضير')" class="bg-slate-700 hover:bg-slate-600 px-2.5 py-1 rounded-lg text-[10px] transition">قيد التحضير</button>
-            <button onclick="changeStatus('${order._id}', 'جاري التوصيل')" class="bg-blue-600/30 text-blue-300 hover:bg-blue-600/50 px-2.5 py-1 rounded-lg text-[10px] transition">توصيل</button>
-            <button onclick="changeStatus('${order._id}', 'تم التسليم')" class="bg-emerald-600/30 text-emerald-300 hover:bg-emerald-600/50 px-2.5 py-1 rounded-lg text-[10px] transition">تم التسليم</button>
-          </td>
-        </tr>
-      `).join('');
-    }
+                if (response.ok) {
+                    loadOrders(); // إعادة جلب فورية للبيانات
+                } else {
+                    alert("تعذر تحديث حالة الطلب");
+                }
+            } catch (error) {
+                console.error("خطأ في تحديث حالة الطلب:", error);
+            }
+        }
 
-    async function changeStatus(orderId, status) {
-      try {
-        await fetch(`/api/orders/${orderId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  </script>
+        // التشغيل التلقائي
+        loadOrders();
+        // تحديث أوتوماتيكي كل 3 ثوانٍ
+        setInterval(loadOrders, 3000);
+    </script>
 </body>
 </html>
