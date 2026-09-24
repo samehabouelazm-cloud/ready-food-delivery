@@ -9,25 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔴 ضع رابط MongoDB Atlas الخاص بك هنا كخيار احتياطي لضمان عدم توقف Vercel
-// تنبيه: إذا كانت كلمة المرور تحتوي على رمز @ استبدله بـ %40
-const FALLBACK_MONGODB_URI = "mongodb+srv://<USERNAME>:<PASSWORD>@cluster0.mongodb.net/ready_db?retryWrites=true&w=majority";
+const FALLBACK_MONGODB_URI = "mongodb+srv://samehabouelazm_db_user:Ss1234567890@cluster0.nqeqi1n.mongodb.net/ready_db?retryWrites=true&w=majority";
 
 const MONGODB_URI = process.env.MONGODB_URI || FALLBACK_MONGODB_URI;
-
 async function connectToDatabase() {
   if (mongoose.connection.readyState >= 1) {
     return;
   }
-  
-  if (!MONGODB_URI || MONGODB_URI.includes("<USERNAME>")) {
-    throw new Error('رابط الاتصال MONGODB_URI غير صحيح أو لم يتم إدخال بيانات المستخدم وكلمة السر بشكل صحيح');
-  }
 
   await mongoose.connect(MONGODB_URI);
-}
-
-// Order Schema & Model
+}// Order Schema & Model
 const orderSchema = new mongoose.Schema({
   customerName: { type: String, default: 'عميل تجريبي' },
   customerPhone: { type: String, default: '' },
