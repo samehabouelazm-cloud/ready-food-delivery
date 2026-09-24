@@ -5,27 +5,32 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 
-// تقديم الملفات الثابتة (HTML, CSS, JS)
+// تقديم الملفات الثابتة
 app.use(express.static(path.join(__dirname, 'customer_app')));
 
-// الاتصال بقاعدة البيانات
 const MONGODB_URI = process.env.MONGODB_URI;
 
-let isConnected = false;
+// تحسين طريقة الاتصال لمنع الـ Timeout في Vercel
+let cachedDb = null;
 async function connectToDatabase() {
-    if (isConnected && mongoose.connection.readyState === 1) {
-        return;
+    if (cachedDb && mongoose.connection.readyState === 1) {
+        return cachedDb;
     }
+
     if (!MONGODB_URI) {
-        throw new Error("متغير البيئة MONGODB_URI غير معرف!");
     }
-    await mongoose.connect(MONGODB_URI);
-    isConnected = true;
+
+    mongoose.set('strictQuery', false);
+    cachedDb = await mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 5000, // مهلة 5 ثوانٍ بحد أقصى
+        socketTimeoutMS: 45000,
+    });
+    return cachedDb;
 }
 
-// Order Schema & Model
+// Order Schema
 const orderSchema = new mongoose.Schema({
-    customerName: { type: String, default: 'عميل تجريبي' },
+    customerName: { type: String, default: 'عميل جديد' },
     customerPhone: { type: String, default: '' },
     paymentMethod: { type: String, default: 'cash' },
     items: [
@@ -37,111 +42,77 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     totalAmount: { type: Number, required: true },
-    status: { type: String, default: 'pending' }, // pending, accepted, rejected
+    status: { type: String, default: 'pending' },
+    driverName: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now }
 });
 
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 
-// ==================== ENDPOINTS / API ====================
+// ==================== ENDPOINTS ====================
 
-// 1. استقبال طلب جديد من العميل
 app.post('/api/orders', async (req, res) => {
     try {
         await connectToDatabase();
-        const newOrder = new Order(req.body);
+        const orderData = req.body;
+
+        if (!orderData || !orderData.totalAmount) {
+            return res.status(400).json({ success: false, error: 'بيانات غير مكتملة' });
+        }
+
+        const newOrder = new Order(orderData);
         await newOrder.save();
-        res.status(201).json({ success: true, message: 'تم إرسال الطلب بنجاح', order: newOrder });
+        return res.status(201).json({ success: true, order: newOrder });
     } catch (error) {
-        console.error("خطأ في حفظ الطلب:", error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error("MongoDB Error:", error);
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// 2. جلب جميع الطلبات للوحة الإدارة
 app.get('/api/orders', async (req, res) => {
     try {
         await connectToDatabase();
-        const orders = await Order.find().sort({ createdAt: -1 }); // الأحدث أولاً
-        res.status(200).json(orders);
+        const orders = await Order.find().sort({ createdAt: -1 });
+        return res.status(200).json(orders);
     } catch (error) {
-        console.error("خطأ في جلب الطلبات:", error);
-        res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// 3. تحديث حالة الطلب من الإدارة (موافقة / إلغاء)
 app.patch('/api/orders/:id', async (req, res) => {
     try {
         await connectToDatabase();
-        const { id } = req.params;
-        const { status } = req.body;
-
         const updatedOrder = await Order.findByIdAndUpdate(
-            id,
-            { status: status },
+            req.params.id,
+            { status: req.body.status },
             { new: true }
         );
-
-        if (!updatedOrder) {
-            return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
-        }
-
-        res.status(200).json({ success: true, order: updatedOrder });
+        return res.status(200).json({ success: true, order: updatedOrder });
     } catch (error) {
-        console.error("خطأ في تحديث الحالة:", error);
-        res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// التوافق مع Vercel Serverless Functions
-module.exports = app;
-
-// التشغيل المحلي فقط
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
-}
-// 1. تحديث الـ Schema ليشمل بيانات الكابتن
-const orderSchema = new mongoose.Schema({
-    customerName: { type: String, default: 'عميل تجريبي' },
-    customerPhone: { type: String, default: '' },
-    paymentMethod: { type: String, default: 'cash' },
-    items: [
-        {
-            id: String,
-            name: String,
-            price: Number,
-            quantity: { type: Number, default: 1 }
-        }
-    ],
-    totalAmount: { type: Number, required: true },
-    status: { type: String, default: 'pending' }, // pending, accepted, delivering, rejected
-    driverName: { type: String, default: '' },
-    createdAt: { type: Date, default: Date.now }
-});
-
-// 2. إضافة Endpoint استلام الكابتن للطلب
 app.patch('/api/orders/:id/assign', async (req, res) => {
     try {
         await connectToDatabase();
-        const { id } = req.params;
-        const { driverName } = req.body;
-
         const updatedOrder = await Order.findByIdAndUpdate(
-            id,
+            req.params.id,
             { 
-                driverName: driverName || 'كابتن التوصيل',
-                status: 'delivering' // تغيير الحالة إلى جاري التوصيل
+                driverName: req.body.driverName || 'كابتن التوصيل',
+                status: 'delivering'
             },
             { new: true }
         );
-
-        res.status(200).json({ success: true, order: updatedOrder });
+        return res.status(200).json({ success: true, order: updatedOrder });
     } catch (error) {
-        console.error("خطأ في إسناد الطلب للكابتن:", error);
-        res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
+
+module.exports = app;
+
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Server on port ${PORT}`));
+}
