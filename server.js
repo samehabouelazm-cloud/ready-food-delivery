@@ -144,3 +144,48 @@ app.patch('/api/orders/:id', async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 });
+// Schema للوجبة / الصنف
+const menuItemSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    category: { type: String, required: true }, // تصنيف الوجبة (مشويات، بيتزا، مشروبات...)
+    price: { type: Number, required: true },
+    description: { type: String },
+    imageUrl: { type: String },
+    isAvailable: { type: Boolean, default: true }
+});
+
+const MenuItem = mongoose.models.MenuItem || mongoose.model('MenuItem', menuItemSchema);
+
+// Endpoint 1: جلب كل عناصر قائمة الطعام
+app.get('/api/menu', async (req, res) => {
+    try {
+        await connectToDatabase();
+        const items = await MenuItem.find({ isAvailable: true });
+        res.status(200).json(items);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Endpoint 2: إضافة صنف/وجبة جديدة من لوحة التحكم
+app.post('/api/menu', async (req, res) => {
+    try {
+        await connectToDatabase();
+        const newItem = new MenuItem(req.body);
+        await newItem.save();
+        res.status(201).json({ success: true, message: 'تمت إضافة الوجبة بنجاح', item: newItem });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Endpoint 3: حذف صنف/وجبة
+app.delete('/api/menu/:id', async (req, res) => {
+    try {
+        await connectToDatabase();
+        await MenuItem.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: 'تم حذف الوجبة بنجاح' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});

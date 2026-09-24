@@ -274,3 +274,44 @@
     </script>
 </body>
 </html>
+<!-- نموذج إضافة وجبة جديدة -->
+<div style="background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
+    <h2 style="color: #f59e0b; font-size: 18px; margin-bottom: 15px;">🍔 إضافة وجبة / صنف جديد للقائمة</h2>
+    <form id="addMenuForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+        <input type="text" id="itemName" placeholder="اسم الوجبة" required style="padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;">
+        <input type="text" id="itemCategory" placeholder="التصنيف (مثل: مشويات، بيتزا)" required style="padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;">
+        <input type="number" id="itemPrice" placeholder="السعر (ج.م)" required style="padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;">
+        <input type="url" id="itemImage" placeholder="رابط الصورة (اختياري)" style="padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white;">
+        <button type="submit" style="background: #10b981; color: white; font-weight: bold; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">إضافة إلى المنيو ➕</button>
+    </form>
+</div>
+
+<script>
+// كود إرسال الوجبة الجديدة للسيرفر
+document.getElementById('addMenuForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newItem = {
+        name: document.getElementById('itemName').value,
+        category: document.getElementById('itemCategory').value,
+        price: Number(document.getElementById('itemPrice').value),
+        imageUrl: document.getElementById('itemImage').value || 'https://via.placeholder.com/150'
+    };
+
+    try {
+        const res = await fetch('/api/menu', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newItem)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('تمت إضافة الوجبة بنجاح!');
+            document.getElementById('addMenuForm').reset();
+        } else {
+            alert('حدث خطأ أثناء الإضافة');
+        }
+    } catch (err) {
+        alert('تعذر الاتصال بالسيرفر');
+    }
+});
+</script>
