@@ -18,6 +18,7 @@ async function connectToDatabase() {
     }
 
     if (!MONGODB_URI) {
+        throw new Error("متغير البيئة MONGODB_URI غير متوفر!");
     }
 
     mongoose.set('strictQuery', false);
