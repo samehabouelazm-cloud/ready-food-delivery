@@ -1,195 +1,105 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY OS - تطبيق الكابتن</title>
-    <!-- مكتبة Leaflet للخرائط -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background-color: #0f172a; color: #f8fafc; padding: 15px; padding-bottom: 50px; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #334155; margin-bottom: 15px; }
-        .brand { font-size: 20px; font-weight: bold; color: #38bdf8; }
-        .status-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-
-        /* مفتاح التبديل (متاح / غير متاح) */
-        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #10b981; }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        .order-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 10px; }
-        .customer-info { margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
-        .items-list { background: #0f172a; padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; color: #cbd5e1; }
-        
-        #map { height: 180px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 12px; }
-
-        .btn-group { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-primary { background: #38bdf8; color: #0f172a; }
-
-        /* شريط تنبيه الطلبات الجديدة */
-        .alert-banner { display: none; background: #f59e0b; color: #0f172a; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 15px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>READY OS - تطبيق الكابتن</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 20px; padding: 15px; background: #1e293b; border-radius: 12px; }
+    header h1 { color: #10b981; font-size: 24px; }
+    .card { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #334155; }
+    .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+    .btn-success { background: #10b981; color: #fff; }
+    select { width: 100%; padding: 10px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 6px; margin-bottom: 15px; }
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="brand">🛵 READY Driver</div>
-        <div class="status-toggle">
-            <span>حالة الكابتن:</span>
-            <label class="switch">
-                <input type="checkbox" id="driverStatusToggle" checked onchange="toggleDriverStatus()">
-                <span class="slider"></span>
-            </label>
+<div class="container">
+  <header>
+    <h1>🚴 بوابة الكابتن</h1>
+  </header>
+
+  <div class="card">
+    <label style="display:block; margin-bottom:8px;">اختر حساب الكابتن الحالي:</label>
+    <select id="driverSelect" onchange="loadDriverOrders()">
+      <option value="">جاري تحميل الكباتن...</option>
+    </select>
+  </div>
+
+  <h3 style="margin-bottom: 10px; color: #38bdf8;">📦 الطلبات الموكلة إليك</h3>
+  <div id="ordersContainer">
+    <p style="color: #64748b;">اختر كابتن لعرض الطلبات.</p>
+  </div>
+</div>
+
+<script>
+  async function loadDrivers() {
+    try {
+      const res = await fetch('/api/drivers');
+      const drivers = await res.json();
+      const select = document.getElementById('driverSelect');
+      select.innerHTML = '<option value="">-- اختر حسابك --</option>' + 
+        drivers.map(d => `<option value="${d.id}">${d.name} (${d.status})</option>`).join('');
+    } catch (err) {
+      console.error('Error loading drivers:', err);
+    }
+  }
+
+  async function loadDriverOrders() {
+    const driverId = document.getElementById('driverSelect').value;
+    const container = document.getElementById('ordersContainer');
+    if (!driverId) {
+      container.innerHTML = '<p style="color: #64748b;">اختر كابتن لعرض الطلبات.</p>';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      const assignedOrders = orders.filter(o => o.driverId == driverId || o.status === 'في الطريق مع الكابتن');
+
+      if (assignedOrders.length === 0) {
+        container.innerHTML = '<p style="color: #94a3b8;">لا توجد طلبات معلقة حالياً لهذا الكابتن.</p>';
+        return;
+      }
+
+      container.innerHTML = assignedOrders.map(order => `
+        <div class="card">
+          <h4>طلب #${order.id || order._id}</h4>
+          <p><strong>العميل:</strong> ${order.customerName}</p>
+          <p><strong>الهاتف:</strong> ${order.phone}</p>
+          <p><strong>العنوان:</strong> ${order.address || 'محدد على الخريطة'}</p>
+          <p><strong>الحالة:</strong> <span style="color:#f59e0b;">${order.status}</span></p>
+          <button class="btn btn-success" onclick="updateStatus('${order.id || order._id}', 'تم التوصيل بنجاح')">تم التوصيل ✅</button>
         </div>
-    </div>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading orders:', err);
+    }
+  }
 
-    <!-- تنبيه الطلبات الجديدة -->
-    <div id="newOrderAlert" class="alert-banner">
-        🔔 هناك طلبات جديدة بانتظار القبول!
-    </div>
+  async function updateStatus(orderId, status) {
+    try {
+      await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      alert('تم تحديث حالة الطلب!');
+      loadDriverOrders();
+    } catch (err) {
+      alert('حدث خطأ أثناء التحديث.');
+    }
+  }
 
-    <h3 style="margin-bottom: 12px; color: #cbd5e1;">📌 الطلبات الحالية</h3>
-    <div id="ordersContainer">
-        <p style="color:#94a3b8;">جاري البحث عن طلبات جديدة...</p>
-    </div>
-
-    <script>
-        let map, marker;
-        let knownOrderCount = 0;
-        let isDriverAvailable = true;
-
-        // صوت التنبيه عند وصول طلب جديد
-        const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-
-        function initMap(lat = 30.0444, lng = 31.2357) {
-            if (!map) {
-                map = L.map('map').setView([lat, lng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-                marker = L.marker([lat, lng]).addTo(map);
-            } else {
-                map.setView([lat, lng], 13);
-                marker.setLatLng([lat, lng]);
-            }
-        }
-
-        async function fetchDriverOrders() {
-            try {
-                const res = await fetch('/api/orders');
-                const orders = await res.json();
-                
-                // جلب الطلبات النشطة (معلقة أو في الطريق)
-                const activeOrders = orders.filter(o => o.status === 'pending' || o.status === 'delivering');
-
-                // التنبيه الصوتي والبصري
-                if (activeOrders.length > knownOrderCount && knownOrderCount !== 0) {
-                    document.getElementById('newOrderAlert').style.display = 'block';
-                    alertAudio.play().catch(() => {});
-                } else if (activeOrders.length <= knownOrderCount) {
-                    document.getElementById('newOrderAlert').style.display = 'none';
-                }
-                knownOrderCount = activeOrders.length;
-
-                const container = document.getElementById('ordersContainer');
-                if (activeOrders.length === 0) {
-                    container.innerHTML = '<p style="color:#94a3b8;">لا يوجد طلبات حالياً.</p>';
-                    return;
-                }
-
-                container.innerHTML = activeOrders.map(order => `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <span style="font-weight:bold; color:#f59e0b;">رقم الطلب: #${order._id.slice(-5)}</span>
-                            <span style="font-size:12px; color:#94a3b8;">${order.status === 'pending' ? '🟡 في انتظار الكابتن' : '🛵 جاري التوصيل'}</span>
-                        </div>
-                        <div class="customer-info">
-                            <div>👤 <b>العميل:</b> ${order.customerName}</div>
-                            <div>📞 <b>الهاتف:</b> <a href="tel:${order.customerPhone}" style="color:#38bdf8;">${order.customerPhone}</a></div>
-                            <div>📝 <b>ملاحظات:</b> ${order.notes || 'لا يوجد'}</div>
-                        </div>
-                        <div class="items-list">
-                            <b>الطلبات:</b> ${order.items ? order.items.map(i => `${i.name} (x${i.quantity || 1})`).join(', ') : 'وجبات متنوعة'}<br>
-                            <b style="color:#10b981;">المبلغ المطلوب: ${order.totalAmount} ج.م</b>
-                        </div>
-
-                        ${order.location ? `
-                            <div style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">📍 موقع العميل على الخريطة:</div>
-                            <div id="map"></div>
-                        ` : ''}
-
-                        <div class="btn-group">
-                            ${order.status === 'pending' ? `
-                                <button class="btn btn-primary" onclick="acceptOrder('${order._id}')">قبول الطلب وتوليه 🚀</button>
-                            ` : `
-                                <button class="btn btn-success" onclick="completeOrder('${order._id}')">تأكيد التوصيل وتسليم الطلب ✅</button>
-                            `}
-                        </div>
-                    </div>
-                `).join('');
-
-                // إظهار الموقع على الخريطة
-                const orderWithLoc = activeOrders.find(o => o.location);
-                if (orderWithLoc && orderWithLoc.location) {
-                    setTimeout(() => initMap(orderWithLoc.location.lat, orderWithLoc.location.lng), 200);
-                }
-
-            } catch (err) { console.error('خطأ في جلب البيانات:', err); }
-        }
-
-        async function acceptOrder(orderId) {
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        status: 'delivering',
-                        driverName: 'كابتن محمد',
-                        driverPhone: '01122334455'
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert('تم قبول الطلب وبدء التوصيل!');
-                    fetchDriverOrders();
-                }
-            } catch (err) { alert('خطأ في قبول الطلب'); }
-        }
-
-        async function completeOrder(orderId) {
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'completed' })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert('تم إنهاء الطلب وتسليمه بنجاح! شكرًا لك.');
-                    fetchDriverOrders();
-                }
-            } catch (err) { alert('خطأ في إنهاء الطلب'); }
-        }
-
-        function toggleDriverStatus() {
-            isDriverAvailable = document.getElementById('driverStatusToggle').checked;
-            alert(isDriverAvailable ? 'أنت الآن متاح لتلقي الطلبات 🟢' : 'تم تغيير حالتك إلى غير متاح 🔴');
-        }
-
-        window.onload = () => {
-            fetchDriverOrders();
-            setInterval(fetchDriverOrders, 5000); // تحديث القائمة تلقائياً كل 5 ثوانٍ
-        };
-    </script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDrivers();
+    setInterval(loadDriverOrders, 4000);
+  });
+</script>
 </body>
 </html>
