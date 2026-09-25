@@ -4,159 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>READY OS - تطبيق الكابتن</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- مكتبة Leaflet الخرائط -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-color: #3b82f6;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --text-color: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border-color: #334155;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; padding: 15px; padding-bottom: 50px; }
         
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px 0; 
-            border-bottom: 1px solid var(--border-color); 
-            margin-bottom: 20px; 
-        }
-        h1 { font-size: 20px; color: var(--accent-color); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #334155; margin-bottom: 15px; }
+        .brand { font-size: 20px; font-weight: bold; color: #38bdf8; }
+        .status-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+
+        /* مفتاح التبديل */
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #10b981; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .order-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 10px; }
+        .customer-info { margin-bottom: 10px; font-size: 14px; line-height: 1.6; }
+        .items-list { background: #0f172a; padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; color: #cbd5e1; }
         
-        .order-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 15px;
-        }
+        #map { height: 180px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 12px; }
 
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 8px;
-        }
+        .btn-group { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-primary { background: #38bdf8; color: #0f172a; }
+        .btn-disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
 
-        .customer-info { margin-bottom: 12px; font-size: 14px; }
-        .customer-info div { margin-bottom: 4px; }
-        .items-list { font-size: 13px; color: var(--text-secondary); margin-bottom: 15px; }
-
-        .btn-deliver {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--success-color);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .badge-delivering {
-            background-color: rgba(59, 130, 246, 0.2);
-            color: var(--accent-color);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-        }
-
-        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+        /* شريط التنبيه العائم */
+        .alert-banner { display: none; background: #f59e0b; color: #0f172a; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 15px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>🚴‍♂️ لوحة طلبات الكابتن</h1>
-            <span style="font-size: 13px; color: var(--success-color);">🟢 متاح للتوصيل</span>
-        </header>
-
-        <div id="driver-orders-container">
-            <div class="empty-state">جاري جلب الطلبات المتاحة...</div>
+    <div class="header">
+        <div class="brand">🛵 READY Driver</div>
+        <div class="status-toggle">
+            <span>حالة الكابتن:</span>
+            <label class="switch">
+                <input type="checkbox" id="driverStatusToggle" checked onchange="toggleDriverStatus()">
+                <span class="slider"></span>
+            </label>
         </div>
     </div>
 
+    <!-- تنبيه الطلبات الجديدة -->
+    <div id="newOrderAlert" class="alert-banner">
+        🔔 هناك طلبات جديدة بانتظار القبول!
+    </div>
+
+    <h3 style="margin-bottom: 12px; color: #cbd5e1;">📌 الطلبات الحالية</h3>
+    <div id="ordersContainer">
+        <p style="color:#94a3b8;">جاري البحث عن طلبات جديدة...</p>
+    </div>
+
     <script>
-        async function fetchAcceptedOrders() {
-            try {
-                const response = await fetch('/api/orders');
-                if (!response.ok) return;
-                const orders = await response.json();
-                
-                // تصفية الطلبات المقبولة والجاري توصيلها فقط
-                const driverOrders = orders.filter(o => o.status === 'accepted' || o.status === 'delivering');
-                renderOrders(driverOrders);
-            } catch (error) {
-                console.error("خطأ في جلب الطلبات:", error);
+        let map, marker;
+        let knownOrderCount = 0;
+        let isDriverAvailable = true;
+
+        // تهيئة الصوت للتنبيه عند وصول طلب
+        const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+
+        function initMap(lat = 30.0444, lng = 31.2357) {
+            if (!map) {
+                map = L.map('map').setView([lat, lng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+                marker = L.marker([lat, lng]).addTo(map);
+            } else {
+                map.setView([lat, lng], 13);
+                marker.setLatLng([lat, lng]);
             }
         }
 
-        function renderOrders(orders) {
-            const container = document.getElementById('driver-orders-container');
-            
-            if (orders.length === 0) {
-                container.innerHTML = '<div class="empty-state">لا توجد طلبات جاهزة للتوصيل حالياً..</div>';
-                return;
-            }
+        async function fetchDriverOrders() {
+            try {
+                const res = await fetch('/api/orders');
+                const orders = await res.json();
+                
+                // تصفية الطلبات المعلقة أو المسندة للتوصيل
+                const activeOrders = orders.filter(o => o.status === 'pending' || o.status === 'delivering');
 
-            container.innerHTML = orders.map(order => {
-                const itemsStr = (order.items || []).map(i => `${i.name} (x${i.quantity})`).join(', ');
-                const isDelivering = order.status === 'delivering';
+                // التنبيه الإشعاري عند ورود طلب جديد
+                if (activeOrders.length > knownOrderCount && knownOrderCount !== 0) {
+                    document.getElementById('newOrderAlert').style.display = 'block';
+                    alertAudio.play().catch(() => {}); // تشغيل صوت التنبيه
+                } else if (activeOrders.length <= knownOrderCount) {
+                    document.getElementById('newOrderAlert').style.display = 'none';
+                }
+                knownOrderCount = activeOrders.length;
 
-                return `
+                const container = document.getElementById('ordersContainer');
+                if (activeOrders.length === 0) {
+                    container.innerHTML = '<p style="color:#94a3b8;">لا يوجد طلبات حالياً.</p>';
+                    return;
+                }
+
+                container.innerHTML = activeOrders.map(order => `
                     <div class="order-card">
                         <div class="order-header">
-                            <strong>طلب #${(order._id || '').slice(-5)}</strong>
-                            <span>${order.totalAmount || 0} ج.م</span>
+                            <span style="font-weight:bold; color:#f59e0b;">رقم الطلب: #${order._id.slice(-5)}</span>
+                            <span style="font-size:12px; color:#94a3b8;">${order.status === 'pending' ? '🟡 في انتظار الكابتن' : '🛵 جاري التوصيل'}</span>
                         </div>
                         <div class="customer-info">
-                            <div>👤 <strong>العميل:</strong> ${order.customerName || 'عميل'}</div>
-                            <div>📞 <strong>الهاتف:</strong> ${order.customerPhone || 'غير مدخل'}</div>
+                            <div>👤 <b>العميل:</b> ${order.customerName}</div>
+                            <div>📞 <b>الهاتف:</b> <a href="tel:${order.customerPhone}" style="color:#38bdf8;">${order.customerPhone}</a></div>
+                            <div>📝 <b>ملاحظات:</b> ${order.notes || 'لا يوجد'}</div>
                         </div>
-                        <div class="items-list">📦 ${itemsStr}</div>
-                        ${
-                            isDelivering 
-                            ? `<div class="badge-delivering" style="text-align:center;">🚚 جاري التوصيل بواسطة: ${order.driverName || 'الكابتن'}</div>`
-                            : `<button class="btn-deliver" onclick="acceptDelivery('${order._id}')">قبول واستلام الطلب</button>`
-                        }
+                        <div class="items-list">
+                            <b>الطلبات:</b> ${order.items ? order.items.map(i => `${i.name} (x${i.quantity || 1})`).join(', ') : 'وجبات متنوعة'}<br>
+                            <b style="color:#10b981;">المبلغ المطلوب: ${order.totalAmount} ج.م</b>
+                        </div>
+
+                        ${order.location ? `
+                            <div style="font-size:12px; color:#cbd5e1; margin-bottom:4px;">📍 موقع العميل على الخريطة:</div>
+                            <div id="map"></div>
+                        ` : ''}
+
+                        <div class="btn-group">
+                            ${order.status === 'pending' ? `
+                                <button class="btn btn-primary" onclick="acceptOrder('${order._id}')">قبول الطلب وتوليه 🚀</button>
+                            ` : `
+                                <button class="btn btn-success" onclick="completeOrder('${order._id}')">تأكيد التوصيل وتسليم الطلب ✅</button>
+                            `}
+                        </div>
                     </div>
-                `;
-            }).join('');
+                `).join('');
+
+                // تحديث الخريطة لأول طلب يحتوي على موقع
+                const orderWithLoc = activeOrders.find(o => o.location);
+                if (orderWithLoc && orderWithLoc.location) {
+                    setTimeout(() => initMap(orderWithLoc.location.lat, orderWithLoc.location.lng), 200);
+                }
+
+            } catch (err) { console.error('خطأ في جلب البيانات:', err); }
         }
 
-        async function acceptDelivery(orderId) {
-            const driverName = prompt("أدخل اسم الكابتن للتأكيد:");
-            if (!driverName) return;
-
+        async function acceptOrder(orderId) {
             try {
-                const response = await fetch('/api/orders/' + orderId + '/assign', {
+                const res = await fetch(`/api/orders/${orderId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ driverName: driverName })
+                    body: JSON.stringify({
+                        status: 'delivering',
+                        driverName: 'الكابتن الحالي',
+                        driverPhone: '01000000000'
+                    })
                 });
-
-                if (response.ok) {
-                    fetchAcceptedOrders();
+                const data = await res.json();
+                if (data.success) {
+                    alert('تم قبول الطلب وبدء التوصيل!');
+                    fetchDriverOrders();
                 }
-            } catch (error) {
-                console.error("خطأ في استلام الطلب:", error);
-            }
+            } catch (err) { alert('خطأ في قبول الطلب'); }
         }
 
-        fetchAcceptedOrders();
-        setInterval(fetchAcceptedOrders, 3000);
+        async function completeOrder(orderId) {
+            try {
+                const res = await fetch(`/api/orders/${orderId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'completed' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('تم إنهاء الطلب بنجاح! شكرًا لك.');
+                    fetchDriverOrders();
+                }
+            } catch (err) { alert('خطأ في إنهاء الطلب'); }
+        }
+
+        function toggleDriverStatus() {
+            isDriverAvailable = document.getElementById('driverStatusToggle').checked;
+            alert(isDriverAvailable ? 'أنت الآن متاح لتلقي الطلبات 🟢' : 'تم تغيير حالتك إلى غير متاح 🔴');
+        }
+
+        window.onload = () => {
+            fetchDriverOrders();
+            setInterval(fetchDriverOrders, 5000); // تحديث القائمة تلقائياً كل 5 ثوانٍ
+        };
     </script>
 </body>
 </html>
