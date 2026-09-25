@@ -89,166 +89,117 @@
         <div id="driverInfo" style="margin-top:10px; font-size:13px; color:#cbd5e1;"></div>
     </div>
 
-    <script>
-        let cart = [];
-        let map, marker;
-        let selectedLocation = { lat: 30.0444, lng: 31.2357 };
-        let activeOrderId = null;
+<script>
+  let currentOrderId = null;
+  let trackingInterval = null;
 
-        // تهيئة الخريطة
-        function initMap() {
-            map = L.map('map').setView([selectedLocation.lat, selectedLocation.lng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
+  // عند الضغط على زر "تأكيد وإرسال الطلب"
+  document.getElementById('orderForm')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
 
-            marker = L.marker([selectedLocation.lat, selectedLocation.lng], { draggable: true }).addTo(map);
-            marker.on('dragend', function (e) {
-                const position = marker.getLatLng();
-                selectedLocation = { lat: position.lat, lng: position.lng };
-            });
-        }
+      const customerName = document.getElementById('customerName')?.value || 'عميل تجريبي';
+      const customerPhone = document.getElementById('customerPhone')?.value || '01000000000';
+      const notes = document.getElementById('orderNotes')?.value || '';
 
-        async function fetchMenuAndStatus() {
-            try {
-                // جلب المنيو
-                const resMenu = await fetch('/api/menu');
-                const menu = await resMenu.json();
-                const container = document.getElementById('menuContainer');
-                
-                container.innerHTML = menu.map(item => `
-                    <div class="card">
-                        <div>
-                            <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" alt="${item.name}">
-                            <div class="card-title">${item.name}</div>
-                            <div class="card-price">${item.price} ج.م</div>
-                        </div>
-                        <button class="btn-add" onclick='addToCart(${JSON.stringify(item)})'>+ إضافة</button>
-                    </div>
-                `).join('');
+      const orderData = {
+          customerName,
+          phone: customerPhone,
+          notes,
+          items: JSON.parse(localStorage.getItem('cart') || '[]'),
+          status: 'قيد التحضير في المطبخ',
+          createdAt: new Date().toISOString()
+      };
 
-                // جلب حالة المطعم
-                const resStats = await fetch('/api/stats');
-                const stats = await resStats.json();
-                const statusBadge = document.getElementById('storeStatus');
-                if (stats.isStoreOpen) {
-                    statusBadge.className = 'status-badge open';
-                    statusBadge.innerText = 'المطعم مفتوح 🟢';
-                } else {
-                    statusBadge.className = 'status-badge closed';
-                    statusBadge.innerText = 'المطعم مغلق حالياً 🔴';
-                }
-            } catch (err) { console.error(err); }
-        }
+      try {
+          const response = await fetch('/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(orderData)
+          });
 
-        function addToCart(item) {
-            cart.push(item);
-            renderCart();
-        }
+          if (!response.ok) throw new Error('فشل إرسال الطلب');
 
-        function renderCart() {
-            const summary = document.getElementById('cartSummary');
-            if (cart.length === 0) {
-                summary.innerHTML = '<p style="color:#94a3b8; font-size:13px;">السلة فارغة، اختر من المنيو أعلاه.</p>';
-                return;
-            }
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            summary.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <span>${item.name}</span>
-                    <span>${item.price} ج.م</span>
-                </div>
-            `).join('') + `<hr style="border-color:#334155; margin:8px 0;">
-            <div class="cart-item" style="font-weight:bold; color:#10b981;">
-                <span>الإجمالي</span>
-                <span>${total} ج.م</span>
-            </div>`;
-        }
+          const data = await response.json();
+          currentOrderId = data.id || data._id;
+          
+          // حفظ رقم الطلب في التخزين المحلي
+          localStorage.setItem('currentOrderId', currentOrderId);
 
-        async function submitOrder() {
-            const name = document.getElementById('custName').value.trim();
-            const phone = document.getElementById('custPhone').value.trim();
-            const notes = document.getElementById('custNotes').value.trim();
+          alert(`تم إرسال الطلب بنجاح! رقم الطلب: ${currentOrderId}`);
 
-            if (!name || !phone) {
-                alert('يرجى إدخال اسمك ورقم الهاتف.');
-                return;
-            }
-            if (cart.length === 0) {
-                alert('يرجى إضافة وجبة واحدة على الأقل للسلة.');
-                return;
-            }
+          // إظهار قسم التتبع وإضافة زر الانتقال السريع
+          showTrackingUI(currentOrderId);
 
-            const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
+          // بدء التتبع التلقائي اللحظي كل 3 ثوانٍ
+          startLiveTracking(currentOrderId);
 
-            try {
-                const res = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerName: name,
-                        customerPhone: phone,
-                        notes: notes,
-                        items: cart,
-                        totalAmount: totalAmount,
-                        location: selectedLocation
-                    })
-                });
+      } catch (error) {
+          console.error('Error submitting order:', error);
+          alert('حدث خطأ أثناء إرسال الطلب. تأكد من فتح الرابط عبر سيرفر Vercel!');
+      }
+  });
 
-                const data = await res.json();
-                if (data.success) {
-                    alert('تم إرسال طلبك بنجاح! جاري التجهيز.');
-                    activeOrderId = data.order._id;
-                    cart = [];
-                    renderCart();
-                    document.getElementById('activeOrderSection').style.display = 'block';
-                    trackActiveOrder();
-                } else {
-                    alert(data.message || 'تعذر إرسال الطلب');
-                }
-            } catch (err) { alert('حدث خطأ في الاتصال بالسيرفر'); }
-        }
+  // دالة بدء التتبع اللحظي للطلب
+  function startLiveTracking(orderId) {
+      if (trackingInterval) clearInterval(trackingInterval);
 
-        async function trackActiveOrder() {
-            if (!activeOrderId) return;
-            try {
-                const res = await fetch('/api/orders');
-                const orders = await res.json();
-                const myOrder = orders.find(o => o._id === activeOrderId);
+      trackingInterval = setInterval(async () => {
+          try {
+              const res = await fetch(`/api/orders/${orderId}`);
+              if (!res.ok) return;
+              const order = await res.json();
 
-                if (!myOrder) return;
+              updateStatusUI(order.status);
+          } catch (err) {
+              console.error('Error fetching order tracking status:', err);
+          }
+      }, 3000);
+  }
 
-                const stepPending = document.getElementById('stepPending');
-                const stepDelivering = document.getElementById('stepDelivering');
-                const stepCompleted = document.getElementById('stepCompleted');
-                const driverInfo = document.getElementById('driverInfo');
+  // تحديث حالة الطلب في الواجهة
+  function updateStatusUI(status) {
+      const statusElement = document.getElementById('orderStatus');
+      if (statusElement) {
+          statusElement.innerText = status;
+      }
 
-                stepPending.className = 'order-step';
-                stepDelivering.className = 'order-step';
-                stepCompleted.className = 'order-step';
+      // ألوان ومؤشرات حسب حالة الطلب
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
 
-                if (myOrder.status === 'pending') {
-                    stepPending.className = 'order-step step-active';
-                    document.getElementById('orderStatusText').innerText = '⏳ الطلب قيد التحضير في المطبخ...';
-                } else if (myOrder.status === 'delivering') {
-                    stepDelivering.className = 'order-step step-active';
-                    document.getElementById('orderStatusText').innerText = '🛵 الطلب مع الكابتن وفي الطريق إليك!';
-                    if (myOrder.driverName) {
-                        driverInfo.innerText = `الكابتن: ${myOrder.driverName} (${myOrder.driverPhone || 'بدون رقم'})`;
-                    }
-                } else if (myOrder.status === 'completed') {
-                    stepCompleted.className = 'order-step step-active';
-                    document.getElementById('orderStatusText').innerText = '✅ تم توصيل الطلب بنجاح! وبالهناء والشفاء.';
-                }
-            } catch (err) { console.error(err); }
-        }
+      if (status === 'قيد التحضير في المطبخ') {
+          if (step1) step1.style.color = '#e67e22';
+      } else if (status === 'في الطريق مع الكابتن') {
+          if (step1) step1.style.color = '#2ecc71';
+          if (step2) step2.style.color = '#e67e22';
+      } else if (status === 'تم التوصيل بنجاح' || status === 'تم التوصيل') {
+          if (step1) step1.style.color = '#2ecc71';
+          if (step2) step2.style.color = '#2ecc71';
+          clearInterval(trackingInterval); // إيقاف المتابعة بعد اكتمال التوصيل
+      }
+  }
 
-        window.onload = () => {
-            initMap();
-            fetchMenuAndStatus();
-            setInterval(fetchMenuAndStatus, 15000);
-            setInterval(trackActiveOrder, 5000);
-        };
-    </script>
-</body>
-</html>
+  // إظهار واجهة التتبع وأزرار التحويل السريع للتجربة
+  function showTrackingUI(orderId) {
+      let trackerBox = document.getElementById('quickTrackerBox');
+      if (!trackerBox) {
+          trackerBox = document.createElement('div');
+          trackerBox.id = 'quickTrackerBox';
+          trackerBox.style.cssText = 'margin-top:20px; padding:15px; background:#1e293b; border-radius:10px; color:#fff; text-align:center;';
+          
+          const orderForm = document.getElementById('orderForm') || document.body;
+          orderForm.parentNode.insertBefore(trackerBox, orderForm.nextSibling);
+      }
+
+      trackerBox.innerHTML = `
+          <h3 style="color:#2ecc71; margin-bottom:10px;">🚀 جارٍ تتبع الطلب رقم: ${orderId}</h3>
+          <p>الحالة الحالية: <strong id="orderStatus" style="color:#f39c12;">قيد التحضير في المطبخ</strong></p>
+          <hr style="border-color:#334155; margin:15px 0;">
+          <p style="font-size:14px; color:#cbd5e1;">لتجربة الدورة الكاملة وإسناد الطلب للكابتن:</p>
+          <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+              <a href="/admin.html" target="_blank" style="background:#3b82f6; color:#fff; padding:8px 15px; border-radius:5px; text-decoration:none; font-weight:bold;">فتح لوحة الأدمن 🛠️</a>
+              <a href="/driver.html" target="_blank" style="background:#10b981; color:#fff; padding:8px 15px; border-radius:5px; text-decoration:none; font-weight:bold;">فتح تطبيق الكابتن 🚴</a>
+          </div>
+      `;
+  }
+</script>
