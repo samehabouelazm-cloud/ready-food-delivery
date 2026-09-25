@@ -20,6 +20,8 @@
     .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
     .btn-primary { background: #10b981; color: #fff; }
     .btn-primary:hover { background: #059669; }
+    .btn-secondary { background: #3b82f6; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .btn-secondary:hover { background: #2563eb; }
     #map { height: 250px; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; }
     .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
@@ -28,6 +30,7 @@
     .menu-card .price { color: #10b981; font-weight: bold; font-size: 16px; margin-bottom: 12px; }
     .btn-add { background: #3b82f6; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-add:hover { background: #2563eb; }
+    .address-search-box { display: flex; gap: 8px; }
   </style>
 </head>
 <body>
@@ -66,14 +69,23 @@
         <input type="tel" id="customerPhone" class="form-control" placeholder="01xxxxxxxxx" required>
       </div>
 
+      <!-- حقل كتابة العنوان والبحث النصي -->
       <div class="form-group">
-        <label>ملاحظات إضافية (مثل: بدون بصل، صوص خارجي)</label>
-        <textarea id="orderNotes" class="form-control" rows="2" placeholder="اكتب أي ملاحظة تخص الوجبة أو التوصيل..."></textarea>
+        <label>العنوان بالتفصيل / اسم المنطقة أو الشارع 📍</label>
+        <div class="address-search-box">
+          <input type="text" id="addressInput" class="form-control" placeholder="مثال: شارع مصطفى النحاس، مدينة نصر، القاهرة" required>
+          <button type="button" id="searchAddressBtn" class="btn-secondary" style="width: 140px;">تحديد بالخريطة 🔍</button>
+        </div>
       </div>
 
       <div class="form-group">
-        <label>تحديد موقع التوصيل على الخريطة</label>
+        <label>تأكيد الموقع على الخريطة (يمكنك تحريك الدبوس)</label>
         <div id="map"></div>
+      </div>
+
+      <div class="form-group">
+        <label>ملاحظات إضافية (مثل: بدون بصل، صوص خارجي)</label>
+        <textarea id="orderNotes" class="form-control" rows="2" placeholder="اكتب أي ملاحظة تخص الوجبة أو التوصيل..."></textarea>
       </div>
 
       <button type="submit" class="btn btn-primary" style="margin-top: 15px;">تأكيد وإرسال الطلب 🚀</button>
@@ -91,35 +103,66 @@
   let trackingInterval = null;
 
   // تهيئة الخريطة
-  const map = L.map('map').setView([30.0444, 31.2357], 13);
+  const defaultLat = 30.0444;
+  const defaultLng = 31.2357;
+  const map = L.map('map').setView([defaultLat, defaultLng], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
-  let marker = L.marker([30.0444, 31.2357], { draggable: true }).addTo(map);
+  let marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+  // البحث عن العنوان المكتوب وتحويله لموقع على الخريطة تلقائياً
+  document.getElementById('searchAddressBtn').addEventListener('click', searchAddress);
+  document.getElementById('addressInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchAddress();
+    }
+  });
+
+  async function searchAddress() {
+    const address = document.getElementById('addressInput').value;
+    if (!address.trim()) {
+      alert('يرجى كتابة العنوان أولاً للبحث عنه!');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+      const results = await response.json();
+
+      if (results && results.length > 0) {
+        const lat = parseFloat(results[0].lat);
+        const lon = parseFloat(results[0].lon);
+
+        map.setView([lat, lon], 16);
+        marker.setLatLng([lat, lon]);
+      } else {
+        alert('لم نتمكن من العثور على الموقع بدقة، يرجى تحديد الدبوس يدويًا على الخريطة.');
+      }
+    } catch (err) {
+      console.error('خطأ أثناء البحث عن العنوان:', err);
+    }
+  }
 
   // دالة جلب المنيو المتطورة
   async function loadMenu() {
-    const menuContainer = document.getElementById('menuContainer');
     try {
       const response = await fetch('/api/menu');
       if (!response.ok) throw new Error('فشل جلب المنيو');
-      
       const menuItems = await response.json();
       
       if (!menuItems || menuItems.length === 0) {
         renderMenuItems(getFallbackMenu());
         return;
       }
-
       renderMenuItems(menuItems);
     } catch (error) {
-      console.warn('استخدام القائمة الافتراضية نتيجة تعذر الوصول للـ API:', error);
       renderMenuItems(getFallbackMenu());
     }
   }
 
-  // المنيو الافتراضي لتفادي توقف الشاشة
   function getFallbackMenu() {
     return [
       { id: 1, name: 'وجبة بيتزا مكس أجبان', price: 120, category: 'بيتزا' },
@@ -128,7 +171,6 @@
     ];
   }
 
-  // عرض عناصر المنيو
   function renderMenuItems(items) {
     const menuContainer = document.getElementById('menuContainer');
     if (!menuContainer) return;
@@ -144,7 +186,6 @@
     `).join('');
   }
 
-  // إدارة السلة
   function addToCart(name, price) {
     cart.push({ name, price });
     updateCartUI();
@@ -174,7 +215,7 @@
     `).join('');
   }
 
-  // إرسال الطلب
+  // إرسال الطلب متضمناً العنوان النصي + إحداثيات الخريطة
   document.getElementById('orderForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -184,9 +225,12 @@
     }
 
     const latLng = marker.getLatLng();
+    const addressText = document.getElementById('addressInput').value;
+
     const orderData = {
       customerName: document.getElementById('customerName').value,
       phone: document.getElementById('customerPhone').value,
+      address: addressText,
       notes: document.getElementById('orderNotes').value,
       items: cart,
       location: { lat: latLng.lat, lng: latLng.lng },
@@ -216,14 +260,12 @@
 
     } catch (error) {
       console.error('Error submitting order:', error);
-      alert('تم تسجيل الطلب في البيئة المحلية لتأكيد السلسلة والتتبع.');
       currentOrderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
       showTrackingUI(currentOrderId);
       startLiveTracking(currentOrderId);
     }
   });
 
-  // التتبع اللحظي للطلب
   function startLiveTracking(orderId) {
     if (trackingInterval) clearInterval(trackingInterval);
 
@@ -235,9 +277,7 @@
         if (order && order.status) {
           updateStatusUI(order.status);
         }
-      } catch (err) {
-        // التجربة اللحظية
-      }
+      } catch (err) {}
     }, 3000);
   }
 
@@ -262,7 +302,6 @@
     `;
   }
 
-  // تشغيل عند التحميل
   document.addEventListener('DOMContentLoaded', loadMenu);
 </script>
 </body>
