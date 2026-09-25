@@ -1,191 +1,182 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const path = require('path');
-
 const app = express();
+
 app.use(express.json());
 
-// تقديم الملفات الثابتة
+// تقديم الملفات الثابتة لجميع التطبيقات (العملاء، الإدارة، الكباتن)
 app.use(express.static(path.join(__dirname, 'customer_app')));
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// ==========================================
+// 1. قاعدة البيانات المؤقتة (في الذاكرة)
+// ==========================================
 
-// تحسين طريقة الاتصال لمنع الـ Timeout في Vercel
-let cachedDb = null;
-async function connectToDatabase() {
-    if (cachedDb && mongoose.connection.readyState === 1) {
-        return cachedDb;
+let menu = [
+    { id: '1', name: 'برجر كلاسيك', category: 'برجر', price: 120, imageUrl: 'https://via.placeholder.com/150' },
+    { id: '2', name: 'بيتزا مارجريتا', category: 'بيتزا', price: 150, imageUrl: 'https://via.placeholder.com/150' },
+    { id: '3', name: 'شاورما دجاج', category: 'مشويات', price: 90, imageUrl: 'https://via.placeholder.com/150' }
+];
+
+let orders = [
+    {
+        _id: 'ord_' + Date.now(),
+        customerName: 'أحمد محمود',
+        customerPhone: '01012345678',
+        notes: 'بدون بصل، صوص ثوم إضافي',
+        items: [{ name: 'برجر كلاسيك', price: 120, quantity: 1 }],
+        totalAmount: 120,
+        status: 'pending',
+        driverName: '',
+        driverPhone: '',
+        createdAt: new Date()
+    }
+];
+
+let drivers = [
+    { id: 'drv_1', name: 'كابتن محمد', phone: '01122334455', isAvailable: true, lat: 30.0444, lng: 31.2357 },
+    { id: 'drv_2', name: 'كابتن علي', phone: '01555667788', isAvailable: true, lat: 30.0500, lng: 31.2400 }
+];
+
+let isStoreOpen = true;
+
+// ==========================================
+// 2. الروابط البرمجية الخاصة بالمنيو (Menu APIs)
+// ==========================================
+
+// جلب كامل المنيو للعملاء ولوحة التحكم
+app.get('/api/menu', (req, res) => {
+    res.json(menu);
+});
+
+// إضافة وجبة جديدة من لوحة التحكم
+app.post('/api/menu', (req, res) => {
+    const { name, category, price, imageUrl } = req.body;
+    if (!name || !category || !price) {
+        return res.status(400).json({ success: false, message: 'يرجى إكمال البيانات المطلوبة' });
+    }
+    const newItem = {
+        id: Date.now().toString(),
+        name,
+        category,
+        price: Number(price),
+        imageUrl: imageUrl || 'https://via.placeholder.com/150'
+    };
+    menu.push(newItem);
+    res.json({ success: true, item: newItem });
+});
+
+// حذف وجبة من المنيو
+app.delete('/api/menu/:id', (req, res) => {
+    const { id } = req.params;
+    menu = menu.filter(item => item.id !== id && item._id !== id);
+    res.json({ success: true, message: 'تم حذف الصنف من المنيو' });
+});
+
+// ==========================================
+// 3. الروابط البرمجية للطلبات (Orders APIs)
+// ==========================================
+
+// جلب جميع الطلبات
+app.get('/api/orders', (req, res) => {
+    res.json(orders);
+});
+
+// إنشاء طلب جديد من قبل العميل
+app.post('/api/orders', (req, res) => {
+    if (!isStoreOpen) {
+        return res.status(400).json({ success: false, message: 'المطعم مغلق حالياً، يرجى المحاولة لاحقاً.' });
+    }
+    const { customerName, customerPhone, items, totalAmount, notes } = req.body;
+    const newOrder = {
+        _id: 'ord_' + Date.now(),
+        customerName: customerName || 'عميل',
+        customerPhone: customerPhone || '',
+        notes: notes || '',
+        items: items || [],
+        totalAmount: Number(totalAmount) || 0,
+        status: 'pending',
+        driverName: '',
+        driverPhone: '',
+        createdAt: new Date()
+    };
+    orders.unshift(newOrder);
+    res.json({ success: true, order: newOrder });
+});
+
+// تعديل أو تحديث طلب (حالة الطلب، إسناد كابتن، إلغاء كابتن)
+app.patch('/api/orders/:id', (req, res) => {
+    const { id } = req.params;
+    const order = orders.find(o => o._id === id);
+    if (!order) {
+        return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     }
 
-    if (!MONGODB_URI) {
-        throw new Error("متغير البيئة MONGODB_URI غير متوفر!");
+    Object.assign(order, req.body);
+    res.json({ success: true, order });
+});
+
+// حذف طلب
+app.delete('/api/orders/:id', (req, res) => {
+    const { id } = req.params;
+    orders = orders.filter(o => o._id !== id);
+    res.json({ success: true, message: 'تم حذف الطلب' });
+});
+
+// الإسناد التلقائي للكابتن الأقرب
+app.post('/api/orders/:id/auto-assign', (req, res) => {
+    const { id } = req.params;
+    const order = orders.find(o => o._id === id);
+    if (!order) {
+        return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     }
 
-    mongoose.set('strictQuery', false);
-    cachedDb = await mongoose.connect(MONGODB_URI, {
-        serverSelectionTimeoutMS: 5000, // مهلة 5 ثوانٍ بحد أقصى
-        socketTimeoutMS: 45000,
+    const availableDriver = drivers.find(d => d.isAvailable);
+    if (!availableDriver) {
+        return res.status(400).json({ success: false, message: 'لا يوجد كباتن متاحون حالياً' });
+    }
+
+    order.driverName = availableDriver.name;
+    order.driverPhone = availableDriver.phone;
+    order.status = 'delivering';
+
+    res.json({
+        success: true,
+        message: `تم إسناد الطلب للكابتن: ${availableDriver.name}`,
+        order
     });
-    return cachedDb;
-}
-
-// Order Schema
-const orderSchema = new mongoose.Schema({
-    customerName: { type: String, default: 'عميل جديد' },
-    customerPhone: { type: String, default: '' },
-    paymentMethod: { type: String, default: 'cash' },
-    items: [
-        {
-            id: String,
-            name: String,
-            price: Number,
-            quantity: { type: Number, default: 1 }
-        }
-    ],
-    totalAmount: { type: Number, required: true },
-    status: { type: String, default: 'pending' },
-    driverName: { type: String, default: '' },
-    createdAt: { type: Date, default: Date.now }
 });
 
-const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
+// ==========================================
+// 4. إحصائيات لوحة التحكم وحالة المطعم
+// ==========================================
 
-// ==================== ENDPOINTS ====================
+// جلب إحصائيات المبيعات والطلبات وحالة المطعم
+app.get('/api/stats', (req, res) => {
+    const totalSales = orders
+        .filter(o => o.status === 'completed')
+        .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
-app.post('/api/orders', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const orderData = req.body;
+    const pendingOrders = orders.filter(o => o.status === 'pending').length;
 
-        if (!orderData || !orderData.totalAmount) {
-            return res.status(400).json({ success: false, error: 'بيانات غير مكتملة' });
-        }
-
-        const newOrder = new Order(orderData);
-        await newOrder.save();
-        return res.status(201).json({ success: true, order: newOrder });
-    } catch (error) {
-        console.error("MongoDB Error:", error);
-        return res.status(500).json({ success: false, error: error.message });
-    }
+    res.json({
+        totalOrders: orders.length,
+        pendingOrders: pendingOrders,
+        totalSales: totalSales,
+        isStoreOpen: isStoreOpen
+    });
 });
 
-app.get('/api/orders', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const orders = await Order.find().sort({ createdAt: -1 });
-        return res.status(200).json(orders);
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
-    }
+// فتح أو إغلاق المطعم
+app.post('/api/store/toggle', (req, res) => {
+    isStoreOpen = !isStoreOpen;
+    res.json({ success: true, isStoreOpen: isStoreOpen });
 });
 
-app.patch('/api/orders/:id', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const updatedOrder = await Order.findByIdAndUpdate(
-            req.params.id,
-            { status: req.body.status },
-            { new: true }
-        );
-        return res.status(200).json({ success: true, order: updatedOrder });
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
-    }
-});
+// ==========================================
+// 5. التشغيل
+// ==========================================
 
-app.patch('/api/orders/:id/assign', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const updatedOrder = await Order.findByIdAndUpdate(
-            req.params.id,
-            { 
-                driverName: req.body.driverName || 'كابتن التوصيل',
-                status: 'delivering'
-            },
-            { new: true }
-        );
-        return res.status(200).json({ success: true, order: updatedOrder });
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-module.exports = app;
-
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`Server on port ${PORT}`));
-}
-// Endpoint: حذف طلب معين
-app.delete('/api/orders/:id', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const deletedOrder = await Order.findByIdAndDelete(req.params.id);
-        if (!deletedOrder) {
-            return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
-        }
-        return res.status(200).json({ success: true, message: 'تم حذف الطلب بنجاح' });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Endpoint: تحديث حالة الطلب أو بياناته
-app.patch('/api/orders/:id', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedOrder) {
-            return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
-        }
-        return res.status(200).json({ success: true, message: 'تم تحديث الطلب بنجاح', order: updatedOrder });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
-    }
-});
-// Schema للوجبة / الصنف
-const menuItemSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    category: { type: String, required: true }, // تصنيف الوجبة (مشويات، بيتزا، مشروبات...)
-    price: { type: Number, required: true },
-    description: { type: String },
-    imageUrl: { type: String },
-    isAvailable: { type: Boolean, default: true }
-});
-
-const MenuItem = mongoose.models.MenuItem || mongoose.model('MenuItem', menuItemSchema);
-
-// Endpoint 1: جلب كل عناصر قائمة الطعام
-app.get('/api/menu', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const items = await MenuItem.find({ isAvailable: true });
-        res.status(200).json(items);
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Endpoint 2: إضافة صنف/وجبة جديدة من لوحة التحكم
-app.post('/api/menu', async (req, res) => {
-    try {
-        await connectToDatabase();
-        const newItem = new MenuItem(req.body);
-        await newItem.save();
-        res.status(201).json({ success: true, message: 'تمت إضافة الوجبة بنجاح', item: newItem });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Endpoint 3: حذف صنف/وجبة
-app.delete('/api/menu/:id', async (req, res) => {
-    try {
-        await connectToDatabase();
-        await MenuItem.findByIdAndDelete(req.params.id);
-        res.status(200).json({ success: true, message: 'تم حذف الوجبة بنجاح' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 السيرفر يعمل بنجاح على البورت: ${PORT}`);
 });
