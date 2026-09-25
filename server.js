@@ -122,3 +122,15 @@ app.put('/api/orders/:id/status', (req, res) => {
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'customer_app', 'index.html')));
 
 app.listen(PORT, () => console.log(`🚀 READY OS Server running on port: ${PORT}`));
+// مسار حذف الكابتن برقم الـ ID
+app.delete('/api/drivers/:id', (req, res) => {
+    const { id } = req.params;
+    const initialLength = global.drivers.length;
+    global.drivers = global.drivers.filter(d => d.id != id);
+
+    if (global.drivers.length === initialLength) {
+        return res.status(404).json({ error: 'الكابتن غير موجود' });
+    }
+
+    res.json({ message: 'تم حذف الكابتن بنجاح' });
+});
