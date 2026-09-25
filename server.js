@@ -45,6 +45,24 @@ app.post('/api/menu', (req, res) => {
     global.menu.push(newItem);
     res.status(201).json(newItem);
 });
+// قائمة المنيو المبدئية
+global.menu = global.menu || [
+  { id: 1, name: "سمك بلطي مشوي - للكيلو", category: "أسماك", price: 180 },
+  { id: 2, name: "وجبة كفتة مشوية", category: "مشويات", price: 150 },
+  { id: 3, name: "بيتزا ميكس أجبان", category: "بيتزا", price: 120 }
+];
+
+// مسار جلب المنيو
+app.get('/api/menu', (req, res) => {
+    res.json(global.menu);
+});
+
+// مسار إضافة عنصر للمنيو
+app.post('/api/menu', (req, res) => {
+    const newItem = { id: Date.now(), ...req.body };
+    global.menu.push(newItem);
+    res.status(201).json(newItem);
+});
 
 // --- API الكباتن ---
 app.get('/api/drivers', (req, res) => {

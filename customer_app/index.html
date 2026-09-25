@@ -4,214 +4,145 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>READY OS - تطبيق العميل</title>
-  <!-- مكتبة الخرائط Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
-    .container { max-width: 900px; margin: 0 auto; }
+    .container { max-width: 800px; margin: 0 auto; }
     header { text-align: center; margin-bottom: 25px; padding: 20px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #f59e0b; font-size: 28px; }
-    
-    .section-card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #334155; }
-    .section-title { font-size: 20px; color: #38bdf8; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-    
+    header h1 { color: #f59e0b; font-size: 26px; }
+    header p { color: #94a3b8; font-size: 14px; margin-top: 5px; }
+    .section-card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
+    .section-title { font-size: 20px; color: #38bdf8; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
     .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-    .menu-card { background: #0f172a; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; }
-    .menu-card h4 { color: #fff; font-size: 18px; margin-bottom: 8px; }
-    .menu-card .price { color: #10b981; font-weight: bold; font-size: 16px; margin-bottom: 12px; }
-    
-    .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; width: 100%; }
-    .btn-primary { background: #3b82f6; color: #fff; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-success { background: #10b981; color: #fff; }
+    .menu-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
+    .menu-item h3 { color: #fff; font-size: 16px; margin-bottom: 5px; }
+    .menu-item .price { color: #10b981; font-weight: bold; margin-bottom: 10px; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #3b82f6; color: #fff; width: 100%; transition: 0.2s; }
+    .btn:hover { background: #2563eb; }
+    .btn-success { background: #10b981; }
     .btn-success:hover { background: #059669; }
-    
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #cbd5e1; }
-    .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
-    
-    .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #334155; }
-    #map { height: 250px; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; }
-    .search-box { display: flex; gap: 8px; margin-bottom: 10px; }
+    .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; margin-bottom: 12px; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>🍔 READY OS</h1>
-    <p style="color: #94a3b8; margin-top: 5px;">نظام طلب الطعام والتوصيل الذكي</p>
+    <h1>READY OS 🍔</h1>
+    <p>نظام طلب الطعام والتوصيل الذكي</p>
   </header>
 
-  <!-- 1. قسم المنيو (يقوم بالجلب الديناميكي) -->
+  <!-- قسم المنيو -->
   <div class="section-card">
     <div class="section-title">📜 المنيو</div>
     <div id="menuContainer" class="menu-grid">
-      <p style="color: #94a3b8;">جاري تحميل الوجبات المتاحة...</p>
+      <p style="color: #94a3b8;">جاري تحميل المنيو...</p>
     </div>
   </div>
 
-  <!-- 2. قسم السلة وإتمام الطلب -->
+  <!-- قسم إتمام الطلب -->
   <div class="section-card">
     <div class="section-title">🛒 إتمام الطلب</div>
-    
-    <div id="cartItems" style="margin-bottom: 15px;">
+    <div id="cartItems">
       <p style="color: #94a3b8;">السلة فارغة، اختر من المنيو أعلاه.</p>
     </div>
-    
-    <div style="font-size: 18px; font-weight: bold; color: #10b981; margin-bottom: 20px;">
-      الإجمالي: <span id="cartTotal">0</span> ج.م
-    </div>
+    <h3 style="margin: 15px 0; color: #10b981;">الإجمالي: <span id="totalPrice">0</span> ج.م</h3>
 
     <form id="orderForm">
-      <div class="form-group">
-        <label>اسمك الكريم</label>
-        <input type="text" id="customerName" class="form-control" placeholder="أدخل اسمك الكامل" required>
-      </div>
+      <label style="color:#cbd5e1; font-size:14px;">اسمك الكريم</label>
+      <input type="text" id="custName" class="form-control" placeholder="أدخل اسمك الكامل" required>
 
-      <div class="form-group">
-        <label>رقم الجوال</label>
-        <input type="tel" id="customerPhone" class="form-control" placeholder="01xxxxxxxxx" required>
-      </div>
+      <label style="color:#cbd5e1; font-size:14px;">رقم الجوال</label>
+      <input type="tel" id="custPhone" class="form-control" placeholder="01xxxxxxxxx" required>
 
-      <div class="form-group">
-        <label>العنوان بالتفصيل / اسم المنطقة أو الشارع 📍</label>
-        <div class="search-box">
-          <input type="text" id="addressInput" class="form-control" placeholder="اكتب اسم الشارع أو المنطقة...">
-          <button type="button" class="btn btn-primary" style="width: auto; whitespace: nowrap;" onclick="searchAddress()">تحديد بالخريطة 🔍</button>
-        </div>
-        <div id="map"></div>
-      </div>
+      <label style="color:#cbd5e1; font-size:14px;">العنوان بالتفصيل</label>
+      <input type="text" id="custAddress" class="form-control" placeholder="اسم الشارع، المنطقة، رقم الشقة" required>
 
-      <button type="submit" class="btn btn-success" style="font-size: 16px; padding: 12px;">تأكيد وإرسال الطلب 🚀</button>
+      <button type="submit" class="btn btn-success" style="padding: 12px; font-size: 16px; margin-top: 10px;">إرسال الطلب الآن 🚀</button>
     </form>
   </div>
 </div>
 
-<!-- مكتبة الخرائط Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
   let cart = [];
-  let map, marker;
-  let selectedLat = 30.0444, selectedLng = 31.2357; // الإحداثيات الافتراضية (القاهرة)
+  let menuData = [];
 
-  // 1. جلب المنيو ديناميكياً من السيرفر
-  async function loadMenu() {
+  // 1. جلب قائمة المنيو من السيرفر
+  async function fetchMenu() {
     try {
       const res = await fetch('/api/menu');
-      const items = await res.json();
-      const container = document.getElementById('menuContainer');
+      if (!res.ok) throw new Error('فشل جلب البيانات');
+      menuData = await res.json();
 
-      if (!items || items.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">لا توجد وجبات مسجلة حالياً في المنيو.</p>';
+      const container = document.getElementById('menuContainer');
+      if (!menuData || menuData.length === 0) {
+        container.innerHTML = '<p style="color:#94a3b8;">القائمة فارغة حالياً.</p>';
         return;
       }
 
-      container.innerHTML = items.map(item => `
-        <div class="menu-card">
+      container.innerHTML = menuData.map(item => `
+        <div class="menu-item">
           <div>
-            <h4>${item.name}</h4>
+            <h3>${item.name}</h3>
             <div class="price">${item.price} ج.م</div>
           </div>
-          <button class="btn btn-primary" onclick="addToCart('${item.name}', ${item.price})">إضافة للسلة 🛒</button>
+          <button class="btn" onclick="addToCart(${item.id})">إضافة للسلة ➕</button>
         </div>
       `).join('');
     } catch (err) {
-      console.error(err);
       document.getElementById('menuContainer').innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء تحميل المنيو من السيرفر.</p>';
     }
   }
 
-  // 2. إدارة السلة
-  function addToCart(name, price) {
-    cart.push({ name, price });
-    updateCartUI();
+  // 2. إضافة وجبة للسلة
+  function addToCart(id) {
+    const item = menuData.find(i => i.id == id);
+    if (item) {
+      cart.push(item);
+      updateCartUI();
+    }
   }
 
+  // 3. تحديث واجهة السلة
   function updateCartUI() {
-    const container = document.getElementById('cartItems');
-    const totalSpan = document.getElementById('cartTotal');
+    const cartContainer = document.getElementById('cartItems');
+    const totalEl = document.getElementById('totalPrice');
 
     if (cart.length === 0) {
-      container.innerHTML = '<p style="color: #94a3b8;">السلة فارغة، اختر من المنيو أعلاه.</p>';
-      totalSpan.textContent = '0';
+      cartContainer.innerHTML = '<p style="color:#94a3b8;">السلة فارغة، اختر من المنيو أعلاه.</p>';
+      totalEl.innerText = '0';
       return;
     }
 
-    let total = 0;
-    container.innerHTML = cart.map((item, index) => {
-      total += item.price;
-      return `
-        <div class="cart-item">
-          <span>${item.name}</span>
-          <span>${item.price} ج.م <button style="background:none; border:none; color:#ef4444; cursor:pointer; margin-right:5px;" onclick="removeFromCart(${index})">❌</button></span>
-        </div>
-      `;
-    }).join('');
+    cartContainer.innerHTML = cart.map((item, index) => `
+      <div class="cart-item">
+        <span>${item.name} - <strong>${item.price} ج.م</strong></span>
+        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">حذف ❌</button>
+      </div>
+    `).join('');
 
-    totalSpan.textContent = total;
+    const total = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+    totalEl.innerText = total;
   }
 
+  // 4. حذف عنصر من السلة
   function removeFromCart(index) {
     cart.splice(index, 1);
     updateCartUI();
   }
 
-  // 3. تهيئة الخريطة والبحث عن العنوان
-  function initMap() {
-    map = L.map('map').setView([selectedLat, selectedLng], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(map);
-
-    marker = L.marker([selectedLat, selectedLng], { draggable: true }).addTo(map);
-
-    marker.on('dragend', function (e) {
-      const coord = marker.getLatLng();
-      selectedLat = coord.lat;
-      selectedLng = coord.lng;
-    });
-  }
-
-  async function searchAddress() {
-    const query = document.getElementById('addressInput').value;
-    if (!query) return alert('يرجى كتابة اسم المنطقة أو الشارع أولاً.');
-
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (data && data.length > 0) {
-        selectedLat = parseFloat(data[0].lat);
-        selectedLng = parseFloat(data[0].lon);
-        map.setView([selectedLat, selectedLng], 15);
-        marker.setLatLng([selectedLat, selectedLng]);
-      } else {
-        alert('لم يتم العثور على الموقع، حاول تحديد مكان معروف بالقرب منك.');
-      }
-    } catch (err) {
-      alert('خطأ أثناء العثور على الموقع.');
-    }
-  }
-
-  // 4. إرسال الطلب
+  // 5. إرسال الطلب
   document.getElementById('orderForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    if (cart.length === 0) {
-      alert('يرجى إضافة وجبة واحدة على الأقل للسلة!');
-      return;
-    }
+    if (cart.length === 0) return alert('يرجى إضافة وجبة واحدة على الأقل للسلة!');
 
     const orderData = {
-      customerName: document.getElementById('customerName').value,
-      phone: document.getElementById('customerPhone').value,
-      address: document.getElementById('addressInput').value || 'محدد على الخريطة',
+      customerName: document.getElementById('custName').value,
+      phone: document.getElementById('custPhone').value,
+      address: document.getElementById('custAddress').value,
       items: cart,
-      total: cart.reduce((sum, item) => sum + item.price, 0),
-      status: 'قيد التحضير',
-      location: { lat: selectedLat, lng: selectedLng }
+      total: cart.reduce((sum, item) => sum + parseFloat(item.price), 0)
     };
 
     try {
@@ -222,23 +153,17 @@
       });
 
       if (res.ok) {
-        const createdOrder = await res.json();
-        alert(`تم إرسال طلبك بنجاح! رقم الطلب: ${createdOrder.id}`);
+        alert('تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً.');
         cart = [];
         updateCartUI();
         document.getElementById('orderForm').reset();
-      } else {
-        alert('حدث خطأ أثناء إرسال الطلب.');
       }
     } catch (err) {
-      alert('تعذر الاتصال بالسيرفر.');
+      alert('حدث خطأ أثناء إرسال الطلب.');
     }
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    loadMenu();
-    initMap();
-  });
+  document.addEventListener('DOMContentLoaded', fetchMenu);
 </script>
 </body>
 </html>
