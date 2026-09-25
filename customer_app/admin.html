@@ -315,3 +315,15 @@ document.getElementById('addMenuForm')?.addEventListener('submit', async (e) => 
     }
 });
 </script>
+// دعم الطلبات التي تحتوي على اسم المجلد في الرابط
+app.get('/customer_app/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'customer_app', 'admin.html'));
+});
+
+app.get('/customer_app/driver.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'customer_app', 'driver.html'));
+});
+
+app.get('/customer_app/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'customer_app', 'index.html'));
+});
