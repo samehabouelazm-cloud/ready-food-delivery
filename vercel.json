@@ -8,22 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/admin.html",
-      "dest": "/customer_app/admin.html"
-    },
-    {
-      "src": "/driver.html",
-      "dest": "/customer_app/driver.html"
-    },
-    {
-      "src": "/index.html",
-      "dest": "/customer_app/index.html"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
       "src": "/(.*)",
       "dest": "server.js"
     }
