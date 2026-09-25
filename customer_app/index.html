@@ -3,348 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY OS - لوحة إدارة المطعم والطلبات</title>
+    <title>READY OS - طلب الطعام</title>
+    <!-- تضمين مكتبة Leaflet للخريطة التفاعلية -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            padding: 20px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #334155;
-            margin-bottom: 25px;
-        }
-        .header h1 {
-            color: #f59e0b;
-            font-size: 24px;
-        }
-        .refresh-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .section-title {
-            color: #f59e0b;
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-        .form-container {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border: 1px solid #334155;
-        }
-        .menu-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-        }
-        .menu-form input {
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-        }
-        .btn-add {
-            background: #10b981;
-            color: white;
-            font-weight: bold;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .btn-add:hover {
-            background: #059669;
-        }
-        .orders-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-        .order-card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-        }
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .order-id {
-            font-weight: bold;
-            color: #94a3b8;
-        }
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .status-pending { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b; }
-        .status-delivering { background: #3b82f622; color: #3b82f6; border: 1px solid #3b82f6; }
-        .status-completed { background: #10b98122; color: #10b981; border: 1px solid #10b981; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; padding: 15px; padding-bottom: 80px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #334155; margin-bottom: 20px; }
+        .brand { font-size: 22px; font-weight: bold; color: #f59e0b; }
+        .status-badge { font-size: 13px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .open { background: #10b98122; color: #10b981; border: 1px solid #10b981; }
+        .closed { background: #ef444422; color: #ef4444; border: 1px solid #ef4444; }
         
-        .customer-info, .items-list {
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #cbd5e1;
-        }
-        .price {
-            font-size: 18px;
-            font-weight: bold;
-            color: #10b981;
-            margin-bottom: 15px;
-        }
-        .driver-box {
-            background: #0f172a;
-            border: 1px dashed #10b981;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-        .driver-box p {
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .btn-auto-assign {
-            background: #f59e0b;
-            color: #0f172a;
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-delete {
-            background: #ef444422;
-            color: #ef4444;
-            border: 1px solid #ef4444;
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-delete:hover {
-            background: #ef4444;
-            color: white;
-        }
-        .btn-unassign {
-            background: #64748b;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 5px;
-        }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 12px; }
+        .card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+        .card-title { font-weight: bold; font-size: 15px; color: #f1f5f9; }
+        .card-price { color: #10b981; font-weight: bold; margin-top: 4px; }
+        .btn-add { background: #f59e0b; color: #0f172a; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+
+        .checkout-section { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 25px; }
+        .checkout-section h3 { color: #f59e0b; margin-bottom: 12px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; }
+        #map { height: 160px; border-radius: 8px; border: 1px solid #334155; margin-top: 8px; }
+
+        .cart-summary { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px dashed #334155; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; }
+        .btn-submit { background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; }
+
+        .active-order { background: #1e293b; border: 1px solid #f59e0b; border-radius: 12px; padding: 15px; margin-top: 20px; }
+        .order-step { display: flex; align-items: center; margin-top: 10px; gap: 10px; font-size: 14px; color: #94a3b8; }
+        .step-active { color: #10b981; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>📦 READY OS - لوحة التحكم وإدارة الطعام</h1>
-        <button class="refresh-btn" onclick="fetchOrders()">تحديث الطلبات 🔄</button>
+        <div class="brand">🍔 READY OS</div>
+        <div id="storeStatus" class="status-badge open">جاري التحقق...</div>
     </div>
 
-    <!-- نموذج إضافة وجبة جديدة للقائمة -->
-    <div class="form-container">
-        <h2 class="section-title">🍔 إضافة وجبة / صنف جديد للقائمة</h2>
-        <form id="addMenuForm" class="menu-form">
-            <input type="text" id="itemName" placeholder="اسم الوجبة" required>
-            <input type="text" id="itemCategory" placeholder="التصنيف (مثل: مشويات، بيتزا)" required>
-            <input type="number" id="itemPrice" placeholder="السعر (ج.م)" required>
-            <input type="url" id="itemImage" placeholder="رابط الصورة (اختياري)">
-            <button type="submit" class="btn-add">إضافة إلى المنيو ➕</button>
-        </form>
+    <!-- قائمة الطعام -->
+    <h3 style="margin-bottom: 12px; color: #cbd5e1;">📋 المنيو</h3>
+    <div id="menuContainer" class="menu-grid">
+        <p style="color:#94a3b8;">جاري تحميل القائمة...</p>
     </div>
 
-    <h2 class="section-title">📋 طلبات العملاء الحالية</h2>
-    <div id="ordersContainer" class="orders-grid">
-        <p style="color: #94a3b8;">جاري تحميل الطلبات...</p>
+    <!-- إتمام الطلب -->
+    <div class="checkout-section">
+        <h3>🛒 إتمام الطلب</h3>
+        <div class="cart-summary" id="cartSummary">
+            <p style="color:#94a3b8; font-size:13px;">السلة فارغة، اختر من المنيو أعلاه.</p>
+        </div>
+
+        <div class="form-group">
+            <label>اسمك الكريم</label>
+            <input type="text" id="custName" placeholder="أدخل اسمك الكامل">
+        </div>
+        <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="tel" id="custPhone" placeholder="01xxxxxxxxx">
+        </div>
+        <div class="form-group">
+            <label>ملاحظات إضافية (مثل: بدون بصل، صوص خارجي)</label>
+            <textarea id="custNotes" rows="2" placeholder="اكتب أي ملاحظة تخص الوجبة أو التوصيل..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>تحديد موقع التوصيل على الخريطة</label>
+            <div id="map"></div>
+        </div>
+
+        <button class="btn-submit" onclick="submitOrder()">تأكيد وإرسال الطلب 🚀</button>
+    </div>
+
+    <!-- تتبع الطلب الحالي -->
+    <div id="activeOrderSection" class="active-order" style="display:none;">
+        <h3 style="color:#f59e0b; margin-bottom:8px;">📡 تتبع طلبك الحالي</h3>
+        <div id="orderStatusText" style="font-weight:bold; color:#10b981; margin-bottom:10px;">جاري معالجة الطلب...</div>
+        <div class="order-step" id="stepPending">1. 🟡 جاري التجهيز والتحضير</div>
+        <div class="order-step" id="stepDelivering">2. 🛵 الطلب في الطريق مع الكابتن</div>
+        <div class="order-step" id="stepCompleted">3. 🟢 تم التوصيل بنجاح</div>
+        <div id="driverInfo" style="margin-top:10px; font-size:13px; color:#cbd5e1;"></div>
     </div>
 
     <script>
-        // جلب قائمة الطلبات من السيرفر
-        async function fetchOrders() {
+        let cart = [];
+        let map, marker;
+        let selectedLocation = { lat: 30.0444, lng: 31.2357 };
+        let activeOrderId = null;
+
+        // تهيئة الخريطة
+        function initMap() {
+            map = L.map('map').setView([selectedLocation.lat, selectedLocation.lng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            marker = L.marker([selectedLocation.lat, selectedLocation.lng], { draggable: true }).addTo(map);
+            marker.on('dragend', function (e) {
+                const position = marker.getLatLng();
+                selectedLocation = { lat: position.lat, lng: position.lng };
+            });
+        }
+
+        async function fetchMenuAndStatus() {
+            try {
+                // جلب المنيو
+                const resMenu = await fetch('/api/menu');
+                const menu = await resMenu.json();
+                const container = document.getElementById('menuContainer');
+                
+                container.innerHTML = menu.map(item => `
+                    <div class="card">
+                        <div>
+                            <img src="${item.imageUrl || 'https://via.placeholder.com/150'}" alt="${item.name}">
+                            <div class="card-title">${item.name}</div>
+                            <div class="card-price">${item.price} ج.م</div>
+                        </div>
+                        <button class="btn-add" onclick='addToCart(${JSON.stringify(item)})'>+ إضافة</button>
+                    </div>
+                `).join('');
+
+                // جلب حالة المطعم
+                const resStats = await fetch('/api/stats');
+                const stats = await resStats.json();
+                const statusBadge = document.getElementById('storeStatus');
+                if (stats.isStoreOpen) {
+                    statusBadge.className = 'status-badge open';
+                    statusBadge.innerText = 'المطعم مفتوح 🟢';
+                } else {
+                    statusBadge.className = 'status-badge closed';
+                    statusBadge.innerText = 'المطعم مغلق حالياً 🔴';
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function addToCart(item) {
+            cart.push(item);
+            renderCart();
+        }
+
+        function renderCart() {
+            const summary = document.getElementById('cartSummary');
+            if (cart.length === 0) {
+                summary.innerHTML = '<p style="color:#94a3b8; font-size:13px;">السلة فارغة، اختر من المنيو أعلاه.</p>';
+                return;
+            }
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            summary.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <span>${item.name}</span>
+                    <span>${item.price} ج.م</span>
+                </div>
+            `).join('') + `<hr style="border-color:#334155; margin:8px 0;">
+            <div class="cart-item" style="font-weight:bold; color:#10b981;">
+                <span>الإجمالي</span>
+                <span>${total} ج.م</span>
+            </div>`;
+        }
+
+        async function submitOrder() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const notes = document.getElementById('custNotes').value.trim();
+
+            if (!name || !phone) {
+                alert('يرجى إدخال اسمك ورقم الهاتف.');
+                return;
+            }
+            if (cart.length === 0) {
+                alert('يرجى إضافة وجبة واحدة على الأقل للسلة.');
+                return;
+            }
+
+            const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerName: name,
+                        customerPhone: phone,
+                        notes: notes,
+                        items: cart,
+                        totalAmount: totalAmount,
+                        location: selectedLocation
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert('تم إرسال طلبك بنجاح! جاري التجهيز.');
+                    activeOrderId = data.order._id;
+                    cart = [];
+                    renderCart();
+                    document.getElementById('activeOrderSection').style.display = 'block';
+                    trackActiveOrder();
+                } else {
+                    alert(data.message || 'تعذر إرسال الطلب');
+                }
+            } catch (err) { alert('حدث خطأ في الاتصال بالسيرفر'); }
+        }
+
+        async function trackActiveOrder() {
+            if (!activeOrderId) return;
             try {
                 const res = await fetch('/api/orders');
                 const orders = await res.json();
-                const container = document.getElementById('ordersContainer');
-                
-                if (!orders || orders.length === 0) {
-                    container.innerHTML = '<p style="color: #94a3b8;">لا توجد طلبات حالياً.</p>';
-                    return;
+                const myOrder = orders.find(o => o._id === activeOrderId);
+
+                if (!myOrder) return;
+
+                const stepPending = document.getElementById('stepPending');
+                const stepDelivering = document.getElementById('stepDelivering');
+                const stepCompleted = document.getElementById('stepCompleted');
+                const driverInfo = document.getElementById('driverInfo');
+
+                stepPending.className = 'order-step';
+                stepDelivering.className = 'order-step';
+                stepCompleted.className = 'order-step';
+
+                if (myOrder.status === 'pending') {
+                    stepPending.className = 'order-step step-active';
+                    document.getElementById('orderStatusText').innerText = '⏳ الطلب قيد التحضير في المطبخ...';
+                } else if (myOrder.status === 'delivering') {
+                    stepDelivering.className = 'order-step step-active';
+                    document.getElementById('orderStatusText').innerText = '🛵 الطلب مع الكابتن وفي الطريق إليك!';
+                    if (myOrder.driverName) {
+                        driverInfo.innerText = `الكابتن: ${myOrder.driverName} (${myOrder.driverPhone || 'بدون رقم'})`;
+                    }
+                } else if (myOrder.status === 'completed') {
+                    stepCompleted.className = 'order-step step-active';
+                    document.getElementById('orderStatusText').innerText = '✅ تم توصيل الطلب بنجاح! وبالهناء والشفاء.';
                 }
-
-                container.innerHTML = '';
-                orders.forEach(order => {
-                    const card = document.createElement('div');
-                    card.className = 'order-card';
-                    
-                    let statusClass = 'status-pending';
-                    let statusText = 'قيد الانتظار';
-                    if (order.status === 'delivering') { statusClass = 'status-delivering'; statusText = 'جاري التوصيل'; }
-                    if (order.status === 'completed') { statusClass = 'status-completed'; statusText = 'مكتمل'; }
-
-                    const itemsText = order.items && order.items.length > 0 
-                        ? order.items.map(i => i.name || i.title || 'وجبة').join(', ') 
-                        : 'طلب وجبات متنوعة';
-
-                    card.innerHTML = `
-                        <div>
-                            <div class="order-header">
-                                <span class="order-id">#${order._id.substring(order._id.length - 6)}</span>
-                                <span class="badge ${statusClass}">${statusText}</span>
-                            </div>
-                            <div class="customer-info">
-                                <strong>العميل:</strong> ${order.customerName || 'عميل جديد'}<br>
-                                <strong>الهاتف:</strong> ${order.customerPhone || 'غير مسجل'}
-                            </div>
-                            <div class="items-list">
-                                <strong>العناصر:</strong> ${itemsText}
-                            </div>
-                            <div class="price">
-                                ${order.totalAmount || 0} ج.م
-                            </div>
-                        </div>
-
-                        <div>
-                            ${order.driverName ? `
-                                <div class="driver-box">
-                                    <p>🚴 <strong>الكابتن:</strong> ${order.driverName}</p>
-                                    <p>📞 <strong>جوال الكابتن:</strong> <a href="tel:${order.driverPhone}" style="color: #38bdf8;">${order.driverPhone || 'غير متوفر'}</a></p>
-                                    <button class="btn-unassign" onclick="unassignDriver('${order._id}')">إلغاء إسناد الكابتن</button>
-                                </div>
-                            ` : `
-                                <button class="btn-auto-assign" style="margin-bottom:8px;" onclick="autoAssign('${order._id}')">
-                                    ⚡ إسناد تلقائي للكابتن الأقرب
-                                </button>
-                            `}
-
-                            <div class="action-buttons">
-                                <button class="btn-delete" onclick="deleteOrder('${order._id}')">
-                                    🗑️ حذف الطلب
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (err) {
-                console.error(err);
-                document.getElementById('ordersContainer').innerHTML = '<p style="color: #ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // إسناد تلقائي للكابتن
-        async function autoAssign(orderId) {
-            try {
-                const res = await fetch(`/api/orders/${orderId}/auto-assign`, { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    alert(data.message);
-                    fetchOrders();
-                } else {
-                    alert('تعذر الإسناد: ' + (data.message || 'خطأ بالسيرفر'));
-                }
-            } catch (err) {
-                alert('حدث خطأ أثناء الاتصال بالسيرفر');
-            }
-        }
-
-        // إلغاء إسناد الكابتن
-        async function unassignDriver(orderId) {
-            if (!confirm('هل تريد إزالة الكابتن من الطلب وإبقاؤه في قائمة الانتظار؟')) return;
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ driverName: '', driverPhone: '', status: 'pending' })
-                });
-                const data = await res.json();
-                if (data.success) fetchOrders();
-            } catch (err) {
-                alert('فشل التعديل على الطلب');
-            }
-        }
-
-        // حذف الطلب
-        async function deleteOrder(orderId) {
-            if (!confirm('هل أنت تأكد من رغبتك في حذف هذا الطلب نهائياً؟')) return;
-            try {
-                const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (data.success) fetchOrders();
-                else alert('فشل حذف الطلب');
-            } catch (err) {
-                alert('حدث خطأ أثناء تنفيذ عملية الحذف');
-            }
-        }
-
-        // كود إضافة الوجبة الجديدة
-        document.getElementById('addMenuForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newItem = {
-                name: document.getElementById('itemName').value,
-                category: document.getElementById('itemCategory').value,
-                price: Number(document.getElementById('itemPrice').value),
-                imageUrl: document.getElementById('itemImage').value || 'https://via.placeholder.com/150'
-            };
-
-            try {
-                const res = await fetch('/api/menu', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newItem)
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert('تمت إضافة الوجبة بنجاح!');
-                    document.getElementById('addMenuForm').reset();
-                } else {
-                    alert('حدث خطأ أثناء الإضافة');
-                }
-            } catch (err) {
-                alert('تعذر الاتصال بالسيرفر');
-            }
-        });
-
-        // التشغيل التلقائي عند التحميل
-        fetchOrders();
-        setInterval(fetchOrders, 8000);
+        window.onload = () => {
+            initMap();
+            fetchMenuAndStatus();
+            setInterval(fetchMenuAndStatus, 15000);
+            setInterval(trackActiveOrder, 5000);
+        };
     </script>
 </body>
 </html>
