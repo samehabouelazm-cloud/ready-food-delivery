@@ -193,6 +193,32 @@ app.post('/api/store/toggle', (req, res) => {
 // ==========================================
 
 const PORT = process.env.PORT || 3000;
+// قائمة الكباتن في الذاكرة
+global.drivers = global.drivers || [
+    { id: 1, name: 'أحمد محمود', phone: '01012345678', status: 'متاح' },
+    { id: 2, name: 'محمد علي', phone: '01198765432', status: 'مشغول' }
+];
+
+// مسار جلب قائمة الكباتن
+app.get('/api/drivers', (req, res) => {
+    res.json(global.drivers);
+});
+
+// مسار إضافة كابتن جديد
+app.post('/api/drivers', (req, res) => {
+    const { name, phone } = req.body;
+    if (!name || !phone) {
+        return res.status(400).json({ error: 'يرجى إدخال اسم ورقم هاتف الكابتن' });
+    }
+    const newDriver = {
+        id: Date.now(),
+        name,
+        phone,
+        status: 'متاح'
+    };
+    global.drivers.push(newDriver);
+    res.status(201).json(newDriver);
+});
 app.listen(PORT, () => {
     console.log(`🚀 READY OS Server running on port: ${PORT}`);
 });
