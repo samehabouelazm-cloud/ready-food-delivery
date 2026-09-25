@@ -3,106 +3,101 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware لتمرير بيانات JSON والملفات الاستاتيكية
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'customer_app')));
 
-// --- قواعد البيانات في الذاكرة (In-Memory Data) ---
+// --- البيانات في الذاكرة ---
 
-// 1. القائمة الأولية للمنيو
 global.menu = global.menu || [
     { id: 1, name: 'وجبة بيتزا مكس أجبان', price: 120, category: 'بيتزا' },
     { id: 2, name: 'برجر دجاج كلاسيك', price: 85, category: 'برجر' },
     { id: 3, name: 'وجبة شاورما عربي', price: 95, category: 'مشويات' }
 ];
 
-// 2. قائمة الكباتن الأولية
+// قائمة الكباتن مع مواقعهم الحالية (إحداثيات افتراضية)
 global.drivers = global.drivers || [
-    { id: 1, name: 'أحمد محمود', phone: '01012345678', status: 'متاح' },
-    { id: 2, name: 'محمد علي', phone: '01198765432', status: 'مشغول' }
+    { id: 1, name: 'أحمد محمود', phone: '01012345678', status: 'متاح', location: { lat: 30.0444, lng: 31.2357 } },
+    { id: 2, name: 'محمد علي', phone: '01198765432', status: 'متاح', location: { lat: 30.0500, lng: 31.2400 } }
 ];
 
-// 3. قائمة الطلبات الأولية
 global.orders = global.orders || [];
 
-// --- مسارات الـ API الخاصة بالمنيو (Menu API) ---
+// دالة حساب المسافة بين نقطتين بالإحداثيات (بالكيلومتر) - Haversine Formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    const R = 6371; // نصف قطر الأرض بالكيلومتر
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c).toFixed(2); // المسافة بـ كم
+}
 
-app.get('/api/menu', (req, res) => {
-    res.json(global.menu);
-});
+// --- مسارات الـ API للمنيو ---
+app.get('/api/menu', (req, res) => res.json(global.menu));
 
-app.post('/api/menu', (req, res) => {
-    const { name, price, category } = req.body;
-    if (!name || !price) {
-        return res.status(400).json({ error: 'يرجى إدخال اسم الوجبة والسعر' });
-    }
-    const newItem = { id: Date.now(), name, price: parseFloat(price), category: category || 'عام' };
-    global.menu.push(newItem);
-    res.status(201).json(newItem);
-});
+// --- مسارات الـ API للكباتن ---
 
-// --- مسارات الـ API الخاصة بالكباتن (Drivers API) ---
-
-// جلب قائمة الكباتن
+// جلب الكباتن مع حساب المسافة لطلب معين إن وُجد
 app.get('/api/drivers', (req, res) => {
-    res.json(global.drivers);
+    const { targetLat, targetLng } = req.query;
+    
+    const driversWithDistance = global.drivers.map(driver => {
+        let distance = null;
+        if (targetLat && targetLng && driver.location) {
+            distance = calculateDistance(driver.location.lat, driver.location.lng, parseFloat(targetLat), parseFloat(targetLng));
+        }
+        return { ...driver, distance: distance ? `${distance} كم` : 'غير محدد' };
+    });
+
+    res.json(driversWithDistance);
 });
 
-// إضافة كابتن جديد
+// إضافة كابتن جديد برقم الجوال والاسم
 app.post('/api/drivers', (req, res) => {
-    const { name, phone } = req.body;
+    const { name, phone, lat, lng } = req.body;
     if (!name || !phone) {
-        return res.status(400).json({ error: 'يرجى إدخال اسم ورقم هاتف الكابتن' });
+        return res.status(400).json({ error: 'يرجى إدخال اسم ورقم جوال الكابتن' });
     }
     const newDriver = {
         id: Date.now(),
         name,
         phone,
-        status: 'متاح'
+        status: 'متاح',
+        location: { lat: lat || 30.0444, lng: lng || 31.2357 }
     };
     global.drivers.push(newDriver);
     res.status(201).json(newDriver);
 });
 
-// تحديث حالة الكابتن
-app.put('/api/drivers/:id/status', (req, res) => {
+// تحديث موقع الكابتن أو حالته
+app.put('/api/drivers/:id', (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, location } = req.body;
     const driver = global.drivers.find(d => d.id == id);
-    if (!driver) {
-        return res.status(404).json({ error: 'الكابتن غير موجود' });
-    }
-    driver.status = status;
+    if (!driver) return res.status(404).json({ error: 'الكابتن غير موجود' });
+
+    if (status) driver.status = status;
+    if (location) driver.location = location;
+
     res.json(driver);
 });
 
-// --- مسارات الـ API الخاصة بالطلبات (Orders API) ---
+// --- مسارات الـ API للطلبات ---
+app.get('/api/orders', (req, res) => res.json(global.orders));
 
-// جلب جميع الطلبات
-app.get('/api/orders', (req, res) => {
-    res.json(global.orders);
-});
-
-// جلب طلب محدد بواسطة ID
-app.get('/api/orders/:id', (req, res) => {
-    const order = global.orders.find(o => o.id == req.params.id);
-    if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
-    res.json(order);
-});
-
-// إنشاء طلب جديد
 app.post('/api/orders', (req, res) => {
-    const orderData = req.body;
     const newOrder = {
         id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-        ...orderData,
+        ...req.body,
         createdAt: new Date().toISOString()
     };
     global.orders.push(newOrder);
     res.status(201).json(newOrder);
 });
 
-// تحديث حالة الطلب وإسناد الكابتن
 app.put('/api/orders/:id/status', (req, res) => {
     const { id } = req.params;
     const { status, driverId } = req.body;
@@ -115,13 +110,10 @@ app.put('/api/orders/:id/status', (req, res) => {
     res.json(order);
 });
 
-// --- توجيه الصفحات الرئيسية ---
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'customer_app', 'index.html'));
 });
 
-// تشغيل السيرفر
 app.listen(PORT, () => {
     console.log(`🚀 READY OS Server running on port: ${PORT}`);
 });
