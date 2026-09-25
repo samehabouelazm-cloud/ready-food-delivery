@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>READY OS - تطبيق الكابتن</title>
-    <!-- مكتبة Leaflet الخرائط -->
+    <!-- مكتبة Leaflet للخرائط -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -15,7 +15,7 @@
         .brand { font-size: 20px; font-weight: bold; color: #38bdf8; }
         .status-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 
-        /* مفتاح التبديل */
+        /* مفتاح التبديل (متاح / غير متاح) */
         .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
@@ -34,9 +34,8 @@
         .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; }
         .btn-success { background: #10b981; color: white; }
         .btn-primary { background: #38bdf8; color: #0f172a; }
-        .btn-disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
 
-        /* شريط التنبيه العائم */
+        /* شريط تنبيه الطلبات الجديدة */
         .alert-banner { display: none; background: #f59e0b; color: #0f172a; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 15px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
     </style>
@@ -69,7 +68,7 @@
         let knownOrderCount = 0;
         let isDriverAvailable = true;
 
-        // تهيئة الصوت للتنبيه عند وصول طلب
+        // صوت التنبيه عند وصول طلب جديد
         const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 
         function initMap(lat = 30.0444, lng = 31.2357) {
@@ -90,13 +89,13 @@
                 const res = await fetch('/api/orders');
                 const orders = await res.json();
                 
-                // تصفية الطلبات المعلقة أو المسندة للتوصيل
+                // جلب الطلبات النشطة (معلقة أو في الطريق)
                 const activeOrders = orders.filter(o => o.status === 'pending' || o.status === 'delivering');
 
-                // التنبيه الإشعاري عند ورود طلب جديد
+                // التنبيه الصوتي والبصري
                 if (activeOrders.length > knownOrderCount && knownOrderCount !== 0) {
                     document.getElementById('newOrderAlert').style.display = 'block';
-                    alertAudio.play().catch(() => {}); // تشغيل صوت التنبيه
+                    alertAudio.play().catch(() => {});
                 } else if (activeOrders.length <= knownOrderCount) {
                     document.getElementById('newOrderAlert').style.display = 'none';
                 }
@@ -139,7 +138,7 @@
                     </div>
                 `).join('');
 
-                // تحديث الخريطة لأول طلب يحتوي على موقع
+                // إظهار الموقع على الخريطة
                 const orderWithLoc = activeOrders.find(o => o.location);
                 if (orderWithLoc && orderWithLoc.location) {
                     setTimeout(() => initMap(orderWithLoc.location.lat, orderWithLoc.location.lng), 200);
@@ -155,8 +154,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         status: 'delivering',
-                        driverName: 'الكابتن الحالي',
-                        driverPhone: '01000000000'
+                        driverName: 'كابتن محمد',
+                        driverPhone: '01122334455'
                     })
                 });
                 const data = await res.json();
@@ -176,7 +175,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('تم إنهاء الطلب بنجاح! شكرًا لك.');
+                    alert('تم إنهاء الطلب وتسليمه بنجاح! شكرًا لك.');
                     fetchDriverOrders();
                 }
             } catch (err) { alert('خطأ في إنهاء الطلب'); }
