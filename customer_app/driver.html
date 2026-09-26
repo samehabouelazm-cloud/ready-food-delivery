@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - تطبيق الكابتن</title>
+  <title>READY OS - بوابة الكابتن</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
-    .container { max-width: 700px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 25px; padding: 15px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #10b981; font-size: 24px; }
-    .section-card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
-    .section-title { font-size: 18px; color: #38bdf8; margin-bottom: 15px; }
-    .form-control { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 15px; }
-    .order-card { background: #0f172a; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
-    .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; }
-    .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #10b981; color: #fff; width: 100%; margin-top: 10px; }
-    .btn:hover { background: #059669; }
+    .container { max-width: 600px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 25px; padding: 15px 20px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; }
+    header h1 { color: #38bdf8; font-size: 22px; }
+    .card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
+    .form-control { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 15px; margin-top: 8px; }
+    .order-card { background: #0f172a; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px solid #334155; }
+    .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px; }
+    .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; background: #10b981; color: #fff; }
+    .btn-delivered { background: #64748b; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -26,15 +25,15 @@
     <h1>🚴 بوابة الكابتن</h1>
   </header>
 
-  <div class="section-card">
-    <div class="section-title">اختر حساب الكابتن الحالي:</div>
+  <div class="card">
+    <label for="driverSelect" style="font-weight: bold;">اختر حساب الكابتن الحالي:</label>
     <select id="driverSelect" class="form-control" onchange="loadDriverOrders()">
       <option value="">جاري تحميل الكباتن...</option>
     </select>
   </div>
 
-  <div class="section-card">
-    <div class="section-title">📦 الطلبات الموكلة إليك</div>
+  <div class="card">
+    <h3 style="color: #38bdf8; margin-bottom: 10px;">📦 الطلبات الموكلة إليك</h3>
     <div id="ordersContainer">
       <p style="color: #94a3b8;">اختر كابتن لعرض الطلبات.</p>
     </div>
@@ -42,71 +41,79 @@
 </div>
 
 <script>
-  let currentDriverId = null;
+  let driversList = [];
 
-  // 1. جلب قائمة الكباتن عند فتح الصفحة
-  async function loadDrivers() {
+  // جلب قائمة الكباتن وتعبئة المنيو المنسدل
+  async function fetchDrivers() {
+    const select = document.getElementById('driverSelect');
     try {
       const res = await fetch('/api/drivers');
-      if (!res.ok) throw new Error('Network error');
-      const drivers = await res.json();
+      if (!res.ok) throw new Error('فشل جلب الكباتن');
+      
+      driversList = await res.json();
 
-      const select = document.getElementById('driverSelect');
-      if (!drivers || drivers.length === 0) {
+      if (!driversList || driversList.length === 0) {
         select.innerHTML = '<option value="">لا يوجد كباتن مسجلين</option>';
         return;
       }
 
       select.innerHTML = '<option value="">-- اختر الكابتن --</option>' + 
-        drivers.map(d => `<option value="${d.id}">${d.name} (${d.phone})</option>`).join('');
+        driversList.map(d => `<option value="${d.id}">${d.name} (${d.phone})</option>`).join('');
+
     } catch (err) {
-      document.getElementById('driverSelect').innerHTML = '<option value="">خطأ في تحميل الكباتن</option>';
+      console.error(err);
+      select.innerHTML = '<option value="">خطأ في تحميل الكباتن</option>';
     }
   }
 
-  // 2. جلب الطلبات الموكلة للكابتن المختار
+  // جلب الطلبات الخاصة بالكابتن المختار
   async function loadDriverOrders() {
-    const select = document.getElementById('driverSelect');
-    currentDriverId = select.value;
+    const driverId = document.getElementById('driverSelect').value;
     const container = document.getElementById('ordersContainer');
 
-    if (!currentDriverId) {
+    if (!driverId) {
       container.innerHTML = '<p style="color: #94a3b8;">اختر كابتن لعرض الطلبات.</p>';
       return;
     }
 
     try {
       const res = await fetch('/api/orders');
+      if (!res.ok) throw new Error('فشل جلب الطلبات');
       const allOrders = await res.json();
-      
-      // تصفية الطلبات الخاصة بهذا الكابتن فقط
-      const driverOrders = allOrders.filter(o => o.driverId == currentDriverId);
 
-      if (driverOrders.length === 0) {
+      // تصفية الطلبات الموكلة لهذا الكابتن بمرونة مقارنة الأرقام والنصوص
+      const myOrders = allOrders.filter(o => String(o.driverId) === String(driverId));
+
+      if (myOrders.length === 0) {
         container.innerHTML = '<p style="color: #94a3b8;">لا توجد طلبات موكلة إليك حالياً.</p>';
         return;
       }
 
-      container.innerHTML = driverOrders.map(order => `
+      container.innerHTML = myOrders.map(order => `
         <div class="order-card">
           <div class="order-header">
             <strong style="color:#f59e0b;">طلب #${order.id}</strong>
-            <span style="color:#10b981;">${order.status}</span>
+            <span style="color:#38bdf8;">${order.status}</span>
           </div>
-          <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'} (${order.phone || '-'})</p>
-          <p><strong>العنوان:</strong> ${order.address || 'محدد بالإحداثيات'}</p>
-          <p><strong>المبلغ المطلوب:</strong> ${order.total || 0} ج.م</p>
+          <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'}</p>
+          <p><strong>الهاتف:</strong> ${order.phone || '-'}</p>
+          <p><strong>العنوان:</strong> ${order.address || '-'}</p>
+          
           ${order.status !== 'تم التسليم' ? `
-            <button class="btn" onclick="markAsDelivered('${order.id}')">تأكيد تسليم الطلب ✅</button>
-          ` : '<p style="color:#10b981; font-weight:bold; margin-top:10px;">تم تسليم هذا الطلب بنجاح 👍</p>'}
+            <button class="btn" onclick="markAsDelivered('${order.id}')">تأكيد التسليم للعميل ✅</button>
+          ` : `
+            <button class="btn btn-delivered" disabled>تم التسليم ✔️</button>
+          `}
         </div>
       `).join('');
+
     } catch (err) {
-      container.innerHTML = '<p style="color: #ef4444;">حدث خطأ أثناء جلب الطلبات.</p>';
+      console.error(err);
+      container.innerHTML = '<p style="color: #ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
     }
   }
 
-  // 3. تحديث حالة الطلب إلى "تم التسليم"
+  // تغيير حالة الطلب إلى تم التسليم
   async function markAsDelivered(orderId) {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
@@ -116,15 +123,17 @@
       });
 
       if (res.ok) {
-        alert('تم تحديث حالة الطلب إلى تم التسليم!');
+        alert('تم تحديث حالة الطلب إلى "تم التسليم"!');
         loadDriverOrders();
       }
     } catch (err) {
-      alert('حدث خطأ أثناء تحديث الحالة.');
+      alert('خطأ أثناء تحديث حالة الطلب.');
     }
   }
 
-  document.addEventListener('DOMContentLoaded', loadDrivers);
+  // التشغيل عند فتح الصفحة
+  document.addEventListener('DOMContentLoaded', fetchDrivers);
 </script>
+
 </body>
 </html>
