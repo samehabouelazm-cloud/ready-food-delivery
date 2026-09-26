@@ -9,7 +9,6 @@ app.use(express.static(path.join(__dirname, 'customer_app')));
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 
-// دالة قراءة البيانات
 function readData() {
   if (!fs.existsSync(DATA_FILE)) {
     const initialData = {
@@ -27,16 +26,12 @@ function readData() {
   }
 }
 
-// دالة حفظ البيانات
 function saveData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// --- APIs الكباتن ---
-app.get('/api/drivers', (req, res) => {
-  const db = readData();
-  res.json(db.drivers);
-});
+// APIs الكباتن
+app.get('/api/drivers', (req, res) => res.json(readData().drivers));
 
 app.post('/api/drivers', (req, res) => {
   const db = readData();
@@ -46,15 +41,11 @@ app.post('/api/drivers', (req, res) => {
   res.status(201).json(newDriver);
 });
 
-// الحذف الحقيقي والدائم للطلب والكابتن
 app.delete('/api/drivers/:id', (req, res) => {
   const db = readData();
   const id = String(req.params.id);
 
-  // حذف الكابتن نهائياً من الملف
   db.drivers = db.drivers.filter(d => String(d.id) !== id);
-
-  // إزالة إسناده من جميع الطلبات
   db.orders.forEach(o => {
     if (String(o.driverId) === id) {
       o.driverId = null;
@@ -63,14 +54,11 @@ app.delete('/api/drivers/:id', (req, res) => {
   });
 
   saveData(db);
-  res.json({ message: 'تم الحذف الدائم وتحديث الملف بنجاح' });
+  res.json({ message: 'تم حذف الكابتن وتنظيف التكليفات' });
 });
 
-// --- APIs الطلبات ---
-app.get('/api/orders', (req, res) => {
-  const db = readData();
-  res.json(db.orders);
-});
+// APIs الطلبات
+app.get('/api/orders', (req, res) => res.json(readData().orders));
 
 app.post('/api/orders', (req, res) => {
   const db = readData();
@@ -86,41 +74,32 @@ app.post('/api/orders', (req, res) => {
   res.status(201).json(newOrder);
 });
 
-app.put('/api/orders/:id/status', (req, res) => {
+// الإسناد اليدوي المباشر للطلب
+app.put('/api/orders/:id/assign', (req, res) => {
   const db = readData();
   const { id } = req.params;
-  const { status, driverId, autoAssign } = req.body;
+  const { driverId } = req.body;
 
   const order = db.orders.find(o => String(o.id) === String(id));
   if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
 
-  if (autoAssign) {
-    if (db.drivers.length === 0) {
-      return res.status(400).json({ error: 'لا يوجد كباتن مسجلين حالياً!' });
-    }
-    const driver = db.drivers[0];
-    order.driverId = String(driver.id);
-    order.status = 'في الطريق مع الكابتن';
-    saveData(db);
-    return res.json({ message: `تم إسناد الطلب للكابتن: ${driver.name}`, order });
+  if (!driverId) {
+    return res.status(400).json({ error: 'يرجى اختيار كابتن لإسناد الطلب' });
   }
 
-  if (driverId) {
-    const exists = db.drivers.some(d => String(d.id) === String(driverId));
-    if (!exists) {
-      return res.status(400).json({ error: 'هذا الكابتن غير موجود أو تم حذفه!' });
-    }
-    order.driverId = String(driverId);
-    order.status = status || 'في الطريق مع الكابتن';
-  } else if (status) {
-    order.status = status;
+  const driver = db.drivers.find(d => String(d.id) === String(driverId));
+  if (!driver) {
+    return res.status(400).json({ error: 'الكابتن المختار غير موجود بالقائمة أو تم حذفه' });
   }
+
+  order.driverId = String(driver.id);
+  order.status = `جاري التوصيل مع (${driver.name})`;
 
   saveData(db);
-  res.json({ message: 'تم تحديث الطلب بنجاح', order });
+  res.json({ message: `تم إسناد الطلب بنجاح للكابتن ${driver.name}`, order });
 });
 
-// --- APIs المنيو ---
+// APIs المنيو
 app.get('/api/menu', (req, res) => res.json(readData().menu));
 
 app.listen(PORT, () => console.log(`🚀 READY OS running on http://localhost:${PORT}`));

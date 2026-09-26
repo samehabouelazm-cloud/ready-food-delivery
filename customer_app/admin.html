@@ -73,7 +73,7 @@
   </div>
 </div>
 
-<script>
+<<script>
   let cachedDrivers = [];
 
   async function loadAllData() {
@@ -107,7 +107,7 @@
     }
   }
 
-  // 2. حذف كابتن وتحديث الشاشة فوراً
+  // 2. حذف كابتن
   async function deleteDriver(id) {
     if (!confirm('هل أنت تأكد من حذف هذا الكابتن؟')) return;
 
@@ -122,7 +122,7 @@
     }
   }
 
-  // 3. جلب الطلبات وعرض خيارات الكباتن المتاحين الحقيقيين فقط
+  // 3. عرض الطلبات مع قائمة اختيار يدوية لكافة الكباتن المتاحين
   async function loadOrders() {
     const container = document.getElementById('ordersList');
     try {
@@ -144,11 +144,11 @@
               <span class="order-title">طلب #${order.id}</span>
               <span style="color:#f59e0b; font-size:13px;">${order.status}</span>
             </div>
-            <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'} (${order.phone || '-'})</p>
-            <p><strong>الكابتن الحالي:</strong> <span style="color:#10b981; font-weight:bold;">${assignedName}</span></p>
+            <p><strong>العميل:</strong> ${order.customerName || 'عميل'} (${order.phone || '-'})</p>
+            <p style="margin-top:5px;"><strong>الكابتن الموكل:</strong> <span style="color:#10b981; font-weight:bold;">${assignedName}</span></p>
             
-            <div class="driver-assign-box" style="margin-top:10px;">
-              <select id="select-driver-${order.id}" class="form-control" style="background:#1e293b;">
+            <div class="driver-assign-box" style="margin-top:12px; display:flex; gap:8px;">
+              <select id="select-driver-${order.id}" class="form-control" style="background:#1e293b; color:#fff;">
                 <option value="">-- اختر كابتن مسجل --</option>
                 ${cachedDrivers.map(d => `
                   <option value="${d.id}" ${String(order.driverId) === String(d.id) ? 'selected' : ''}>
@@ -156,8 +156,7 @@
                   </option>
                 `).join('')}
               </select>
-              <button class="btn btn-primary" onclick="assignDriver('${order.id}')">إسناد 🚀</button>
-              <button class="btn btn-success" onclick="autoAssignDriver('${order.id}')">تلقائي ⚡</button>
+              <button class="btn btn-primary" onclick="manualAssign('${order.id}')">إسناد يدوي 🚀</button>
             </div>
           </div>
         `;
@@ -167,44 +166,36 @@
     }
   }
 
-  // 4. إسناد يدوي لكابتن معين
-  async function assignDriver(orderId) {
-    const driverId = document.getElementById(`select-driver-${orderId}`).value;
-    if (!driverId) return alert('اختر كابتن من القائمة أولاً!');
+  // 4. تنفيذ الإسناد اليدوي
+  async function manualAssign(orderId) {
+    const select = document.getElementById(`select-driver-${orderId}`);
+    const driverId = select.value;
 
-    const res = await fetch(`/api/orders/${orderId}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'في الطريق مع الكابتن', driverId })
-    });
+    if (!driverId) {
+      alert('يرجى تحديد كابتن من القائمة أولاً!');
+      return;
+    }
 
-    const data = await res.json();
-    if (res.ok) {
-      alert('تم الإسناد بنجاح!');
-      loadAllData();
-    } else {
-      alert(data.error || 'خطأ في الإسناد');
+    try {
+      const res = await fetch(`/api/orders/${orderId}/assign`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        loadAllData();
+      } else {
+        alert(data.error || 'فشل الإسناد');
+      }
+    } catch (err) {
+      alert('حدث خطأ أثناء الاتصال بالسيرفر');
     }
   }
 
-  // 5. إسناد تلقائي لأول كابتن متاح
-  async function autoAssignDriver(orderId) {
-    const res = await fetch(`/api/orders/${orderId}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ autoAssign: true })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert(data.message);
-      loadAllData();
-    } else {
-      alert(data.error || 'فشل الإسناد التلقائي');
-    }
-  }
-
-  // إضافة كابتن
+  // إضافة كابتن جديد
   document.getElementById('addDriverForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('driverName').value;
@@ -223,27 +214,5 @@
     }
   });
 
-  // إضافة وجبة
-  document.getElementById('addMenuForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('itemName').value;
-    const category = document.getElementById('itemCategory').value;
-    const price = document.getElementById('itemPrice').value;
-
-    const res = await fetch('/api/menu', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, category, price: Number(price) })
-    });
-
-    if (res.ok) {
-      document.getElementById('itemName').value = '';
-      document.getElementById('itemCategory').value = '';
-      document.getElementById('itemPrice').value = '';
-    }
-  });
-
   document.addEventListener('DOMContentLoaded', loadAllData);
 </script>
-</body>
-</html>
