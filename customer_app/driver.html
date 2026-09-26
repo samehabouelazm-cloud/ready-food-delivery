@@ -33,7 +33,10 @@
   </div>
 
   <div class="card">
-    <h3 style="color: #38bdf8; margin-bottom: 10px;">📦 الطلبات الموكلة إليك</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h3 style="color: #38bdf8;">📦 الطلبات الموكلة إليك</h3>
+      <button onclick="loadDriverOrders()" style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">تحديث 🔄</button>
+    </div>
     <div id="ordersContainer">
       <p style="color: #94a3b8;">اختر كابتن لعرض الطلبات.</p>
     </div>
@@ -43,7 +46,7 @@
 <script>
   let driversList = [];
 
-  // جلب قائمة الكباتن وتعبئة المنيو المنسدل
+  // 1. جلب قائمة الكباتن وتعبئة الاختيارات
   async function fetchDrivers() {
     const select = document.getElementById('driverSelect');
     try {
@@ -66,7 +69,7 @@
     }
   }
 
-  // جلب الطلبات الخاصة بالكابتن المختار
+  // 2. جلب وتصفية الطلبات بمرونة معالجة الـ ID
   async function loadDriverOrders() {
     const driverId = document.getElementById('driverSelect').value;
     const container = document.getElementById('ordersContainer');
@@ -81,8 +84,10 @@
       if (!res.ok) throw new Error('فشل جلب الطلبات');
       const allOrders = await res.json();
 
-      // تصفية الطلبات الموكلة لهذا الكابتن بمرونة مقارنة الأرقام والنصوص
-      const myOrders = allOrders.filter(o => String(o.driverId) === String(driverId));
+      // المقارنة بالتحويل لنصوص لضمان المطابقة بين الأرقام والنصوص
+      const myOrders = allOrders.filter(o => 
+        o.driverId && String(o.driverId).trim() === String(driverId).trim()
+      );
 
       if (myOrders.length === 0) {
         container.innerHTML = '<p style="color: #94a3b8;">لا توجد طلبات موكلة إليك حالياً.</p>';
@@ -98,6 +103,7 @@
           <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'}</p>
           <p><strong>الهاتف:</strong> ${order.phone || '-'}</p>
           <p><strong>العنوان:</strong> ${order.address || '-'}</p>
+          <p><strong>الإجمالي:</strong> ${order.total || 0} ج.م</p>
           
           ${order.status !== 'تم التسليم' ? `
             <button class="btn" onclick="markAsDelivered('${order.id}')">تأكيد التسليم للعميل ✅</button>
@@ -113,7 +119,7 @@
     }
   }
 
-  // تغيير حالة الطلب إلى تم التسليم
+  // 3. تحديث حالة الطلب إلى تم التسليم
   async function markAsDelivered(orderId) {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
@@ -131,7 +137,6 @@
     }
   }
 
-  // التشغيل عند فتح الصفحة
   document.addEventListener('DOMContentLoaded', fetchDrivers);
 </script>
 
