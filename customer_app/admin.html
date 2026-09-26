@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - لوحة التحكم وإدارة الكباتن</title>
+  <title>READY OS - لوحة التحكم وإسناد الطلبات</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
@@ -33,23 +33,23 @@
 
 <div class="container">
   <header>
-    <h1>📦 READY OS - لوحة التحكم وإسناد الطلبات</h1>
+    <h1>📦 READY OS - لوحة التحكم وإصلاح الإسناد</h1>
     <button class="btn btn-primary" onclick="loadAllData()">تحديث البيانات 🔄</button>
   </header>
 
-  <!-- إضافة صنف للمنيو -->
+  <!-- إضافة وجبة -->
   <div class="section-card">
     <div class="section-title">🍔 إضافة وجبة / صنف جديد للقائمة</div>
     <form id="addMenuForm" class="form-row">
       <input type="text" id="itemName" class="form-control" placeholder="اسم الوجبة" required>
-      <input type="text" id="itemCategory" class="form-control" placeholder="التصنيف (مثل: مشويات، بيتزا)">
+      <input type="text" id="itemCategory" class="form-control" placeholder="التصنيف">
       <input type="number" id="itemPrice" class="form-control" placeholder="السعر (ج.م)" required>
       <button type="submit" class="btn btn-success">إضافة إلى المنيو ➕</button>
     </form>
   </div>
 
   <div class="grid-2">
-    <!-- قائمة الطلبات وإسناد الكباتن -->
+    <!-- الطلبات والإسناد -->
     <div class="section-card">
       <div class="section-title">🛒 الطلبات الواردة والإسناد</div>
       <div id="ordersList">
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <!-- إدارة إضافة وحذف الكباتن -->
+    <!-- إدارة الكباتن -->
     <div class="section-card">
       <div class="section-title">🚴 إدارة الكباتن (إضافة / حذف)</div>
       <form id="addDriverForm" class="form-row">
@@ -81,11 +81,11 @@
     await loadOrders();
   }
 
-  // جلب الكباتن مع زر الحذف
+  // 1. جلب الكباتن وتحديث القائمة العامة
   async function loadDrivers() {
     try {
       const res = await fetch('/api/drivers');
-      if (!res.ok) throw new Error('Network error');
+      if (!res.ok) throw new Error('خطأ شبكة');
       cachedDrivers = await res.json();
 
       const container = document.getElementById('driversList');
@@ -98,7 +98,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #334155;">
           <div>
             <strong>${d.name}</strong> 
-            <div style="font-size:12px; color:#94a3b8;">📱 ${d.phone} | <span style="color:${d.status === 'متاح' ? '#10b981' : '#f59e0b'};">${d.status}</span></div>
+            <div style="font-size:12px; color:#94a3b8;">📱 ${d.phone} | ID: ${d.id}</div>
           </div>
           <button class="btn btn-danger" onclick="deleteDriver('${d.id}')">حذف 🗑️</button>
         </div>
@@ -108,7 +108,7 @@
     }
   }
 
-  // حذف كابتن
+  // 2. حذف كابتن مع تحديث الشاشة فوراً
   async function deleteDriver(id) {
     if (!confirm('هل أنت تأكد من رغبتك في حذف هذا الكابتن؟')) return;
 
@@ -116,20 +116,18 @@
       const res = await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
       if (res.ok) {
         alert('تم حذف الكابتن بنجاح!');
-        loadAllData();
-      } else {
-        alert('فشل عملية الحذف.');
+        await loadAllData(); // إعادة جلب البيانات لمنع الإسناد لكابتن محذوف
       }
     } catch (err) {
-      alert('خطأ أثناء الاتصال بالسيرفر لحذف الكابتن.');
+      alert('خطأ أثناء حذف الكابتن.');
     }
   }
 
-  // جلب الطلبات
+  // 3. جلب الطلبات وعرض خيارات الكباتن المتاحين فقط
   async function loadOrders() {
     try {
       const res = await fetch('/api/orders');
-      if (!res.ok) throw new Error('Network error');
+      if (!res.ok) throw new Error('خطأ شبكة');
       const orders = await res.json();
 
       const container = document.getElementById('ordersList');
@@ -138,43 +136,58 @@
         return;
       }
 
-      container.innerHTML = orders.map(order => `
-        <div class="order-card">
-          <div class="order-header">
-            <span class="order-title">طلب #${order.id || order._id}</span>
-            <span style="color:#f59e0b; font-size:13px;">${order.status || 'قيد التحضير'}</span>
+      container.innerHTML = orders.map(order => {
+        // معرفة الكابتن الموكل إليه إن وجد
+        const currentAssignedDriver = cachedDrivers.find(d => String(d.id) === String(order.driverId));
+        const assignedName = currentAssignedDriver ? currentAssignedDriver.name : 'غير محدد';
+
+        return `
+          <div class="order-card">
+            <div class="order-header">
+              <span class="order-title">طلب #${order.id}</span>
+              <span style="color:#f59e0b; font-size:13px;">${order.status}</span>
+            </div>
+            <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'} (${order.phone || '-'})</p>
+            <p><strong>الكابتن الحالي:</strong> <span style="color:#10b981; font-weight:bold;">${assignedName}</span></p>
+            
+            <div class="driver-assign-box">
+              <select id="select-driver-${order.id}" class="form-control" style="background:#1e293b;">
+                <option value="">-- اختر كابتن للإسناد --</option>
+                ${cachedDrivers.map(d => `
+                  <option value="${d.id}" ${String(order.driverId) === String(d.id) ? 'selected' : ''}>
+                    ${d.name} (${d.phone})
+                  </option>
+                `).join('')}
+              </select>
+              <button class="btn btn-primary" onclick="assignDriver('${order.id}')">إسناد 🚀</button>
+            </div>
           </div>
-          <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'} (${order.phone || '-'})</p>
-          <p><strong>الطلبات:</strong> ${order.items ? order.items.map(i => i.name).join('، ') : 'وجبات متنوعة'}</p>
-          
-          <div class="driver-assign-box">
-            <select id="select-driver-${order.id}" class="form-control" style="background:#1e293b;">
-              <option value="">-- اختر كابتن لإسناد الطلب --</option>
-              ${cachedDrivers.map(d => `<option value="${d.id}">${d.name} (${d.status})</option>`).join('')}
-            </select>
-            <button class="btn btn-primary" onclick="assignDriver('${order.id}')">إسناد 🚀</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     } catch (err) {
       document.getElementById('ordersList').innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
     }
   }
 
-  // إسناد كابتن
+  // 4. إسناد الطلب للكابتن المختار بدقة
   async function assignDriver(orderId) {
-    const driverId = document.getElementById(`select-driver-${orderId}`).value;
-    if (!driverId) return alert('يرجى اختيار كابتن أولاً!');
+    const selectElement = document.getElementById(`select-driver-${orderId}`);
+    const selectedDriverId = selectElement.value;
+
+    if (!selectedDriverId) return alert('يرجى اختيار كابتن من القائمة أولاً!');
 
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'في الطريق مع الكابتن', driverId: driverId })
+        body: JSON.stringify({ 
+          status: 'في الطريق مع الكابتن', 
+          driverId: selectedDriverId 
+        })
       });
 
       if (res.ok) {
-        alert('تم إسناد الطلب بنجاح!');
+        alert('تم إسناد الطلب للكابتن المختار بنجاح!');
         loadAllData();
       }
     } catch (err) {
@@ -182,45 +195,27 @@
     }
   }
 
-  // إضافة كابتن
+  // 5. إضافة كابتن جديد
   document.getElementById('addDriverForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('driverName').value;
     const phone = document.getElementById('driverPhone').value;
 
     try {
-      await fetch('/api/drivers', {
+      const res = await fetch('/api/drivers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone })
       });
-      document.getElementById('driverName').value = '';
-      document.getElementById('driverPhone').value = '';
-      loadAllData();
+
+      if (res.ok) {
+        alert('تم إضافة الكابتن بنجاح!');
+        document.getElementById('driverName').value = '';
+        document.getElementById('driverPhone').value = '';
+        await loadAllData();
+      }
     } catch (err) {
       alert('خطأ أثناء إضافة الكابتن');
-    }
-  });
-
-  // إضافة وجبة
-  document.getElementById('addMenuForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('itemName').value;
-    const category = document.getElementById('itemCategory').value;
-    const price = document.getElementById('itemPrice').value;
-
-    try {
-      await fetch('/api/menu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, category, price })
-      });
-      alert('تمت إضافة الوجبة بنجاح!');
-      document.getElementById('itemName').value = '';
-      document.getElementById('itemCategory').value = '';
-      document.getElementById('itemPrice').value = '';
-    } catch (err) {
-      alert('خطأ أثناء إضافة الوجبة');
     }
   });
 
