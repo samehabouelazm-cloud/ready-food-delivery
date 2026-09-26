@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - لوحة التحكم وإسناد الطلبات</title>
+  <title>READY OS - لوحة التحكم وإصلاح الإسناد</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
@@ -42,7 +42,7 @@
     <div class="section-title">🍔 إضافة وجبة / صنف جديد للقائمة</div>
     <form id="addMenuForm" class="form-row">
       <input type="text" id="itemName" class="form-control" placeholder="اسم الوجبة" required>
-      <input type="text" id="itemCategory" class="form-control" placeholder="التصنيف">
+      <input type="text" id="itemCategory" class="form-control" placeholder="التصنيف (مثل: مشويات، بيتزا)">
       <input type="number" id="itemPrice" class="form-control" placeholder="السعر (ج.م)" required>
       <button type="submit" class="btn btn-success">إضافة إلى المنيو ➕</button>
     </form>
@@ -81,14 +81,14 @@
     await loadOrders();
   }
 
-  // 1. جلب الكباتن وتحديث القائمة العامة
+  // 1. جلب قائمة الكباتن
   async function loadDrivers() {
+    const container = document.getElementById('driversList');
     try {
       const res = await fetch('/api/drivers');
       if (!res.ok) throw new Error('خطأ شبكة');
       cachedDrivers = await res.json();
 
-      const container = document.getElementById('driversList');
       if (!cachedDrivers || cachedDrivers.length === 0) {
         container.innerHTML = '<p style="color:#94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>';
         return;
@@ -98,17 +98,17 @@
         <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #334155;">
           <div>
             <strong>${d.name}</strong> 
-            <div style="font-size:12px; color:#94a3b8;">📱 ${d.phone} | ID: ${d.id}</div>
+            <div style="font-size:12px; color:#94a3b8;">📱 ${d.phone}</div>
           </div>
           <button class="btn btn-danger" onclick="deleteDriver('${d.id}')">حذف 🗑️</button>
         </div>
       `).join('');
     } catch (err) {
-      document.getElementById('driversList').innerHTML = '<p style="color:#ef4444;">خطأ في تحميل الكباتن.</p>';
+      container.innerHTML = '<p style="color:#ef4444;">خطأ في تحميل الكباتن.</p>';
     }
   }
 
-  // 2. حذف كابتن مع تحديث الشاشة فوراً
+  // 2. حذف كابتن مع إلغاء الإسناد المرتبط به تلقائياً
   async function deleteDriver(id) {
     if (!confirm('هل أنت تأكد من رغبتك في حذف هذا الكابتن؟')) return;
 
@@ -116,30 +116,29 @@
       const res = await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
       if (res.ok) {
         alert('تم حذف الكابتن بنجاح!');
-        await loadAllData(); // إعادة جلب البيانات لمنع الإسناد لكابتن محذوف
+        await loadAllData();
       }
     } catch (err) {
       alert('خطأ أثناء حذف الكابتن.');
     }
   }
 
-  // 3. جلب الطلبات وعرض خيارات الكباتن المتاحين فقط
+  // 3. جلب وتحديث الطلبات المتاحة
   async function loadOrders() {
+    const container = document.getElementById('ordersList');
     try {
       const res = await fetch('/api/orders');
       if (!res.ok) throw new Error('خطأ شبكة');
       const orders = await res.json();
 
-      const container = document.getElementById('ordersList');
       if (!orders || orders.length === 0) {
         container.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات حالياً.</p>';
         return;
       }
 
       container.innerHTML = orders.map(order => {
-        // معرفة الكابتن الموكل إليه إن وجد
         const currentAssignedDriver = cachedDrivers.find(d => String(d.id) === String(order.driverId));
-        const assignedName = currentAssignedDriver ? currentAssignedDriver.name : 'غير محدد';
+        const assignedName = currentAssignedDriver ? currentAssignedDriver.name : 'غير مسند';
 
         return `
           <div class="order-card">
@@ -165,11 +164,11 @@
         `;
       }).join('');
     } catch (err) {
-      document.getElementById('ordersList').innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
+      container.innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
     }
   }
 
-  // 4. إسناد الطلب للكابتن المختار بدقة
+  // 4. دالة إسناد الطلب
   async function assignDriver(orderId) {
     const selectElement = document.getElementById(`select-driver-${orderId}`);
     const selectedDriverId = selectElement.value;
@@ -187,7 +186,7 @@
       });
 
       if (res.ok) {
-        alert('تم إسناد الطلب للكابتن المختار بنجاح!');
+        alert('تم إسناد الطلب بنجاح!');
         loadAllData();
       }
     } catch (err) {
@@ -219,79 +218,32 @@
     }
   });
 
-  document.addEventListener('DOMContentLoaded', loadAllData);
-<script>
-  // جلب البيانات من LocalStorage لضمان بقائها حتى على Vercel
-  function getLocalData(key, defaultData) {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : defaultData;
-  }
+  // 6. إضافة صنف للمنيو
+  document.getElementById('addMenuForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('itemName').value;
+    const category = document.getElementById('itemCategory').value;
+    const price = document.getElementById('itemPrice').value;
 
-  function setLocalData(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-  }
+    try {
+      const res = await fetch('/api/menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, category, price: Number(price) })
+      });
 
-  // التهيئة الأولى للبيانات
-  let drivers = getLocalData('ready_drivers', [
-    { id: "1", name: "كابتن محمد", phone: "01198765432" }
-  ]);
-  
-  let orders = getLocalData('ready_orders', []);
-
-  // 1. عرض وتحديث القوائم
-  function renderAll() {
-    renderDrivers();
-    renderOrders();
-  }
-
-  // 2. دالة حذف الكابتن نهائياً
-  function deleteDriver(driverId) {
-    if (!confirm('هل أنت تأكد من حذف هذا الكابتن؟')) return;
-
-    // حذف الكابتن من القائمة
-    drivers = drivers.filter(d => String(d.id) !== String(driverId));
-    setLocalData('ready_drivers', drivers);
-
-    // إلغاء إسناد الطلبات الموكلة له
-    orders.forEach(order => {
-      if (String(order.driverId) === String(driverId)) {
-        order.driverId = null;
-        order.status = 'قيد الانتظار';
+      if (res.ok) {
+        alert('تم إضافة الصنف للمنيو بنجاح!');
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemCategory').value = '';
+        document.getElementById('itemPrice').value = '';
       }
-    });
-    setLocalData('ready_orders', orders);
-
-    alert('تم حذف الكابتن وإلغاء كافة التكليفات الموكلة إليه!');
-    renderAll();
-  }
-
-  // 3. دالة الإسناد التلقائي للكابتن الأقرب (الموجودين فقط)
-  function autoAssignOrder(orderId) {
-    // تصفية الكباتن المتاحين فقط والفعليين
-    if (drivers.length === 0) {
-      alert('خطأ: لا يوجد كباتن مسجلين حالياً لإسناد الطلب إليهم!');
-      return;
+    } catch (err) {
+      alert('خطأ أثناء إضافة الوجبة');
     }
+  });
 
-    // اختيار أول كابتن متاح من القائمة الفعلية الحالية
-    const assignedDriver = drivers[0];
-
-    orders = orders.map(order => {
-      if (String(order.id) === String(orderId)) {
-        return {
-          ...order,
-          driverId: assignedDriver.id,
-          status: 'في الطريق مع الكابتن'
-        };
-      }
-      return order;
-    });
-
-    setLocalData('ready_orders', orders);
-    alert(`تم إسناد الطلب بنجاح للكابتن: ${assignedDriver.name}`);
-    renderAll();
-  }
-
-  // تشغيل عند تحميل الصفحة
-  document.addEventListener('DOMContentLoaded', renderAll);
+  document.addEventListener('DOMContentLoaded', loadAllData);
 </script>
+</body>
+</html>
