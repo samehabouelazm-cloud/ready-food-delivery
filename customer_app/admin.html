@@ -220,6 +220,78 @@
   });
 
   document.addEventListener('DOMContentLoaded', loadAllData);
+<script>
+  // جلب البيانات من LocalStorage لضمان بقائها حتى على Vercel
+  function getLocalData(key, defaultData) {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : defaultData;
+  }
+
+  function setLocalData(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  // التهيئة الأولى للبيانات
+  let drivers = getLocalData('ready_drivers', [
+    { id: "1", name: "كابتن محمد", phone: "01198765432" }
+  ]);
+  
+  let orders = getLocalData('ready_orders', []);
+
+  // 1. عرض وتحديث القوائم
+  function renderAll() {
+    renderDrivers();
+    renderOrders();
+  }
+
+  // 2. دالة حذف الكابتن نهائياً
+  function deleteDriver(driverId) {
+    if (!confirm('هل أنت تأكد من حذف هذا الكابتن؟')) return;
+
+    // حذف الكابتن من القائمة
+    drivers = drivers.filter(d => String(d.id) !== String(driverId));
+    setLocalData('ready_drivers', drivers);
+
+    // إلغاء إسناد الطلبات الموكلة له
+    orders.forEach(order => {
+      if (String(order.driverId) === String(driverId)) {
+        order.driverId = null;
+        order.status = 'قيد الانتظار';
+      }
+    });
+    setLocalData('ready_orders', orders);
+
+    alert('تم حذف الكابتن وإلغاء كافة التكليفات الموكلة إليه!');
+    renderAll();
+  }
+
+  // 3. دالة الإسناد التلقائي للكابتن الأقرب (الموجودين فقط)
+  function autoAssignOrder(orderId) {
+    // تصفية الكباتن المتاحين فقط والفعليين
+    if (drivers.length === 0) {
+      alert('خطأ: لا يوجد كباتن مسجلين حالياً لإسناد الطلب إليهم!');
+      return;
+    }
+
+    // اختيار أول كابتن متاح من القائمة الفعلية الحالية
+    const assignedDriver = drivers[0];
+
+    orders = orders.map(order => {
+      if (String(order.id) === String(orderId)) {
+        return {
+          ...order,
+          driverId: assignedDriver.id,
+          status: 'في الطريق مع الكابتن'
+        };
+      }
+      return order;
+    });
+
+    setLocalData('ready_orders', orders);
+    alert(`تم إسناد الطلب بنجاح للكابتن: ${assignedDriver.name}`);
+    renderAll();
+  }
+
+  // تشغيل عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', renderAll);
 </script>
-</body>
-</html>
