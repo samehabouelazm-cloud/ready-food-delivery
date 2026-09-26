@@ -81,12 +81,11 @@
     await loadOrders();
   }
 
-  // 1. جلب قائمة الكباتن
+  // 1. جلب الكباتن
   async function loadDrivers() {
     const container = document.getElementById('driversList');
     try {
       const res = await fetch('/api/drivers');
-      if (!res.ok) throw new Error('خطأ شبكة');
       cachedDrivers = await res.json();
 
       if (!cachedDrivers || cachedDrivers.length === 0) {
@@ -108,9 +107,9 @@
     }
   }
 
-  // 2. حذف كابتن مع إلغاء الإسناد المرتبط به تلقائياً
+  // 2. حذف كابتن وتحديث الشاشة فوراً
   async function deleteDriver(id) {
-    if (!confirm('هل أنت تأكد من رغبتك في حذف هذا الكابتن؟')) return;
+    if (!confirm('هل أنت تأكد من حذف هذا الكابتن؟')) return;
 
     try {
       const res = await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
@@ -119,16 +118,15 @@
         await loadAllData();
       }
     } catch (err) {
-      alert('خطأ أثناء حذف الكابتن.');
+      alert('حدث خطأ أثناء الحذف.');
     }
   }
 
-  // 3. جلب وتحديث الطلبات المتاحة
+  // 3. جلب الطلبات وعرض خيارات الكباتن المتاحين الحقيقيين فقط
   async function loadOrders() {
     const container = document.getElementById('ordersList');
     try {
       const res = await fetch('/api/orders');
-      if (!res.ok) throw new Error('خطأ شبكة');
       const orders = await res.json();
 
       if (!orders || orders.length === 0) {
@@ -137,8 +135,8 @@
       }
 
       container.innerHTML = orders.map(order => {
-        const currentAssignedDriver = cachedDrivers.find(d => String(d.id) === String(order.driverId));
-        const assignedName = currentAssignedDriver ? currentAssignedDriver.name : 'غير مسند';
+        const currentDriver = cachedDrivers.find(d => String(d.id) === String(order.driverId));
+        const assignedName = currentDriver ? currentDriver.name : 'غير مسند';
 
         return `
           <div class="order-card">
@@ -149,9 +147,9 @@
             <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'} (${order.phone || '-'})</p>
             <p><strong>الكابتن الحالي:</strong> <span style="color:#10b981; font-weight:bold;">${assignedName}</span></p>
             
-            <div class="driver-assign-box">
+            <div class="driver-assign-box" style="margin-top:10px;">
               <select id="select-driver-${order.id}" class="form-control" style="background:#1e293b;">
-                <option value="">-- اختر كابتن للإسناد --</option>
+                <option value="">-- اختر كابتن مسجل --</option>
                 ${cachedDrivers.map(d => `
                   <option value="${d.id}" ${String(order.driverId) === String(d.id) ? 'selected' : ''}>
                     ${d.name} (${d.phone})
@@ -159,87 +157,89 @@
                 `).join('')}
               </select>
               <button class="btn btn-primary" onclick="assignDriver('${order.id}')">إسناد 🚀</button>
+              <button class="btn btn-success" onclick="autoAssignDriver('${order.id}')">تلقائي ⚡</button>
             </div>
           </div>
         `;
       }).join('');
     } catch (err) {
-      container.innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
+      container.innerHTML = '<p style="color:#ef4444;">خطأ أثناء تحميل الطلبات.</p>';
     }
   }
 
-  // 4. دالة إسناد الطلب
+  // 4. إسناد يدوي لكابتن معين
   async function assignDriver(orderId) {
-    const selectElement = document.getElementById(`select-driver-${orderId}`);
-    const selectedDriverId = selectElement.value;
+    const driverId = document.getElementById(`select-driver-${orderId}`).value;
+    if (!driverId) return alert('اختر كابتن من القائمة أولاً!');
 
-    if (!selectedDriverId) return alert('يرجى اختيار كابتن من القائمة أولاً!');
+    const res = await fetch(`/api/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'في الطريق مع الكابتن', driverId })
+    });
 
-    try {
-      const res = await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status: 'في الطريق مع الكابتن', 
-          driverId: selectedDriverId 
-        })
-      });
-
-      if (res.ok) {
-        alert('تم إسناد الطلب بنجاح!');
-        loadAllData();
-      }
-    } catch (err) {
-      alert('خطأ أثناء إسناد الطلب.');
+    const data = await res.json();
+    if (res.ok) {
+      alert('تم الإسناد بنجاح!');
+      loadAllData();
+    } else {
+      alert(data.error || 'خطأ في الإسناد');
     }
   }
 
-  // 5. إضافة كابتن جديد
+  // 5. إسناد تلقائي لأول كابتن متاح
+  async function autoAssignDriver(orderId) {
+    const res = await fetch(`/api/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ autoAssign: true })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message);
+      loadAllData();
+    } else {
+      alert(data.error || 'فشل الإسناد التلقائي');
+    }
+  }
+
+  // إضافة كابتن
   document.getElementById('addDriverForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('driverName').value;
     const phone = document.getElementById('driverPhone').value;
 
-    try {
-      const res = await fetch('/api/drivers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone })
-      });
+    const res = await fetch('/api/drivers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone })
+    });
 
-      if (res.ok) {
-        alert('تم إضافة الكابتن بنجاح!');
-        document.getElementById('driverName').value = '';
-        document.getElementById('driverPhone').value = '';
-        await loadAllData();
-      }
-    } catch (err) {
-      alert('خطأ أثناء إضافة الكابتن');
+    if (res.ok) {
+      document.getElementById('driverName').value = '';
+      document.getElementById('driverPhone').value = '';
+      loadAllData();
     }
   });
 
-  // 6. إضافة صنف للمنيو
+  // إضافة وجبة
   document.getElementById('addMenuForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('itemName').value;
     const category = document.getElementById('itemCategory').value;
     const price = document.getElementById('itemPrice').value;
 
-    try {
-      const res = await fetch('/api/menu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, category, price: Number(price) })
-      });
+    const res = await fetch('/api/menu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category, price: Number(price) })
+    });
 
-      if (res.ok) {
-        alert('تم إضافة الصنف للمنيو بنجاح!');
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemCategory').value = '';
-        document.getElementById('itemPrice').value = '';
-      }
-    } catch (err) {
-      alert('خطأ أثناء إضافة الوجبة');
+    if (res.ok) {
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemCategory').value = '';
+      document.getElementById('itemPrice').value = '';
     }
   });
 
