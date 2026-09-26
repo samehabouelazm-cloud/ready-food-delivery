@@ -3,11 +3,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware لتمرير JSON والملفات الاستاتيكية
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'customer_app')));
 
-// --- البيانات في الذاكرة (Memory DB) ---
+// --- البيانات في الذاكرة ---
 global.menu = global.menu || [
   { id: 1, name: "سمك بلطي مشوي - للكيلو", category: "أسماك", price: 180 },
   { id: 2, name: "وجبة كفتة مشوية", category: "مشويات", price: 150 },
@@ -21,22 +20,21 @@ global.drivers = global.drivers || [
 
 global.orders = global.orders || [];
 
-// ================= API ENDPOINTS =================
-
-// 1. مسارات المنيو (Menu APIs)
-app.get('/api/menu', (req, res) => {
-    res.json(global.menu);
-});
-
+// --- APIs المنيو ---
+app.get('/api/menu', (req, res) => res.json(global.menu));
 app.post('/api/menu', (req, res) => {
     const newItem = { id: Date.now(), ...req.body };
     global.menu.push(newItem);
     res.status(201).json(newItem);
 });
 
-// 2. مسارات الكباتن (Drivers APIs)
+// --- APIs الكباتن ---
 app.get('/api/drivers', (req, res) => {
-    res.json(global.drivers);
+    try {
+        res.json(global.drivers);
+    } catch (err) {
+        res.status(500).json({ error: 'خطأ في السيرفر' });
+    }
 });
 
 app.post('/api/drivers', (req, res) => {
@@ -47,19 +45,12 @@ app.post('/api/drivers', (req, res) => {
 
 app.delete('/api/drivers/:id', (req, res) => {
     const { id } = req.params;
-    const initialLength = global.drivers.length;
     global.drivers = global.drivers.filter(d => String(d.id) !== String(id));
-
-    if (global.drivers.length === initialLength) {
-        return res.status(404).json({ error: 'الكابتن غير موجود' });
-    }
-    res.json({ message: 'تم حذف الكابتن بنجاح' });
+    res.json({ message: 'تم الحذف بنجاح' });
 });
 
-// 3. مسارات الطلبات (Orders APIs)
-app.get('/api/orders', (req, res) => {
-    res.json(global.orders);
-});
+// --- APIs الطلبات ---
+app.get('/api/orders', (req, res) => res.json(global.orders));
 
 app.post('/api/orders', (req, res) => {
     const newOrder = { 
@@ -75,17 +66,14 @@ app.post('/api/orders', (req, res) => {
 app.put('/api/orders/:id/status', (req, res) => {
     const { id } = req.params;
     const { status, driverId } = req.body;
-    
     const order = global.orders.find(o => String(o.id) === String(id));
-    if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
-
-    if (status) order.status = status;
-    if (driverId) order.driverId = driverId;
-
-    res.json(order);
+    
+    if (order) {
+        if (status) order.status = status;
+        if (driverId) order.driverId = driverId;
+        return res.json(order);
+    }
+    res.status(404).json({ error: 'الطلب غير موجود' });
 });
 
-// تشغيل السيرفر
-app.listen(PORT, () => {
-    console.log(`✅ السيرفر يعمل بنجاح على: http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 READY OS running on http://localhost:${PORT}`));
