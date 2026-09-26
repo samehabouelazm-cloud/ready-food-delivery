@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -6,92 +7,108 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'customer_app')));
 
-// --- البيانات في الذاكرة (معرفات نصية موحدة) ---
-global.menu = global.menu || [
-  { id: "1", name: "سمك بلطي مشوي - للكيلو", category: "أسماك", price: 180 },
-  { id: "2", name: "وجبة كفتة مشوية", category: "مشويات", price: 150 }
-];
+const DATA_FILE = path.join(__dirname, 'data.json');
 
-global.drivers = global.drivers || [
-  { id: "101", name: "كابتن أحمد", phone: "01012345678", status: "متاح" }
-];
+// دالة قراءة البيانات
+function readData() {
+  if (!fs.existsSync(DATA_FILE)) {
+    const initialData = {
+      drivers: [{ id: "101", name: "كابتن محمد", phone: "01198765432" }],
+      orders: [],
+      menu: [{ id: "1", name: "وجبة كفتة", category: "مشويات", price: 150 }]
+    };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2));
+    return initialData;
+  }
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  } catch (e) {
+    return { drivers: [], orders: [], menu: [] };
+  }
+}
 
-global.orders = global.orders || [];
-
-// --- APIs المنيو ---
-app.get('/api/menu', (req, res) => res.json(global.menu));
-app.post('/api/menu', (req, res) => {
-  const newItem = { id: Date.now().toString(), ...req.body };
-  global.menu.push(newItem);
-  res.status(201).json(newItem);
-});
+// دالة حفظ البيانات
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
 
 // --- APIs الكباتن ---
-app.get('/api/drivers', (req, res) => res.json(global.drivers));
+app.get('/api/drivers', (req, res) => {
+  const db = readData();
+  res.json(db.drivers);
+});
 
 app.post('/api/drivers', (req, res) => {
-  const newDriver = { id: Date.now().toString(), status: 'متاح', ...req.body };
-  global.drivers.push(newDriver);
+  const db = readData();
+  const newDriver = { id: Date.now().toString(), ...req.body };
+  db.drivers.push(newDriver);
+  saveData(db);
   res.status(201).json(newDriver);
 });
 
-// حذف الكابتن + إزالة إسناده من كافة الطلبات
+// الحذف الحقيقي والدائم للطلب والكابتن
 app.delete('/api/drivers/:id', (req, res) => {
-  const { id } = req.params;
-  
-  // 1. حذف الكابتن
-  global.drivers = global.drivers.filter(d => String(d.id) !== String(id));
+  const db = readData();
+  const id = String(req.params.id);
 
-  // 2. تصفية جميع الطلبات الموكلة له وإعادتها لقيد الانتظار
-  global.orders.forEach(order => {
-    if (String(order.driverId) === String(id)) {
-      order.driverId = null;
-      order.status = 'قيد الانتظار';
+  // حذف الكابتن نهائياً من الملف
+  db.drivers = db.drivers.filter(d => String(d.id) !== id);
+
+  // إزالة إسناده من جميع الطلبات
+  db.orders.forEach(o => {
+    if (String(o.driverId) === id) {
+      o.driverId = null;
+      o.status = 'قيد الانتظار';
     }
   });
 
-  res.json({ message: 'تم حذف الكابتن وتنظيف الطلبات بنجاح' });
+  saveData(db);
+  res.json({ message: 'تم الحذف الدائم وتحديث الملف بنجاح' });
 });
 
 // --- APIs الطلبات ---
-app.get('/api/orders', (req, res) => res.json(global.orders));
+app.get('/api/orders', (req, res) => {
+  const db = readData();
+  res.json(db.orders);
+});
 
 app.post('/api/orders', (req, res) => {
-  const newOrder = { 
-    id: 'ord_' + Math.floor(Math.random() * 1000000), 
-    status: 'قيد الانتظار', 
+  const db = readData();
+  const newOrder = {
+    id: 'ord_' + Math.floor(Math.random() * 1000000),
+    status: 'قيد الانتظار',
     driverId: null,
     createdAt: new Date(),
-    ...req.body 
+    ...req.body
   };
-  global.orders.push(newOrder);
+  db.orders.push(newOrder);
+  saveData(db);
   res.status(201).json(newOrder);
 });
 
-// تحديث حالة وإسناد الطلب مع التحقق الإجباري من وجود الكابتن
 app.put('/api/orders/:id/status', (req, res) => {
+  const db = readData();
   const { id } = req.params;
   const { status, driverId, autoAssign } = req.body;
-  
-  const order = global.orders.find(o => String(o.id) === String(id));
+
+  const order = db.orders.find(o => String(o.id) === String(id));
   if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
 
-  // في حالة الإسناد التلقائي
   if (autoAssign) {
-    if (global.drivers.length === 0) {
-      return res.status(400).json({ error: 'لا يوجد كباتن مسجلين حالياً لإسناد الطلب!' });
+    if (db.drivers.length === 0) {
+      return res.status(400).json({ error: 'لا يوجد كباتن مسجلين حالياً!' });
     }
-    const driver = global.drivers[0];
+    const driver = db.drivers[0];
     order.driverId = String(driver.id);
     order.status = 'في الطريق مع الكابتن';
+    saveData(db);
     return res.json({ message: `تم إسناد الطلب للكابتن: ${driver.name}`, order });
   }
 
-  // في حالة الإسناد اليدوي
   if (driverId) {
-    const exists = global.drivers.some(d => String(d.id) === String(driverId));
+    const exists = db.drivers.some(d => String(d.id) === String(driverId));
     if (!exists) {
-      return res.status(400).json({ error: 'الكابتن المختار غير موجود أو تم حذفه!' });
+      return res.status(400).json({ error: 'هذا الكابتن غير موجود أو تم حذفه!' });
     }
     order.driverId = String(driverId);
     order.status = status || 'في الطريق مع الكابتن';
@@ -99,7 +116,11 @@ app.put('/api/orders/:id/status', (req, res) => {
     order.status = status;
   }
 
+  saveData(db);
   res.json({ message: 'تم تحديث الطلب بنجاح', order });
 });
+
+// --- APIs المنيو ---
+app.get('/api/menu', (req, res) => res.json(readData().menu));
 
 app.listen(PORT, () => console.log(`🚀 READY OS running on http://localhost:${PORT}`));
