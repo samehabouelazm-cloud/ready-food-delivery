@@ -3,167 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - تطبيق العميل</title>
+  <title>جاهز في بلطيم - طلب الطعام أونلاين</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
     .container { max-width: 800px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 25px; padding: 20px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #f59e0b; font-size: 26px; }
-    header p { color: #94a3b8; font-size: 14px; margin-top: 5px; }
-    .section-card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
-    .section-title { font-size: 20px; color: #38bdf8; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
-    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-    .menu-item { background: #0f172a; border: 1px solid #334155; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; }
-    .menu-item h3 { color: #fff; font-size: 16px; margin-bottom: 5px; }
-    .menu-item .price { color: #10b981; font-weight: bold; margin-bottom: 10px; }
-    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #3b82f6; color: #fff; width: 100%; transition: 0.2s; }
+    header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
+    header h1 { color: #38bdf8; font-size: 22px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .menu-card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+    .price { color: #10b981; font-weight: bold; margin: 10px 0; font-size: 18px; }
+    .btn { padding: 8px 15px; background: #3b82f6; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn:hover { background: #2563eb; }
-    .btn-success { background: #10b981; }
-    .btn-success:hover { background: #059669; }
-    .form-control { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; margin-bottom: 12px; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>READY OS 🍔</h1>
-    <p>نظام طلب الطعام والتوصيل الذكي</p>
+    <h1>🍕 جاهز في بلطيم</h1>
+    <span style="color:#94a3b8;">أسرع توصيل في بلطيم 🚀</span>
   </header>
 
-  <!-- قسم المنيو -->
-  <div class="section-card">
-    <div class="section-title">📜 المنيو</div>
-    <div id="menuContainer" class="menu-grid">
-      <p style="color: #94a3b8;">جاري تحميل المنيو...</p>
-    </div>
-  </div>
-
-  <!-- قسم إتمام الطلب -->
-  <div class="section-card">
-    <div class="section-title">🛒 إتمام الطلب</div>
-    <div id="cartItems">
-      <p style="color: #94a3b8;">السلة فارغة، اختر من المنيو أعلاه.</p>
-    </div>
-    <h3 style="margin: 15px 0; color: #10b981;">الإجمالي: <span id="totalPrice">0</span> ج.م</h3>
-
-    <form id="orderForm">
-      <label style="color:#cbd5e1; font-size:14px;">اسمك الكريم</label>
-      <input type="text" id="custName" class="form-control" placeholder="أدخل اسمك الكامل" required>
-
-      <label style="color:#cbd5e1; font-size:14px;">رقم الجوال</label>
-      <input type="tel" id="custPhone" class="form-control" placeholder="01xxxxxxxxx" required>
-
-      <label style="color:#cbd5e1; font-size:14px;">العنوان بالتفصيل</label>
-      <input type="text" id="custAddress" class="form-control" placeholder="اسم الشارع، المنطقة، رقم الشقة" required>
-
-      <button type="submit" class="btn btn-success" style="padding: 12px; font-size: 16px; margin-top: 10px;">إرسال الطلب الآن 🚀</button>
-    </form>
+  <h2 style="margin-bottom: 15px; color:#f59e0b;">قائمة الطعام (المنيو)</h2>
+  <div id="menuContainer" class="menu-grid">
+    <p style="color:#94a3b8;">جاري تحميل المنيو...</p>
   </div>
 </div>
 
 <script>
-  let cart = [];
-  let menuData = [];
-
-  // 1. جلب قائمة المنيو من السيرفر
-  async function fetchMenu() {
+  async function loadMenu() {
+    const container = document.getElementById('menuContainer');
     try {
       const res = await fetch('/api/menu');
-      if (!res.ok) throw new Error('فشل جلب البيانات');
-      menuData = await res.json();
+      const menu = await res.json();
 
-      const container = document.getElementById('menuContainer');
-      if (!menuData || menuData.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">القائمة فارغة حالياً.</p>';
+      if (!menu || menu.length === 0) {
+        container.innerHTML = '<p style="color:#94a3b8;">لا توجد وجبات في المنيو حالياً.</p>';
         return;
       }
 
-      container.innerHTML = menuData.map(item => `
-        <div class="menu-item">
-          <div>
-            <h3>${item.name}</h3>
-            <div class="price">${item.price} ج.م</div>
-          </div>
-          <button class="btn" onclick="addToCart(${item.id})">إضافة للسلة ➕</button>
+      container.innerHTML = menu.map(item => `
+        <div class="menu-card">
+          <h3>${item.name}</h3>
+          <p style="color:#94a3b8; font-size:12px;">${item.category || 'عام'}</p>
+          <div class="price">${item.price} ج.م</div>
+          <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
         </div>
       `).join('');
     } catch (err) {
-      document.getElementById('menuContainer').innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء تحميل المنيو من السيرفر.</p>';
+      container.innerHTML = '<p style="color:#ef4444;">خطأ في تحميل المنيو.</p>';
     }
   }
 
-  // 2. إضافة وجبة للسلة
-  function addToCart(id) {
-    const item = menuData.find(i => i.id == id);
-    if (item) {
-      cart.push(item);
-      updateCartUI();
-    }
-  }
-
-  // 3. تحديث واجهة السلة
-  function updateCartUI() {
-    const cartContainer = document.getElementById('cartItems');
-    const totalEl = document.getElementById('totalPrice');
-
-    if (cart.length === 0) {
-      cartContainer.innerHTML = '<p style="color:#94a3b8;">السلة فارغة، اختر من المنيو أعلاه.</p>';
-      totalEl.innerText = '0';
-      return;
-    }
-
-    cartContainer.innerHTML = cart.map((item, index) => `
-      <div class="cart-item">
-        <span>${item.name} - <strong>${item.price} ج.م</strong></span>
-        <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">حذف ❌</button>
-      </div>
-    `).join('');
-
-    const total = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
-    totalEl.innerText = total;
-  }
-
-  // 4. حذف عنصر من السلة
-  function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCartUI();
-  }
-
-  // 5. إرسال الطلب
-  document.getElementById('orderForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (cart.length === 0) return alert('يرجى إضافة وجبة واحدة على الأقل للسلة!');
-
-    const orderData = {
-      customerName: document.getElementById('custName').value,
-      phone: document.getElementById('custPhone').value,
-      address: document.getElementById('custAddress').value,
-      items: cart,
-      total: cart.reduce((sum, item) => sum + parseFloat(item.price), 0)
-    };
+  async function placeOrder(itemName) {
+    const name = prompt('أدخل اسمك الكريم:');
+    if (!name) return;
+    const phone = prompt('أدخل رقم جوالك:');
+    if (!phone) return;
 
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify({ customerName: name, phone: phone, item: itemName })
       });
 
       if (res.ok) {
-        alert('تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً.');
-        cart = [];
-        updateCartUI();
-        document.getElementById('orderForm').reset();
+        alert('تم إرسال طلبك بنجاح! يتم تجهيزه الآن 🚀');
       }
     } catch (err) {
-      alert('حدث خطأ أثناء إرسال الطلب.');
+      alert('حدث خطأ في إرسال الطلب');
     }
-  });
+  }
 
-  document.addEventListener('DOMContentLoaded', fetchMenu);
+  document.addEventListener('DOMContentLoaded', loadMenu);
 </script>
 </body>
 </html>

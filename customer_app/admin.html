@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - لوحة التحكم وإصلاح الإسناد</title>
+  <title>جاهز في بلطيم - لوحة التحكم</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
@@ -33,7 +33,7 @@
 
 <div class="container">
   <header>
-    <h1>📦 READY OS - لوحة التحكم وإصلاح الإسناد</h1>
+    <h1>📦 جاهز في بلطيم - لوحة التحكم</h1>
     <button class="btn btn-primary" onclick="loadAllData()">تحديث البيانات 🔄</button>
   </header>
 
@@ -51,7 +51,7 @@
   <div class="grid-2">
     <!-- الطلبات والإسناد -->
     <div class="section-card">
-      <div class="section-title">🛒 الطلبات الواردة والإسناد</div>
+      <div class="section-title">🛒 الطلبات الواردة والإسناد اليدوي</div>
       <div id="ordersList">
         <p style="color: #94a3b8;">جاري تحميل الطلبات...</p>
       </div>
@@ -73,7 +73,7 @@
   </div>
 </div>
 
-<<script>
+<script>
   let cachedDrivers = [];
 
   async function loadAllData() {
@@ -122,7 +122,7 @@
     }
   }
 
-  // 3. عرض الطلبات مع قائمة اختيار يدوية لكافة الكباتن المتاحين
+  // 3. عرض الطلبات مع خيارات الإسناد اليدوي
   async function loadOrders() {
     const container = document.getElementById('ordersList');
     try {
@@ -166,7 +166,7 @@
     }
   }
 
-  // 4. تنفيذ الإسناد اليدوي
+  // 4. الإسناد اليدوي
   async function manualAssign(orderId) {
     const select = document.getElementById(`select-driver-${orderId}`);
     const driverId = select.value;
@@ -195,7 +195,7 @@
     }
   }
 
-  // إضافة كابتن جديد
+  // إضافة كابتن
   document.getElementById('addDriverForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('driverName').value;
@@ -214,5 +214,28 @@
     }
   });
 
+  // إضافة وجبة
+  document.getElementById('addMenuForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('itemName').value;
+    const category = document.getElementById('itemCategory').value;
+    const price = document.getElementById('itemPrice').value;
+
+    const res = await fetch('/api/menu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category, price: Number(price) })
+    });
+
+    if (res.ok) {
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemCategory').value = '';
+      document.getElementById('itemPrice').value = '';
+      alert('تمت إضافة الوجبة بنجاح!');
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', loadAllData);
 </script>
+</body>
+</html>

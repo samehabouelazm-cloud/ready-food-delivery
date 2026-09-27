@@ -3,142 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>READY OS - بوابة الكابتن</title>
+  <title>جاهز في بلطيم - تطبيق الكابتن</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
     .container { max-width: 600px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 25px; padding: 15px 20px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #38bdf8; font-size: 22px; }
-    .card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
-    .form-control { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 15px; margin-top: 8px; }
-    .order-card { background: #0f172a; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px solid #334155; }
-    .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px; }
-    .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; background: #10b981; color: #fff; }
-    .btn-delivered { background: #64748b; cursor: not-allowed; }
+    header { text-align: center; margin-bottom: 20px; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; }
+    header h1 { color: #10b981; font-size: 22px; }
+    .order-card { background: #1e293b; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
+    .status { font-size: 14px; font-weight: bold; color: #f59e0b; margin-top: 5px; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>🚴 بوابة الكابتن</h1>
+    <h1>🚴 جاهز في بلطيم - تطبيق الكابتن</h1>
+    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">قائمة الطلبات المسندة إليك</p>
   </header>
 
-  <div class="card">
-    <label for="driverSelect" style="font-weight: bold;">اختر حساب الكابتن الحالي:</label>
-    <select id="driverSelect" class="form-control" onchange="loadDriverOrders()">
-      <option value="">جاري تحميل الكباتن...</option>
-    </select>
-  </div>
-
-  <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <h3 style="color: #38bdf8;">📦 الطلبات الموكلة إليك</h3>
-      <button onclick="loadDriverOrders()" style="background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">تحديث 🔄</button>
-    </div>
-    <div id="ordersContainer">
-      <p style="color: #94a3b8;">اختر كابتن لعرض الطلبات.</p>
-    </div>
+  <div id="driverOrders">
+    <p style="color: #94a3b8; text-align:center;">جاري تحميل الطلبات المكلفة...</p>
   </div>
 </div>
 
 <script>
-  let driversList = [];
-
-  // 1. جلب قائمة الكباتن وتعبئة الاختيارات
-  async function fetchDrivers() {
-    const select = document.getElementById('driverSelect');
-    try {
-      const res = await fetch('/api/drivers');
-      if (!res.ok) throw new Error('فشل جلب الكباتن');
-      
-      driversList = await res.json();
-
-      if (!driversList || driversList.length === 0) {
-        select.innerHTML = '<option value="">لا يوجد كباتن مسجلين</option>';
-        return;
-      }
-
-      select.innerHTML = '<option value="">-- اختر الكابتن --</option>' + 
-        driversList.map(d => `<option value="${d.id}">${d.name} (${d.phone})</option>`).join('');
-
-    } catch (err) {
-      console.error(err);
-      select.innerHTML = '<option value="">خطأ في تحميل الكباتن</option>';
-    }
-  }
-
-  // 2. جلب وتصفية الطلبات بمرونة معالجة الـ ID
-  async function loadDriverOrders() {
-    const driverId = document.getElementById('driverSelect').value;
-    const container = document.getElementById('ordersContainer');
-
-    if (!driverId) {
-      container.innerHTML = '<p style="color: #94a3b8;">اختر كابتن لعرض الطلبات.</p>';
-      return;
-    }
-
+  async function loadMyOrders() {
+    const container = document.getElementById('driverOrders');
     try {
       const res = await fetch('/api/orders');
-      if (!res.ok) throw new Error('فشل جلب الطلبات');
-      const allOrders = await res.json();
+      const orders = await res.json();
 
-      // المقارنة بالتحويل لنصوص لضمان المطابقة بين الأرقام والنصوص
-      const myOrders = allOrders.filter(o => 
-        o.driverId && String(o.driverId).trim() === String(driverId).trim()
-      );
-
-      if (myOrders.length === 0) {
-        container.innerHTML = '<p style="color: #94a3b8;">لا توجد طلبات موكلة إليك حالياً.</p>';
+      if (!orders || orders.length === 0) {
+        container.innerHTML = '<p style="color:#94a3b8; text-align:center;">لا توجد طلبات حالياً.</p>';
         return;
       }
 
-      container.innerHTML = myOrders.map(order => `
+      container.innerHTML = orders.map(o => `
         <div class="order-card">
-          <div class="order-header">
-            <strong style="color:#f59e0b;">طلب #${order.id}</strong>
-            <span style="color:#38bdf8;">${order.status}</span>
-          </div>
-          <p><strong>العميل:</strong> ${order.customerName || 'غير محدد'}</p>
-          <p><strong>الهاتف:</strong> ${order.phone || '-'}</p>
-          <p><strong>العنوان:</strong> ${order.address || '-'}</p>
-          <p><strong>الإجمالي:</strong> ${order.total || 0} ج.م</p>
-          
-          ${order.status !== 'تم التسليم' ? `
-            <button class="btn" onclick="markAsDelivered('${order.id}')">تأكيد التسليم للعميل ✅</button>
-          ` : `
-            <button class="btn btn-delivered" disabled>تم التسليم ✔️</button>
-          `}
+          <h3>طلب #${o.id}</h3>
+          <p class="status">الحالة: ${o.status}</p>
+          <p style="margin-top:8px;"><strong>تاريخ الطلب:</strong> ${new Date(o.createdAt).toLocaleString('ar-EG')}</p>
         </div>
       `).join('');
-
     } catch (err) {
-      console.error(err);
-      container.innerHTML = '<p style="color: #ef4444;">حدث خطأ أثناء تحميل الطلبات.</p>';
+      container.innerHTML = '<p style="color:#ef4444; text-align:center;">خطأ في جلب البيانات.</p>';
     }
   }
 
-  // 3. تحديث حالة الطلب إلى تم التسليم
-  async function markAsDelivered(orderId) {
-    try {
-      const res = await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'تم التسليم' })
-      });
-
-      if (res.ok) {
-        alert('تم تحديث حالة الطلب إلى "تم التسليم"!');
-        loadDriverOrders();
-      }
-    } catch (err) {
-      alert('خطأ أثناء تحديث حالة الطلب.');
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', fetchDrivers);
+  document.addEventListener('DOMContentLoaded', loadMyOrders);
 </script>
-
 </body>
 </html>

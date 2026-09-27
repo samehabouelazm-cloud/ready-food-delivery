@@ -9,6 +9,7 @@ app.use(express.static(path.join(__dirname, 'customer_app')));
 
 const DATA_FILE = path.join(__dirname, 'data.json');
 
+// قراءة البيانات من الملف المحلي
 function readData() {
   if (!fs.existsSync(DATA_FILE)) {
     const initialData = {
@@ -26,11 +27,12 @@ function readData() {
   }
 }
 
+// حفظ البيانات
 function saveData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// APIs الكباتن
+// --- APIs الكباتن ---
 app.get('/api/drivers', (req, res) => res.json(readData().drivers));
 
 app.post('/api/drivers', (req, res) => {
@@ -45,7 +47,10 @@ app.delete('/api/drivers/:id', (req, res) => {
   const db = readData();
   const id = String(req.params.id);
 
+  // حذف الكابتن نهائياً
   db.drivers = db.drivers.filter(d => String(d.id) !== id);
+  
+  // إلغاء تكليفه من الطلبات
   db.orders.forEach(o => {
     if (String(o.driverId) === id) {
       o.driverId = null;
@@ -54,10 +59,10 @@ app.delete('/api/drivers/:id', (req, res) => {
   });
 
   saveData(db);
-  res.json({ message: 'تم حذف الكابتن وتنظيف التكليفات' });
+  res.json({ message: 'تم حذف الكابتن وتحديث التكليفات' });
 });
 
-// APIs الطلبات
+// --- APIs الطلبات ---
 app.get('/api/orders', (req, res) => res.json(readData().orders));
 
 app.post('/api/orders', (req, res) => {
@@ -74,7 +79,7 @@ app.post('/api/orders', (req, res) => {
   res.status(201).json(newOrder);
 });
 
-// الإسناد اليدوي المباشر للطلب
+// الإسناد اليدوي المباشر
 app.put('/api/orders/:id/assign', (req, res) => {
   const db = readData();
   const { id } = req.params;
@@ -89,7 +94,7 @@ app.put('/api/orders/:id/assign', (req, res) => {
 
   const driver = db.drivers.find(d => String(d.id) === String(driverId));
   if (!driver) {
-    return res.status(400).json({ error: 'الكابتن المختار غير موجود بالقائمة أو تم حذفه' });
+    return res.status(400).json({ error: 'الكابتن المختار غير موجود بالقائمة' });
   }
 
   order.driverId = String(driver.id);
@@ -99,7 +104,7 @@ app.put('/api/orders/:id/assign', (req, res) => {
   res.json({ message: `تم إسناد الطلب بنجاح للكابتن ${driver.name}`, order });
 });
 
-// APIs المنيو
+// --- APIs المنيو ---
 app.get('/api/menu', (req, res) => res.json(readData().menu));
 
-app.listen(PORT, () => console.log(`🚀 READY OS running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 جاهز في بلطيم شغال على http://localhost:${PORT}`));
