@@ -4,151 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>جاهز في بلطيم - تطبيق الكابتن</title>
-  <!-- مكتبة الخرائط Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 650px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 20px; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #10b981; font-size: 22px; }
-    
-    .order-card { background: #1e293b; border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #334155; }
-    .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 12px; }
-    .status-badge { background: #f59e0b; color: #000; font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 13px; }
-    .status-done { background: #10b981; color: #fff; }
-
-    #map { height: 250px; width: 100%; border-radius: 10px; margin-top: 15px; border: 1px solid #334155; }
-
-    .action-btn { width: 100%; padding: 12px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
-    .btn-step1 { background: #3b82f6; color: #fff; }
-    .btn-step2 { background: #8b5cf6; color: #fff; }
-    .btn-step3 { background: #f59e0b; color: #000; }
-    .btn-step4 { background: #10b981; color: #fff; }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <header>
-    <h1>🚴 جاهز في بلطيم - تطبيق الكابتن</h1>
-    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">متابعة الرحلة بالخريطة وتحديث موقعك للإدارة</p>
-  </header>
-
-  <div id="driverOrders">
-    <p style="color: #94a3b8; text-align:center;">جاري تحميل الطلبات...</p>
-  </div>
-</div>
-
-<script>
-  let map, marker;
-  // إحداثيات بلطيم الافتراضية
-  let currentLat = 31.584, currentLng = 31.085;
-
-  async function loadMyOrders() {
-    const container = document.getElementById('driverOrders');
-    try {
-      const res = await fetch('/api/orders');
-      const orders = await res.json();
-
-      if (!orders || orders.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8; text-align:center;">لا توجد طلبات حالياً.</p>';
-        return;
-      }
-
-      container.innerHTML = orders.map(o => {
-        const isCompleted = o.status.includes('تم التوصيل بنجاح');
-        return `
-          <div class="order-card">
-            <div class="order-header">
-              <h3>طلب #${o.id}</h3>
-              <span class="status-badge ${isCompleted ? 'status-done' : ''}">${o.status}</span>
-            </div>
-            <p><strong>العميل:</strong> ${o.customerName || 'عميل'} (${o.phone || '-'})</p>
-            <p><strong>العنوان/الوجبة:</strong> ${o.item || 'وجبة طعام'}</p>
-            
-            <div id="map"></div>
-
-            ${!isCompleted ? renderActionButtons(o.id, o.status) : '<p style="color:#10b981; text-align:center; margin-top:10px; font-weight:bold;">🎉 تم توصيل هذا الطلب بنجاح</p>'}
-          </div>
-        `;
-      }).join('');
-
-      initMap();
-    } catch (err) {
-      container.innerHTML = '<p style="color:#ef4444; text-align:center;">خطأ في جلب البيانات.</p>';
-    }
-  }
-
-  function initMap() {
-    const mapElement = document.getElementById('map');
-    if (!mapElement) return;
-
-    map = L.map('map').setView([currentLat, currentLng], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    marker = L.marker([currentLat, currentLng]).addTo(map)
-      .bindPopup('📍 موقعك الحالي ككابتن (بلطيم)').openPopup();
-
-    // تحديث الموقع الجغرافي الحقيقي من الجهاز إذا توفر
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(pos => {
-        currentLat = pos.coords.latitude;
-        currentLng = pos.coords.longitude;
-        marker.setLatLng([currentLat, currentLng]);
-        map.setView([currentLat, currentLng]);
-      });
-    }
-  }
-
-  function renderActionButtons(orderId, currentStatus) {
-    if (currentStatus.includes('جاري التوصيل مع')) {
-      return `<button class="action-btn btn-step1" onclick="updateOrderStatus('${orderId}', '👨‍🍳 الكابتن في الطريق للمطعم')">👨‍🍳 التحرك إلى المطعم</button>`;
-    } else if (currentStatus.includes('في الطريق للمطعم')) {
-      return `<button class="action-btn btn-step2" onclick="updateOrderStatus('${orderId}', '🛍️ تم استلام الطلب من المطعم')">🛍️ تم استلام الطلب</button>`;
-    } else if (currentStatus.includes('تم استلام الطلب')) {
-      return `<button class="action-btn btn-step3" onclick="updateOrderStatus('${orderId}', '🚴 الكابتن في الطريق للعميل')">🚴 التحرك إلى موقع العميل</button>`;
-    } else if (currentStatus.includes('في الطريق للعميل')) {
-      return `<button class="action-btn btn-step4" onclick="updateOrderStatus('${orderId}', '✅ تم التوصيل بنجاح')">✅ تأكيد التوصيل وتسليم الطلب</button>`;
-    } else {
-      return `<button class="action-btn btn-step1" onclick="updateOrderStatus('${orderId}', '👨‍🍳 الكابتن في الطريق للمطعم')">تحديث الحالة</button>`;
-    }
-  }
-
-  async function updateOrderStatus(orderId, newStatus) {
-    try {
-      const res = await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status: newStatus,
-          location: { lat: currentLat, lng: currentLng }
-        })
-      });
-
-      if (res.ok) {
-        await loadMyOrders();
-      } else {
-        alert('حدث خطأ أثناء تحديث الحالة');
-      }
-    } catch (err) {
-      alert('خطأ في الاتصال بالسيرفر');
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', loadMyOrders);
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جاهز في بلطيم - تطبيق الكابتن</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -198,7 +53,7 @@
       }
 
       container.innerHTML = orders.map(o => {
-        const isCompleted = o.status.includes('تم التوصيل بنجاح');
+        const isCompleted = o.status && o.status.includes('تم التوصيل بنجاح');
         return `
           <div class="order-card">
             <div class="order-header">
@@ -210,7 +65,7 @@
             
             <div id="map"></div>
 
-            ${!isCompleted ? renderActionButtons(o.id, o.status) : '<p style="color:#10b981; text-align:center; margin-top:10px; font-weight:bold;">🎉 تم توصيل هذا الطلب بنجاح</p>'}
+            ${!isCompleted ? renderActionButtons(o.id, o.status || '') : '<p style="color:#10b981; text-align:center; margin-top:10px; font-weight:bold;">🎉 تم توصيل هذا الطلب بنجاح</p>'}
           </div>
         `;
       }).join('');
