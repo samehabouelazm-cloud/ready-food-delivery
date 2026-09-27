@@ -30,7 +30,6 @@ function saveData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// الصفحة الرئيسية
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'customer_app', 'index.html'));
 });
@@ -61,7 +60,7 @@ app.delete('/api/drivers/:id', (req, res) => {
   res.json({ message: 'تم الحذف' });
 });
 
-// APIs الطلبات
+// APIs الطلبات والتتبع
 app.get('/api/orders', (req, res) => res.json(readData().orders || []));
 
 app.post('/api/orders', (req, res) => {
@@ -71,7 +70,7 @@ app.post('/api/orders', (req, res) => {
     status: 'قيد الانتظار',
     driverId: null,
     createdAt: new Date(),
-    location: { lat: 31.584, lng: 31.085 },
+    driverLocation: { lat: 31.584, lng: 31.085 }, // موقع افتراضي في بلطيم
     ...req.body
   };
   if (!db.orders) db.orders = [];
@@ -97,6 +96,7 @@ app.put('/api/orders/:id/assign', (req, res) => {
   res.json({ message: `تم إسناد الطلب للكابتن ${driver.name}`, order });
 });
 
+// تحديث حالة الطلب وموقع الكابتن المباشر
 app.put('/api/orders/:id/status', (req, res) => {
   const db = readData();
   const { id } = req.params;
@@ -105,15 +105,12 @@ app.put('/api/orders/:id/status', (req, res) => {
   const order = (db.orders || []).find(o => String(o.id) === String(id));
   if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
 
-  order.status = status;
-  if (location) {
-    order.driverLocation = location;
-  }
+  if (status) order.status = status;
+  if (location) order.driverLocation = location;
   saveData(db);
   res.json({ message: 'تم تحديث الحالة والموقع بنجاح', order });
 });
 
-// APIs المنيو
 app.get('/api/menu', (req, res) => res.json(readData().menu || []));
 
 app.listen(PORT, () => console.log(`🚀 جاهز في بلطيم شغال على http://localhost:${PORT}`));

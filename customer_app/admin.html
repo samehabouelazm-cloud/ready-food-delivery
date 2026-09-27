@@ -6,27 +6,15 @@
   <title>جاهز في بلطيم - لوحة التحكم</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; line-height: 1.6; }
-    .container { max-width: 1100px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 15px 20px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #f59e0b; font-size: 24px; }
-    .btn { padding: 10px 18px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .btn-primary { background: #3b82f6; color: #fff; }
-    .btn-success { background: #10b981; color: #fff; }
-    .btn-danger { background: #ef4444; color: #fff; padding: 6px 12px; font-size: 13px; border-radius: 6px; }
-    .btn-danger:hover { background: #dc2626; }
-    .section-card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #334155; }
-    .section-title { font-size: 18px; color: #38bdf8; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
-    
-    .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-    .form-control { flex: 1; min-width: 150px; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #fff; }
-    
-    .order-card { background: #0f172a; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
-    .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px; }
-    .order-title { font-weight: bold; color: #f59e0b; }
-    .driver-assign-box { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+    header h1 { color: #f59e0b; font-size: 22px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
+    .btn { background: #10b981; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    select, input { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; }
+    .order-item { border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -34,208 +22,119 @@
 <div class="container">
   <header>
     <h1>📦 جاهز في بلطيم - لوحة التحكم</h1>
-    <button class="btn btn-primary" onclick="loadAllData()">تحديث البيانات 🔄</button>
+    <button class="btn" onclick="loadAll()">تحديث البيانات 🔄</button>
   </header>
 
-  <!-- إضافة وجبة -->
-  <div class="section-card">
-    <div class="section-title">🍔 إضافة وجبة / صنف جديد للقائمة</div>
-    <form id="addMenuForm" class="form-row">
-      <input type="text" id="itemName" class="form-control" placeholder="اسم الوجبة" required>
-      <input type="text" id="itemCategory" class="form-control" placeholder="التصنيف (مثل: مشويات، بيتزا)">
-      <input type="number" id="itemPrice" class="form-control" placeholder="السعر (ج.م)" required>
-      <button type="submit" class="btn btn-success">إضافة إلى المنيو ➕</button>
-    </form>
+  <div class="card" style="margin-bottom: 20px;">
+    <h3>🍔 إضافة وجبة / صنف جديد للقائمة</h3>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <input type="text" id="itemName" placeholder="اسم الوجبة">
+      <input type="text" id="itemCat" placeholder="التصنيف">
+      <input type="number" id="itemPrice" placeholder="السعر">
+      <button class="btn" onclick="addMenuItem()">إضافة ➕</button>
+    </div>
   </div>
 
-  <div class="grid-2">
-    <!-- الطلبات والإسناد -->
-    <div class="section-card">
-      <div class="section-title">🛒 الطلبات الواردة والإسناد اليدوي</div>
-      <div id="ordersList">
-        <p style="color: #94a3b8;">جاري تحميل الطلبات...</p>
+  <div class="grid">
+    <div class="card">
+      <h3>🚴 إدارة الكباتن</h3>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <input type="text" id="driverName" placeholder="اسم الكابتن">
+        <input type="text" id="driverPhone" placeholder="رقم الجوال">
+        <button class="btn" onclick="addDriver()">إضافة</button>
       </div>
+      <div id="driversList" style="margin-top:15px;">جاري التحميل...</div>
     </div>
 
-    <!-- إدارة الكباتن -->
-    <div class="section-card">
-      <div class="section-title">🚴 إدارة الكباتن (إضافة / حذف)</div>
-      <form id="addDriverForm" class="form-row">
-        <input type="text" id="driverName" class="form-control" placeholder="اسم الكابتن" required>
-        <input type="tel" id="driverPhone" class="form-control" placeholder="رقم الجوال" required>
-        <button type="submit" class="btn btn-success">إضافة كابتن ➕</button>
-      </form>
-      <hr style="border-color:#334155; margin: 15px 0;">
-      <div id="driversList">
-        <p style="color: #94a3b8;">جاري تحميل الكباتن...</p>
-      </div>
+    <div class="card">
+      <h3>🛒 الطلبات الواردة والمتابعة المباشرة</h3>
+      <div id="ordersList">جاري التحميل...</div>
     </div>
   </div>
 </div>
 
 <script>
-  let cachedDrivers = [];
-
-  async function loadAllData() {
-    await loadDrivers();
-    await loadOrders();
+  async function loadAll() {
+    loadDrivers();
+    loadOrders();
   }
 
-  // 1. جلب الكباتن
   async function loadDrivers() {
-    const container = document.getElementById('driversList');
     try {
       const res = await fetch('/api/drivers');
-      cachedDrivers = await res.json();
-
-      if (!cachedDrivers || cachedDrivers.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>';
-        return;
-      }
-
-      container.innerHTML = cachedDrivers.map(d => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:12px; border-radius:8px; margin-bottom:8px; border:1px solid #334155;">
-          <div>
-            <strong>${d.name}</strong> 
-            <div style="font-size:12px; color:#94a3b8;">📱 ${d.phone}</div>
-          </div>
-          <button class="btn btn-danger" onclick="deleteDriver('${d.id}')">حذف 🗑️</button>
+      const drivers = await res.json();
+      document.getElementById('driversList').innerHTML = drivers.map(d => `
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <span>${d.name} (${d.phone})</span>
+          <button onclick="deleteDriver('${d.id}')" style="color:#ef4444; background:none; border:none; cursor:pointer;">حذف ❌</button>
         </div>
       `).join('');
-    } catch (err) {
-      container.innerHTML = '<p style="color:#ef4444;">خطأ في تحميل الكباتن.</p>';
-    }
+    } catch(e) {}
   }
 
-  // 2. حذف كابتن
-  async function deleteDriver(id) {
-    if (!confirm('هل أنت تأكد من حذف هذا الكابتن؟')) return;
-
-    try {
-      const res = await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        alert('تم حذف الكابتن بنجاح!');
-        await loadAllData();
-      }
-    } catch (err) {
-      alert('حدث خطأ أثناء الحذف.');
-    }
-  }
-
-  // 3. عرض الطلبات مع خيارات الإسناد اليدوي
   async function loadOrders() {
-    const container = document.getElementById('ordersList');
     try {
-      const res = await fetch('/api/orders');
-      const orders = await res.json();
+      const resOrders = await fetch('/api/orders');
+      const orders = await resOrders.json();
+      const resDrivers = await fetch('/api/drivers');
+      const drivers = await resDrivers.json();
 
-      if (!orders || orders.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات حالياً.</p>';
-        return;
-      }
-
-      container.innerHTML = orders.map(order => {
-        const currentDriver = cachedDrivers.find(d => String(d.id) === String(order.driverId));
-        const assignedName = currentDriver ? currentDriver.name : 'غير مسند';
-
-        return `
-          <div class="order-card">
-            <div class="order-header">
-              <span class="order-title">طلب #${order.id}</span>
-              <span style="color:#f59e0b; font-size:13px;">${order.status}</span>
-            </div>
-            <p><strong>العميل:</strong> ${order.customerName || 'عميل'} (${order.phone || '-'})</p>
-            <p style="margin-top:5px;"><strong>الكابتن الموكل:</strong> <span style="color:#10b981; font-weight:bold;">${assignedName}</span></p>
-            
-            <div class="driver-assign-box" style="margin-top:12px; display:flex; gap:8px;">
-              <select id="select-driver-${order.id}" class="form-control" style="background:#1e293b; color:#fff;">
-                <option value="">-- اختر كابتن مسجل --</option>
-                ${cachedDrivers.map(d => `
-                  <option value="${d.id}" ${String(order.driverId) === String(d.id) ? 'selected' : ''}>
-                    ${d.name} (${d.phone})
-                  </option>
-                `).join('')}
-              </select>
-              <button class="btn btn-primary" onclick="manualAssign('${order.id}')">إسناد يدوي 🚀</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    } catch (err) {
-      container.innerHTML = '<p style="color:#ef4444;">خطأ أثناء تحميل الطلبات.</p>';
-    }
+      document.getElementById('ordersList').innerHTML = orders.map(o => `
+        <div class="order-item">
+          <p><strong>طلب #${o.id}</strong> - ${o.item || 'وجبة'}</p>
+          <p>العميل: ${o.customerName || '-'} (${o.phone || '-'})</p>
+          <p style="color:#f59e0b;">الحالة: ${o.status}</p>
+          ${o.driverLocation ? `<p style="font-size:12px; color:#38bdf8;">📍 الإحداثيات: ${o.driverLocation.lat.toFixed(3)},${o.driverLocation.lng.toFixed(3)}</p>` : ''}
+          <select onchange="assignDriver('${o.id}', this.value)">
+            <option value="">إسناد لكابتن...</option>
+            ${drivers.map(d => `<option value="${d.id}" ${o.driverId == d.id ? 'selected' : ''}>${d.name}</option>`).join('')}
+          </select>
+        </div>
+      `).join('');
+    } catch(e) {}
   }
 
-  // 4. الإسناد اليدوي
-  async function manualAssign(orderId) {
-    const select = document.getElementById(`select-driver-${orderId}`);
-    const driverId = select.value;
-
-    if (!driverId) {
-      alert('يرجى تحديد كابتن من القائمة أولاً!');
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/orders/${orderId}/assign`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driverId })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert(data.message);
-        loadAllData();
-      } else {
-        alert(data.error || 'فشل الإسناد');
-      }
-    } catch (err) {
-      alert('حدث خطأ أثناء الاتصال بالسيرفر');
-    }
-  }
-
-  // إضافة كابتن
-  document.getElementById('addDriverForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  async function addDriver() {
     const name = document.getElementById('driverName').value;
     const phone = document.getElementById('driverPhone').value;
-
-    const res = await fetch('/api/drivers', {
+    if(!name) return;
+    await fetch('/api/drivers', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ name, phone })
     });
+    loadAll();
+  }
 
-    if (res.ok) {
-      document.getElementById('driverName').value = '';
-      document.getElementById('driverPhone').value = '';
-      loadAllData();
-    }
-  });
+  async function deleteDriver(id) {
+    await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
+    loadAll();
+  }
 
-  // إضافة وجبة
-  document.getElementById('addMenuForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('itemName').value;
-    const category = document.getElementById('itemCategory').value;
-    const price = document.getElementById('itemPrice').value;
-
-    const res = await fetch('/api/menu', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, category, price: Number(price) })
+  async function assignDriver(orderId, driverId) {
+    if(!driverId) return;
+    await fetch(`/api/orders/${orderId}/assign`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ driverId })
     });
+    loadOrders();
+  }
 
-    if (res.ok) {
-      document.getElementById('itemName').value = '';
-      document.getElementById('itemCategory').value = '';
-      document.getElementById('itemPrice').value = '';
-      alert('تمت إضافة الوجبة بنجاح!');
-    }
-  });
+  async function addMenuItem() {
+    const name = document.getElementById('itemName').value;
+    const category = document.getElementById('itemCat').value;
+    const price = document.getElementById('itemPrice').value;
+    if(!name) return;
+    await fetch('/api/menu', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ name, category, price })
+    });
+    alert('تمت إضافة الوجبة');
+  }
 
-  document.addEventListener('DOMContentLoaded', loadAllData);
+  document.addEventListener('DOMContentLoaded', loadAll);
 </script>
 </body>
 </html>

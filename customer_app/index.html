@@ -81,3 +81,115 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جاهز في بلطيم - تطبيق العميل</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+    header h1 { color: #f59e0b; font-size: 22px; }
+    .section-title { font-size: 18px; color: #38bdf8; margin-bottom: 12px; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+    .tracking-card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; margin-top: 20px; }
+    #clientMap { height: 250px; width: 100%; border-radius: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🍕 جاهز في بلطيم</h1>
+    <span style="color: #cbd5e1; font-size: 14px;">أسرع توصيل في بلطيم 🚀</span>
+  </header>
+
+  <h2 class="section-title">قائمة الطعام (المنيو)</h2>
+  <div id="menuContainer" class="menu-grid">جاري تحميل المنيو...</div>
+
+  <h2 class="section-title">تتبع طلبك الحالي 🚴</h2>
+  <div id="orderTracking">لا توجد طلبات قيد التتبع حالياً.</div>
+</div>
+
+<script>
+  let clientMap, driverMarker;
+
+  async function loadMenu() {
+    try {
+      const res = await fetch('/api/menu');
+      const items = await res.json();
+      document.getElementById('menuContainer').innerHTML = items.map(item => `
+        <div class="card">
+          <h3>${item.name}</h3>
+          <p style="color:#94a3b8; font-size:12px;">${item.category}</p>
+          <p style="color:#10b981; font-weight:bold; margin-top:5px;">${item.price} ج.م</p>
+          <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
+        </div>
+      `).join('');
+    } catch (e) {
+      document.getElementById('menuContainer').innerHTML = 'خطأ في تحميل المنيو.';
+    }
+  }
+
+  async function placeOrder(itemName) {
+    const name = prompt('ادخل اسمك:');
+    const phone = prompt('ادخل رقم جوالك:');
+    if (!name || !phone) return;
+
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customerName: name, phone: phone, item: itemName })
+    });
+    alert('تم إرسال طلبك بنجاح!');
+    trackOrders();
+  }
+
+  async function trackOrders() {
+    try {
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      if (!orders || orders.length === 0) return;
+
+      const latest = orders[orders.length - 1];
+      const trackingDiv = document.getElementById('orderTracking');
+      trackingDiv.innerHTML = `
+        <div class="tracking-card">
+          <h3>طلب #${latest.id} - (${latest.item})</h3>
+          <p style="color:#f59e0b; font-weight:bold; margin-top:5px;">الحالة: ${latest.status}</p>
+          <div id="clientMap"></div>
+        </div>
+      `;
+
+      if (latest.driverLocation) {
+        initClientMap(latest.driverLocation.lat, latest.driverLocation.lng);
+      }
+    } catch (e) {}
+  }
+
+  function initClientMap(lat, lng) {
+    if (!clientMap) {
+      clientMap = L.map('clientMap').setView([lat, lng], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(clientMap);
+      driverMarker = L.marker([lat, lng]).addTo(clientMap).bindPopup('🚴 الكابتن في الطريق إليك').openPopup();
+    } else {
+      driverMarker.setLatLng([lat, lng]);
+      clientMap.setView([lat, lng]);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadMenu();
+    trackOrders();
+    setInterval(trackOrders, 5000); // تحديث تلقائي كل 5 ثوانٍ
+  });
+</script>
+</body>
+</html>
