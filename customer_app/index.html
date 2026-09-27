@@ -291,6 +291,27 @@
     trackOrders();
     setInterval(trackOrders, 5000);
   });
-</script>
+</script>// حفظ بيانات العميل تلقائياً عند الطلب
+function saveCustomerDetails() {
+    const customerData = {
+        name: document.getElementById('customerName')?.value || '',
+        phone: document.getElementById('customerPhone')?.value || '',
+        address: document.getElementById('customerAddress')?.value || '',
+        lat: window.currentLatitude || null,
+        lng: window.currentLongitude || null
+    };
+    localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
+}
+
+// استرجاع البيانات تلقائياً في الحقول عند فتح الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('jahez_saved_customer');
+    if (saved) {
+        const data = JSON.parse(saved);
+        if (document.getElementById('customerName')) document.getElementById('customerName').value = data.name || '';
+        if (document.getElementById('customerPhone')) document.getElementById('customerPhone').value = data.phone || '';
+        if (document.getElementById('customerAddress')) document.getElementById('customerAddress').value = data.address || '';
+    }
+});
 </body>
 </html>
