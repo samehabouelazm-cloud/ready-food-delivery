@@ -54,7 +54,7 @@
   <!-- خدمة أطلب أي حاجة / طلب خاص -->
   <div class="custom-order-card" id="customOrderBox" style="display: none;">
     <h3 style="color: #f59e0b; margin-bottom: 8px;">📦 قسم: أطلب أي حاجة / توصيل مشاوير</h3>
-    <p style="font-size:13px; color:#94a3b8; margin-bottom:10px;">اكتب تفاصيل طلبك بالتفصيل (أغراض، مشوار، توصيل غاز، صيانة...) وسنقوم بتوصيله فوراً:</p>
+    <p style="font-size:13px; color:#94a3b8; margin-bottom:10px;">اكتب تفاصيل طلبك بالتفصيل (أغراض، مشوار، توصيل غاز، صيانة...):</p>
     <textarea id="customOrderText" rows="3" placeholder="اكتب هنا طلبك الخاص التفصيلي..."></textarea>
     <button class="btn" style="background: #f59e0b; color:#000;" onclick="placeCustomOrder()">تأكيد وإرسال الطلب الخاص 🚀</button>
   </div>
@@ -115,7 +115,12 @@
 
   function initSelectMap() {
     selectMap = L.map('selectMap').setView([selectedCustomerLat, selectedCustomerLng], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(selectMap);
+
+    // سيرفر CartoDB الحديث لتجنب حظر OpenStreetMap (403 Forbidden)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap & CARTO'
+    }).addTo(selectMap);
 
     selectMarker = L.marker([selectedCustomerLat, selectedCustomerLng], { draggable: true }).addTo(selectMap)
       .bindPopup('🏠 موقع التوصيل المختار').openPopup();
@@ -124,6 +129,12 @@
       selectedCustomerLat = e.latlng.lat;
       selectedCustomerLng = e.latlng.lng;
       selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
+    });
+
+    selectMarker.on('dragend', (e) => {
+      const pos = e.target.getLatLng();
+      selectedCustomerLat = pos.lat;
+      selectedCustomerLng = pos.lng;
     });
   }
 
@@ -260,7 +271,12 @@
   function initClientMap(lat, lng) {
     if (!clientMap) {
       clientMap = L.map('clientMap').setView([lat, lng], 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(clientMap);
+
+      // سيرفر CartoDB لتتبع الكابتن المباشر
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+      }).addTo(clientMap);
+
       driverMarker = L.marker([lat, lng]).addTo(clientMap).bindPopup('🚴 الكابتن في الطريق إليك').openPopup();
     } else {
       driverMarker.setLatLng([lat, lng]);
