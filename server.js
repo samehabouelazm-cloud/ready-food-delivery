@@ -20,22 +20,31 @@ function readData() {
     return initialData;
   }
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    const content = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(content);
   } catch (e) {
     return { drivers: [], orders: [], menu: [] };
   }
 }
 
 function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error("خطأ في حفظ البيانات:", e);
+  }
 }
 
+// الصفحة الرئيسية
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'customer_app', 'index.html'));
 });
 
 // APIs الكباتن
-app.get('/api/drivers', (req, res) => res.json(readData().drivers || []));
+app.get('/api/drivers', (req, res) => {
+  const db = readData();
+  res.json(db.drivers || []);
+});
 
 app.post('/api/drivers', (req, res) => {
   const db = readData();
@@ -60,8 +69,11 @@ app.delete('/api/drivers/:id', (req, res) => {
   res.json({ message: 'تم الحذف' });
 });
 
-// APIs الطلبات والتتبع
-app.get('/api/orders', (req, res) => res.json(readData().orders || []));
+// APIs الطلبات
+app.get('/api/orders', (req, res) => {
+  const db = readData();
+  res.json(db.orders || []);
+});
 
 app.post('/api/orders', (req, res) => {
   const db = readData();
@@ -70,7 +82,7 @@ app.post('/api/orders', (req, res) => {
     status: 'قيد الانتظار',
     driverId: null,
     createdAt: new Date(),
-    driverLocation: { lat: 31.584, lng: 31.085 }, // موقع افتراضي في بلطيم
+    driverLocation: { lat: 31.584, lng: 31.085 },
     ...req.body
   };
   if (!db.orders) db.orders = [];
@@ -96,7 +108,6 @@ app.put('/api/orders/:id/assign', (req, res) => {
   res.json({ message: `تم إسناد الطلب للكابتن ${driver.name}`, order });
 });
 
-// تحديث حالة الطلب وموقع الكابتن المباشر
 app.put('/api/orders/:id/status', (req, res) => {
   const db = readData();
   const { id } = req.params;
@@ -108,9 +119,13 @@ app.put('/api/orders/:id/status', (req, res) => {
   if (status) order.status = status;
   if (location) order.driverLocation = location;
   saveData(db);
-  res.json({ message: 'تم تحديث الحالة والموقع بنجاح', order });
+  res.json({ message: 'تم تحديث الحالة بنجاح', order });
 });
 
-app.get('/api/menu', (req, res) => res.json(readData().menu || []));
+// APIs المنيو
+app.get('/api/menu', (req, res) => {
+  const db = readData();
+  res.json(db.menu || []);
+});
 
 app.listen(PORT, () => console.log(`🚀 جاهز في بلطيم شغال على http://localhost:${PORT}`));
