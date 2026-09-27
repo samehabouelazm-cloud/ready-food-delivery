@@ -1,392 +1,100 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جاهز في بلطيم - جميع الخدمات والطلبات</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 850px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
-    header h1 { color: #f59e0b; font-size: 22px; }
-    .section-title { font-size: 18px; color: #38bdf8; margin-bottom: 12px; }
-    
-    /* شريط الأقسام الأفقي */
-    .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: thin; }
-    .cat-chip { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: bold; transition: 0.2s; }
-    .cat-chip.active, .cat-chip:hover { background: #f59e0b; color: #0f172a; border-color: #f59e0b; }
-
-    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-    .btn-gps { background: #10b981; margin-top: 5px; }
-    .location-box { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
-    input, textarea { width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; }
-    #selectMap, #clientMap { height: 220px; width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; }
-    .tracking-card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; margin-top: 20px; }
-    .custom-order-card { background: #1e293b; border: 1px dashed #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جاهز في بلطيم - تطبيق العميل</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #0b132b; color: #fff; margin: 0; padding: 20px; direction: rtl; text-align: right; }
+        .container { max-width: 600px; margin: 0 auto; background: #1c2541; padding: 20px; border-radius: 10px; }
+        .item-card { background: #3a506b; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        button { cursor: pointer; padding: 8px 15px; border: none; border-radius: 5px; background: #4cc9f0; color: #000; font-weight: bold; }
+        button:hover { background: #4361ee; color: #fff; }
+    </style>
 </head>
 <body>
-
-<div class="container">
-  <header>
-    <h1>🛍️ جاهز في بلطيم</h1>
-    <span style="color: #cbd5e1; font-size: 14px;">توصيل كل احتياجاتك في بلطيم 🚀</span>
-  </header>
-
-  <!-- خانة عنوان التوصيل والخريطة -->
-  <div class="location-box">
-    <h2 class="section-title">📍 عنوان التوصيل</h2>
-    <label style="font-size:13px; color:#94a3b8;">اكتب عنوانك التفصيلي لتسهيل الوصول إليك:</label>
-    <input type="text" id="customerAddressInput" placeholder="مثال: بلطيم - شارع البحر - بجوار المسجد الكبير" value="بلطيم - السوق المركزي">
-    <button class="btn btn-gps" onclick="getCurrentLocation()">📍 تحديث الخريطة بموقعي الجغرافي الحالي (GPS)</button>
-    <div id="selectMap"></div>
-  </div>
-
-  <!-- شريط الأقسام -->
-  <h2 class="section-title">🗂️ اختر القسم</h2>
-  <div class="categories-bar" id="categoriesContainer">جاري تحميل الأقسام...</div>
-
-  <!-- خدمة أطلب أي حاجة / طلب خاص -->
-  <div class="custom-order-card" id="customOrderBox" style="display: none;">
-    <h3 style="color: #f59e0b; margin-bottom: 8px;">📦 قسم: أطلب أي حاجة / توصيل مشاوير</h3>
-    <p style="font-size:13px; color:#94a3b8; margin-bottom:10px;">اكتب تفاصيل طلبك بالتفصيل (أغراض، مشوار، توصيل غاز، صيانة...):</p>
-    <textarea id="customOrderText" rows="3" placeholder="اكتب هنا طلبك الخاص التفصيلي..."></textarea>
-    <button class="btn" style="background: #f59e0b; color:#000;" onclick="placeCustomOrder()">تأكيد وإرسال الطلب الخاص 🚀</button>
-  </div>
-
-  <!-- عرض العناصر والتصنيفات -->
-  <h2 class="section-title" id="currentCatTitle">الجميع</h2>
-  <div id="menuContainer" class="menu-grid">جاري تحميل المنيو والخدمات...</div>
-
-  <!-- تتبع الطلب -->
-  <h2 class="section-title">تتبع طلبك الحالي 🚴</h2>
-  <div id="orderTracking">لا توجد طلبات قيد التتبع حالياً.</div>
-</div>
-
-<script>
-  // تخزين الكميات المؤقتة لكل صنف
-const itemQuantities = {};
-
-function increaseQty(itemId) {
-    if (!itemQuantities[itemId]) itemQuantities[itemId] = 1;
-    itemQuantities[itemId]++;
-    const el = document.getElementById(`qty_${itemId}`);
-    if (el) el.innerText = itemQuantities[itemId];
-}
-
-function decreaseQty(itemId) {
-    if (itemQuantities[itemId] && itemQuantities[itemId] > 1) {
-        itemQuantities[itemId]--;
-        const el = document.getElementById(`qty_${itemId}`);
-        if (el) el.innerText = itemQuantities[itemId];
-    }
-}
-
-// دالة إضافة الصنف بالسعر والكمية المحددة للسلة
-function addToCartWithQty(itemId, itemName, itemPrice) {
-    const qty = itemQuantities[itemId] || 1;
-    let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
-    
-    const existingItem = cart.find(i => i.id === itemId);
-    if (existingItem) {
-        existingItem.quantity += qty;
-    } else {
-        cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: qty });
-    }
-    
-    localStorage.setItem('jahez_cart', JSON.stringify(cart));
-    alert(`تمت إضافة ${qty} من (${itemName}) إلى السلة بنجاح!`);
-    
-    // إعادة تعيين العداد إلى 1
-    itemQuantities[itemId] = 1;
-    const qtyElement = document.getElementById(`qty_${itemId}`);
-    if (qtyElement) qtyElement.innerText = '1';
-}
-  let selectMap, selectMarker;
-  let clientMap, driverMarker;
-  let selectedCustomerLat = 31.584, selectedCustomerLng = 31.085;
-  let allMenuItems = [];
-  let currentCategory = 'الكل';
-
-  const defaultCategories = [
-    "الكل",
-    "🍔 مأكولات ومطاعم",
-    "🥦 خضروات وفواكه",
-    "🫘 بقوليات وعطارة",
-    "🐟 أسماك ومأكولات بحرية",
-    "🥩 لحوم وطيور",
-    "📱 إلكترونيات وصيانة",
-    "🛒 سوبر ماركت",
-    "🔥 توصيل غاز",
-    "🚗 توصيل مشاوير خاصة",
-    "📦 أطلب أي حاجة"
-  ];
-
-  function initCategories() {
-    const container = document.getElementById('categoriesContainer');
-    container.innerHTML = defaultCategories.map(cat => `
-      <button class="cat-chip ${cat === 'الكل' ? 'active' : ''}" onclick="filterCategory('${cat}', this)">${cat}</button>
-    `).join('');
-  }
-
-  function filterCategory(cat, btn) {
-    document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-
-    currentCategory = cat;
-    document.getElementById('currentCatTitle').innerText = cat;
-
-    const customBox = document.getElementById('customOrderBox');
-    if (cat === '📦 أطلب أي حاجة' || cat === '🚗 توصيل مشاوير خاصة' || cat === '🔥 توصيل غاز') {
-      customBox.style.display = 'block';
-    } else {
-      customBox.style.display = 'none';
-    }
-
-    renderItems();
-  }
-
-  function initSelectMap() {
-    selectMap = L.map('selectMap').setView([selectedCustomerLat, selectedCustomerLng], 14);
-
-    // سيرفر CartoDB الحديث لتجنب حظر OpenStreetMap (403 Forbidden)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap & CARTO'
-    }).addTo(selectMap);
-
-    selectMarker = L.marker([selectedCustomerLat, selectedCustomerLng], { draggable: true }).addTo(selectMap)
-      .bindPopup('🏠 موقع التوصيل المختار').openPopup();
-
-    selectMap.on('click', (e) => {
-      selectedCustomerLat = e.latlng.lat;
-      selectedCustomerLng = e.latlng.lng;
-      selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
-    });
-
-    selectMarker.on('dragend', (e) => {
-      const pos = e.target.getLatLng();
-      selectedCustomerLat = pos.lat;
-      selectedCustomerLng = pos.lng;
-    });
-  }
-
-  function getCurrentLocation() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        selectedCustomerLat = pos.coords.latitude;
-        selectedCustomerLng = pos.coords.longitude;
-        selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
-        selectMap.setView([selectedCustomerLat, selectedCustomerLng], 16);
-      }, () => alert('تعذر جلب الموقع الجغرافي تلقائياً.'));
-    }
-  }
-
-  async function loadMenu() {
-    try {
-      const res = await fetch('/api/menu');
-      allMenuItems = await res.json();
-      renderItems();
-    } catch (e) {
-      document.getElementById('menuContainer').innerHTML = '<p style="color:#ef4444;">خطأ في تحميل الخدمات والمنتجات.</p>';
-    }
-  }
-
-  function renderItems() {
-    const container = document.getElementById('menuContainer');
-    let filtered = allMenuItems;
-
-    if (currentCategory !== 'الكل') {
-      filtered = allMenuItems.filter(i => i.category === currentCategory);
-    }
-
-    if (!filtered || filtered.length === 0) {
-      container.innerHTML = '<p style="color:#94a3b8; grid-column: 1/-1;">لا توجد عناصر مسجلة في هذا القسم حالياً، يمكنك كتابة طلبك في "أطلب أي حاجة".</p>';
-      return;
-    }
-
-    container.innerHTML = filtered.map(item => `
-      <div class="card">
-        <div>
-          <h3>${item.name}</h3>
-          <p style="color:#f59e0b; font-size:12px; margin-top:4px;">${item.category || ''}</p>
+    <div class="container">
+        <h1>🍽️ منصة جاهز في بلطيم</h1>
+        <p>اختر أصنافك المفضلة وحدد الكميات بكل سهولة:</p>
+        
+        <div class="item-card">
+            <h3>وجبة كبدة مميزة</h3>
+            <p>السعر: 50 جنيه</p>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+                <button type="button" onclick="decreaseQty('item_kibda')">-</button>
+                <span id="qty_item_kibda" style="font-weight: bold; font-size: 18px;">1</span>
+                <button type="button" onclick="increaseQty('item_kibda')">+</button>
+            </div>
+            
+            <button type="button" onclick="addToCartWithQty('item_kibda', 'وجبة كبدة مميزة', 50)" style="background: #28a745; color: #fff;">إضافة للسلة</button>
         </div>
-        <div>
-          <p style="color:#10b981; font-weight:bold; margin-top:8px;">${item.price} ج.م</p>
-          <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
+
+        <div style="margin-top: 30px; background: #222d4a; padding: 15px; border-radius: 8px;">
+            <h3>بيانات التوصيل</h3>
+            <input type="text" id="customerName" placeholder="الاسم الكريم" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveCustomerDetails()">
+            <input type="text" id="customerPhone" placeholder="رقم الهاتف" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveCustomerDetails()">
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveCustomerDetails()">
         </div>
-      </div>
-    `).join('');
-  }
+    </div>
 
-  async function placeOrder(itemName) {
-    const addressText = document.getElementById('customerAddressInput').value.trim();
-    if (!addressText) {
-      alert('يرجى كتابة عنوان التوصيل أولاً!');
-      return;
-    }
+    <script>
+        function saveCustomerDetails() {
+            const customerData = {
+                name: document.getElementById('customerName')?.value || '',
+                phone: document.getElementById('customerPhone')?.value || '',
+                address: document.getElementById('customerAddress')?.value || '',
+                lat: window.currentLatitude || null,
+                lng: window.currentLongitude || null
+            };
+            localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
+        }
 
-    const name = prompt('ادخل اسمك:');
-    const phone = prompt('ادخل رقم جوالك:');
-    if (!name || !phone) return;
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('jahez_saved_customer');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (document.getElementById('customerName')) document.getElementById('customerName').value = data.name || '';
+                if (document.getElementById('customerPhone')) document.getElementById('customerPhone').value = data.phone || '';
+                if (document.getElementById('customerAddress')) document.getElementById('customerAddress').value = data.address || '';
+            }
+        });
 
-    await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        customerName: name, 
-        phone: phone, 
-        item: `[${currentCategory}] ${itemName}`,
-        customerAddress: addressText,
-        customerLocation: { lat: selectedCustomerLat, lng: selectedCustomerLng }
-      })
-    });
-    alert('تم إرسال طلبك وعنوانك بنجاح!');
-    trackOrders();
-  }
+        const itemQuantities = {};
 
-  async function placeCustomOrder() {
-    const customDetail = document.getElementById('customOrderText').value.trim();
-    const addressText = document.getElementById('customerAddressInput').value.trim();
+        function increaseQty(itemId) {
+            if (!itemQuantities[itemId]) itemQuantities[itemId] = 1;
+            itemQuantities[itemId]++;
+            const el = document.getElementById(`qty_${itemId}`);
+            if (el) el.innerText = itemQuantities[itemId];
+        }
 
-    if (!customDetail) {
-      alert('يرجى كتابة تفاصيل الطلب أو المشوار أولاً!');
-      return;
-    }
-    if (!addressText) {
-      alert('يرجى كتابة عنوان التوصيل أولاً!');
-      return;
-    }
+        function decreaseQty(itemId) {
+            if (itemQuantities[itemId] && itemQuantities[itemId] > 1) {
+                itemQuantities[itemId]--;
+                const el = document.getElementById(`qty_${itemId}`);
+                if (el) el.innerText = itemQuantities[itemId];
+            }
+        }
 
-    const name = prompt('ادخل اسمك:');
-    const phone = prompt('ادخل رقم جوالك:');
-    if (!name || !phone) return;
-
-    await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        customerName: name, 
-        phone: phone, 
-        item: `[طلب خاص: ${currentCategory}] ${customDetail}`,
-        customerAddress: addressText,
-        customerLocation: { lat: selectedCustomerLat, lng: selectedCustomerLng }
-      })
-    });
-    alert('تم إرسال طلبك الخاص بنجاح!');
-    document.getElementById('customOrderText').value = '';
-    trackOrders();
-  }
-
-  async function trackOrders() {
-    try {
-      const res = await fetch('/api/orders');
-      const orders = await res.json();
-      if (!orders || orders.length === 0) return;
-
-      const latest = orders[orders.length - 1];
-      const trackingDiv = document.getElementById('orderTracking');
-      trackingDiv.innerHTML = `
-        <div class="tracking-card">
-          <h3>طلب #${latest.id} - (${latest.item})</h3>
-          <p style="color:#cbd5e1; margin-top:4px;"><strong>العنوان المسجل:</strong> ${latest.customerAddress || 'عنوان العميل'}</p>
-          <p style="color:#f59e0b; font-weight:bold; margin-top:5px;">الحالة: ${latest.status}</p>
-          <div id="clientMap"></div>
-        </div>
-      `;
-
-      if (latest.driverLocation) {
-        initClientMap(latest.driverLocation.lat, latest.driverLocation.lng);
-      }
-    } catch (e) {}
-  }
-
-  function initClientMap(lat, lng) {
-    if (!clientMap) {
-      clientMap = L.map('clientMap').setView([lat, lng], 14);
-
-      // سيرفر CartoDB لتتبع الكابتن المباشر
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19
-      }).addTo(clientMap);
-
-      driverMarker = L.marker([lat, lng]).addTo(clientMap).bindPopup('🚴 الكابتن في الطريق إليك').openPopup();
-    } else {
-      driverMarker.setLatLng([lat, lng]);
-      clientMap.setView([lat, lng]);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    initCategories();
-    initSelectMap();
-    loadMenu();
-    trackOrders();
-    setInterval(trackOrders, 5000);
-  });
-</script>// حفظ بيانات العميل تلقائياً عند الطلب
-function saveCustomerDetails() {
-    const customerData = {
-        name: document.getElementById('customerName')?.value || '',
-        phone: document.getElementById('customerPhone')?.value || '',
-        address: document.getElementById('customerAddress')?.value || '',
-        lat: window.currentLatitude || null,
-        lng: window.currentLongitude || null
-    };
-    localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
-}
-
-// استرجاع البيانات تلقائياً في الحقول عند فتح الصفحة
-window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('jahez_saved_customer');
-    if (saved) {
-        const data = JSON.parse(saved);
-        if (document.getElementById('customerName')) document.getElementById('customerName').value = data.name || '';
-        if (document.getElementById('customerPhone')) document.getElementById('customerPhone').value = data.phone || '';
-        if (document.getElementById('customerAddress')) document.getElementById('customerAddress').value = data.address || '';
-    }
-});
+        function addToCartWithQty(itemId, itemName, itemPrice) {
+            const qty = itemQuantities[itemId] || 1;
+            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+            
+            const existingItem = cart.find(i => i.id === itemId);
+            if (existingItem) {
+                existingItem.quantity += qty;
+            } else {
+                cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: qty });
+            }
+            
+            localStorage.setItem('jahez_cart', JSON.stringify(cart));
+            alert(`تمت إضافة ${qty} من (${itemName}) إلى السلة بنجاح!`);
+            
+            itemQuantities[itemId] = 1;
+            const qtyElement = document.getElementById(`qty_${itemId}`);
+            if (qtyElement) qtyElement.innerText = '1';
+        }
+    </script>
 </body>
 </html>
-<script>
-  // تخزين الكميات المؤقتة لكل صنف
-const itemQuantities = {};
-
-function increaseQty(itemId) {
-    if (!itemQuantities[itemId]) itemQuantities[itemId] = 1;
-    itemQuantities[itemId]++;
-    const el = document.getElementById(`qty_${itemId}`);
-    if (el) el.innerText = itemQuantities[itemId];
-}
-
-function decreaseQty(itemId) {
-    if (itemQuantities[itemId] && itemQuantities[itemId] > 1) {
-        itemQuantities[itemId]--;
-        const el = document.getElementById(`qty_${itemId}`);
-        if (el) el.innerText = itemQuantities[itemId];
-    }
-}
-
-function addToCartWithQty(itemId, itemName, itemPrice) {
-    const qty = itemQuantities[itemId] || 1;
-    let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
-    
-    const existingItem = cart.find(i => i.id === itemId);
-    if (existingItem) {
-        existingItem.quantity += qty;
-    } else {
-        cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: qty });
-    }
-    
-    localStorage.setItem('jahez_cart', JSON.stringify(cart));
-    alert(`تمت إضافة ${qty} من (${itemName}) إلى السلة بنجاح!`);
-    
-    itemQuantities[itemId] = 1;
-    const qtyElement = document.getElementById(`qty_${itemId}`);
-    if (qtyElement) qtyElement.innerText = '1';
-}
