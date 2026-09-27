@@ -69,6 +69,44 @@
 </div>
 
 <script>
+  // تخزين الكميات المؤقتة لكل صنف
+const itemQuantities = {};
+
+function increaseQty(itemId) {
+    if (!itemQuantities[itemId]) itemQuantities[itemId] = 1;
+    itemQuantities[itemId]++;
+    const el = document.getElementById(`qty_${itemId}`);
+    if (el) el.innerText = itemQuantities[itemId];
+}
+
+function decreaseQty(itemId) {
+    if (itemQuantities[itemId] && itemQuantities[itemId] > 1) {
+        itemQuantities[itemId]--;
+        const el = document.getElementById(`qty_${itemId}`);
+        if (el) el.innerText = itemQuantities[itemId];
+    }
+}
+
+// دالة إضافة الصنف بالسعر والكمية المحددة للسلة
+function addToCartWithQty(itemId, itemName, itemPrice) {
+    const qty = itemQuantities[itemId] || 1;
+    let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+    
+    const existingItem = cart.find(i => i.id === itemId);
+    if (existingItem) {
+        existingItem.quantity += qty;
+    } else {
+        cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: qty });
+    }
+    
+    localStorage.setItem('jahez_cart', JSON.stringify(cart));
+    alert(`تمت إضافة ${qty} من (${itemName}) إلى السلة بنجاح!`);
+    
+    // إعادة تعيين العداد إلى 1
+    itemQuantities[itemId] = 1;
+    const qtyElement = document.getElementById(`qty_${itemId}`);
+    if (qtyElement) qtyElement.innerText = '1';
+}
   let selectMap, selectMarker;
   let clientMap, driverMarker;
   let selectedCustomerLat = 31.584, selectedCustomerLng = 31.085;
@@ -315,3 +353,40 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </body>
 </html>
+<script>
+  // تخزين الكميات المؤقتة لكل صنف
+const itemQuantities = {};
+
+function increaseQty(itemId) {
+    if (!itemQuantities[itemId]) itemQuantities[itemId] = 1;
+    itemQuantities[itemId]++;
+    const el = document.getElementById(`qty_${itemId}`);
+    if (el) el.innerText = itemQuantities[itemId];
+}
+
+function decreaseQty(itemId) {
+    if (itemQuantities[itemId] && itemQuantities[itemId] > 1) {
+        itemQuantities[itemId]--;
+        const el = document.getElementById(`qty_${itemId}`);
+        if (el) el.innerText = itemQuantities[itemId];
+    }
+}
+
+function addToCartWithQty(itemId, itemName, itemPrice) {
+    const qty = itemQuantities[itemId] || 1;
+    let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+    
+    const existingItem = cart.find(i => i.id === itemId);
+    if (existingItem) {
+        existingItem.quantity += qty;
+    } else {
+        cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: qty });
+    }
+    
+    localStorage.setItem('jahez_cart', JSON.stringify(cart));
+    alert(`تمت إضافة ${qty} من (${itemName}) إلى السلة بنجاح!`);
+    
+    itemQuantities[itemId] = 1;
+    const qtyElement = document.getElementById(`qty_${itemId}`);
+    if (qtyElement) qtyElement.innerText = '1';
+}
