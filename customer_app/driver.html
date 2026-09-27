@@ -65,8 +65,9 @@
               <span class="status-badge ${isCompleted ? 'status-done' : ''}">${o.status}</span>
             </div>
             <p><strong>العميل:</strong> ${o.customerName || 'عميل'} (${o.phone || '-'})</p>
-            <p><strong>العنوان/الوجبة:</strong> ${o.item || 'وجبة طعام'}</p>
-            <p><a href="${googleMapsUrl}" target="_blank" class="maps-link">📍 فتح موقع عنوان العميل في خرائط جوجل ↗</a></p>
+            <p style="color:#38bdf8; margin-top:4px;"><strong>🏠 العنوان المكتوب:</strong> ${o.customerAddress || 'غير محدد'}</p>
+            <p><strong>الوجبة:</strong> ${o.item || 'وجبة طعام'}</p>
+            <p><a href="${googleMapsUrl}" target="_blank" class="maps-link">📍 فتح موقع العميل المحدد في خرائط جوجل ↗</a></p>
             
             <div id="map"></div>
 
@@ -87,14 +88,14 @@
     if (!mapElement) return;
 
     map = L.map('map').setView([currentLat, currentLng], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     driverMarker = L.marker([currentLat, currentLng]).addTo(map)
-      .bindPopup('🚴 موقعك الحالي').openPopup();
+      .bindPopup('🚴 موقع الكابتن الحالي').openPopup();
 
     if (customerLoc) {
       customerMarker = L.marker([customerLoc.lat, customerLoc.lng]).addTo(map)
-        .bindPopup('🏠 موقع التوصيل للعميل');
+        .bindPopup('🏠 عنوان موقع التوصيل للعميل');
     }
 
     if (navigator.geolocation) {

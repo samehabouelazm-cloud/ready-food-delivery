@@ -3,44 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جاهز في بلطيم - تطبيق العميل</title>
+  <title>جاهز في بلطيم - جميع الخدمات والطلبات</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
+    .container { max-width: 850px; margin: 0 auto; }
     header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
     header h1 { color: #f59e0b; font-size: 22px; }
     .section-title { font-size: 18px; color: #38bdf8; margin-bottom: 12px; }
-    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-    .btn-gps { background: #10b981; margin-bottom: 10px; }
-    .tracking-card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; margin-top: 20px; }
-    #selectMap, #clientMap { height: 220px; width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; }
+    
+    /* شريط الأقسام الأفقي */
+    .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: thin; }
+    .cat-chip { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 14px; font-weight: bold; transition: 0.2s; }
+    .cat-chip.active, .cat-chip:hover { background: #f59e0b; color: #0f172a; border-color: #f59e0b; }
+
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+    .btn-gps { background: #10b981; margin-top: 5px; }
     .location-box { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; }
+    #selectMap, #clientMap { height: 220px; width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; }
+    .tracking-card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; margin-top: 20px; }
+    .custom-order-card { background: #1e293b; border: 1px dashed #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>🍕 جاهز في بلطيم</h1>
-    <span style="color: #cbd5e1; font-size: 14px;">أسرع توصيل في بلطيم 🚀</span>
+    <h1>🛍️ جاهز في بلطيم</h1>
+    <span style="color: #cbd5e1; font-size: 14px;">توصيل كل احتياجاتك في بلطيم 🚀</span>
   </header>
 
-  <!-- خريطة اختيار عنوان العميل -->
+  <!-- خانة عنوان التوصيل والخريطة -->
   <div class="location-box">
-    <h2 class="section-title">📍 حدد عنوان التوصيل الخاص بك</h2>
-    <p style="font-size:13px; color:#94a3b8;">اضغط على الخريطة لتحديد مكانك أو استخدم زر الموقع الحالي:</p>
-    <button class="btn btn-gps" onclick="getCurrentLocation()">📍 استخدام موقعي الحالي عبر الـ GPS</button>
+    <h2 class="section-title">📍 عنوان التوصيل</h2>
+    <label style="font-size:13px; color:#94a3b8;">اكتب عنوانك التفصيلي لتسهيل الوصول إليك:</label>
+    <input type="text" id="customerAddressInput" placeholder="مثال: بلطيم - شارع البحر - بجوار المسجد الكبير" value="بلطيم - السوق المركزي">
+    <button class="btn btn-gps" onclick="getCurrentLocation()">📍 تحديث الخريطة بموقعي الجغرافي الحالي (GPS)</button>
     <div id="selectMap"></div>
   </div>
 
-  <h2 class="section-title">قائمة الطعام (المنيو)</h2>
-  <div id="menuContainer" class="menu-grid">جاري تحميل المنيو...</div>
+  <!-- شريط الأقسام -->
+  <h2 class="section-title">🗂️ اختر القسم</h2>
+  <div class="categories-bar" id="categoriesContainer">جاري تحميل الأقسام...</div>
 
+  <!-- خدمة أطلب أي حاجة / طلب خاص -->
+  <div class="custom-order-card" id="customOrderBox" style="display: none;">
+    <h3 style="color: #f59e0b; margin-bottom: 8px;">📦 قسم: أطلب أي حاجة / توصيل مشاوير</h3>
+    <p style="font-size:13px; color:#94a3b8; margin-bottom:10px;">اكتب تفاصيل طلبك بالتفصيل (أغراض، مشوار، توصيل غاز، صيانة...) وسنقوم بتوصيله فوراً:</p>
+    <textarea id="customOrderText" rows="3" placeholder="اكتب هنا طلبك الخاص التفصيلي..."></textarea>
+    <button class="btn" style="background: #f59e0b; color:#000;" onclick="placeCustomOrder()">تأكيد وإرسال الطلب الخاص 🚀</button>
+  </div>
+
+  <!-- عرض العناصر والتصنيفات -->
+  <h2 class="section-title" id="currentCatTitle">الجميع</h2>
+  <div id="menuContainer" class="menu-grid">جاري تحميل المنيو والخدمات...</div>
+
+  <!-- تتبع الطلب -->
   <h2 class="section-title">تتبع طلبك الحالي 🚴</h2>
   <div id="orderTracking">لا توجد طلبات قيد التتبع حالياً.</div>
 </div>
@@ -48,8 +71,47 @@
 <script>
   let selectMap, selectMarker;
   let clientMap, driverMarker;
-  // إحداثيات افتراضية لبلطيم
   let selectedCustomerLat = 31.584, selectedCustomerLng = 31.085;
+  let allMenuItems = [];
+  let currentCategory = 'الكل';
+
+  const defaultCategories = [
+    "الكل",
+    "🍔 مأكولات ومطاعم",
+    "🥦 خضروات وفواكه",
+    "🫘 بقوليات وعطارة",
+    "🐟 أسماك ومأكولات بحرية",
+    "🥩 لحوم وطيور",
+    "📱 إلكترونيات وصيانة",
+    "🛒 سوبر ماركت",
+    "🔥 توصيل غاز",
+    "🚗 توصيل مشاوير خاصة",
+    "📦 أطلب أي حاجة"
+  ];
+
+  function initCategories() {
+    const container = document.getElementById('categoriesContainer');
+    container.innerHTML = defaultCategories.map(cat => `
+      <button class="cat-chip ${cat === 'الكل' ? 'active' : ''}" onclick="filterCategory('${cat}', this)">${cat}</button>
+    `).join('');
+  }
+
+  function filterCategory(cat, btn) {
+    document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    currentCategory = cat;
+    document.getElementById('currentCatTitle').innerText = cat;
+
+    const customBox = document.getElementById('customOrderBox');
+    if (cat === '📦 أطلب أي حاجة' || cat === '🚗 توصيل مشاوير خاصة' || cat === '🔥 توصيل غاز') {
+      customBox.style.display = 'block';
+    } else {
+      customBox.style.display = 'none';
+    }
+
+    renderItems();
+  }
 
   function initSelectMap() {
     selectMap = L.map('selectMap').setView([selectedCustomerLat, selectedCustomerLng], 14);
@@ -63,12 +125,6 @@
       selectedCustomerLng = e.latlng.lng;
       selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
     });
-
-    selectMarker.on('dragend', (e) => {
-      const pos = e.target.getLatLng();
-      selectedCustomerLat = pos.lat;
-      selectedCustomerLng = pos.lng;
-    });
   }
 
   function getCurrentLocation() {
@@ -78,33 +134,54 @@
         selectedCustomerLng = pos.coords.longitude;
         selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
         selectMap.setView([selectedCustomerLat, selectedCustomerLng], 16);
-        alert('تم تحديد موقعك الحالي بنجاح!');
-      }, () => alert('تعذر جلب الموقع الجغرافي.'));
+      }, () => alert('تعذر جلب الموقع الجغرافي تلقائياً.'));
     }
   }
 
   async function loadMenu() {
     try {
       const res = await fetch('/api/menu');
-      const items = await res.json();
-      if (!items || items.length === 0) {
-        document.getElementById('menuContainer').innerHTML = '<p style="color:#94a3b8;">لا توجد وجبات بالمنيو حالياً.</p>';
-        return;
-      }
-      document.getElementById('menuContainer').innerHTML = items.map(item => `
-        <div class="card">
-          <h3>${item.name}</h3>
-          <p style="color:#94a3b8; font-size:12px;">${item.category || ''}</p>
-          <p style="color:#10b981; font-weight:bold; margin-top:5px;">${item.price} ج.م</p>
-          <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
-        </div>
-      `).join('');
+      allMenuItems = await res.json();
+      renderItems();
     } catch (e) {
-      document.getElementById('menuContainer').innerHTML = '<p style="color:#ef4444;">خطأ في تحميل المنيو.</p>';
+      document.getElementById('menuContainer').innerHTML = '<p style="color:#ef4444;">خطأ في تحميل الخدمات والمنتجات.</p>';
     }
   }
 
+  function renderItems() {
+    const container = document.getElementById('menuContainer');
+    let filtered = allMenuItems;
+
+    if (currentCategory !== 'الكل') {
+      filtered = allMenuItems.filter(i => i.category === currentCategory);
+    }
+
+    if (!filtered || filtered.length === 0) {
+      container.innerHTML = '<p style="color:#94a3b8; grid-column: 1/-1;">لا توجد عناصر مسجلة في هذا القسم حالياً، يمكنك كتابة طلبك في "أطلب أي حاجة".</p>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(item => `
+      <div class="card">
+        <div>
+          <h3>${item.name}</h3>
+          <p style="color:#f59e0b; font-size:12px; margin-top:4px;">${item.category || ''}</p>
+        </div>
+        <div>
+          <p style="color:#10b981; font-weight:bold; margin-top:8px;">${item.price} ج.م</p>
+          <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
   async function placeOrder(itemName) {
+    const addressText = document.getElementById('customerAddressInput').value.trim();
+    if (!addressText) {
+      alert('يرجى كتابة عنوان التوصيل أولاً!');
+      return;
+    }
+
     const name = prompt('ادخل اسمك:');
     const phone = prompt('ادخل رقم جوالك:');
     if (!name || !phone) return;
@@ -115,11 +192,45 @@
       body: JSON.stringify({ 
         customerName: name, 
         phone: phone, 
-        item: itemName,
+        item: `[${currentCategory}] ${itemName}`,
+        customerAddress: addressText,
         customerLocation: { lat: selectedCustomerLat, lng: selectedCustomerLng }
       })
     });
-    alert('تم إرسال طلبك وموقع التوصيل بنجاح!');
+    alert('تم إرسال طلبك وعنوانك بنجاح!');
+    trackOrders();
+  }
+
+  async function placeCustomOrder() {
+    const customDetail = document.getElementById('customOrderText').value.trim();
+    const addressText = document.getElementById('customerAddressInput').value.trim();
+
+    if (!customDetail) {
+      alert('يرجى كتابة تفاصيل الطلب أو المشوار أولاً!');
+      return;
+    }
+    if (!addressText) {
+      alert('يرجى كتابة عنوان التوصيل أولاً!');
+      return;
+    }
+
+    const name = prompt('ادخل اسمك:');
+    const phone = prompt('ادخل رقم جوالك:');
+    if (!name || !phone) return;
+
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        customerName: name, 
+        phone: phone, 
+        item: `[طلب خاص: ${currentCategory}] ${customDetail}`,
+        customerAddress: addressText,
+        customerLocation: { lat: selectedCustomerLat, lng: selectedCustomerLng }
+      })
+    });
+    alert('تم إرسال طلبك الخاص بنجاح!');
+    document.getElementById('customOrderText').value = '';
     trackOrders();
   }
 
@@ -134,6 +245,7 @@
       trackingDiv.innerHTML = `
         <div class="tracking-card">
           <h3>طلب #${latest.id} - (${latest.item})</h3>
+          <p style="color:#cbd5e1; margin-top:4px;"><strong>العنوان المسجل:</strong> ${latest.customerAddress || 'عنوان العميل'}</p>
           <p style="color:#f59e0b; font-weight:bold; margin-top:5px;">الحالة: ${latest.status}</p>
           <div id="clientMap"></div>
         </div>
@@ -157,6 +269,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    initCategories();
     initSelectMap();
     loadMenu();
     trackOrders();

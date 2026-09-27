@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جاهز في بلطيم - لوحة التحكم</title>
+  <title>جاهز في بلطيم - لوحة التحكم الشاملة</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; }
+    .container { max-width: 950px; margin: 0 auto; }
     header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
     header h1 { color: #f59e0b; font-size: 22px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -21,16 +21,26 @@
 
 <div class="container">
   <header>
-    <h1>📦 جاهز في بلطيم - لوحة التحكم</h1>
+    <h1>📦 جاهز في بلطيم - لوحة التحكم الشاملة</h1>
     <button class="btn" onclick="loadAll()">تحديث البيانات 🔄</button>
   </header>
 
   <div class="card" style="margin-bottom: 20px;">
-    <h3>🍔 إضافة وجبة / صنف جديد للقائمة</h3>
-    <div style="display:flex; gap:10px; margin-top:10px;">
-      <input type="text" id="itemName" placeholder="اسم الوجبة">
-      <input type="text" id="itemCat" placeholder="التصنيف">
-      <input type="number" id="itemPrice" placeholder="السعر">
+    <h3>➕ إضافة صنف / خدمة جديدة إلى الأقسام</h3>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 120px; gap:10px; margin-top:10px;">
+      <input type="text" id="itemName" placeholder="اسم المنتج/الخدمة">
+      <select id="itemCat">
+        <option value="🍔 مأكولات ومطاعم">🍔 مأكولات ومطاعم</option>
+        <option value="🥦 خضروات وفواكه">🥦 خضروات وفواكه</option>
+        <option value="🫘 بقوليات وعطارة">🫘 بقوليات وعطارة</option>
+        <option value="🐟 أسماك ومأكولات بحرية">🐟 أسماك ومأكولات بحرية</option>
+        <option value="🥩 لحوم وطيور">🥩 لحوم وطيور</option>
+        <option value="📱 إلكترونيات وصيانة">📱 إلكترونيات وصيانة</option>
+        <option value="🛒 سوبر ماركت">🛒 سوبر ماركت</option>
+        <option value="🔥 توصيل غاز">🔥 توصيل غاز</option>
+        <option value="🚗 توصيل مشاوير خاصة">🚗 توصيل مشاوير خاصة</option>
+      </select>
+      <input type="number" id="itemPrice" placeholder="السعر (ج.م)">
       <button class="btn" onclick="addMenuItem()">إضافة ➕</button>
     </div>
   </div>
@@ -47,7 +57,7 @@
     </div>
 
     <div class="card">
-      <h3>🛒 الطلبات الواردة والمتابعة المباشرة</h3>
+      <h3>🛒 الطلبات الواردة من الأقسام والعملاء</h3>
       <div id="ordersList">جاري التحميل...</div>
     </div>
   </div>
@@ -81,10 +91,10 @@
 
       document.getElementById('ordersList').innerHTML = orders.map(o => `
         <div class="order-item">
-          <p><strong>طلب #${o.id}</strong> - ${o.item || 'وجبة'}</p>
+          <p><strong>طلب #${o.id}</strong> - <span style="color:#f59e0b;">${o.item || 'طلب'}</span></p>
           <p>العميل: ${o.customerName || '-'} (${o.phone || '-'})</p>
-          <p style="color:#f59e0b;">الحالة: ${o.status}</p>
-          ${o.driverLocation ? `<p style="font-size:12px; color:#38bdf8;">📍 الإحداثيات: ${o.driverLocation.lat.toFixed(3)},${o.driverLocation.lng.toFixed(3)}</p>` : ''}
+          <p style="color:#38bdf8; font-size:13px;">🏠 العنوان: ${o.customerAddress || 'غير محدد'}</p>
+          <p style="color:#10b981;">الحالة: ${o.status}</p>
           <select onchange="assignDriver('${o.id}', this.value)">
             <option value="">إسناد لكابتن...</option>
             ${drivers.map(d => `<option value="${d.id}" ${o.driverId == d.id ? 'selected' : ''}>${d.name}</option>`).join('')}
@@ -131,7 +141,9 @@
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ name, category, price })
     });
-    alert('تمت إضافة الوجبة');
+    alert('تمت إضافة المنتج/الخدمة للقسم بنجاح');
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemPrice').value = '';
   }
 
   document.addEventListener('DOMContentLoaded', loadAll);
