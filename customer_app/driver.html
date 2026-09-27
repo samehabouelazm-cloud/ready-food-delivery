@@ -22,6 +22,7 @@
     .btn-step2 { background: #8b5cf6; color: #fff; }
     .btn-step3 { background: #f59e0b; color: #000; }
     .btn-step4 { background: #10b981; color: #fff; }
+    .maps-link { display: inline-block; margin-top: 8px; color: #38bdf8; text-decoration: none; font-weight: bold; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -29,7 +30,7 @@
 <div class="container">
   <header>
     <h1>🚴 جاهز في بلطيم - تطبيق الكابتن</h1>
-    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">تتبع مسار الرحلة على الخريطة</p>
+    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">تتبع مسار الرحلة وموقع العميل على الخريطة</p>
   </header>
 
   <div id="driverOrders">
@@ -38,7 +39,7 @@
 </div>
 
 <script>
-  let map, marker;
+  let map, driverMarker, customerMarker;
   let currentLat = 31.584, currentLng = 31.085;
 
   async function loadMyOrders() {
@@ -54,6 +55,9 @@
 
       container.innerHTML = orders.map(o => {
         const isCompleted = o.status && o.status.includes('تم التوصيل بنجاح');
+        const cLoc = o.customerLocation || { lat: 31.584, lng: 31.085 };
+        const googleMapsUrl = `https://www.google.com/maps?q=${cLoc.lat},${cLoc.lng}`;
+
         return `
           <div class="order-card">
             <div class="order-header">
@@ -62,6 +66,7 @@
             </div>
             <p><strong>العميل:</strong> ${o.customerName || 'عميل'} (${o.phone || '-'})</p>
             <p><strong>العنوان/الوجبة:</strong> ${o.item || 'وجبة طعام'}</p>
+            <p><a href="${googleMapsUrl}" target="_blank" class="maps-link">📍 فتح موقع عنوان العميل في خرائط جوجل ↗</a></p>
             
             <div id="map"></div>
 
@@ -70,28 +75,33 @@
         `;
       }).join('');
 
-      initMap();
+      const firstOrder = orders[0];
+      initMap(firstOrder ? firstOrder.customerLocation : null);
     } catch (err) {
       container.innerHTML = '<p style="color:#ef4444; text-align:center;">خطأ في جلب البيانات.</p>';
     }
   }
 
-  function initMap() {
+  function initMap(customerLoc) {
     const mapElement = document.getElementById('map');
     if (!mapElement) return;
 
-    map = L.map('map').setView([currentLat, currentLng], 14);
+    map = L.map('map').setView([currentLat, currentLng], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
-    marker = L.marker([currentLat, currentLng]).addTo(map)
-      .bindPopup('📍 موقع الكابتن الحالي').openPopup();
+    driverMarker = L.marker([currentLat, currentLng]).addTo(map)
+      .bindPopup('🚴 موقعك الحالي').openPopup();
+
+    if (customerLoc) {
+      customerMarker = L.marker([customerLoc.lat, customerLoc.lng]).addTo(map)
+        .bindPopup('🏠 موقع التوصيل للعميل');
+    }
 
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(pos => {
         currentLat = pos.coords.latitude;
         currentLng = pos.coords.longitude;
-        marker.setLatLng([currentLat, currentLng]);
-        map.setView([currentLat, currentLng]);
+        driverMarker.setLatLng([currentLat, currentLng]);
       });
     }
   }

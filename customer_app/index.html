@@ -3,89 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جاهز في بلطيم - طلب الطعام أونلاين</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
-    header h1 { color: #38bdf8; font-size: 22px; }
-    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .menu-card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
-    .price { color: #10b981; font-weight: bold; margin: 10px 0; font-size: 18px; }
-    .btn { padding: 8px 15px; background: #3b82f6; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn:hover { background: #2563eb; }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <header>
-    <h1>🍕 جاهز في بلطيم</h1>
-    <span style="color:#94a3b8;">أسرع توصيل في بلطيم 🚀</span>
-  </header>
-
-  <h2 style="margin-bottom: 15px; color:#f59e0b;">قائمة الطعام (المنيو)</h2>
-  <div id="menuContainer" class="menu-grid">
-    <p style="color:#94a3b8;">جاري تحميل المنيو...</p>
-  </div>
-</div>
-
-<script>
-  async function loadMenu() {
-    const container = document.getElementById('menuContainer');
-    try {
-      const res = await fetch('/api/menu');
-      const menu = await res.json();
-
-      if (!menu || menu.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">لا توجد وجبات في المنيو حالياً.</p>';
-        return;
-      }
-
-      container.innerHTML = menu.map(item => `
-        <div class="menu-card">
-          <h3>${item.name}</h3>
-          <p style="color:#94a3b8; font-size:12px;">${item.category || 'عام'}</p>
-          <div class="price">${item.price} ج.م</div>
-          <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
-        </div>
-      `).join('');
-    } catch (err) {
-      container.innerHTML = '<p style="color:#ef4444;">خطأ في تحميل المنيو.</p>';
-    }
-  }
-
-  async function placeOrder(itemName) {
-    const name = prompt('أدخل اسمك الكريم:');
-    if (!name) return;
-    const phone = prompt('أدخل رقم جوالك:');
-    if (!phone) return;
-
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerName: name, phone: phone, item: itemName })
-      });
-
-      if (res.ok) {
-        alert('تم إرسال طلبك بنجاح! يتم تجهيزه الآن 🚀');
-      }
-    } catch (err) {
-      alert('حدث خطأ في إرسال الطلب');
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', loadMenu);
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>جاهز في بلطيم - تطبيق العميل</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -99,8 +16,10 @@
     .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
     .card { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center; }
     .btn { background: #2563eb; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+    .btn-gps { background: #10b981; margin-bottom: 10px; }
     .tracking-card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #38bdf8; margin-top: 20px; }
-    #clientMap { height: 250px; width: 100%; border-radius: 8px; margin-top: 10px; }
+    #selectMap, #clientMap { height: 220px; width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #334155; }
+    .location-box { background: #1e293b; border: 1px solid #334155; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
   </style>
 </head>
 <body>
@@ -111,6 +30,14 @@
     <span style="color: #cbd5e1; font-size: 14px;">أسرع توصيل في بلطيم 🚀</span>
   </header>
 
+  <!-- خريطة اختيار عنوان العميل -->
+  <div class="location-box">
+    <h2 class="section-title">📍 حدد عنوان التوصيل الخاص بك</h2>
+    <p style="font-size:13px; color:#94a3b8;">اضغط على الخريطة لتحديد مكانك أو استخدم زر الموقع الحالي:</p>
+    <button class="btn btn-gps" onclick="getCurrentLocation()">📍 استخدام موقعي الحالي عبر الـ GPS</button>
+    <div id="selectMap"></div>
+  </div>
+
   <h2 class="section-title">قائمة الطعام (المنيو)</h2>
   <div id="menuContainer" class="menu-grid">جاري تحميل المنيو...</div>
 
@@ -119,22 +46,61 @@
 </div>
 
 <script>
+  let selectMap, selectMarker;
   let clientMap, driverMarker;
+  // إحداثيات افتراضية لبلطيم
+  let selectedCustomerLat = 31.584, selectedCustomerLng = 31.085;
+
+  function initSelectMap() {
+    selectMap = L.map('selectMap').setView([selectedCustomerLat, selectedCustomerLng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(selectMap);
+
+    selectMarker = L.marker([selectedCustomerLat, selectedCustomerLng], { draggable: true }).addTo(selectMap)
+      .bindPopup('🏠 موقع التوصيل المختار').openPopup();
+
+    selectMap.on('click', (e) => {
+      selectedCustomerLat = e.latlng.lat;
+      selectedCustomerLng = e.latlng.lng;
+      selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
+    });
+
+    selectMarker.on('dragend', (e) => {
+      const pos = e.target.getLatLng();
+      selectedCustomerLat = pos.lat;
+      selectedCustomerLng = pos.lng;
+    });
+  }
+
+  function getCurrentLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        selectedCustomerLat = pos.coords.latitude;
+        selectedCustomerLng = pos.coords.longitude;
+        selectMarker.setLatLng([selectedCustomerLat, selectedCustomerLng]);
+        selectMap.setView([selectedCustomerLat, selectedCustomerLng], 16);
+        alert('تم تحديد موقعك الحالي بنجاح!');
+      }, () => alert('تعذر جلب الموقع الجغرافي.'));
+    }
+  }
 
   async function loadMenu() {
     try {
       const res = await fetch('/api/menu');
       const items = await res.json();
+      if (!items || items.length === 0) {
+        document.getElementById('menuContainer').innerHTML = '<p style="color:#94a3b8;">لا توجد وجبات بالمنيو حالياً.</p>';
+        return;
+      }
       document.getElementById('menuContainer').innerHTML = items.map(item => `
         <div class="card">
           <h3>${item.name}</h3>
-          <p style="color:#94a3b8; font-size:12px;">${item.category}</p>
+          <p style="color:#94a3b8; font-size:12px;">${item.category || ''}</p>
           <p style="color:#10b981; font-weight:bold; margin-top:5px;">${item.price} ج.م</p>
           <button class="btn" onclick="placeOrder('${item.name}')">طلب الآن 🛒</button>
         </div>
       `).join('');
     } catch (e) {
-      document.getElementById('menuContainer').innerHTML = 'خطأ في تحميل المنيو.';
+      document.getElementById('menuContainer').innerHTML = '<p style="color:#ef4444;">خطأ في تحميل المنيو.</p>';
     }
   }
 
@@ -146,9 +112,14 @@
     await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customerName: name, phone: phone, item: itemName })
+      body: JSON.stringify({ 
+        customerName: name, 
+        phone: phone, 
+        item: itemName,
+        customerLocation: { lat: selectedCustomerLat, lng: selectedCustomerLng }
+      })
     });
-    alert('تم إرسال طلبك بنجاح!');
+    alert('تم إرسال طلبك وموقع التوصيل بنجاح!');
     trackOrders();
   }
 
@@ -186,9 +157,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    initSelectMap();
     loadMenu();
     trackOrders();
-    setInterval(trackOrders, 5000); // تحديث تلقائي كل 5 ثوانٍ
+    setInterval(trackOrders, 5000);
   });
 </script>
 </body>

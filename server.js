@@ -35,16 +35,12 @@ function saveData(data) {
   }
 }
 
-// الصفحة الرئيسية
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'customer_app', 'index.html'));
 });
 
 // APIs الكباتن
-app.get('/api/drivers', (req, res) => {
-  const db = readData();
-  res.json(db.drivers || []);
-});
+app.get('/api/drivers', (req, res) => res.json(readData().drivers || []));
 
 app.post('/api/drivers', (req, res) => {
   const db = readData();
@@ -69,11 +65,8 @@ app.delete('/api/drivers/:id', (req, res) => {
   res.json({ message: 'تم الحذف' });
 });
 
-// APIs الطلبات
-app.get('/api/orders', (req, res) => {
-  const db = readData();
-  res.json(db.orders || []);
-});
+// APIs الطلبات والتوصيل
+app.get('/api/orders', (req, res) => res.json(readData().orders || []));
 
 app.post('/api/orders', (req, res) => {
   const db = readData();
@@ -83,6 +76,7 @@ app.post('/api/orders', (req, res) => {
     driverId: null,
     createdAt: new Date(),
     driverLocation: { lat: 31.584, lng: 31.085 },
+    customerLocation: req.body.customerLocation || { lat: 31.584, lng: 31.085 }, // موقع العميل الجغرافي
     ...req.body
   };
   if (!db.orders) db.orders = [];
@@ -123,9 +117,15 @@ app.put('/api/orders/:id/status', (req, res) => {
 });
 
 // APIs المنيو
-app.get('/api/menu', (req, res) => {
+app.get('/api/menu', (req, res) => res.json(readData().menu || []));
+
+app.post('/api/menu', (req, res) => {
   const db = readData();
-  res.json(db.menu || []);
+  const newItem = { id: Date.now().toString(), ...req.body };
+  if (!db.menu) db.menu = [];
+  db.menu.push(newItem);
+  saveData(db);
+  res.status(201).json(newItem);
 });
 
 app.listen(PORT, () => console.log(`🚀 جاهز في بلطيم شغال على http://localhost:${PORT}`));
