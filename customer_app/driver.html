@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>جاهز في بلطيم - تطبيق الكابتن</title>
+  <!-- مكتبة الخرائط Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; }
+    .container { max-width: 650px; margin: 0 auto; }
     header { text-align: center; margin-bottom: 20px; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; }
     header h1 { color: #10b981; font-size: 22px; }
     
@@ -16,12 +19,13 @@
     .status-badge { background: #f59e0b; color: #000; font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 13px; }
     .status-done { background: #10b981; color: #fff; }
 
-    .action-btn { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+    #map { height: 250px; width: 100%; border-radius: 10px; margin-top: 15px; border: 1px solid #334155; }
+
+    .action-btn { width: 100%; padding: 12px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
     .btn-step1 { background: #3b82f6; color: #fff; }
     .btn-step2 { background: #8b5cf6; color: #fff; }
     .btn-step3 { background: #f59e0b; color: #000; }
     .btn-step4 { background: #10b981; color: #fff; }
-    .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -29,7 +33,7 @@
 <div class="container">
   <header>
     <h1>🚴 جاهز في بلطيم - تطبيق الكابتن</h1>
-    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">متابعة الرحلة وتحديث حالة التوصيل</p>
+    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">متابعة الرحلة بالخريطة وتحديث موقعك للإدارة</p>
   </header>
 
   <div id="driverOrders">
@@ -38,6 +42,10 @@
 </div>
 
 <script>
+  let map, marker;
+  // إحداثيات بلطيم الافتراضية
+  let currentLat = 31.584, currentLng = 31.085;
+
   async function loadMyOrders() {
     const container = document.getElementById('driverOrders');
     try {
@@ -59,18 +67,43 @@
             </div>
             <p><strong>العميل:</strong> ${o.customerName || 'عميل'} (${o.phone || '-'})</p>
             <p><strong>العنوان/الوجبة:</strong> ${o.item || 'وجبة طعام'}</p>
-            <p style="margin-top:6px; font-size:12px; color:#94a3b8;"><strong>التاريخ:</strong> ${new Date(o.createdAt).toLocaleString('ar-EG')}</p>
             
+            <div id="map"></div>
+
             ${!isCompleted ? renderActionButtons(o.id, o.status) : '<p style="color:#10b981; text-align:center; margin-top:10px; font-weight:bold;">🎉 تم توصيل هذا الطلب بنجاح</p>'}
           </div>
         `;
       }).join('');
+
+      initMap();
     } catch (err) {
       container.innerHTML = '<p style="color:#ef4444; text-align:center;">خطأ في جلب البيانات.</p>';
     }
   }
 
-  // تحديد الزر التالي بناءً على حالة الطلب الحالية
+  function initMap() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) return;
+
+    map = L.map('map').setView([currentLat, currentLng], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    marker = L.marker([currentLat, currentLng]).addTo(map)
+      .bindPopup('📍 موقعك الحالي ككابتن (بلطيم)').openPopup();
+
+    // تحديث الموقع الجغرافي الحقيقي من الجهاز إذا توفر
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(pos => {
+        currentLat = pos.coords.latitude;
+        currentLng = pos.coords.longitude;
+        marker.setLatLng([currentLat, currentLng]);
+        map.setView([currentLat, currentLng]);
+      });
+    }
+  }
+
   function renderActionButtons(orderId, currentStatus) {
     if (currentStatus.includes('جاري التوصيل مع')) {
       return `<button class="action-btn btn-step1" onclick="updateOrderStatus('${orderId}', '👨‍🍳 الكابتن في الطريق للمطعم')">👨‍🍳 التحرك إلى المطعم</button>`;
@@ -85,13 +118,15 @@
     }
   }
 
-  // تحديث الحالة إلكترونياً
   async function updateOrderStatus(orderId, newStatus) {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ 
+          status: newStatus,
+          location: { lat: currentLat, lng: currentLng }
+        })
       });
 
       if (res.ok) {
