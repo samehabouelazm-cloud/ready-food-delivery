@@ -6,58 +6,108 @@
     <title>منصة جاهز في بلطيم - العميل</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .container { max-width: 650px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         h1, h3 { color: #f59e0b; }
-        .card, .cart-container, .delivery-container { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        .section-box { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        .categories-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
+        .cat-btn { background: #334155; color: #fff; padding: 8px 15px; border-radius: 20px; border: none; cursor: pointer; white-space: nowrap; }
+        .cat-btn.active { background: #f59e0b; color: #000; font-weight: bold; }
+        .item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; }
         input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; }
-        .add-btn { background: #22c55e; color: #fff; width: 100%; margin-top: 10px; }
+        .add-btn { background: #22c55e; color: #fff; }
+        .gps-btn { background: #0ea5e9; color: #fff; width: 100%; margin-bottom: 10px; }
         .submit-btn { background: #3b82f6; color: #fff; width: 100%; font-size: 16px; }
-        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #334155; }
+        .cart-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #334155; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>منصة جاهز في بلطيم 🍽️</h1>
-        <p>اختر أصنافك المتاحة واطلب الآن:</p>
+        <h1>منصة جاهز في بلطيم 🍽️🛒</h1>
+        <p>اختر القسم المناسب، أضف منتجاتك، واطلب بكل سهولة:</p>
 
-        <!-- قائمة الأصناف الديناميكية -->
-        <div id="menuContainer">
-            <!-- سيتم تحميل الأصناف المضافة من الإدارة هنا تلقائياً -->
+        <!-- أزرار الأقسام المتنوعة -->
+        <div class="categories-nav">
+            <button class="cat-btn active" onclick="filterCategory('المشويات', this)">المشويات</button>
+            <button class="cat-btn" onclick="filterCategory('السوبر ماركت', this)">السوبر ماركت</button>
+            <button class="cat-btn" onclick="filterCategory('السوق', this)">السوق</button>
+            <button class="cat-btn" onclick="filterCategory('الأجبان', this)">الأجبان</button>
+            <button class="cat-btn" onclick="filterCategory('الإلكترونيات', this)">الإلكترونيات</button>
+            <button class="cat-btn" onclick="filterCategory('المنظفات', this)">المنظفات</button>
+            <button class="cat-btn" onclick="filterCategory('الأدوات المنزلية', this)">الأدوات المنزلية</button>
+        </div>
+
+        <!-- قائمة المنتجات حسب القسم -->
+        <div class="section-box">
+            <h3 id="currentCategoryTitle">قسم: المشويات</h3>
+            <div id="menuContainer">جاري تحميل المنتجات...</div>
         </div>
 
         <!-- سلة الطلبات -->
-        <div class="cart-container">
+        <div class="section-box">
             <h3>🛒 سلة الطلبات</h3>
             <div id="cartItemsList">السلة فارغة حالياً.</div>
             <p id="cartTotal" style="font-weight: bold; margin-top: 10px; color: #22c55e;">الإجمالي: 0 جنيه</p>
         </div>
 
-        <!-- بيانات التوصيل وإتمام الطلب -->
-        <div class="delivery-container">
-            <h3>بيانات التوصيل وإتمام الطلب</h3>
+        <!-- بيانات التوصيل وموقع الـ GPS -->
+        <div class="section-box">
+            <h3>بيانات التوصيل والموقع</h3>
             <input type="text" id="customerName" placeholder="الاسم الكريم">
             <input type="text" id="customerPhone" placeholder="رقم الهاتف">
-            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل (شارع، علامة مميزة)">
-            <button type="button" class="submit-btn" onclick="submitOrder()">إرسال الطلب نهائياً 🚀</button>
+            <button type="button" class="gps-btn" onclick="getLiveLocation()">📍 تحديد موقعي الحالي تلقائياً عبر GPS</button>
+            <input type="text" id="customerAddress" placeholder="إحداثيات الموقع أو العنوان بالتفصيل" readonly>
+            <button type="button" class="submit-btn" onclick="submitOrder()">إرسال الطلب للإدارة 🚀</button>
         </div>
     </div>
 
     <script>
-        // الأصناف الافتراضية أو التي يتم إضافتها من الإدارة
-        function loadMenu() {
-            let menu = JSON.parse(localStorage.getItem('jahez_menu')) || [
-                { name: 'وجبة كبدة مميزة', price: 50 },
-                { name: 'وجبة حواوشي طازج', price: 40 }
+        let currentSelectedCategory = 'المشويات';
+
+        // قاعدة بيانات افتراضية للأقسام والمنتجات (يمكن للإدارة إضافة المزيد)
+        function getDefaultMenu() {
+            return [
+                { name: 'وجبة كبدة مميزة', price: 60, category: 'المشويات' },
+                { name: 'كيلو مشمش / فواكه طازجة', price: 35, category: 'السوق' },
+                { name: 'جبنة رومي أقدم', price: 120, category: 'الأجبان' },
+                { name: 'سلة منظفات منزلية', price: 90, category: 'المنظفات' },
+                { name: 'طقم صواني تفلون', price: 350, category: 'الأدوات المنزلية' },
+                { name: 'حليب جهينة 1 لتر', price: 42, category: 'السوبر ماركت' },
+                { name: 'سماعة بلوتوث لاسلكية', price: 250, category: 'الإلكترونيات' }
             ];
+        }
+
+        function filterCategory(categoryName, btnElement) {
+            currentSelectedCategory = categoryName;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+            document.getElementById('currentCategoryTitle').innerText = `قسم: ${categoryName}`;
+            loadMenu();
+        }
+
+        function loadMenu() {
+            let menu = JSON.parse(localStorage.getItem('jahez_menu'));
+            if (!menu) {
+                menu = getDefaultMenu();
+                localStorage.setItem('jahez_menu', JSON.stringify(menu));
+            }
 
             const container = document.getElementById('menuContainer');
+            const filtered = menu.filter(i => i.category === currentSelectedCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد منتجات في هذا القسم حالياً.</p>';
+                return;
+            }
+
             let html = '';
-            menu.forEach((item, index) => {
+            filtered.forEach(item => {
                 html += `
-                    <div class="card">
-                        <h3>${item.name}</h3>
-                        <p>السعر: ${item.price} جنيه</p>
+                    <div class="item-card">
+                        <div>
+                            <strong>${item.name}</strong>
+                            <div style="color: #22c55e; font-size: 14px; margin-top: 4px;">${item.price} جنيه</div>
+                        </div>
                         <button type="button" class="add-btn" onclick="addToCart('${item.name}', ${item.price})">إضافة للسلة</button>
                     </div>
                 `;
@@ -75,7 +125,7 @@
             }
             localStorage.setItem('jahez_cart', JSON.stringify(cart));
             updateCartDisplay();
-            alert(`تمت إضافة (${name}) إلى السلة بنجاح!`);
+            alert(`تمت إضافة (${name}) للسلة بنجاح!`);
         }
 
         function updateCartDisplay() {
@@ -104,6 +154,28 @@
             cartTotal.innerText = `الإجمالي: ${total} جنيه`;
         }
 
+        // خاصية تتبع الموقع الجغرافي الحقيقي للعميل عبر الـ GPS
+        let userLat = 31.57; // إحداثيات افتراضية لبلطيم
+        let userLng = 31.08;
+
+        function getLiveLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLat = position.coords.latitude;
+                        userLng = position.coords.longitude;
+                        document.getElementById('customerAddress').value = `خط عرض: ${userLat.toFixed(4)}, خط طول: ${userLng.toFixed(4)} (موقع GPS حقيقي)`;
+                        alert('تم تحديد موقعك بدقة بنجاح!');
+                    },
+                    (error) => {
+                        alert('تعذر تحديد الموقع تلقائياً. تأكد من السماح للمتصفح بالوصول لموقعك.');
+                    }
+                );
+            } else {
+                alert('متصفحك لا يدعم خاصية تحديد الموقع الجغرافي.');
+            }
+        }
+
         function submitOrder() {
             const name = document.getElementById('customerName').value.trim();
             const phone = document.getElementById('customerPhone').value.trim();
@@ -111,31 +183,33 @@
             let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
 
             if (!name || !phone || !address) {
-                alert('الرجاء إدخال كافة بيانات التوصيل (الاسم، الهاتف، العنوان)!');
+                alert('الرجاء إدخال الاسم، الهاتف، واستخدام زر تحديد الموقع (GPS)!');
                 return;
             }
 
             if (cart.length === 0) {
-                alert('السلة فارغة! يجدر بك إضافة منتجات قبل إرسال الطلب.');
+                alert('السلة فارغة! أضف منتجات أولاً.');
                 return;
             }
 
             let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
             const newOrder = {
-                id: Date.now().toString().slice(-4), // رقم طلب فريد
+                id: Date.now().toString().slice(-4),
                 customerName: name,
                 phone: phone,
                 address: address,
+                lat: userLat,
+                lng: userLng,
                 items: cart,
                 driver: 'قيد الانتظار',
-                status: 'جديد'
+                status: 'مرسل للإدارة'
             };
 
             orders.push(newOrder);
             localStorage.setItem('jahez_orders', JSON.stringify(orders));
-            localStorage.removeItem('jahez_cart'); // تفريغ السلة بعد الطلب
+            localStorage.removeItem('jahez_cart');
 
-            alert(`تم إرسال طلبك برقم #${newOrder.id} بنجاح إلى الإدارة!`);
+            alert(`تم إرسال طلبك برقم #${newOrder.id} بنجاح للإدارة وتتبع مساره!`);
             window.location.reload();
         }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المطعم - جاهز</title>
+    <title>لوحة إدارة المطعم والمنصة - جاهز</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
         .container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
@@ -11,45 +11,55 @@
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; }
-        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #475569; }
+        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🛠️ لوحة إدارة المطعم</h1>
+        <h1>🛠️ لوحة إدارة المنصة والطلبات</h1>
 
-        <!-- قسم إضافة أصناف للمنيو -->
+        <!-- قسم إضافة منتج جديد لأي قسم -->
         <div class="section">
-            <h2>إضافة صنف جديد للمنيو</h2>
-            <input type="text" id="itemName" placeholder="اسم الوجبة أو الصنف">
-            <input type="number" id="itemPrice" placeholder="السعر بالجنيه">
-            <button type="button" onclick="addMenuItem()">إضافة الصنف لعرضه للعملاء</button>
+            <h2>إضافة منتج جديد لأقسام المنصة</h2>
+            <input type="text" id="newProdName" placeholder="اسم المنتج">
+            <input type="number" id="newProdPrice" placeholder="السعر بالجنيه">
+            <select id="newProdCategory">
+                <option value="المشويات">المشويات</option>
+                <option value="السوبر ماركت">السوبر ماركت</option>
+                <option value="السوق">السوق</option>
+                <option value="الأجبان">الأجبان</option>
+                <option value="الإلكترونيات">الإلكترونيات</option>
+                <option value="المنظفات">المنظفات</option>
+                <option value="الأدوات المنزلية">الأدوات المنزلية</option>
+            </select>
+            <button type="button" onclick="addNewProduct()">إضافة المنتج للقائمة فوراً</button>
         </div>
 
-        <!-- قسم متابعة طلبات العملاء وإسناد الكباتن -->
+        <!-- قسم تتبع الطلبات وإسناد الكابتن الثابت -->
         <div class="section">
-            <h2>📦 طلبات العملاء الواردة</h2>
+            <h2>📦 متابعة وتتبع الطلبات (العميل ⬅️ الإدارة ⬅️ الكابتن)</h2>
             <div id="adminOrdersList">لا توجد طلبات واردة حالياً.</div>
         </div>
     </div>
 
     <script>
-        function addMenuItem() {
-            const name = document.getElementById('itemName').value.trim();
-            const price = document.getElementById('itemPrice').value.trim();
+        function addNewProduct() {
+            const name = document.getElementById('newProdName').value.trim();
+            const price = document.getElementById('newProdPrice').value.trim();
+            const category = document.getElementById('newProdCategory').value;
 
             if (!name || !price) {
-                alert('الرجاء إدخال اسم الصنف والسعر!');
+                alert('الرجاء إدخال اسم المنتج والسعر!');
                 return;
             }
 
             let menu = JSON.parse(localStorage.getItem('jahez_menu')) || [];
-            menu.push({ name, price: Number(price) });
+            menu.push({ name, price: Number(price), category });
             localStorage.setItem('jahez_menu', JSON.stringify(menu));
 
-            alert(`تمت إضافة الصنف (${name}) بنجاح وسيظهر فوراً في صفحة العميل!`);
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemPrice').value = '';
+            alert(`تمت إضافة (${name}) إلى قسم (${category}) بنجاح!`);
+            document.getElementById('newProdName').value = '';
+            document.getElementById('newProdPrice').value = '';
         }
 
         function loadAdminOrders() {
@@ -64,19 +74,23 @@
             let html = '';
             orders.forEach(order => {
                 let itemsText = order.items.map(i => `${i.name} (×${i.quantity})`).join(', ');
+                let currentDriver = order.driver || localStorage.getItem(`jahez_order_${order.id}_driver`) || '';
+
                 html += `
                     <div class="order-card">
-                        <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id}</h3>
+                        <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id} - الحالة: ${order.status}</h3>
                         <p><strong>العميل:</strong> ${order.customerName} | <strong>الهاتف:</strong> ${order.phone}</p>
-                        <p><strong>العنوان:</strong> ${order.address}</p>
+                        <p><strong>الموقع (GPS):</strong> ${order.address} 
+                           <a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" style="color: #38bdf8; margin-right: 10px;">🗺️ عرض على خرائط جوجل</a>
+                        </p>
                         <p><strong>الأصناف:</strong> ${itemsText}</p>
                         <div style="margin-top: 10px;">
-                            <label><strong>إسناد إلى كابتن:</strong></label>
+                            <label><strong>إسناد وحفظ الكابتن:</strong></label>
                             <select onchange="assignDriver('${order.id}', this.value)">
-                                <option value="">اختر الكابتن</option>
-                                <option value="كابتن أحمد" ${order.driver === 'كابتن أحمد' ? 'selected' : ''}>كابتن أحمد</option>
-                                <option value="كابتن محمود" ${order.driver === 'كابتن محمود' ? 'selected' : ''}>كابتن محمود</option>
-                                <option value="كابتن إبراهيم" ${order.driver === 'كابتن إبراهيم' ? 'selected' : ''}>كابتن إبراهيم</option>
+                                <option value="">اختر الكابتن لتوصيل الطلب</option>
+                                <option value="كابتن أحمد" ${currentDriver === 'كابتن أحمد' ? 'selected' : ''}>كابتن أحمد</option>
+                                <option value="كابتن محمود" ${currentDriver === 'كابتن محمود' ? 'selected' : ''}>كابتن محمود</option>
+                                <option value="كابتن إبراهيم" ${currentDriver === 'كابتن إبراهيم' ? 'selected' : ''}>كابتن إبراهيم</option>
                             </select>
                         </div>
                     </div>
@@ -87,12 +101,18 @@
 
         function assignDriver(orderId, driverName) {
             if (!driverName) return;
+            
+            // حفظ الكابتن بثبات تام
+            localStorage.setItem(`jahez_order_${orderId}_driver`, driverName);
+
             let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
             let order = orders.find(o => o.id == orderId);
             if (order) {
                 order.driver = driverName;
+                order.status = 'تم الإسناد للكابتن';
                 localStorage.setItem('jahez_orders', JSON.stringify(orders));
-                alert(`تم إسناد الطلب #${orderId} إلى (${driverName}) بنجاح وثبات!`);
+                alert(`تم إسناد الطلب #${orderId} إلى (${driverName}) وتثبيته بنجاح!`);
+                loadAdminOrders();
             }
         }
 
