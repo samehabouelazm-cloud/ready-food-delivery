@@ -10,7 +10,7 @@
         h1, h2 { color: #f59e0b; text-align: center; }
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input[type="text"], select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-        .category-title { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 15px; font-size: 16px; }
+        .category-title { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 15px; font-size: 16px; font-weight: bold; }
         .product-row { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #475569; }
         .product-row label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
         .product-row input[type="number"] { width: 70px; padding: 5px; text-align: center; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 4px; margin-bottom: 0; }
@@ -21,7 +21,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
@@ -39,51 +39,45 @@
         let customerLat = null;
         let customerLng = null;
 
-        const categories = [
-            {
-                name: "🐟 قسم الأسماك والمأكولات البحرية",
-                items: [
-                    { id: 101, name: "سمك بلطي مشوي - للكيلو", price: 100 },
-                    { id: 102, name: "كيلو جمبري مقلي", price: 250 },
-                    { id: 103, name: "صينية بوري بالفرن", price: 150 }
-                ]
-            },
-            {
-                name: "🍗 قسم الوجبات الرئيسية والمشويات",
-                items: [
-                    { id: 201, name: "وجبة فراخ مشوية كاملة", price: 180 },
-                    { id: 202, name: "نصف فرخة مشوية على الفحم", price: 100 },
-                    { id: 203, name: "طبق كفته مشوية", price: 120 }
-                ]
-            },
-            {
-                name: "🍟 قسم الإضافات والمقبلات",
-                items: [
-                    { id: 301, name: "طبق أرز سيراديش", price: 30 },
-                    { id: 302, name: "سلطة خضراء بلدي", price: 20 },
-                    { id: 303, name: "بطاطس محمرة", price: 25 }
-                ]
-            }
-        ];
+        // جلب الأقسام والأصناف من سحابة Firebase بشكل حي
+        function loadMenuFromCloud() {
+            const menuRef = ref(db, 'restaurantMenu');
+            onValue(menuRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('menuContainer');
+                
+                if (!data) {
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد أصناف مضافة حالياً من الإدارة.</p>';
+                    return;
+                }
 
-        window.renderMenu = function() {
-            const container = document.getElementById('menuContainer');
-            let html = '';
-            categories.forEach(cat => {
-                html += `<div class="category-title"><strong>${cat.name}</strong></div>`;
-                cat.items.forEach(p => {
-                    html += `
-                        <div class="product-row">
-                            <label>
-                                <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty(${p.id})">
-                                <span>${p.name} (${p.price} جنيه)</span>
-                            </label>
-                            <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
-                        </div>
-                    `;
+                // تجميع الأصناف حسب القسم
+                let categories = {};
+                Object.keys(data).forEach(key => {
+                    let item = data[key];
+                    if (!categories[item.category]) {
+                        categories[item.category] = [];
+                    }
+                    categories[item.category].push({ id: key, name: item.name, price: item.price });
                 });
+
+                let html = '';
+                Object.keys(categories).forEach(catName => {
+                    html += `<div class="category-title">📂 ${catName}</div>`;
+                    categories[catName].forEach(p => {
+                        html += `
+                            <div class="product-row">
+                                <label>
+                                    <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty('${p.id}')">
+                                    <span>${p.name} (${p.price} جنيه)</span>
+                                </label>
+                                <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
+                            </div>
+                        `;
+                    });
+                });
+                container.innerHTML = html;
             });
-            container.innerHTML = html;
         }
 
         window.toggleQty = function(id) {
@@ -144,7 +138,7 @@
                 id: orderId,
                 customerName: customerName,
                 customerAddress: customerAddress,
-                lat: customerLat || 31.57, // إحداثيات افتراضية لبلطيم لو لم يحدد العميل
+                lat: customerLat || 31.57,
                 lng: customerLng || 31.25,
                 paymentMethod: paymentMethod,
                 items: selectedItems,
@@ -163,7 +157,9 @@
                 });
         }
 
-        window.onload = function() { renderMenu(); };
+        window.onload = function() {
+            loadMenuFromCloud();
+        };
     </script>
 </head>
 <body>
@@ -183,8 +179,8 @@
         </div>
 
         <div class="section">
-            <h2>قائمة الأقسام والأصناف</h2>
-            <div id="menuContainer">جاري تحميل الأقسام...</div>
+            <h2>قائمة الأقسام والأصناف المتاحة</h2>
+            <div id="menuContainer">جاري جلب أصناف المنيو من السحابة...</div>
         </div>
 
         <button type="button" onclick="sendOrder()">إرسال الطلب الآن 🚀</button>

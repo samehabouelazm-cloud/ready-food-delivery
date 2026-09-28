@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المنصة والطلبات - جاهز</title>
+    <title>لوحة إدارة المنصة والمنتجات - جاهز</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 850px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1, h2 { color: #f59e0b; text-align: center; }
+        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1, h2, h3 { color: #f59e0b; text-align: center; }
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; }
         .danger-btn { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 12px; }
         .map-btn { background: #3b82f6; padding: 6px 12px; font-size: 13px; text-decoration: none; border-radius: 4px; display: inline-block; color: #fff; }
-        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; }
+        .order-card, .menu-item-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; }
         .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
     </style>
 
@@ -36,17 +36,15 @@
 
         let globalDrivers = [];
 
+        // 1. إدارة الكباتن
         function listenToDrivers() {
             const driversRef = ref(db, 'driversList');
             onValue(driversRef, (snapshot) => {
                 const data = snapshot.val();
                 globalDrivers = [];
                 const container = document.getElementById('driversListContainer');
-                if (!data) {
-                    container.innerHTML = '<p style="color: #94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>';
-                    return;
-                }
-                let html = '<p><strong>الكباتن المتاحون سحابياً:</strong></p>';
+                if (!data) { container.innerHTML = '<p style="color: #94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>'; return; }
+                let html = '<p><strong>الكباتن المتاحون:</strong></p>';
                 Object.keys(data).forEach((key) => {
                     let d = data[key];
                     globalDrivers.push({ id: key, name: d.name, phone: d.phone });
@@ -64,29 +62,72 @@
         window.addDriver = function() {
             const name = document.getElementById('driverNameInput').value.trim();
             const phone = document.getElementById('driverPhoneInput').value.trim();
-            if (!name || !phone) { alert('الرجاء إدخال اسم ورقم هاتف الكابتن!'); return; }
+            if (!name || !phone) { alert('أدخل اسم ورقم الكابتن!'); return; }
             push(ref(db, 'driversList'), { name, phone });
             document.getElementById('driverNameInput').value = '';
             document.getElementById('driverPhoneInput').value = '';
-            alert(`تمت إضافة الكابتن (${name}) بنجاح!`);
+            alert('تمت إضافة الكابتن بنجاح!');
         }
 
-        window.deleteDriver = function(driverKey) {
-            if (confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
-                remove(ref(db, 'driversList/' + driverKey));
+        window.deleteDriver = function(key) {
+            if (confirm('حذف هذا الكابتن؟')) remove(ref(db, 'driversList/' + key));
+        }
+
+        // 2. إدارة الأقسام والمنتجات سحابياً
+        function listenToMenu() {
+            const menuRef = ref(db, 'restaurantMenu');
+            onValue(menuRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('adminMenuContainer');
+                if (!data) { container.innerHTML = '<p style="color: #94a3b8;">لا توجد أصناف مضافة حالياً في المنيو.</p>'; return; }
+                let html = '';
+                Object.keys(data).forEach((key) => {
+                    let item = data[key];
+                    html += `
+                        <div class="menu-item-card">
+                            <div>
+                                <span style="background: #334155; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: #38bdf8;">${item.category}</span>
+                                <h4 style="margin: 5px 0 0 0; color: #fff;">${item.name}</h4>
+                                <span style="color: #22c55e; font-size: 14px;">${item.price} جنيه</span>
+                            </div>
+                            <button type="button" class="danger-btn" onclick="deleteMenuItem('${key}')">حذف الصنف</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        window.addMenuItem = function() {
+            const category = document.getElementById('itemCategory').value.trim();
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseFloat(document.getElementById('itemPrice').value);
+
+            if (!category || !name || isNaN(price)) {
+                alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+                return;
+            }
+
+            push(ref(db, 'restaurantMenu'), { category, name, price });
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+            alert('تمت إضافة الصنف إلى المنيو بنجاح وسيفعّل لدى العملاء فوراً!');
+        }
+
+        window.deleteMenuItem = function(key) {
+            if (confirm('هل أنت متأكد من حذف هذا الصنف من المنيو؟')) {
+                remove(ref(db, 'restaurantMenu/' + key));
             }
         }
 
+        // 3. إدارة طلبات العملاء وتتبع الخرائط
         function listenToOrders() {
             const container = document.getElementById('adminOrdersList');
             const ordersRef = ref(db, 'adminOrders');
 
             onValue(ordersRef, (snapshot) => {
                 const data = snapshot.val();
-                if (!data) {
-                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>';
-                    return;
-                }
+                if (!data) { container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>'; return; }
 
                 let html = '';
                 Object.keys(data).forEach((orderKey) => {
@@ -99,11 +140,10 @@
                         driverOptions += `<option value="${d.name}" ${currentDriver === d.name ? 'selected' : ''}>${d.name}</option>`;
                     });
 
-                    // رابط خريطة جوجل المباشر لإحداثيات العميل
                     let mapLink = `https://www.google.com/maps?q=${order.lat},${order.lng}`;
 
                     html += `
-                        <div class="order-card">
+                        <div style="background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569;">
                             <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id} - ${order.time}</h3>
                             <p><strong>اسم العميل:</strong> ${order.customerName}</p>
                             <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
@@ -127,21 +167,17 @@
 
         window.assignDriver = function(orderKey, driverName) {
             if (!driverName) return;
-            update(ref(db, 'adminOrders/' + orderKey), {
-                driver: driverName,
-                status: 'تم الإسناد للكابتن ' + driverName
-            });
-            alert('تم إسناد الطلب بنجاح إلى: ' + driverName);
+            update(ref(db, 'adminOrders/' + orderKey), { driver: driverName, status: 'تم الإسناد للكابتن ' + driverName });
+            alert('تم إسناد الطلب إلى: ' + driverName);
         }
 
         window.deleteOrder = function(orderKey) {
-            if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
-                remove(ref(db, 'adminOrders/' + orderKey));
-            }
+            if (confirm('حذف هذا الطلب؟')) remove(ref(db, 'adminOrders/' + orderKey));
         }
 
         window.onload = function() {
             listenToDrivers();
+            listenToMenu();
             listenToOrders();
         };
     </script>
@@ -149,6 +185,16 @@
 <body>
     <div class="container">
         <h1>🛠️ لوحة إدارة منصة جاهز</h1>
+
+        <!-- قسم إدارة المنيو والأصناف -->
+        <div class="section">
+            <h2>🍽️ إدارة المنيو والأقسام (إضافة / حذف أصناف)</h2>
+            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات، قسم السوبر ماركت)">
+            <input type="text" id="itemName" placeholder="اسم وجبة الطعام أو المنتج (مثلاً: سمك بلطي مشوي)">
+            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
+            <button type="button" onclick="addMenuItem()">إضافة الصنف للمنيو 🚀</button>
+            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
+        </div>
 
         <div class="section">
             <h2>🚴 إدارة فريق الكباتن السحابي</h2>
@@ -159,7 +205,7 @@
         </div>
 
         <div class="section">
-            <h2>📦 طلبات العملاء ومتابعة الخرائط (🔴 تحديث حي)</h2>
+            <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
             <div id="adminOrdersList">جاري الاتصال...</div>
         </div>
     </div>
