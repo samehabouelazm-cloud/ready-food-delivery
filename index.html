@@ -3,96 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة جاهز في بلطيم</title>
+    <title>منصة جاهز في بلطيم - العميل</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
         .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         h1, h3 { color: #f59e0b; }
-        .item-container, .delivery-container, .cart-container { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        .card, .cart-container, .delivery-container { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; }
-        .qty-btn { background: #0ea5e9; color: #fff; font-size: 18px; width: 40px; }
         .add-btn { background: #22c55e; color: #fff; width: 100%; margin-top: 10px; }
-        .save-btn { background: #3b82f6; color: #fff; width: 100%; }
-        #qty_display { font-size: 20px; font-weight: bold; padding: 0 15px; }
-        .cart-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #334155; }
+        .submit-btn { background: #3b82f6; color: #fff; width: 100%; font-size: 16px; }
+        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #334155; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>منصة جاهز في بلطيم 🍽️</h1>
-        <p>اختر أصنافك المفضلة وحدد الكميات بكل سهولة:</p>
+        <p>اختر أصنافك المتاحة واطلب الآن:</p>
 
-        <!-- قسم اختيار الكمية والصنف -->
-        <div class="item-container">
-            <h3>وجبة كبدة مميزة</h3>
-            <p>السعر: 50 جنيه</p>
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <button type="button" class="qty-btn" onclick="changeQty(-1)">-</button>
-                <span id="qty_display">1</span>
-                <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
-            </div>
-            <button type="button" class="add-btn" onclick="addToCart('وجبة كبدة مميزة', 50)">إضافة للسلة</button>
+        <!-- قائمة الأصناف الديناميكية -->
+        <div id="menuContainer">
+            <!-- سيتم تحميل الأصناف المضافة من الإدارة هنا تلقائياً -->
         </div>
 
-        <!-- خانة عرض السلة (تم إضافتها بوضوح) -->
+        <!-- سلة الطلبات -->
         <div class="cart-container">
             <h3>🛒 سلة الطلبات</h3>
-            <div id="cartItemsList">لم يتم إضافة منتجات بعد.</div>
+            <div id="cartItemsList">السلة فارغة حالياً.</div>
             <p id="cartTotal" style="font-weight: bold; margin-top: 10px; color: #22c55e;">الإجمالي: 0 جنيه</p>
         </div>
 
-        <!-- قسم بيانات التوصيل -->
+        <!-- بيانات التوصيل وإتمام الطلب -->
         <div class="delivery-container">
-            <h3>بيانات التوصيل</h3>
+            <h3>بيانات التوصيل وإتمام الطلب</h3>
             <input type="text" id="customerName" placeholder="الاسم الكريم">
             <input type="text" id="customerPhone" placeholder="رقم الهاتف">
-            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل">
-            <button type="button" class="save-btn" onclick="saveDetails()">حفظ البيانات</button>
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل (شارع، علامة مميزة)">
+            <button type="button" class="submit-btn" onclick="submitOrder()">إرسال الطلب نهائياً 🚀</button>
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت التفاعلي -->
     <script>
-        let currentQty = 1;
+        // الأصناف الافتراضية أو التي يتم إضافتها من الإدارة
+        function loadMenu() {
+            let menu = JSON.parse(localStorage.getItem('jahez_menu')) || [
+                { name: 'وجبة كبدة مميزة', price: 50 },
+                { name: 'وجبة حواوشي طازج', price: 40 }
+            ];
 
-        function changeQty(val) {
-            currentQty += val;
-            if (currentQty < 1) currentQty = 1;
-            const qtyEl = document.getElementById('qty_display');
-            if (qtyEl) qtyEl.innerText = currentQty;
-        }
-
-        function saveDetails() {
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            const address = document.getElementById('customerAddress').value.trim();
-
-            if (!name || !phone || !address) {
-                alert('الرجاء إكمال جميع بيانات التوصيل أولاً!');
-                return false;
-            }
-
-            const customerData = { name, phone, address };
-            localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
-            alert('تم حفظ البيانات بنجاح!');
-            return true;
-        }
-
-        function addToCart(itemName, itemPrice) {
-            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
-            cart.push({
-                name: itemName,
-                price: itemPrice,
-                quantity: currentQty
+            const container = document.getElementById('menuContainer');
+            let html = '';
+            menu.forEach((item, index) => {
+                html += `
+                    <div class="card">
+                        <h3>${item.name}</h3>
+                        <p>السعر: ${item.price} جنيه</p>
+                        <button type="button" class="add-btn" onclick="addToCart('${item.name}', ${item.price})">إضافة للسلة</button>
+                    </div>
+                `;
             });
+            container.innerHTML = html;
+        }
 
+        function addToCart(name, price) {
+            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+            let existing = cart.find(i => i.name === name);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
             localStorage.setItem('jahez_cart', JSON.stringify(cart));
-            alert(`تمت إضافة ${currentQty} من (${itemName}) إلى السلة بنجاح!`);
-            
-            currentQty = 1;
-            document.getElementById('qty_display').innerText = '1';
             updateCartDisplay();
+            alert(`تمت إضافة (${name}) إلى السلة بنجاح!`);
         }
 
         function updateCartDisplay() {
@@ -101,18 +84,18 @@
             const cartTotal = document.getElementById('cartTotal');
 
             if (cart.length === 0) {
-                cartList.innerHTML = 'لم يتم إضافة منتجات بعد.';
+                cartList.innerHTML = 'السلة فارغة حالياً.';
                 cartTotal.innerText = 'الإجمالي: 0 جنيه';
                 return;
             }
 
             let html = '';
             let total = 0;
-            cart.forEach((item, index) => {
+            cart.forEach(item => {
                 let itemTotal = item.price * item.quantity;
                 total += itemTotal;
                 html += `<div class="cart-item">
-                    <span>${item.name} (x${item.quantity})</span>
+                    <span>${item.name} (×${item.quantity})</span>
                     <span>${itemTotal} جنيه</span>
                 </div>`;
             });
@@ -121,18 +104,43 @@
             cartTotal.innerText = `الإجمالي: ${total} جنيه`;
         }
 
-        window.onload = function() {
-            const saved = localStorage.getItem('jahez_saved_customer');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data.name) document.getElementById('customerName').value = data.name;
-                    if (data.phone) document.getElementById('customerPhone').value = data.phone;
-                    if (data.address) document.getElementById('customerAddress').value = data.address;
-                } catch (e) {
-                    console.error("Error loading data", e);
-                }
+        function submitOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+
+            if (!name || !phone || !address) {
+                alert('الرجاء إدخال كافة بيانات التوصيل (الاسم، الهاتف، العنوان)!');
+                return;
             }
+
+            if (cart.length === 0) {
+                alert('السلة فارغة! يجدر بك إضافة منتجات قبل إرسال الطلب.');
+                return;
+            }
+
+            let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
+            const newOrder = {
+                id: Date.now().toString().slice(-4), // رقم طلب فريد
+                customerName: name,
+                phone: phone,
+                address: address,
+                items: cart,
+                driver: 'قيد الانتظار',
+                status: 'جديد'
+            };
+
+            orders.push(newOrder);
+            localStorage.setItem('jahez_orders', JSON.stringify(orders));
+            localStorage.removeItem('jahez_cart'); // تفريغ السلة بعد الطلب
+
+            alert(`تم إرسال طلبك برقم #${newOrder.id} بنجاح إلى الإدارة!`);
+            window.location.reload();
+        }
+
+        window.onload = function() {
+            loadMenu();
             updateCartDisplay();
         };
     </script>
