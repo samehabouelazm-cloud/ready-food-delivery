@@ -22,79 +22,82 @@
             <p>السعر: 50 جنيه</p>
             
             <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-                <button type="button" onclick="decreaseQty('item_kibda')">-</button>
-                <span id="qty_item_kibda" style="font-weight: bold; font-size: 18px;">1</span>
-                <button type="button" onclick="increaseQty('item_kibda')">+</button>
+                <button type="button" onclick="changeQty(-1)">-</button>
+                <span id="qty_display" style="font-weight: bold; font-size: 18px;">1</span>
+                <button type="button" onclick="changeQty(1)">+</button>
             </div>
             
-            <button type="button" onclick="addToCartWithQty('item_kibda', 'وجبة كبدة مميزة', 50)" style="background: #28a745; color: #fff;">إضافة للسلة</button>
+            <button type="button" onclick="addToCart('وجبة كبدة مميزة', 50)" style="background: #28a745; color: #fff;">إضافة للسلة</button>
         </div>
 
         <div style="margin-top: 30px; background: #222d4a; padding: 15px; border-radius: 8px;">
             <h3>بيانات التوصيل</h3>
-            <input type="text" id="customerName" placeholder="الاسم الكريم" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveCustomerDetails()">
-            <input type="text" id="customerPhone" placeholder="رقم الهاتف" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveCustomerDetails()">
-            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveCustomerDetails()">
+            <input type="text" id="customerName" placeholder="الاسم الكريم" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveDetails()">
+            <input type="text" id="customerPhone" placeholder="رقم الهاتف" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveDetails()">
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:none;" oninput="saveDetails()">
         </div>
     </div>
 
     <script>
-        function saveCustomerDetails() {
-            const customerData = {
-                name: document.getElementById('customerName')?.value || '',
-                phone: document.getElementById('customerPhone')?.value || '',
-                address: document.getElementById('customerAddress')?.value || '',
-                lat: window.currentLatitude || null,
-                lng: window.currentLongitude || null
-            };
-            localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
+        let currentQty = 1;
+
+        function changeQty(val) {
+            currentQty += val;
+            if (currentQty < 1) currentQty = 1;
+            document.getElementById('qty_display').innerText = currentQty;
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        function saveDetails() {
+            const data = {
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddress').value
+            };
+            localStorage.setItem('jahez_saved_customer', JSON.stringify(data));
+        }
+
+        window.onload = function() {
             const saved = localStorage.getItem('jahez_saved_customer');
             if (saved) {
                 const data = JSON.parse(saved);
-                if (document.getElementById('customerName')) document.getElementById('customerName').value = data.name || '';
-                if (document.getElementById('customerPhone')) document.getElementById('customerPhone').value = data.phone || '';
-                if (document.getElementById('customerAddress')) document.getElementById('customerAddress').value = data.address || '';
+                document.getElementById('customerName').value = data.name || '';
+                document.getElementById('customerPhone').value = data.phone || '';
+                document.getElementById('customerAddress').value = data.address || '';
             }
-        });
+        };
 
-        const itemQuantities = {};
-
-        function increaseQty(itemId) {
-            if (!itemQuantities[itemId]) itemQuantities[itemId] = 1;
-            itemQuantities[itemId]++;
-            const el = document.getElementById(`qty_${itemId}`);
-            if (el) el.innerText = itemQuantities[itemId];
-        }
-
-        function decreaseQty(itemId) {
-            if (itemQuantities[itemId] && itemQuantities[itemId] > 1) {
-                itemQuantities[itemId]--;
-                const el = document.getElementById(`qty_${itemId}`);
-                if (el) el.innerText = itemQuantities[itemId];
-            }
-        }
-
-        function addToCartWithQty(itemId, itemName, itemPrice) {
-            const qty = itemQuantities[itemId] || 1;
+        function addToCart(itemName, itemPrice) {
             let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
-            
-            const existingItem = cart.find(i => i.id === itemId);
-            if (existingItem) {
-                existingItem.quantity += qty;
-            } else {
-                cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: qty });
-            }
-            
+            cart.push({ name: itemName, price: itemPrice, quantity: currentQty });
             localStorage.setItem('jahez_cart', JSON.stringify(cart));
-            alert(`تمت إضافة ${qty} من (${itemName}) إلى السلة بنجاح!`);
-            
-            itemQuantities[itemId] = 1;
-            const qtyElement = document.getElementById(`qty_${itemId}`);
-            if (qtyElement) qtyElement.innerText = '1';
+            alert(`تمت إضافة ${currentQty} من (${itemName}) إلى السلة بنجاح!`);
+            currentQty = 1;
+            document.getElementById('qty_display').innerText = '1';
         }
     </script>
 </body>
 </html>
+let currentQty = 1;
+
+        function changeQty(val) {
+            currentQty += val;
+            if (currentQty < 1) currentQty = 1;
+            document.getElementById('qty_display').innerText = currentQty;
+        }
+
+        function saveDetails() {
+            const data = {
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddress').value
+            };
+            localStorage.setItem('jahez_saved_customer', JSON.stringify(data));
+        }
+
+        window.onload = function() {
+            const saved = localStorage.getItem('jahez_saved_customer');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('customerName').value = data.name || '';
+                document.getElementById('customerPhone').value = data.phone || '';
+                document.getElementById('customerAddress').value = data.address || '';
