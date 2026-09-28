@@ -15,35 +15,25 @@
         .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; }
         .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🛠️ لوحة إدارة منصة جاهز في بلطيم</h1>
 
-        <!-- قسم إدارة الكباتن (إضافة وحذف) -->
-        <div class="section">
-            <h2>🚴 إدارة فريق الكباتن</h2>
-            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
-            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
-            <button type="button" onclick="addDriver()">إضافة كابتن جديد</button>
-            
-            <div id="driversListContainer" style="margin-top: 15px;">
-                <!-- سيتم عرض الكباتن المسجلين هنا -->
-            </div>
-        </div>
+    <!-- ربط مكتبة Firebase (الإصدار 9) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        <!-- قسم متابعة طلبات العملاء الواردة -->
-        <div class="section">
-            <h2>📦 طلبات العملاء الواردة (تحديث تلقائي)</h2>
-            <div style="margin-bottom: 10px;">
-                <button type="button" onclick="loadAdminOrders()" style="background: #3b82f6; font-size: 14px; padding: 6px 12px;">🔄 تحديث الطلبات الآن</button>
-            </div>
-            <div id="adminOrdersList">جاري تحميل الطلبات الواردة...</div>
-        </div>
-    </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
+            authDomain: "readystore-542e0.firebaseapp.com",
+            projectId: "readystore-542e0",
+            storageBucket: "readystore-542e0.firebasestorage.app",
+            messagingSenderId: "698121296035",
+            appId: "1:698121296035:web:6d237104d976e11120c716",
+            measurementId: "G-56NZSGK3P2"
+        };
 
-    <script>
-        // دالة جلب الكباتن
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         function getDrivers() {
             return JSON.parse(localStorage.getItem('jahez_drivers')) || [
                 { name: 'كابتن أحمد', phone: '01012345678' },
@@ -51,8 +41,7 @@
             ];
         }
 
-        // عرض قائمة الكباتن مع إمكانية الحذف
-        function renderDriversList() {
+        window.renderDriversList = function() {
             let drivers = getDrivers();
             const container = document.getElementById('driversListContainer');
             if (drivers.length === 0) {
@@ -71,8 +60,7 @@
             container.innerHTML = html;
         }
 
-        // إضافة كابتن جديد
-        function addDriver() {
+        window.addDriver = function() {
             const name = document.getElementById('driverNameInput').value.trim();
             const phone = document.getElementById('driverPhoneInput').value.trim();
             if (!name || !phone) {
@@ -85,102 +73,112 @@
             document.getElementById('driverNameInput').value = '';
             document.getElementById('driverPhoneInput').value = '';
             renderDriversList();
-            loadAdminOrders();
             alert(`تمت إضافة الكابتن (${name}) بنجاح!`);
         }
 
-        // حذف كابتن
-        function deleteDriver(index) {
+        window.deleteDriver = function(index) {
             let drivers = getDrivers();
             drivers.splice(index, 1);
             localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
             renderDriversList();
-            loadAdminOrders();
             alert('تم حذف الكابتن بنجاح.');
         }
 
-        // تحميل طلبات العملاء الواردة من adminOrders (المرتبطة بـ index.html)
-        function loadAdminOrders() {
+        // الاستماع الفوري واللايف للطلبات الواردة من Firebase
+        function listenToOrders() {
             const container = document.getElementById('adminOrdersList');
-            let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
-            let drivers = getDrivers();
+            const ordersRef = ref(db, 'adminOrders');
 
-            if (orders.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة من العملاء حتى الآن.</p>';
-                return;
-            }
+            onValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة من العملاء حتى الآن.</p>';
+                    return;
+                }
 
-            let html = '';
-            orders.forEach((order, index) => {
-                let itemsText = order.items.map(i => `${i.name} (x${i.quantity})`).join(', ');
-                let currentDriver = order.driver || '';
+                let html = '';
+                let drivers = getDrivers();
 
-                let driverOptions = `<option value="">اختر الكابتن للإسناد</option>`;
-                drivers.forEach(d => {
-                    driverOptions += `<option value="${d.name}" ${currentDriver === d.name ? 'selected' : ''}>${d.name}</option>`;
-                });
+                Object.keys(data).forEach((orderKey) => {
+                    let order = data[orderKey];
+                    let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
+                    let currentDriver = order.driver || '';
 
-                html += `
-                    <div class="order-card">
-                        <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id} - ${order.time}</h3>
-                        <p><strong>اسم العميل:</strong> ${order.customerName}</p>
-                        <p><strong>العنوان بالتفصيل:</strong> ${order.address}</p>
-                        <p><strong>طريقة الدفع:</strong> <span style="color: #38bdf8; font-weight: bold;">${order.paymentMethod}</span></p>
-                        <p><strong>الأصناف المطلوبة:</strong> ${itemsText}</p>
-                        <p style="color: #22c55e; font-weight: bold;">الإجمالي: ${order.total} جنيه | الحالة: ${order.status}</p>
-                        
-                        <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <select onchange="assignDriver(${index}, this.value)" style="flex: 1; margin-bottom: 0;">
-                                ${driverOptions}
-                            </select>
-                            <button type="button" style="background: #8b5cf6;" onclick="autoAssignDriver(${index})">⚡ إسناد أتوماتيك</button>
-                            <button type="button" class="danger-btn" onclick="deleteOrder(${index})">حذف الطلب</button>
+                    let driverOptions = `<option value="">اختر الكابتن للإسناد</option>`;
+                    drivers.forEach(d => {
+                        driverOptions += `<option value="${d.name}" ${currentDriver === d.name ? 'selected' : ''}>${d.name}</option>`;
+                    });
+
+                    html += `
+                        <div class="order-card">
+                            <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id} - ${order.time}</h3>
+                            <p><strong>اسم العميل:</strong> ${order.customerName}</p>
+                            <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
+                            <p><strong>طريقة الدفع:</strong> <span style="color: #38bdf8; font-weight: bold;">${order.paymentMethod}</span></p>
+                            <p><strong>الأصناف المطلوبة:</strong> ${itemsText}</p>
+                            <p style="color: #22c55e; font-weight: bold;">الإجمالي: ${order.total} جنيه | الحالة: ${order.status}</p>
+                            
+                            <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <select onchange="assignDriver('${orderKey}', this.value)" style="flex: 1; margin-bottom: 0;">
+                                    ${driverOptions}
+                                </select>
+                                <button type="button" style="background: #8b5cf6;" onclick="autoAssignDriver('${orderKey}')">⚡ إسناد أتوماتيك</button>
+                                <button type="button" class="danger-btn" onclick="deleteOrder('${orderKey}')">حذف الطلب</button>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                });
+                container.innerHTML = html;
             });
-            container.innerHTML = html;
         }
 
-        // الإسناد التلقائي للكابتن
-        function autoAssignDriver(orderIndex) {
+        window.autoAssignDriver = function(orderKey) {
             let drivers = getDrivers();
             if (drivers.length === 0) {
                 alert('لا توجد كباتن متاحين للإسناد التلقائي! أضف كابتن أولاً.');
                 return;
             }
             let randomDriver = drivers[Math.floor(Math.random() * drivers.length)].name;
-            assignDriver(orderIndex, randomDriver);
-            alert(`تم إسناد الطلب أتوماتيكياً إلى: (${randomDriver}) بنجاح!`);
+            assignDriver(orderKey, randomDriver);
         }
 
-        // إسناد الطلب لكابتن معين وحفظه
-        function assignDriver(orderIndex, driverName) {
+        window.assignDriver = function(orderKey, driverName) {
             if (!driverName) return;
-            let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
-            if (orders[orderIndex]) {
-                orders[orderIndex].driver = driverName;
-                orders[orderIndex].status = 'تم الإسناد للكابتن ' + driverName;
-                localStorage.setItem('adminOrders', JSON.stringify(orders));
-                loadAdminOrders();
-            }
+            update(ref(db, 'adminOrders/' + orderKey), {
+                driver: driverName,
+                status: 'تم الإسناد للكابتن ' + driverName
+            });
         }
 
-        // حذف طلب من القائمة
-        function deleteOrder(orderIndex) {
+        window.deleteOrder = function(orderKey) {
             if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
-                let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
-                orders.splice(orderIndex, 1);
-                localStorage.setItem('adminOrders', JSON.stringify(orders));
-                loadAdminOrders();
+                remove(ref(db, 'adminOrders/' + orderKey));
             }
         }
 
-        // عند فتح الصفحة يتم تحميل البيانات وكباتن التوصيل
         window.onload = function() {
             renderDriversList();
-            loadAdminOrders();
+            listenToOrders();
         };
     </script>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ لوحة إدارة منصة جاهز في بلطيم</h1>
+
+        <div class="section">
+            <h2>🚴 إدارة فريق الكباتن</h2>
+            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
+            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
+            <button type="button" onclick="addDriver()">إضافة كابتن جديد</button>
+            
+            <div id="driversListContainer" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="section">
+            <h2>📦 طلبات العملاء الواردة (مزامنة سحابية حية 🔴)</h2>
+            <div id="adminOrdersList">جاري الاتصال بقاعدة البيانات السحابية واستقبال الطلبات...</div>
+        </div>
+    </div>
 </body>
 </html>
