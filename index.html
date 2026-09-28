@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز في بلطيم - تطبيق العميل</title>
+    <title>منصة جاهز في بلطيم</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0b132b; color: #fff; margin: 0; padding: 20px; direction: rtl; text-align: right; }
-        .container { max-width: 600px; margin: 0 auto; background: #1c2541; padding: 20px; border-radius: 10px; }
-        .item-card { background: #3a506b; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
-        button { cursor: pointer; padding: 8px 15px; border: none; border-radius: 5px; background: #4cc9f0; color: #000; font-weight: bold; }
-        button:hover { background: #4361ee; color: #fff; }
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1, h3 { color: #f59e0b; }
+        .item-container, .delivery-container { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
+        button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; }
+        .qty-btn { background: #0ea5e9; color: #fff; font-size: 18px; width: 40px; }
+        .add-btn { background: #22c55e; color: #fff; width: 100%; margin-top: 10px; }
+        .save-btn { background: #3b82f6; color: #fff; width: 100%; }
+        #qty_display { font-size: 20px; font-weight: bold; padding: 0 15px; }
     </style>
 </head>
 <body>
@@ -17,28 +22,100 @@
         <h1>منصة جاهز في بلطيم 🍽️</h1>
         <p>اختر أصنافك المفضلة وحدد الكميات بكل سهولة:</p>
 
-        <!-- قسم اختيار الكمية -->
-        <div class="item-container" style="margin-bottom: 20px; background: #1e293b; padding: 15px; border-radius: 8px;">
+        <!-- قسم اختيار الكمية والصنف -->
+        <div class="item-container">
             <h3>وجبة كبدة مميزة</h3>
             <p>السعر: 50 جنيه</p>
-            <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-                <button type="button" onclick="changeQty(-1)" style="padding: 5px 15px; font-weight: bold; cursor: pointer; background: #0ea5e9; color: #fff; border: none; border-radius: 4px;">-</button>
-                <span id="qty_display" style="font-weight: bold; font-size: 18px; color: #fff;">1</span>
-                <button type="button" onclick="changeQty(1)" style="padding: 5px 15px; font-weight: bold; cursor: pointer; background: #0ea5e9; color: #fff; border: none; border-radius: 4px;">+</button>
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <button type="button" class="qty-btn" onclick="changeQty(-1)">-</button>
+                <span id="qty_display">1</span>
+                <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
             </div>
-            <button type="button" onclick="addToCart('وجبة كبدة مميزة', 50)" style="background: #22c55e; color: #fff; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">إضافة للسلة</button>
+            <button type="button" class="add-btn" onclick="addToCart('وجبة كبدة مميزة', 50)">إضافة للسلة</button>
         </div>
 
         <!-- قسم بيانات التوصيل -->
-        <div class="delivery-container" style="background: #1e293b; padding: 15px; border-radius: 8px; margin-top: 20px;">
-            <h3 style="color: #f59e0b; margin-bottom: 10px;">بيانات التوصيل</h3>
-            <input type="text" id="customerName" placeholder="الاسم الكريم" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:#fff;">
-            <input type="text" id="customerPhone" placeholder="رقم الهاتف" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:#fff;">
-            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل" style="width:100%; padding:8px; margin-bottom:10px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:#fff;">
-            <button type="button" onclick="saveDetails()" style="background: #3b82f6; color: #fff; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">حفظ البيانات</button>
+        <div class="delivery-container">
+            <h3>بيانات التوصيل</h3>
+            <input type="text" id="customerName" placeholder="الاسم الكريم">
+            <input type="text" id="customerPhone" placeholder="رقم الهاتف">
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل">
+            <button type="button" class="save-btn" onclick="saveDetails()">حفظ البيانات</button>
         </div>
     </div>
 
-    <!-- ملف السكريبت الخارجي -->
-    <script src="script.js"></script>
+    <!-- كود الجافاسكريبت التفاعلي المباشر -->
+    <script>
+        let currentQty = 1;
+
+        // دالة تغيير الكمية بالموجب والسالب
+        function changeQty(val) {
+            currentQty += val;
+            if (currentQty < 1) currentQty = 1;
+            const qtyEl = document.getElementById('qty_display');
+            if (qtyEl) {
+                qtyEl.innerText = currentQty;
+            }
+        }
+
+        // دالة حفظ بيانات العميل في localStorage
+        function saveDetails() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+
+            if (!name || !phone || !address) {
+                alert('الرجاء إكمال جميع بيانات التوصيل أولاً!');
+                return false;
+            }
+
+            const customerData = { name, phone, address };
+            localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
+            alert('تم حفظ البيانات بنجاح!');
+            return true;
+        }
+
+        // دالة الإضافة الفعالة للسلة
+        function addToCart(itemName, itemPrice) {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            
+            if (!name || !phone) {
+                alert('من فضلك ادخل الاسم ورقم الهاتف قبل الإضافة للسلة.');
+                return;
+            }
+
+            saveDetails(); // حفظ البيانات تلقائياً
+
+            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+            cart.push({
+                name: itemName,
+                price: itemPrice,
+                quantity: currentQty
+            });
+
+            localStorage.setItem('jahez_cart', JSON.stringify(cart));
+            alert(`تمت إضافة ${currentQty} من (${itemName}) إلى السلة بنجاح!`);
+            
+            // إعادة تعيين الكمية
+            currentQty = 1;
+            document.getElementById('qty_display').innerText = '1';
+        }
+
+        // استرجاع البيانات المحفوظة عند فتح الصفحة
+        window.onload = function() {
+            const saved = localStorage.getItem('jahez_saved_customer');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.name) document.getElementById('customerName').value = data.name;
+                    if (data.phone) document.getElementById('customerPhone').value = data.phone;
+                    if (data.address) document.getElementById('customerAddress').value = data.address;
+                } catch (e) {
+                    console.error("Error loading data", e);
+                }
+            }
+        };
+    </script>
 </body>
+</html>
