@@ -64,83 +64,110 @@
 </div>
 
 <script>
-  async function loadAll() {
+  function loadAll() {
     loadDrivers();
     loadOrders();
   }
 
-  async function loadDrivers() {
-    try {
-      const res = await fetch('/api/drivers');
-      const drivers = await res.json();
-      document.getElementById('driversList').innerHTML = drivers.map(d => `
-        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-          <span>${d.name} (${d.phone})</span>
-          <button onclick="deleteDriver('${d.id}')" style="color:#ef4444; background:none; border:none; cursor:pointer;">حذف ❌</button>
-        </div>
-      `).join('');
-    } catch(e) {}
+  function loadDrivers() {
+    const drivers = JSON.parse(localStorage.getItem('jahez_drivers')) || [];
+    const listEl = document.getElementById('driversList');
+    
+    if (drivers.length === 0) {
+      listEl.innerHTML = '<p style="color:#94a3b8; font-size:14px;">لا يوجد كباتن مضافين حالياً.</p>';
+      return;
+    }
+
+    listEl.innerHTML = drivers.map(d => `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span>${d.name} (${d.phone})</span>
+        <button onclick="deleteDriver('${d.id}')" style="color:#ef4444; background:none; border:none; cursor:pointer;">حذف ❌</button>
+      </div>
+    `).join('');
   }
 
-  async function loadOrders() {
-    try {
-      const resOrders = await fetch('/api/orders');
-      const orders = await resOrders.json();
-      const resDrivers = await fetch('/api/drivers');
-      const drivers = await resDrivers.json();
+  function loadOrders() {
+    const orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
+    const drivers = JSON.parse(localStorage.getItem('jahez_drivers')) || [];
+    const savedCustomer = JSON.parse(localStorage.getItem('jahez_saved_customer')) || {};
+    const listEl = document.getElementById('ordersList');
 
-      document.getElementById('ordersList').innerHTML = orders.map(o => `
-        <div class="order-item">
-          <p><strong>طلب #${o.id}</strong> - <span style="color:#f59e0b;">${o.item || 'طلب'}</span></p>
-          <p>العميل: ${o.customerName || '-'} (${o.phone || '-'})</p>
-          <p style="color:#38bdf8; font-size:13px;">🏠 العنوان: ${o.customerAddress || 'غير محدد'}</p>
-          <p style="color:#10b981;">الحالة: ${o.status}</p>
-          <select onchange="assignDriver('${o.id}', this.value)">
-            <option value="">إسناد لكابتن...</option>
-            ${drivers.map(d => `<option value="${d.id}" ${o.driverId == d.id ? 'selected' : ''}>${d.name}</option>`).join('')}
-          </select>
-        </div>
-      `).join('');
-    } catch(e) {}
+    if (orders.length === 0) {
+      // جلب السلة الحالية كطلب افتراضي لو وُجدت
+      const cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+      if(cart.length > 0) {
+        orders.push({
+          id: '101',
+          items: cart,
+          customerName: savedCustomer.name || 'عميل كريم',
+          phone: savedCustomer.phone || 'غير محدد',
+          customerAddress: savedCustomer.address || 'بلطيم',
+          status: 'قيد التحضير',
+          driverId: ''
+        });
+      } else {
+        listEl.innerHTML = '<p style="color:#94a3b8; font-size:14px;">لا توجد طلبات واردة حالياً.</p>';
+        return;
+      }
+    }
+
+    listEl.innerHTML = orders.map(o => `
+      <div class="order-item">
+        <p><strong>طلب #${o.id || '1'}</strong></p>
+        <p>العميل: ${o.customerName || savedCustomer.name || '-'} (${o.phone || savedCustomer.phone || '-'})</p>
+        <p style="color:#38bdf8; font-size:13px;">🏠 العنوان: ${o.customerAddress || savedCustomer.address || 'غير محدد'}</p>
+        <p style="color:#10b981;">الحالة: ${o.status || 'قيد التحضير'}</p>
+        <select onchange="assignDriver('${o.id}', this.value)" style="margin-top:8px;">
+          <option value="">إسناد لكابتن...</option>
+          ${drivers.map(d => `<option value="${d.id}" ${o.driverId == d.id ? 'selected' : ''}>${d.name}</option>`).join('')}
+        </select>
+      </div>
+    `).join('');
   }
 
-  async function addDriver() {
+  function addDriver() {
     const name = document.getElementById('driverName').value;
     const phone = document.getElementById('driverPhone').value;
     if(!name) return;
-    await fetch('/api/drivers', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, phone })
-    });
+
+    let drivers = JSON.parse(localStorage.getItem('jahez_drivers')) || [];
+    drivers.push({ id: Date.now().toString(), name, phone });
+    localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
+
+    document.getElementById('driverName').value = '';
+    document.getElementById('driverPhone').value = '';
     loadAll();
   }
 
-  async function deleteDriver(id) {
-    await fetch(`/api/drivers/${id}`, { method: 'DELETE' });
+  function deleteDriver(id) {
+    let drivers = JSON.parse(localStorage.getItem('jahez_drivers')) || [];
+    drivers = drivers.filter(d => d.id !== id);
+    localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
     loadAll();
   }
 
-  async function assignDriver(orderId, driverId) {
+  function assignDriver(orderId, driverId) {
     if(!driverId) return;
-    await fetch(`/api/orders/${orderId}/assign`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ driverId })
-    });
-    loadOrders();
+    let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
+    let order = orders.find(o => o.id == orderId);
+    if(order) {
+      order.driverId = driverId;
+      order.status = 'جاري التوصيل';
+      localStorage.setItem('jahez_orders', JSON.stringify(orders));
+      loadOrders();
+    }
   }
 
-  async function addMenuItem() {
+  function addMenuItem() {
     const name = document.getElementById('itemName').value;
     const category = document.getElementById('itemCat').value;
     const price = document.getElementById('itemPrice').value;
     if(!name) return;
-    await fetch('/api/menu', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, category, price })
-    });
+
+    let menu = JSON.parse(localStorage.getItem('jahez_menu')) || [];
+    menu.push({ id: Date.now().toString(), name, category, price });
+    localStorage.setItem('jahez_menu', JSON.stringify(menu));
+
     alert('تمت إضافة المنتج/الخدمة للقسم بنجاح');
     document.getElementById('itemName').value = '';
     document.getElementById('itemPrice').value = '';
