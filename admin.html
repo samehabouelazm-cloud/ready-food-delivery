@@ -145,19 +145,42 @@
     localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
     loadAll();
   }
-
-  function assignDriver(orderId, driverId) {
-    if(!driverId) return;
+// دالة إسناد وحفظ الكابتن للطلب
+function assignDriver(orderId, driverName) {
+    if (!driverName) return;
+    
+    // حفظ مباشر ومؤكد في localStorage لكل طلب برقم خاص به
+    localStorage.setItem(`jahez_order_${orderId}_driver`, driverName);
+    
+    // تحديث مصفوفة الطلبات العامة إن وجدت
     let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
     let order = orders.find(o => o.id == orderId);
-    if(order) {
-      order.driverId = driverId;
-      order.status = 'جاري التوصيل';
-      localStorage.setItem('jahez_orders', JSON.stringify(orders));
-      loadOrders();
+    if (order) {
+        order.driver = driverName;
+        localStorage.setItem('jahez_orders', JSON.stringify(orders));
     }
-  }
-
+    
+    console.log(`تم حفظ إسناد الطلب #${orderId} للكابتن: ${driverName}`);
+}
+// استرجاع الكابتن المسند تلقائياً عند تحميل الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+    // البحث عن كل القوائم المنسدلة الخاصة بالطلبات وتعبئتها إن وجدت
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        // استخراج معرف الطلب من خاصية onchange أو السياق
+        const onchangeAttr = select.getAttribute('onchange');
+        if (onchangeAttr && onchangeAttr.includes('assignDriver')) {
+            const match = onchangeAttr.match(/assignDriver\(\s*['"]?([^,'"\s]+)['"]?\s*,/);
+            if (match && match[1]) {
+                const orderId = match[1];
+                const savedDriver = localStorage.getItem(`jahez_order_${orderId}_driver`);
+                if (savedDriver) {
+                    select.value = savedDriver;
+                }
+            }
+        }
+    });
+});
   function addMenuItem() {
     const name = document.getElementById('itemName').value;
     const category = document.getElementById('itemCat').value;
