@@ -14,22 +14,7 @@ function saveDetails() {
     };
     localStorage.setItem('jahez_saved_customer', JSON.stringify(data));
 }
-let currentQty = 1;
 
-function changeQty(val) {
-    currentQty += val;
-    if (currentQty < 1) currentQty = 1;
-    document.getElementById('qty_display').innerText = currentQty;
-}
-
-function saveDetails() {
-    const data = {
-        name: document.getElementById('customerName').value,
-        phone: document.getElementById('customerPhone').value,
-        address: document.getElementById('customerAddress').value
-    };
-    localStorage.setItem('jahez_saved_customer', JSON.stringify(data));
-}
 window.onload = function() {
     const saved = localStorage.getItem('jahez_saved_customer');
     if (saved) {
