@@ -7,7 +7,7 @@
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
         .container { max-width: 650px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1, h2, h3 { color: #f59e0b; text-align: center; }
+        h1, h2 { color: #f59e0b; text-align: center; }
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input[type="text"], select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         .category-title { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 15px; font-size: 16px; }
@@ -16,9 +16,9 @@
         .product-row input[type="number"] { width: 70px; padding: 5px; text-align: center; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 4px; margin-bottom: 0; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 12px; background: #22c55e; color: #fff; width: 100%; font-size: 16px; }
         button:hover { background: #16a34a; }
+        .map-btn { background: #3b82f6; margin-bottom: 10px; }
     </style>
 
-    <!-- ربط مكتبة Firebase (الإصدار 9) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -36,7 +36,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // الأقسام والمنتجات المتاحة
+        let customerLat = null;
+        let customerLng = null;
+
         const categories = [
             {
                 name: "🐟 قسم الأسماك والمأكولات البحرية",
@@ -67,7 +69,6 @@
         window.renderMenu = function() {
             const container = document.getElementById('menuContainer');
             let html = '';
-            
             categories.forEach(cat => {
                 html += `<div class="category-title"><strong>${cat.name}</strong></div>`;
                 cat.items.forEach(p => {
@@ -89,6 +90,24 @@
             const checkbox = document.querySelector(`input[data-id="${id}"]`);
             const qtyInput = document.getElementById(`qty_${id}`);
             qtyInput.disabled = !checkbox.checked;
+        }
+
+        window.getMyLocation = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        customerLat = position.coords.latitude;
+                        customerLng = position.coords.longitude;
+                        document.getElementById('locationStatus').innerText = "✅ تم تحديد موقعك الجغرافي بنجاح!";
+                        document.getElementById('locationStatus').style.color = "#22c55e";
+                    },
+                    (error) => {
+                        alert("فشل تحديد الموقع. تأكد من السماح للمتصفح بالوصول لموقعك.");
+                    }
+                );
+            } else {
+                alert("متصفحك لا يدعم خاصية تحديد الموقع.");
+            }
         }
 
         window.sendOrder = function() {
@@ -116,12 +135,7 @@
                 const price = parseFloat(box.getAttribute('data-price'));
                 const qty = parseInt(document.getElementById(`qty_${id}`).value) || 1;
 
-                selectedItems.push({
-                    name: name,
-                    quantity: qty,
-                    price: price
-                });
-
+                selectedItems.push({ name: name, quantity: qty, price: price });
                 totalAmount += (price * qty);
             });
 
@@ -130,6 +144,8 @@
                 id: orderId,
                 customerName: customerName,
                 customerAddress: customerAddress,
+                lat: customerLat || 31.57, // إحداثيات افتراضية لبلطيم لو لم يحدد العميل
+                lng: customerLng || 31.25,
                 paymentMethod: paymentMethod,
                 items: selectedItems,
                 total: totalAmount,
@@ -147,9 +163,7 @@
                 });
         }
 
-        window.onload = function() {
-            renderMenu();
-        };
+        window.onload = function() { renderMenu(); };
     </script>
 </head>
 <body>
@@ -157,9 +171,11 @@
         <h1>🛒 منصة جاهز - طلبات العملاء</h1>
 
         <div class="section">
-            <h2>بيانات التوصيل</h2>
+            <h2>بيانات التوصيل والموقع</h2>
             <input type="text" id="customerName" placeholder="اسم العميل الكريم">
-            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل (الشارع، رقم العمارة)">
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل (الشارع، رقم العمارة، الدور)">
+            <button type="button" class="map-btn" onclick="getMyLocation()">📍 إرسال موقعي الحالي على الخريطة</button>
+            <p id="locationStatus" style="font-size: 13px; color: #94a3b8; text-align: center; margin: 5px 0;">لم يتم تحديد الموقع بعد (اختياري)</p>
             <select id="paymentMethod">
                 <option value="كاش">الدفع نقداً عند الاستلام (كاش)</option>
                 <option value="فودافون كاش">فودافون كاش</option>
