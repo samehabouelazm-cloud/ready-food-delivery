@@ -1,27 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة جاهز في بلطيم</title>
+    <title>منصة جاهز للطلبات - العميل</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1, h2 { text-align: center; color: #f59e0b; }
-        .categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
-        .cat-btn { background: #334155; color: #fff; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; }
-        .cat-btn.active, .cat-btn:hover { background: #f59e0b; color: #000; font-weight: bold; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1, h2 { color: #f59e0b; text-align: center; }
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
-        .product-card { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #475569; }
-        .add-btn { background: #22c55e; color: #fff; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .add-btn:hover { background: #16a34a; }
-        .cart-section, .checkout-section { background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #475569; margin-top: 20px; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #0f172a; color: #fff; box-sizing: border-box; }
-        .checkout-btn { background: #f59e0b; color: #000; font-weight: bold; width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        .checkout-btn:hover { background: #d97706; }
+        input[type="text"], select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
+        .product-row { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #475569; }
+        .product-row label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
+        .product-row input[type="number"] { width: 70px; padding: 5px; text-align: center; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 4px; margin-bottom: 0; }
+        button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 12px; background: #22c55e; color: #fff; width: 100%; font-size: 16px; }
+        button:hover { background: #16a34a; }
     </style>
 
-    <!-- ربط مكتبة Firebase (الإصدار 9 المعتمد للويب) -->
+    <!-- ربط مكتبة Firebase (الإصدار 9) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -39,148 +35,93 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // قاعدة بيانات المنتجات لكل قسم
-        const storeData = {
-            'مشويات': [
-                { name: 'سمك بلطي مشوي - للكيلو', price: 100 },
-                { name: 'سمك بوري مشوي - للكيلو', price: 140 },
-                { name: 'وجبة فراخ مشوية كاملة', price: 180 }
-            ],
-            'سوبر ماركت': [
-                { name: 'زيت عافية ذرة 1 لتر', price: 95 },
-                { name: 'سكر الأبيض 1 كيلو', price: 35 },
-                { name: 'أرز المالديف 1 كيلو', price: 30 }
-            ],
-            'سوق': [
-                { name: 'طماطم طازجة - 1 كيلو', price: 15 },
-                { name: 'بطاطس للتحمير - 1 كيلو', price: 20 },
-                { name: 'بصل أحمر - 1 كيلو', price: 25 }
-            ],
-            'أجبان': [
-                { name: 'جبنة فريك اسطنبولي - ربع كيلو', price: 30 },
-                { name: 'جبنة رومي عمري - ربع كيلو', price: 55 },
-                { name: 'حلاوة طحينية ممتازة - نصف كيلو', price: 45 }
-            ],
-            'إلكترونيات': [
-                { name: 'سماعة بلوتوث لاسلكية', price: 250 },
-                { name: 'كابل شحن آيفون / أندرويد سريع', price: 60 },
-                { name: 'لمبة ليد اقتصادية 12 وات', price: 40 }
-            ],
-            'منظفات': [
-                { name: 'مسحوق أوتوماتيك برسيل 2.5 كيلو', price: 130 },
-                { name: 'سائل غسيل أطباق فيري 1 لتر', price: 55 },
-                { name: 'ديتول مطهر ومنظف عام', price: 75 }
-            ],
-            'أدوات منزلية': [
-                { name: 'طقم طاسات تيفال (3 قطع)', price: 350 },
-                { name: 'كوبايات عصير زجاج (طقم 6 قطع)', price: 90 },
-                { name: 'منظم ثلاجة أكريليك شفافة', price: 45 }
-            ]
-        };
+        // قائمة المنتجات المتاحة وأسعارها
+        const productsList = [
+            { id: 1, name: "سمك بلطي مشوي - للكيلو", price: 100 },
+            { id: 2, name: "وجبة فراخ مشوية كاملة", price: 180 },
+            { id: 3, name: "كيلو جمبري مقلي", price: 250 },
+            { id: 4, name: "طبق أرز سيراديش", price: 30 }
+        ];
 
-        let cart = [];
-        let currentCat = 'مشويات';
-
-        window.switchCategory = function(category) {
-            currentCat = category;
-            document.getElementById('currentCategoryTitle').innerText = 'قسم: ' + category;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.innerText.includes(category)) {
-                    btn.classList.add('active');
-                }
-            });
-            renderProducts();
-        }
-
-        function renderProducts() {
-            const listDiv = document.getElementById('productsList');
-            listDiv.innerHTML = '';
-            const products = storeData[currentCat] || [];
-            products.forEach((prod) => {
-                listDiv.innerHTML += `
-                    <div class="product-card">
-                        <div>
-                            <strong>${prod.name}</strong><br>
-                            <span style="color: #22c55e; font-size: 14px;">${prod.price} جنيه</span>
-                        </div>
-                        <button class="add-btn" onclick="addToCart('${prod.name}', ${prod.price})">إضافة للسلة</button>
+        window.renderProducts = function() {
+            const container = document.getElementById('productsContainer');
+            let html = '';
+            productsList.forEach(p => {
+                html += `
+                    <div class="product-row">
+                        <label>
+                            <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty(${p.id})">
+                            <span>${p.name} (${p.price} جنيه)</span>
+                        </label>
+                        <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
                     </div>
                 `;
             });
+            container.innerHTML = html;
         }
 
-        window.addToCart = function(name, price) {
-            const existingItem = cart.find(item => item.name === name);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ name: name, price: price, quantity: 1 });
-            }
-            updateCartUI();
+        window.toggleQty = function(id) {
+            const checkbox = document.querySelector(`input[data-id="${id}"]`);
+            const qtyInput = document.getElementById(`qty_${id}`);
+            qtyInput.disabled = !checkbox.checked;
         }
 
-        function updateCartUI() {
-            const cartDiv = document.getElementById('cartItems');
-            const totalSpan = document.getElementById('totalPrice');
-            if (cart.length === 0) {
-                cartDiv.innerHTML = 'السلة فارغة حالياً.';
-                totalSpan.innerText = '0';
+        window.sendOrder = function() {
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerAddress = document.getElementById('customerAddress').value.trim();
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            if (!customerName || !customerAddress) {
+                alert('الرجاء إدخال الاسم والعنوان بالتفصيل!');
                 return;
             }
-            cartDiv.innerHTML = '';
-            let total = 0;
-            cart.forEach((item) => {
-                total += item.price * item.quantity;
-                cartDiv.innerHTML += `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #334155; padding-bottom: 5px;">
-                        <span>${item.name} (x${item.quantity})</span>
-                        <span>${item.price * item.quantity} جنيه</span>
-                    </div>
-                `;
+
+            // جمع الأصناف المختارة والكميات
+            const checkedBoxes = document.querySelectorAll('.product-check:checked');
+            if (checkedBoxes.length === 0) {
+                alert('الرجاء اختيار صنف واحد على الأقل!');
+                return;
+            }
+
+            let selectedItems = [];
+            let totalAmount = 0;
+
+            checkedBoxes.forEach(box => {
+                const id = box.getAttribute('data-id');
+                const name = box.getAttribute('data-name');
+                const price = parseFloat(box.getAttribute('data-price'));
+                const qty = parseInt(document.getElementById(`qty_${id}`).value) || 1;
+
+                selectedItems.push({
+                    name: name,
+                    quantity: qty,
+                    price: price
+                });
+
+                totalAmount += (price * qty);
             });
-            totalSpan.innerText = total;
-        }
 
-        window.submitOrder = async function() {
-            const name = document.getElementById('customerName').value.trim();
-            const address = document.getElementById('customerAddress').value.trim();
-            const payment = document.getElementById('paymentMethod').value;
-
-            if (!name || !address) {
-                alert('الرجاء إدخال الاسم والعنوان بالتفصيل لنتمكن من توصيل الطلب!');
-                return;
-            }
-            if (cart.length === 0) {
-                alert('السلة فارغة، يرجى اختيار منتجات أولاً.');
-                return;
-            }
-
-            let total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-            const newOrder = {
-                id: 'HZ-' + Math.floor(1000 + Math.random() * 9000),
-                customerName: name,
-                customerAddress: address,
-                paymentMethod: payment,
-                items: [...cart],
-                total: total,
-                status: 'جديد',
-                time: new Date().toLocaleTimeString()
+            const orderId = Math.floor(1000 + Math.random() * 9000);
+            const orderData = {
+                id: orderId,
+                customerName: customerName,
+                customerAddress: customerAddress,
+                paymentMethod: paymentMethod,
+                items: selectedItems,
+                total: totalAmount,
+                status: 'قيد المراجعة',
+                time: new Date().toLocaleTimeString('ar-EG')
             };
 
-            try {
-                // إرسال الطلب مباشرة إلى سحابة Firebase Realtime Database
-                await push(ref(db, 'adminOrders'), newOrder);
-                alert('تم إرسال طلبك بنجاح يا ' + name + '! جارٍ تنفيذه من الإدارة.');
-                cart = [];
-                updateCartUI();
-                document.getElementById('customerName').value = '';
-                document.getElementById('customerAddress').value = '';
-            } catch (error) {
-                console.error(error);
-                alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.');
-            }
+            // إرسال الطلب لقاعدة بيانات Firebase
+            push(ref(db, 'adminOrders'), orderData)
+                .then(() => {
+                    alert(`تم إرسال طلبك بنجاح! رقم الطلب: #${orderId}`);
+                    location.reload();
+                })
+                .catch((error) => {
+                    alert('حدث خطأ أثناء الإرسال: ' + error.message);
+                });
         }
 
         window.onload = function() {
@@ -189,44 +130,25 @@
     </script>
 </head>
 <body>
+    <div class="container">
+        <h1>🛒 منصة جاهز - طلبات العملاء</h1>
 
-<div class="container">
-    <h1>منصة جاهز في بلطيم 🛒🍽️</h1>
-    <p style="text-align: center; color: #94a3b8;">اختر القسم، أضف منتجاتك، وحدد طريقة الدفع:</p>
+        <div class="section">
+            <h2>بيانات التوصيل</h2>
+            <input type="text" id="customerName" placeholder="اسم العميل الكريم">
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل (الشارع، رقم العمارة)">
+            <select id="paymentMethod">
+                <option value="كاش">الدفع نقداً عند الاستلام (كاش)</option>
+                <option value="فودافون كاش">فودافون كاش</option>
+            </select>
+        </div>
 
-    <div class="categories">
-        <button class="cat-btn active" onclick="switchCategory('مشويات')">المشويات</button>
-        <button class="cat-btn" onclick="switchCategory('سوبر ماركت')">السوبر ماركت</button>
-        <button class="cat-btn" onclick="switchCategory('سوق')">السوق</button>
-        <button class="cat-btn" onclick="switchCategory('أجبان')">الأجبان</button>
-        <button class="cat-btn" onclick="switchCategory('إلكترونيات')">الإلكترونيات</button>
-        <button class="cat-btn" onclick="switchCategory('منظفات')">المنظفات</button>
-        <button class="cat-btn" onclick="switchCategory('أدوات منزلية')">الأدوات المنزلية</button>
+        <div class="section">
+            <h2>قائمة الأصناف المتاحة (اختر وحدد الكمية)</h2>
+            <div id="productsContainer">جاري تحميل الأصناف...</div>
+        </div>
+
+        <button type="button" onclick="sendOrder()">إرسال الطلب الآن 🚀</button>
     </div>
-
-    <div class="section">
-        <h2 id="currentCategoryTitle" style="text-align: right; font-size: 18px; color: #fbbf24;">قسم: المشويات</h2>
-        <div id="productsList"></div>
-    </div>
-
-    <div class="cart-section">
-        <h3>🛒 سلة الطلبات</h3>
-        <div id="cartItems">السلة فارغة حالياً.</div>
-        <h4 style="color: #22c55e;">الإجمالي: <span id="totalPrice">0</span> جنيه</h4>
-    </div>
-
-    <div class="checkout-section">
-        <h3>📍 بيانات التوصيل والدفع</h3>
-        <input type="text" id="customerName" placeholder="اسم العميل الكريم">
-        <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل في بلطيم (شارع / رقم البيت)">
-        <select id="paymentMethod">
-            <option value="كاش">الدفع عند الاستلام (كاش)</option>
-            <option value="فودافون كاش">فودافون كاش</option>
-            <option value="إنستاباي">إنستاباي (InstaPay)</option>
-        </select>
-        <button class="checkout-btn" onclick="submitOrder()">إرسال الطلب إلى الإدارة 🚀</button>
-    </div>
-</div>
-
 </body>
 </html>
