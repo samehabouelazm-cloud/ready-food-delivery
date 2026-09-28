@@ -8,13 +8,14 @@
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
         .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         h1, h3 { color: #f59e0b; }
-        .item-container, .delivery-container { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        .item-container, .delivery-container, .cart-container { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; }
         .qty-btn { background: #0ea5e9; color: #fff; font-size: 18px; width: 40px; }
         .add-btn { background: #22c55e; color: #fff; width: 100%; margin-top: 10px; }
         .save-btn { background: #3b82f6; color: #fff; width: 100%; }
         #qty_display { font-size: 20px; font-weight: bold; padding: 0 15px; }
+        .cart-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #334155; }
     </style>
 </head>
 <body>
@@ -34,6 +35,13 @@
             <button type="button" class="add-btn" onclick="addToCart('وجبة كبدة مميزة', 50)">إضافة للسلة</button>
         </div>
 
+        <!-- خانة عرض السلة (تم إضافتها بوضوح) -->
+        <div class="cart-container">
+            <h3>🛒 سلة الطلبات</h3>
+            <div id="cartItemsList">لم يتم إضافة منتجات بعد.</div>
+            <p id="cartTotal" style="font-weight: bold; margin-top: 10px; color: #22c55e;">الإجمالي: 0 جنيه</p>
+        </div>
+
         <!-- قسم بيانات التوصيل -->
         <div class="delivery-container">
             <h3>بيانات التوصيل</h3>
@@ -44,21 +52,17 @@
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت التفاعلي المباشر -->
+    <!-- كود الجافاسكريبت التفاعلي -->
     <script>
         let currentQty = 1;
 
-        // دالة تغيير الكمية بالموجب والسالب
         function changeQty(val) {
             currentQty += val;
             if (currentQty < 1) currentQty = 1;
             const qtyEl = document.getElementById('qty_display');
-            if (qtyEl) {
-                qtyEl.innerText = currentQty;
-            }
+            if (qtyEl) qtyEl.innerText = currentQty;
         }
 
-        // دالة حفظ بيانات العميل في localStorage
         function saveDetails() {
             const name = document.getElementById('customerName').value.trim();
             const phone = document.getElementById('customerPhone').value.trim();
@@ -75,18 +79,7 @@
             return true;
         }
 
-        // دالة الإضافة الفعالة للسلة
         function addToCart(itemName, itemPrice) {
-            const name = document.getElementById('customerName').value.trim();
-            const phone = document.getElementById('customerPhone').value.trim();
-            
-            if (!name || !phone) {
-                alert('من فضلك ادخل الاسم ورقم الهاتف قبل الإضافة للسلة.');
-                return;
-            }
-
-            saveDetails(); // حفظ البيانات تلقائياً
-
             let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
             cart.push({
                 name: itemName,
@@ -97,12 +90,37 @@
             localStorage.setItem('jahez_cart', JSON.stringify(cart));
             alert(`تمت إضافة ${currentQty} من (${itemName}) إلى السلة بنجاح!`);
             
-            // إعادة تعيين الكمية
             currentQty = 1;
             document.getElementById('qty_display').innerText = '1';
+            updateCartDisplay();
         }
 
-        // استرجاع البيانات المحفوظة عند فتح الصفحة
+        function updateCartDisplay() {
+            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+            const cartList = document.getElementById('cartItemsList');
+            const cartTotal = document.getElementById('cartTotal');
+
+            if (cart.length === 0) {
+                cartList.innerHTML = 'لم يتم إضافة منتجات بعد.';
+                cartTotal.innerText = 'الإجمالي: 0 جنيه';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                let itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                html += `<div class="cart-item">
+                    <span>${item.name} (x${item.quantity})</span>
+                    <span>${itemTotal} جنيه</span>
+                </div>`;
+            });
+
+            cartList.innerHTML = html;
+            cartTotal.innerText = `الإجمالي: ${total} جنيه`;
+        }
+
         window.onload = function() {
             const saved = localStorage.getItem('jahez_saved_customer');
             if (saved) {
@@ -115,6 +133,7 @@
                     console.error("Error loading data", e);
                 }
             }
+            updateCartDisplay();
         };
     </script>
 </body>
