@@ -13,7 +13,7 @@
         .cat-btn { background: #334155; color: #fff; padding: 8px 15px; border-radius: 20px; border: none; cursor: pointer; white-space: nowrap; }
         .cat-btn.active { background: #f59e0b; color: #000; font-weight: bold; }
         .item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; }
         .add-btn { background: #22c55e; color: #fff; }
         .gps-btn { background: #0ea5e9; color: #fff; width: 100%; margin-bottom: 10px; }
@@ -24,7 +24,7 @@
 <body>
     <div class="container">
         <h1>منصة جاهز في بلطيم 🍽️🛒</h1>
-        <p>اختر القسم المناسب، أضف منتجاتك، واطلب بكل سهولة:</p>
+        <p>اختر القسم، أضف منتجاتك، وحدد طريقة الدفع:</p>
 
         <!-- أزرار الأقسام المتنوعة -->
         <div class="categories-nav">
@@ -37,7 +37,7 @@
             <button class="cat-btn" onclick="filterCategory('الأدوات المنزلية', this)">الأدوات المنزلية</button>
         </div>
 
-        <!-- قائمة المنتجات حسب القسم -->
+        <!-- قائمة المنتجات -->
         <div class="section-box">
             <h3 id="currentCategoryTitle">قسم: المشويات</h3>
             <div id="menuContainer">جاري تحميل المنتجات...</div>
@@ -50,11 +50,19 @@
             <p id="cartTotal" style="font-weight: bold; margin-top: 10px; color: #22c55e;">الإجمالي: 0 جنيه</p>
         </div>
 
-        <!-- بيانات التوصيل وموقع الـ GPS -->
+        <!-- بيانات التوصيل، الدفع، وموقع الـ GPS -->
         <div class="section-box">
-            <h3>بيانات التوصيل والموقع</h3>
+            <h3>بيانات التوصيل والدفع</h3>
             <input type="text" id="customerName" placeholder="الاسم الكريم">
             <input type="text" id="customerPhone" placeholder="رقم الهاتف">
+            
+            <label style="font-size: 14px; color: #94a3b8; display: block; margin-bottom: 5px;">طريقة الدفع:</label>
+            <select id="paymentMethod">
+                <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
+                <option value="فودافون كاش">🔴 فودافون كاش (تحويل على رقم المنصة)</option>
+                <option value="انستاباي (InstaPay)">🟣 إنستاباي (InstaPay)</option>
+            </select>
+
             <button type="button" class="gps-btn" onclick="getLiveLocation()">📍 تحديد موقعي الحالي تلقائياً عبر GPS</button>
             <input type="text" id="customerAddress" placeholder="إحداثيات الموقع أو العنوان بالتفصيل" readonly>
             <button type="button" class="submit-btn" onclick="submitOrder()">إرسال الطلب للإدارة 🚀</button>
@@ -64,12 +72,11 @@
     <script>
         let currentSelectedCategory = 'المشويات';
 
-        // قاعدة بيانات افتراضية للأقسام والمنتجات (يمكن للإدارة إضافة المزيد)
         function getDefaultMenu() {
             return [
                 { name: 'وجبة كبدة مميزة', price: 60, category: 'المشويات' },
-                { name: 'كيلو مشمش / فواكه طازجة', price: 35, category: 'السوق' },
-                { name: 'جبنة رومي أقدم', price: 120, category: 'الأجبان' },
+                { name: 'كيلو فواكه طازجة', price: 35, category: 'السوق' },
+                { name: 'جبنة رومي قديمة', price: 120, category: 'الأجبان' },
                 { name: 'سلة منظفات منزلية', price: 90, category: 'المنظفات' },
                 { name: 'طقم صواني تفلون', price: 350, category: 'الأدوات المنزلية' },
                 { name: 'حليب جهينة 1 لتر', price: 42, category: 'السوبر ماركت' },
@@ -154,8 +161,7 @@
             cartTotal.innerText = `الإجمالي: ${total} جنيه`;
         }
 
-        // خاصية تتبع الموقع الجغرافي الحقيقي للعميل عبر الـ GPS
-        let userLat = 31.57; // إحداثيات افتراضية لبلطيم
+        let userLat = 31.57;
         let userLng = 31.08;
 
         function getLiveLocation() {
@@ -164,15 +170,15 @@
                     (position) => {
                         userLat = position.coords.latitude;
                         userLng = position.coords.longitude;
-                        document.getElementById('customerAddress').value = `خط عرض: ${userLat.toFixed(4)}, خط طول: ${userLng.toFixed(4)} (موقع GPS حقيقي)`;
+                        document.getElementById('customerAddress').value = `خط عرض: ${userLat.toFixed(4)}, خط طول: ${userLng.toFixed(4)} (GPS حقيقي)`;
                         alert('تم تحديد موقعك بدقة بنجاح!');
                     },
                     (error) => {
-                        alert('تعذر تحديد الموقع تلقائياً. تأكد من السماح للمتصفح بالوصول لموقعك.');
+                        alert('تعذر تحديد الموقع تلقائياً. تأكد من إذن الموقع.');
                     }
                 );
             } else {
-                alert('متصفحك لا يدعم خاصية تحديد الموقع الجغرافي.');
+                alert('متصفحك لا يدعم تحديد الموقع الجغرافي.');
             }
         }
 
@@ -180,15 +186,16 @@
             const name = document.getElementById('customerName').value.trim();
             const phone = document.getElementById('customerPhone').value.trim();
             const address = document.getElementById('customerAddress').value.trim();
+            const payment = document.getElementById('paymentMethod').value;
             let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
 
             if (!name || !phone || !address) {
-                alert('الرجاء إدخال الاسم، الهاتف، واستخدام زر تحديد الموقع (GPS)!');
+                alert('الرجاء إدخال الاسم، الهاتف، وموقع GPS!');
                 return;
             }
 
             if (cart.length === 0) {
-                alert('السلة فارغة! أضف منتجات أولاً.');
+                alert('السلة فارغة!');
                 return;
             }
 
@@ -198,6 +205,7 @@
                 customerName: name,
                 phone: phone,
                 address: address,
+                paymentMethod: payment,
                 lat: userLat,
                 lng: userLng,
                 items: cart,
@@ -209,7 +217,7 @@
             localStorage.setItem('jahez_orders', JSON.stringify(orders));
             localStorage.removeItem('jahez_cart');
 
-            alert(`تم إرسال طلبك برقم #${newOrder.id} بنجاح للإدارة وتتبع مساره!`);
+            alert(`تم إرسال طلبك برقم #${newOrder.id} بنجاح بطريقة الدفع (${payment})!`);
             window.location.reload();
         }
 

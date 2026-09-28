@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المطعم والمنصة - جاهز</title>
+    <title>لوحة إدارة المنصة والطلبات - جاهز</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
         .container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
@@ -11,16 +11,30 @@
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; }
+        .danger-btn { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 12px; margin-right: 10px; }
         .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; }
+        .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🛠️ لوحة إدارة المنصة والطلبات</h1>
 
-        <!-- قسم إضافة منتج جديد لأي قسم -->
+        <!-- قسم إدارة الكباتن (إضافة وحذف) -->
         <div class="section">
-            <h2>إضافة منتج جديد لأقسام المنصة</h2>
+            <h2>🚴 إدارة فريق الكباتن</h2>
+            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
+            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
+            <button type="button" onclick="addDriver()">إضافة كابتن جديد</button>
+            
+            <div id="driversListContainer" style="margin-top: 15px;">
+                <!-- سيتم عرض الكباتن المسجلين هنا مع زر الحذف -->
+            </div>
+        </div>
+
+        <!-- قسم إضافة منتج -->
+        <div class="section">
+            <h2>➕ إضافة منتج جديد لأقسام المنصة</h2>
             <input type="text" id="newProdName" placeholder="اسم المنتج">
             <input type="number" id="newProdPrice" placeholder="السعر بالجنيه">
             <select id="newProdCategory">
@@ -32,17 +46,70 @@
                 <option value="المنظفات">المنظفات</option>
                 <option value="الأدوات المنزلية">الأدوات المنزلية</option>
             </select>
-            <button type="button" onclick="addNewProduct()">إضافة المنتج للقائمة فوراً</button>
+            <button type="button" onclick="addNewProduct()">إضافة المنتج للقائمة</button>
         </div>
 
-        <!-- قسم تتبع الطلبات وإسناد الكابتن الثابت -->
+        <!-- قسم متابعة الطلبات وإسناد الكابتن التلقائي واليدوي -->
         <div class="section">
-            <h2>📦 متابعة وتتبع الطلبات (العميل ⬅️ الإدارة ⬅️ الكابتن)</h2>
+            <h2>📦 متابعة وتتبع الطلبات وطرق الدفع</h2>
             <div id="adminOrdersList">لا توجد طلبات واردة حالياً.</div>
         </div>
     </div>
 
     <script>
+        // إدارة الكباتن
+        function getDrivers() {
+            return JSON.parse(localStorage.getItem('jahez_drivers')) || [
+                { name: 'كابتن أحمد', phone: '01012345678' },
+                { name: 'كابتن محمود', phone: '01112345678' }
+            ];
+        }
+
+        function renderDriversList() {
+            let drivers = getDrivers();
+            const container = document.getElementById('driversListContainer');
+            if (drivers.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>';
+                return;
+            }
+            let html = '<p><strong>الكباتن المتاحون حالياً:</strong></p>';
+            drivers.forEach((d, index) => {
+                html += `
+                    <div class="driver-row">
+                        <span>🚴‍♂️ ${d.name} (${d.phone})</span>
+                        <button type="button" class="danger-btn" onclick="deleteDriver(${index})">حذف الكابتن</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function addDriver() {
+            const name = document.getElementById('driverNameInput').value.trim();
+            const phone = document.getElementById('driverPhoneInput').value.trim();
+            if (!name || !phone) {
+                alert('الرجاء إدخال اسم ورقم هاتفك الكابتن!');
+                return;
+            }
+            let drivers = getDrivers();
+            drivers.push({ name, phone });
+            localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
+            document.getElementById('driverNameInput').value = '';
+            document.getElementById('driverPhoneInput').value = '';
+            renderDriversList();
+            loadAdminOrders();
+            alert(`تمت إضافة الكابتن (${name}) بنجاح!`);
+        }
+
+        function deleteDriver(index) {
+            let drivers = getDrivers();
+            let deleted = drivers.splice(index, 1);
+            localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
+            renderDriversList();
+            loadAdminOrders();
+            alert(`تم حذف الكابتن بنجاح.`);
+        }
+
         function addNewProduct() {
             const name = document.getElementById('newProdName').value.trim();
             const price = document.getElementById('newProdPrice').value.trim();
@@ -57,7 +124,7 @@
             menu.push({ name, price: Number(price), category });
             localStorage.setItem('jahez_menu', JSON.stringify(menu));
 
-            alert(`تمت إضافة (${name}) إلى قسم (${category}) بنجاح!`);
+            alert(`تمت إضافة (${name}) بنجاح!`);
             document.getElementById('newProdName').value = '';
             document.getElementById('newProdPrice').value = '';
         }
@@ -65,6 +132,7 @@
         function loadAdminOrders() {
             const container = document.getElementById('adminOrdersList');
             let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
+            let drivers = getDrivers();
 
             if (orders.length === 0) {
                 container.innerHTML = 'لا توجد طلبات واردة حالياً.';
@@ -76,22 +144,26 @@
                 let itemsText = order.items.map(i => `${i.name} (×${i.quantity})`).join(', ');
                 let currentDriver = order.driver || localStorage.getItem(`jahez_order_${order.id}_driver`) || '';
 
+                let driverOptions = `<option value="">اختر الكابتن</option>`;
+                drivers.forEach(d => {
+                    driverOptions += `<option value="${d.name}" ${currentDriver === d.name ? 'selected' : ''}>${d.name}</option>`;
+                });
+
                 html += `
                     <div class="order-card">
                         <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id} - الحالة: ${order.status}</h3>
                         <p><strong>العميل:</strong> ${order.customerName} | <strong>الهاتف:</strong> ${order.phone}</p>
-                        <p><strong>الموقع (GPS):</strong> ${order.address} 
-                           <a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" style="color: #38bdf8; margin-right: 10px;">🗺️ عرض على خرائط جوجل</a>
+                        <p><strong>طريقة الدفع:</strong> <span style="color: #38bdf8; font-weight: bold;">${order.paymentMethod || 'كاش'}</span></p>
+                        <p><strong>موقع العميل (GPS):</strong> ${order.address} 
+                           <a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" style="color: #38bdf8; margin-right: 10px;">🗺️ خرائط جوجل</a>
                         </p>
                         <p><strong>الأصناف:</strong> ${itemsText}</p>
-                        <div style="margin-top: 10px;">
-                            <label><strong>إسناد وحفظ الكابتن:</strong></label>
-                            <select onchange="assignDriver('${order.id}', this.value)">
-                                <option value="">اختر الكابتن لتوصيل الطلب</option>
-                                <option value="كابتن أحمد" ${currentDriver === 'كابتن أحمد' ? 'selected' : ''}>كابتن أحمد</option>
-                                <option value="كابتن محمود" ${currentDriver === 'كابتن محمود' ? 'selected' : ''}>كابتن محمود</option>
-                                <option value="كابتن إبراهيم" ${currentDriver === 'كابتن إبراهيم' ? 'selected' : ''}>كابتن إبراهيم</option>
+                        
+                        <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
+                            <select onchange="assignDriver('${order.id}', this.value)" style="margin-bottom: 0;">
+                                ${driverOptions}
                             </select>
+                            <button type="button" style="background: #8b5cf6; white-space: nowrap;" onclick="autoAssignDriver('${order.id}')">⚡ إسناد أتوماتيك (الأقرب/المتاح)</button>
                         </div>
                     </div>
                 `;
@@ -99,10 +171,21 @@
             container.innerHTML = html;
         }
 
+        // خاصية الإسناد الأتوماتيكي للكابتن المتاح
+        function autoAssignDriver(orderId) {
+            let drivers = getDrivers();
+            if (drivers.length === 0) {
+                alert('لا توجد كباتن مسجلين للإسناد التلقائي! أضف كابتن أولاً.');
+                return;
+            }
+            // اختيار كابتن عشوائي أو الأول المتاح تلقائياً كرمز للأقرب
+            let selectedDriver = drivers[Math.floor(Math.random() * drivers.length)].name;
+            assignDriver(orderId, selectedDriver);
+            alert(`تم اختيار الإسناد الأتوماتيكي وتم تعيين الطلب للكابتن: (${selectedDriver}) بنجاح!`);
+        }
+
         function assignDriver(orderId, driverName) {
             if (!driverName) return;
-            
-            // حفظ الكابتن بثبات تام
             localStorage.setItem(`jahez_order_${orderId}_driver`, driverName);
 
             let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
@@ -111,12 +194,14 @@
                 order.driver = driverName;
                 order.status = 'تم الإسناد للكابتن';
                 localStorage.setItem('jahez_orders', JSON.stringify(orders));
-                alert(`تم إسناد الطلب #${orderId} إلى (${driverName}) وتثبيته بنجاح!`);
                 loadAdminOrders();
             }
         }
 
-        window.onload = loadAdminOrders;
+        window.onload = function() {
+            renderDriversList();
+            loadAdminOrders();
+        };
     </script>
 </body>
 </html>

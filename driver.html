@@ -16,10 +16,10 @@
 <body>
     <div class="container">
         <h1>🚴‍♂️ تطبيق الكابتن</h1>
-        <p style="text-align: center; color: #94a3b8;">تتبع وتوصيل الطلبات للعملاء</p>
+        <p style="text-align: center; color: #94a3b8;">الطلبات المسندة إليك وطرق الدفع</p>
         
         <div id="driverOrdersList">
-            <div style="text-align: center; color: #94a3b8;">جاري تحميل الطلبات المسندة...</div>
+            <div style="text-align: center; color: #94a3b8;">جاري تحميل الطلبات...</div>
         </div>
     </div>
 
@@ -28,7 +28,6 @@
             const container = document.getElementById('driverOrdersList');
             let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
 
-            // تصفية الطلبات المسندة فعلياً
             let activeOrders = orders.filter(o => o.driver && o.driver !== 'قيد الانتظار' && o.status !== 'تم التسليم للعميل');
 
             if (activeOrders.length === 0) {
@@ -44,12 +43,13 @@
                         <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id}</h3>
                         <p><strong>اسم العميل:</strong> ${order.customerName}</p>
                         <p><strong>رقم الهاتف:</strong> ${order.phone}</p>
+                        <p><strong>طريقة الدفع:</strong> <span style="color: #38bdf8; font-weight: bold;">${order.paymentMethod || 'كاش'}</span></p>
                         <p><strong>موقع العميل:</strong> ${order.address} <br>
-                           <a class="map-link" href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank">🗺️ فتح الخريطة وتتبع الطريق للعميل</a>
+                           <a class="map-link" href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank">🗺️ فتح الخريطة لتتبع موقع العميل</a>
                         </p>
                         <p><strong>الأصناف:</strong> ${itemsText}</p>
                         <p><strong>الكابتن المسؤول:</strong> <span style="color: #22c55e; font-weight: bold;">${order.driver}</span></p>
-                        <button type="button" class="deliver-btn" onclick="completeDelivery('${order.id}')">تأكيد توصيل الطلب وتسليمه للعميل ✅</button>
+                        <button type="button" class="deliver-btn" onclick="completeDelivery('${order.id}')">تأكيد تسليم الطلب للعميل ✅</button>
                     </div>
                 `;
             });
@@ -63,7 +63,7 @@
             if (order) {
                 order.status = 'تم التسليم للعميل';
                 localStorage.setItem('jahez_orders', JSON.stringify(orders));
-                alert(`تم إتمام تسليم الطلب #${orderId} بنجاح!`);
+                alert(`تم تأكيد تسليم الطلب #${orderId}!`);
                 loadDriverOrders();
             }
         }
