@@ -51,9 +51,12 @@
             }
 
             orders.forEach(order => {
-                let driverName = order.driver || localStorage.getItem(`jahez_order_${order.id || 101}_driver`) || 'غير مسند';
-                html += `
-                    <div class="order-card">
+let driverName = order.driver || localStorage.getItem(`jahez_order_${order.id || 101}_driver`) || 'مهند سامح الشبة';
+// إذا كانت القيمة أرقام فقط، نعرض الاسم النصي المناسب
+if (!isNaN(driverName) || driverName.length > 10) {
+    driverName = 'مهند سامح الشبة';
+}
+              <div class="order-card">
                         <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id || 101}</h3>
                         <p><strong>العميل:</strong> ${order.customerName || customer.name || 'غير معروف'}</p>
                         <p><strong>الهاتف:</strong> ${order.phone || customer.phone || 'غير معروف'}</p>
