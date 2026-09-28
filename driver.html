@@ -1,163 +1,72 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>جاهز في بلطيم - تطبيق الكابتن</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
-    .container { max-width: 650px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 20px; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; }
-    header h1 { color: #10b981; font-size: 22px; }
-    .order-card { background: #1e293b; border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #334155; }
-    .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 12px; }
-    .status-badge { background: #f59e0b; color: #000; font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 13px; }
-    .status-done { background: #10b981; color: #fff; }
-    #map { height: 260px; width: 100%; border-radius: 10px; margin-top: 15px; border: 1px solid #334155; }
-    .action-btn { width: 100%; padding: 12px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
-    .btn-step1 { background: #3b82f6; color: #fff; }
-    .btn-step2 { background: #8b5cf6; color: #fff; }
-    .btn-step3 { background: #f59e0b; color: #000; }
-    .btn-step4 { background: #10b981; color: #fff; }
-    .maps-link { display: inline-block; margin-top: 8px; color: #38bdf8; text-decoration: none; font-weight: bold; font-size: 14px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة جاهز في بلطيم - تطبيق الكابتن</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1 { color: #f59e0b; text-align: center; }
+        .order-card { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; }
+        .no-orders { text-align: center; color: #94a3b8; padding: 20px; }
+    </style>
 </head>
 <body>
-
-<div class="container">
-  <header>
-    <h1>🚴 جاهز في بلطيم - تطبيق الكابتن</h1>
-    <p style="color:#94a3b8; font-size:13px; margin-top:5px;">تتبع مسار الرحلة وموقع العميل على الخريطة</p>
-  </header>
-
-  <div id="driverOrders">
-    <p style="color: #94a3b8; text-align:center;">جاري تحميل الطلبات...</p>
-  </div>
-</div>
-
-<script>
-  let map, driverMarker, customerMarker;
-  let currentLat = 31.584, currentLng = 31.085;
-
-  async function loadMyOrders() {
-    const container = document.getElementById('driverOrders');
-    try {
-      const res = await fetch('/api/orders');
-      const orders = await res.json();
-
-      if (!orders || orders.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8; text-align:center;">لا توجد طلبات حالياً.</p>';
-        return;
-      }
-
-      container.innerHTML = orders.map(o => {
-        const isCompleted = o.status && o.status.includes('تم التوصيل بنجاح');
-        const cLoc = o.customerLocation || { lat: 31.584, lng: 31.085 };
-        const googleMapsUrl = `https://www.google.com/maps?q=${cLoc.lat},${cLoc.lng}`;
-
-        return `
-          <div class="order-card">
-            <div class="order-header">
-              <h3>طلب #${o.id}</h3>
-              <span class="status-badge ${isCompleted ? 'status-done' : ''}">${o.status}</span>
-            </div>
-            <p><strong>العميل:</strong> ${o.customerName || 'عميل'} (${o.phone || '-'})</p>
-            <p style="color:#38bdf8; margin-top:4px;"><strong>🏠 العنوان المكتوب:</strong> ${o.customerAddress || 'غير محدد'}</p>
-            <p><strong>الوجبة:</strong> ${o.item || 'وجبة طعام'}</p>
-            <p><a href="${googleMapsUrl}" target="_blank" class="maps-link">📍 فتح موقع العميل المحدد في خرائط جوجل ↗</a></p>
-            
-            <div id="map"></div>
-
-            ${!isCompleted ? renderActionButtons(o.id, o.status || '') : '<p style="color:#10b981; text-align:center; margin-top:10px; font-weight:bold;">🎉 تم توصيل هذا الطلب بنجاح</p>'}
-          </div>
-        `;
-      }).join('');
-
-      const firstOrder = orders[0];
-      initMap(firstOrder ? firstOrder.customerLocation : null);
-    } catch (err) {
-      container.innerHTML = '<p style="color:#ef4444; text-align:center;">خطأ في جلب البيانات.</p>';
-    }
-  }
-
-  function initMap(customerLoc) {
-    const mapElement = document.getElementById('map');
-    if (!mapElement) return;
-
-    map = L.map('map').setView([currentLat, currentLng], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    driverMarker = L.marker([currentLat, currentLng]).addTo(map)
-      .bindPopup('🚴 موقع الكابتن الحالي').openPopup();
-
-    if (customerLoc) {
-      customerMarker = L.marker([customerLoc.lat, customerLoc.lng]).addTo(map)
-        .bindPopup('🏠 عنوان موقع التوصيل للعميل');
-    }
-
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(pos => {
-        currentLat = pos.coords.latitude;
-        currentLng = pos.coords.longitude;
-        driverMarker.setLatLng([currentLat, currentLng]);
-      });
-    }
-  }
-
-  function renderActionButtons(orderId, currentStatus) {
-    if (currentStatus.includes('جاري التوصيل مع')) {
-      return `<button class="action-btn btn-step1" onclick="updateOrderStatus('${orderId}', '👨‍🍳 الكابتن في الطريق للمطعم')">👨‍🍳 التحرك إلى المطعم</button>`;
-    } else if (currentStatus.includes('في الطريق للمطعم')) {
-      return `<button class="action-btn btn-step2" onclick="updateOrderStatus('${orderId}', '🛍️ تم استلام الطلب من المطعم')">🛍️ تم استلام الطلب</button>`;
-    } else if (currentStatus.includes('تم استلام الطلب')) {
-      return `<button class="action-btn btn-step3" onclick="updateOrderStatus('${orderId}', '🚴 الكابتن في الطريق للعميل')">🚴 التحرك إلى موقع العميل</button>`;
-    } else if (currentStatus.includes('في الطريق للعميل')) {
-      return `<button class="action-btn btn-step4" onclick="updateOrderStatus('${orderId}', '✅ تم التوصيل بنجاح')">✅ تأكيد التوصيل وتسليم الطلب</button>`;
-    } else {
-      return `<button class="action-btn btn-step1" onclick="updateOrderStatus('${orderId}', '👨‍🍳 الكابتن في الطريق للمطعم')">تحديث الحالة</button>`;
-    }
-  }
-
-  async function updateOrderStatus(orderId, newStatus) {
-    try {
-      const res = await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, location: { lat: currentLat, lng: currentLng } })
-      });
-      if (res.ok) await loadMyOrders();
-    } catch (err) {
-      alert('خطأ في الاتصال بالسيرفر');
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', loadMyOrders);
-</script>
-<script>
-    function displayCaptainOrders(ordersList) {
-        const container = document.getElementById('captain-orders-container');
-        if (!container) return;
+    <div class="container">
+        <h1>🚴‍♂️ تطبيق الكابتن</h1>
+        <p style="text-align: center; color: #94a3b8;">الطلبات المسندة للتوصيل</p>
         
-        container.innerHTML = '';
-        ordersList.forEach(order => {
-            const mapsUrl = order.location && order.location.lat 
-                ? `https://www.google.com/maps?q=${order.location.lat},${order.location.lng}`
-                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.customerAddress || '')}`;
+        <div id="driverOrdersList">
+            <div class="no-orders">جاري تحميل الطلبات...</div>
+        </div>
+    </div>
 
-            const orderCard = document.createElement('div');
-            orderCard.className = 'order-card-captain';
-            orderCard.innerHTML = `
-                <h3>طلب جديد من: ${order.customerName || 'عميل'}</h3>
-                <p><strong>الهاتف:</strong> ${order.customerPhone || 'غير متوفر'}</p>
-                <p><strong>العنوان:</strong> ${order.customerAddress || 'تحديد مباشر عبر الخريطة'}</p>
-                <a href="${mapsUrl}" target="_blank" class="btn-map-navigation" style="display:inline-block; margin-top:10px; padding:8px 15px; background:#28a745; color:#fff; border-radius:5px; text-decoration:none;">📍 فتح الموقع على الخريطة للكابتن</a>
-            `;
-            container.appendChild(orderCard);
-        });
-    }
-</script>
+    <script>
+        function loadDriverOrders() {
+            const container = document.getElementById('driverOrdersList');
+            
+            // استرجاع الطلبات أو السلة من localStorage
+            let orders = JSON.parse(localStorage.getItem('jahez_orders')) || [];
+            let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+            let customer = JSON.parse(localStorage.getItem('jahez_saved_customer')) || {};
+
+            let html = '';
+
+            // إذا لم توجد قائمة طلبات رسمية، ننشئ طلباً افتراضياً من السلة وبيانات العميل لتظهر للكابتن
+            if (orders.length === 0 && cart.length > 0) {
+                orders = [{
+                    id: 101,
+                    customerName: customer.name || 'عميل كريم',
+                    phone: customer.phone || 'غير محدد',
+                    address: customer.address || 'بلطيم',
+                    items: cart,
+                    driver: localStorage.getItem('jahez_order_101_driver') || 'قيد الانتظار'
+                }];
+            }
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="no-orders">لا توجد طلبات مسندة حالياً.</div>';
+                return;
+            }
+
+            orders.forEach(order => {
+                let driverName = order.driver || localStorage.getItem(`jahez_order_${order.id || 101}_driver`) || 'غير مسند';
+                html += `
+                    <div class="order-card">
+                        <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id || 101}</h3>
+                        <p><strong>العميل:</strong> ${order.customerName || customer.name || 'غير معروف'}</p>
+                        <p><strong>الهاتف:</strong> ${order.phone || customer.phone || 'غير معروف'}</p>
+                        <p><strong>العنوان:</strong> ${order.address || customer.address || 'غير محدد'}</p>
+                        <p><strong>الكابتن المسند:</strong> <span style="color: #22c55e; font-weight: bold;">${driverName}</span></p>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        window.onload = loadDriverOrders;
+    </script>
 </body>
 </html>
