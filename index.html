@@ -6,10 +6,11 @@
     <title>منصة جاهز للطلبات - العميل</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1, h2 { color: #f59e0b; text-align: center; }
+        .container { max-width: 650px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1, h2, h3 { color: #f59e0b; text-align: center; }
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         input[type="text"], select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
+        .category-title { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 15px; font-size: 16px; }
         .product-row { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #475569; }
         .product-row label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
         .product-row input[type="number"] { width: 70px; padding: 5px; text-align: center; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 4px; margin-bottom: 0; }
@@ -35,27 +36,51 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // قائمة المنتجات المتاحة وأسعارها
-        const productsList = [
-            { id: 1, name: "سمك بلطي مشوي - للكيلو", price: 100 },
-            { id: 2, name: "وجبة فراخ مشوية كاملة", price: 180 },
-            { id: 3, name: "كيلو جمبري مقلي", price: 250 },
-            { id: 4, name: "طبق أرز سيراديش", price: 30 }
+        // الأقسام والمنتجات المتاحة
+        const categories = [
+            {
+                name: "🐟 قسم الأسماك والمأكولات البحرية",
+                items: [
+                    { id: 101, name: "سمك بلطي مشوي - للكيلو", price: 100 },
+                    { id: 102, name: "كيلو جمبري مقلي", price: 250 },
+                    { id: 103, name: "صينية بوري بالفرن", price: 150 }
+                ]
+            },
+            {
+                name: "🍗 قسم الوجبات الرئيسية والمشويات",
+                items: [
+                    { id: 201, name: "وجبة فراخ مشوية كاملة", price: 180 },
+                    { id: 202, name: "نصف فرخة مشوية على الفحم", price: 100 },
+                    { id: 203, name: "طبق كفته مشوية", price: 120 }
+                ]
+            },
+            {
+                name: "🍟 قسم الإضافات والمقبلات",
+                items: [
+                    { id: 301, name: "طبق أرز سيراديش", price: 30 },
+                    { id: 302, name: "سلطة خضراء بلدي", price: 20 },
+                    { id: 303, name: "بطاطس محمرة", price: 25 }
+                ]
+            }
         ];
 
-        window.renderProducts = function() {
-            const container = document.getElementById('productsContainer');
+        window.renderMenu = function() {
+            const container = document.getElementById('menuContainer');
             let html = '';
-            productsList.forEach(p => {
-                html += `
-                    <div class="product-row">
-                        <label>
-                            <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty(${p.id})">
-                            <span>${p.name} (${p.price} جنيه)</span>
-                        </label>
-                        <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
-                    </div>
-                `;
+            
+            categories.forEach(cat => {
+                html += `<div class="category-title"><strong>${cat.name}</strong></div>`;
+                cat.items.forEach(p => {
+                    html += `
+                        <div class="product-row">
+                            <label>
+                                <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty(${p.id})">
+                                <span>${p.name} (${p.price} جنيه)</span>
+                            </label>
+                            <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
+                        </div>
+                    `;
+                });
             });
             container.innerHTML = html;
         }
@@ -76,7 +101,6 @@
                 return;
             }
 
-            // جمع الأصناف المختارة والكميات
             const checkedBoxes = document.querySelectorAll('.product-check:checked');
             if (checkedBoxes.length === 0) {
                 alert('الرجاء اختيار صنف واحد على الأقل!');
@@ -113,7 +137,6 @@
                 time: new Date().toLocaleTimeString('ar-EG')
             };
 
-            // إرسال الطلب لقاعدة بيانات Firebase
             push(ref(db, 'adminOrders'), orderData)
                 .then(() => {
                     alert(`تم إرسال طلبك بنجاح! رقم الطلب: #${orderId}`);
@@ -125,7 +148,7 @@
         }
 
         window.onload = function() {
-            renderProducts();
+            renderMenu();
         };
     </script>
 </head>
@@ -144,8 +167,8 @@
         </div>
 
         <div class="section">
-            <h2>قائمة الأصناف المتاحة (اختر وحدد الكمية)</h2>
-            <div id="productsContainer">جاري تحميل الأصناف...</div>
+            <h2>قائمة الأقسام والأصناف</h2>
+            <div id="menuContainer">جاري تحميل الأقسام...</div>
         </div>
 
         <button type="button" onclick="sendOrder()">إرسال الطلب الآن 🚀</button>
