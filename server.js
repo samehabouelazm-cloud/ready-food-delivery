@@ -1,131 +1,45 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const app = express();
-const PORT = process.env.PORT || 3000;
+let currentQty = 1;
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'customer_app')));
+function changeQty(val) {
+    currentQty += val;
+    if (currentQty < 1) currentQty = 1;
+    const qtyDisplay = document.getElementById('qty_display');
+    if (qtyDisplay) qtyDisplay.innerText = currentQty;
+}
 
-const DATA_FILE = path.join(__dirname, 'data.json');
-
-function readData() {
-  if (!fs.existsSync(DATA_FILE)) {
-    const initialData = {
-      drivers: [{ id: "101", name: "كابتن محمد", phone: "01198765432" }],
-      orders: [],
-      menu: [{ id: "1", name: "وجبة كفتة", category: "مشويات", price: 150 }]
+function saveDetails() {
+    const nameEl = document.getElementById('customerName');
+    const phoneEl = document.getElementById('customerPhone');
+    const addressEl = document.getElementById('customerAddress');
+    
+    const data = {
+        name: nameEl ? nameEl.value : '',
+        phone: phoneEl ? phoneEl.value : '',
+        address: addressEl ? addressEl.value : ''
     };
-    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2));
-    return initialData;
-  }
-  try {
-    const content = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(content);
-  } catch (e) {
-    return { drivers: [], orders: [], menu: [] };
-  }
+    localStorage.setItem('jahez_saved_customer', JSON.stringify(data));
 }
 
-function saveData(data) {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-  } catch (e) {
-    console.error("خطأ في حفظ البيانات:", e);
-  }
-}
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'customer_app', 'index.html'));
-});
-
-// APIs الكباتن
-app.get('/api/drivers', (req, res) => res.json(readData().drivers || []));
-
-app.post('/api/drivers', (req, res) => {
-  const db = readData();
-  const newDriver = { id: Date.now().toString(), ...req.body };
-  if (!db.drivers) db.drivers = [];
-  db.drivers.push(newDriver);
-  saveData(db);
-  res.status(201).json(newDriver);
-});
-
-app.delete('/api/drivers/:id', (req, res) => {
-  const db = readData();
-  const id = String(req.params.id);
-  db.drivers = (db.drivers || []).filter(d => String(d.id) !== id);
-  (db.orders || []).forEach(o => {
-    if (String(o.driverId) === id) {
-      o.driverId = null;
-      o.status = 'قيد الانتظار';
+window.onload = function() {
+    const saved = localStorage.getItem('jahez_saved_customer');
+    if (saved) {
+        const data = JSON.parse(saved);
+        const nameEl = document.getElementById('customerName');
+        const phoneEl = document.getElementById('customerPhone');
+        const addressEl = document.getElementById('customerAddress');
+        
+        if (nameEl) nameEl.value = data.name || '';
+        if (phoneEl) phoneEl.value = data.phone || '';
+        if (addressEl) addressEl.value = data.address || '';
     }
-  });
-  saveData(db);
-  res.json({ message: 'تم الحذف' });
-});
+};
 
-// APIs الطلبات والتوصيل
-app.get('/api/orders', (req, res) => res.json(readData().orders || []));
-
-app.post('/api/orders', (req, res) => {
-  const db = readData();
-  const newOrder = {
-    id: 'ord_' + Math.floor(Math.random() * 1000000),
-    status: 'قيد الانتظار',
-    driverId: null,
-    createdAt: new Date(),
-    driverLocation: { lat: 31.584, lng: 31.085 },
-    customerLocation: req.body.customerLocation || { lat: 31.584, lng: 31.085 }, // موقع العميل الجغرافي
-    ...req.body
-  };
-  if (!db.orders) db.orders = [];
-  db.orders.push(newOrder);
-  saveData(db);
-  res.status(201).json(newOrder);
-});
-
-app.put('/api/orders/:id/assign', (req, res) => {
-  const db = readData();
-  const { id } = req.params;
-  const { driverId } = req.body;
-  
-  const order = (db.orders || []).find(o => String(o.id) === String(id));
-  if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
-
-  const driver = (db.drivers || []).find(d => String(d.id) === String(driverId));
-  if (!driver) return res.status(400).json({ error: 'الكابتن غير موجود' });
-
-  order.driverId = String(driver.id);
-  order.status = `جاري التوصيل مع (${driver.name})`;
-  saveData(db);
-  res.json({ message: `تم إسناد الطلب للكابتن ${driver.name}`, order });
-});
-
-app.put('/api/orders/:id/status', (req, res) => {
-  const db = readData();
-  const { id } = req.params;
-  const { status, location } = req.body;
-
-  const order = (db.orders || []).find(o => String(o.id) === String(id));
-  if (!order) return res.status(404).json({ error: 'الطلب غير موجود' });
-
-  if (status) order.status = status;
-  if (location) order.driverLocation = location;
-  saveData(db);
-  res.json({ message: 'تم تحديث الحالة بنجاح', order });
-});
-
-// APIs المنيو
-app.get('/api/menu', (req, res) => res.json(readData().menu || []));
-
-app.post('/api/menu', (req, res) => {
-  const db = readData();
-  const newItem = { id: Date.now().toString(), ...req.body };
-  if (!db.menu) db.menu = [];
-  db.menu.push(newItem);
-  saveData(db);
-  res.status(201).json(newItem);
-});
-
-app.listen(PORT, () => console.log(`🚀 جاهز في بلطيم شغال على http://localhost:${PORT}`));
+function addToCart(itemName, itemPrice) {
+    let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+    cart.push({ name: itemName, price: itemPrice, quantity: currentQty });
+    localStorage.setItem('jahez_cart', JSON.stringify(cart));
+    alert(`تمت إضافة ${currentQty} من (${itemName}) إلى السلة بنجاح!`);
+    currentQty = 1;
+    const qtyDisplay = document.getElementById('qty_display');
+    if (qtyDisplay) qtyDisplay.innerText = '1';
+}
