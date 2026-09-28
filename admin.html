@@ -16,10 +16,9 @@
         .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
     </style>
 
-    <!-- ربط مكتبة Firebase (الإصدار 9) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
@@ -34,30 +33,34 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        function getDrivers() {
-            return JSON.parse(localStorage.getItem('jahez_drivers')) || [
-                { name: 'كابتن أحمد', phone: '01012345678' },
-                { name: 'كابتن محمود', phone: '01112345678' }
-            ];
-        }
+        let globalDrivers = [];
 
-        window.renderDriversList = function() {
-            let drivers = getDrivers();
-            const container = document.getElementById('driversListContainer');
-            if (drivers.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>';
-                return;
-            }
-            let html = '<p><strong>الكباتن المتاحون:</strong></p>';
-            drivers.forEach((d, index) => {
-                html += `
-                    <div class="driver-row">
-                        <span>🚴‍♂️ ${d.name} (${d.phone})</span>
-                        <button type="button" class="danger-btn" onclick="deleteDriver(${index})">حذف</button>
-                    </div>
-                `;
+        // الاستماع للكباتن من سحابة Firebase مباشرة
+        function listenToDrivers() {
+            const driversRef = ref(db, 'driversList');
+            onValue(driversRef, (snapshot) => {
+                const data = snapshot.val();
+                globalDrivers = [];
+                const container = document.getElementById('driversListContainer');
+                
+                if (!data) {
+                    container.innerHTML = '<p style="color: #94a3b8;">لا يوجد كباتن مسجلين حالياً. أضف كابتن جديد.</p>';
+                    return;
+                }
+
+                let html = '<p><strong>الكباتن المتاحون سحابياً:</strong></p>';
+                Object.keys(data).forEach((key) => {
+                    let d = data[key];
+                    globalDrivers.push({ id: key, name: d.name, phone: d.phone });
+                    html += `
+                        <div class="driver-row">
+                            <span>🚴‍♂️ ${d.name} (${d.phone})</span>
+                            <button type="button" class="danger-btn" onclick="deleteDriver('${key}')">حذف</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
             });
-            container.innerHTML = html;
         }
 
         window.addDriver = function() {
@@ -67,24 +70,19 @@
                 alert('الرجاء إدخال اسم ورقم هاتفك الكابتن!');
                 return;
             }
-            let drivers = getDrivers();
-            drivers.push({ name, phone });
-            localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
+            push(ref(db, 'driversList'), { name, phone });
             document.getElementById('driverNameInput').value = '';
             document.getElementById('driverPhoneInput').value = '';
-            renderDriversList();
-            alert(`تمت إضافة الكابتن (${name}) بنجاح!`);
+            alert(`تمت إضافة الكابتن (${name}) بنجاح للقاعدة السحابية!`);
         }
 
-        window.deleteDriver = function(index) {
-            let drivers = getDrivers();
-            drivers.splice(index, 1);
-            localStorage.setItem('jahez_drivers', JSON.stringify(drivers));
-            renderDriversList();
-            alert('تم حذف الكابتن بنجاح.');
+        window.deleteDriver = function(driverKey) {
+            if (confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
+                remove(ref(db, 'driversList/' + driverKey));
+            }
         }
 
-        // الاستماع الفوري واللايف للطلبات الواردة من Firebase
+        // الاستماع للطلبات الواردة وإسنادها سحابياً
         function listenToOrders() {
             const container = document.getElementById('adminOrdersList');
             const ordersRef = ref(db, 'adminOrders');
@@ -97,15 +95,13 @@
                 }
 
                 let html = '';
-                let drivers = getDrivers();
-
                 Object.keys(data).forEach((orderKey) => {
                     let order = data[orderKey];
                     let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
                     let currentDriver = order.driver || '';
 
                     let driverOptions = `<option value="">اختر الكابتن للإسناد</option>`;
-                    drivers.forEach(d => {
+                    globalDrivers.forEach(d => {
                         driverOptions += `<option value="${d.name}" ${currentDriver === d.name ? 'selected' : ''}>${d.name}</option>`;
                     });
 
@@ -122,7 +118,6 @@
                                 <select onchange="assignDriver('${orderKey}', this.value)" style="flex: 1; margin-bottom: 0;">
                                     ${driverOptions}
                                 </select>
-                                <button type="button" style="background: #8b5cf6;" onclick="autoAssignDriver('${orderKey}')">⚡ إسناد أتوماتيك</button>
                                 <button type="button" class="danger-btn" onclick="deleteOrder('${orderKey}')">حذف الطلب</button>
                             </div>
                         </div>
@@ -132,22 +127,13 @@
             });
         }
 
-        window.autoAssignDriver = function(orderKey) {
-            let drivers = getDrivers();
-            if (drivers.length === 0) {
-                alert('لا توجد كباتن متاحين للإسناد التلقائي! أضف كابتن أولاً.');
-                return;
-            }
-            let randomDriver = drivers[Math.floor(Math.random() * drivers.length)].name;
-            assignDriver(orderKey, randomDriver);
-        }
-
         window.assignDriver = function(orderKey, driverName) {
             if (!driverName) return;
             update(ref(db, 'adminOrders/' + orderKey), {
                 driver: driverName,
                 status: 'تم الإسناد للكابتن ' + driverName
             });
+            alert('تم إسناد الطلب بنجاح إلى الكابتن: ' + driverName);
         }
 
         window.deleteOrder = function(orderKey) {
@@ -157,7 +143,7 @@
         }
 
         window.onload = function() {
-            renderDriversList();
+            listenToDrivers();
             listenToOrders();
         };
     </script>
@@ -167,17 +153,16 @@
         <h1>🛠️ لوحة إدارة منصة جاهز في بلطيم</h1>
 
         <div class="section">
-            <h2>🚴 إدارة فريق الكباتن</h2>
+            <h2>🚴 إدارة فريق الكباتن السحابي</h2>
             <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
             <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
-            <button type="button" onclick="addDriver()">إضافة كابتن جديد</button>
-            
+            <button type="button" onclick="addDriver()">إضافة كابتن للقاعدة السحابية</button>
             <div id="driversListContainer" style="margin-top: 15px;"></div>
         </div>
 
         <div class="section">
             <h2>📦 طلبات العملاء الواردة (مزامنة سحابية حية 🔴)</h2>
-            <div id="adminOrdersList">جاري الاتصال بقاعدة البيانات السحابية واستقبال الطلبات...</div>
+            <div id="adminOrdersList">جاري الاتصال بقاعدة البيانات...</div>
         </div>
     </div>
 </body>

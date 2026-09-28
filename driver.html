@@ -14,7 +14,6 @@
         .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; }
     </style>
 
-    <!-- ربط مكتبة Firebase (الإصدار 9) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -32,30 +31,28 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // جلب الكباتن المسجلين من localStorage أو استخدام الافتراضي
-        function getDriversList() {
-            return JSON.parse(localStorage.getItem('jahez_drivers')) || [
-                { name: 'كابتن أحمد' },
-                { name: 'كابتن محمود' },
-                { name: 'مهند سامح الشبة' }
-            ];
-        }
-
-        window.populateDriversSelect = function() {
-            let drivers = getDriversList();
-            let select = document.getElementById('driverSelect');
-            select.innerHTML = '<option value="">-- اختر اسمك من القائمة --</option>';
-            drivers.forEach(d => {
-                select.innerHTML += `<option value="${d.name}">${d.name}</option>`;
-            });
-
-            let savedName = localStorage.getItem('jahez_logged_driver');
-            if (savedName) {
-                select.value = savedName;
-            }
-        }
-
         let currentDriverName = localStorage.getItem('jahez_logged_driver') || '';
+
+        // جلب قائمة الكباتن مباشرة من سحابة Firebase لتظهر في القائمة المنسدلة للكابتن
+        function loadDriversDropdown() {
+            const driversRef = ref(db, 'driversList');
+            onValue(driversRef, (snapshot) => {
+                const data = snapshot.val();
+                const select = document.getElementById('driverSelect');
+                select.innerHTML = '<option value="">-- اختر اسمك من القائمة --</option>';
+                
+                if (data) {
+                    Object.keys(data).forEach((key) => {
+                        let d = data[key];
+                        select.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                    });
+                }
+                
+                if (currentDriverName) {
+                    select.value = currentDriverName;
+                }
+            });
+        }
 
         window.loginDriver = function() {
             const select = document.getElementById('driverSelect');
@@ -88,7 +85,7 @@
 
                 Object.keys(data).forEach((orderKey) => {
                     let order = data[orderKey];
-                    // مقارنة دقيقة جداً لاسم الكابتن المسند في الطلب مع الكابتن الحالي
+                    // مقارنة دقيقة بين الكابتن المسند في الطلب والكابتن الحالي
                     if (order.driver && order.driver.trim() === currentDriverName.trim()) {
                         found = true;
                         let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
@@ -109,7 +106,7 @@
                 });
 
                 if (!found) {
-                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات مسندة إليك حالياً في قاعدة البيانات.</p>';
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات مسندة إليك في السحابة حالياً.</p>';
                 } else {
                     container.innerHTML = html;
                 }
@@ -124,7 +121,7 @@
         }
 
         window.onload = function() {
-            populateDriversSelect();
+            loadDriversDropdown();
             if (currentDriverName) {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('driverDashboard').style.display = 'block';
@@ -138,15 +135,13 @@
     <div class="container">
         <h1>🚴 تطبيق الكابتن - جاهز</h1>
 
-        <!-- قسم اختيار تسجيل دخول الكابتن -->
         <div id="loginSection" class="section">
             <h2>تسجيل دخول الكابتن</h2>
-            <p style="color: #94a3b8; font-size: 14px;">اختر اسمك المسجل في لوحة الإدارة:</p>
+            <p style="color: #94a3b8; font-size: 14px;">اختر اسمك المسجل سحابياً من الإدارة:</p>
             <select id="driverSelect"></select>
             <button type="button" onclick="loginDriver()">دخول إلى التطبيق 🚀</button>
         </div>
 
-        <!-- لوحة طلبات الكابتن -->
         <div id="driverDashboard" class="section" style="display: none;">
             <h2 id="welcomeDriverTitle" style="font-size: 18px; color: #fbbf24;"></h2>
             <h3 style="color: #fff; border-bottom: 1px solid #334155; padding-bottom: 8px;">📦 الطلبات المسندة إليك (تحديث حي 🔴)</h3>
