@@ -316,5 +316,56 @@
             <div id="adminOrdersList">جاري الاتصال...</div>
         </div>
     </div>
+    </script>
+    <script>
+        // دالة مساعدة لتحويل الصورة المرفوعة من الكمبيوتر إلى Base64
+        function convertImageFileToBase64(fileInputId) {
+            return new Promise((resolve) => {
+                const fileInput = document.getElementById(fileInputId);
+                if (fileInput && fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        resolve(e.target.result);
+                    };
+                    reader.readAsDataURL(fileInput.files[0]);
+                } else {
+                    resolve('');
+                }
+            });
+        }
+
+        window.addMenuItemWithImages = async function() {
+            const category = document.getElementById('itemCategory').value.trim();
+            const name = document.getElementById('itemName').value.trim();
+            const price = parseFloat(document.getElementById('itemPrice').value);
+
+            if (!category || !name || isNaN(price)) {
+                alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+                return;
+            }
+
+            // تحويل الصور المرفوعة من الكمبيوتر
+            const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
+            const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
+
+            push(ref(db, 'restaurantMenu'), { 
+                category: category, 
+                categoryImage: categoryImageBase64, 
+                name: name, 
+                price: price, 
+                image: itemImageBase64 
+            }).then(() => {
+                alert('✅ تم إضافة الصنف مع الصور من جهازك بنجاح!');
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemPrice').value = '';
+                document.getElementById('categoryImageFile').value = '';
+                document.getElementById('itemImageFile').value = '';
+            }).catch((error) => {
+                alert('خطأ في الإضافة: ' + error.message);
+            });
+        };
+    </script>
+</body>
+</html>
 </body>
 </html>
