@@ -9,65 +9,71 @@
         body { font-family: Tahoma, sans-serif; background: #070d1b; color: #fff; margin: 0; padding: 0; direction: rtl; }
         
         /* الهيدر العلوي */
-        .navbar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 15px 30px; border-bottom: 1px solid #1e293b; }
-        .brand { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 20px; color: #f59e0b; }
-        .brand span { background: #f59e0b; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 20px; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 18px; color: #f59e0b; }
+        .brand span { background: #f59e0b; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
         
-        /* تخطيط الصفحة الرئيسي (سلة يسار + محتوى يمين) */
-        .main-layout { display: flex; gap: 25px; padding: 25px; max-width: 1300px; margin: 0 auto; flex-wrap: wrap; }
+        /* تخطيط الصفحة الرئيسي (متجاوب للموبايل والكمبيوتر) */
+        .main-layout { display: flex; gap: 20px; padding: 15px; max-width: 1300px; margin: 0 auto; flex-direction: row-reverse; }
         
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; padding: 10px; }
+            .cart-sidebar { position: static !important; width: 100% !important; margin-bottom: 20px; }
+        }
+
         /* سلة المشتريات الجانبية */
-        .cart-sidebar { width: 350px; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; height: fit-content; position: sticky; top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .cart-sidebar h3 { color: #f59e0b; margin-top: 0; border-bottom: 1px solid #1e293b; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-sidebar { width: 340px; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 15px; height: fit-content; position: sticky; top: 75px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); flex-shrink: 0; }
+        .cart-sidebar h3 { color: #f59e0b; margin-top: 0; border-bottom: 1px solid #1e293b; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 5px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #1e293b; background: #070d1b; color: #fff; font-size: 14px; box-sizing: border-box; }
         
-        .gps-btn { background: #d97706; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 5px; width: 100%; }
+        .gps-btn { background: #d97706; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; margin-top: 5px; width: 100%; }
         .gps-btn:hover { background: #b45309; }
 
         /* تفاصيل الفاتورة في السلة */
-        .invoice-box { background: #070d1b; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; margin-top: 15px; font-size: 13px; }
-        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: #94a3b8; }
-        .invoice-total { display: flex; justify-content: space-between; margin-top: 10px; border-top: 1px dashed #1e293b; padding-top: 8px; font-weight: bold; color: #22c55e; font-size: 16px; }
+        .invoice-box { background: #070d1b; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; margin-top: 12px; font-size: 13px; }
+        .invoice-row { display: flex; justify-content: space-between; margin-bottom: 6px; color: #94a3b8; }
+        .invoice-total { display: flex; justify-content: space-between; margin-top: 8px; border-top: 1px dashed #1e293b; padding-top: 6px; font-weight: bold; color: #22c55e; font-size: 15px; }
 
-        .checkout-btn { background: #f59e0b; color: #000; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        .checkout-btn { background: #f59e0b; color: #000; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 12px; transition: 0.2s; }
         .checkout-btn:hover { background: #d97706; color: #fff; }
 
-        /* القسم الرئيسي الأيمن */
-        .content-area { flex: 1; min-width: 300px; }
+        /* المحتوى الرئيسي الأيمن */
+        .content-area { flex: 1; min-width: 0; }
         
         /* بانر الإعلانات العريض */
-        .banner { background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 12px; padding: 25px; color: #000; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(245,158,11,0.2); }
-        .banner h2 { margin: 0 0 10px 0; font-size: 24px; }
-        .banner p { margin: 0; font-size: 14px; font-weight: bold; opacity: 0.9; }
+        .banner { background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 12px; padding: 20px; color: #000; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(245,158,11,0.2); }
+        .banner h2 { margin: 0 0 8px 0; font-size: 20px; }
+        .banner p { margin: 0; font-size: 13px; font-weight: bold; opacity: 0.9; }
 
-        /* الأقسام العرضية (Pills) */
-        .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
+        /* شريط الأقسام العرضي الثابت الذكي */
+        .categories-bar-wrapper { position: sticky; top: 65px; background: #070d1b; padding: 10px 0; z-index: 99; margin-bottom: 15px; }
+        .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .categories-bar::-webkit-scrollbar { display: none; }
         
-        .cat-pill { display: flex; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #1e293b; padding: 10px 18px; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.2s; color: #fff; font-size: 14px; }
+        .cat-pill { display: flex; align-items: center; gap: 8px; background: #0f172a; border: 1px solid #1e293b; padding: 8px 15px; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.2s; color: #fff; font-size: 13px; flex-shrink: 0; }
         .cat-pill:hover, .cat-pill.active { background: #f59e0b; color: #000; border-color: #f59e0b; font-weight: bold; }
-        .cat-pill img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+        .cat-pill img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
 
         /* شبكة المنتجات (Grid) */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .product-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 12px; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .product-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 10px; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
         .product-card:hover { border-color: #f59e0b; }
         
-        .product-img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-        .product-title { font-size: 15px; font-weight: bold; margin: 0 0 5px 0; color: #fff; }
-        .product-desc { font-size: 12px; color: #94a3b8; margin: 0 0 10px 0; line-height: 1.4; }
-        .product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid #1e293b; padding-top: 8px; }
-        .product-price { color: #f59e0b; font-weight: bold; font-size: 14px; }
+        .product-img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+        .product-title { font-size: 14px; font-weight: bold; margin: 0 0 4px 0; color: #fff; }
+        .product-desc { font-size: 11px; color: #94a3b8; margin: 0 0 8px 0; }
+        .product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid #1e293b; padding-top: 6px; }
+        .product-price { color: #f59e0b; font-weight: bold; font-size: 13px; }
         
-        .add-to-cart-box { display: flex; align-items: center; gap: 8px; }
-        .add-to-cart-box input { width: 45px; text-align: center; padding: 4px; background: #070d1b; border: 1px solid #1e293b; color: #fff; border-radius: 4px; }
-        .add-btn { background: #22c55e; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .add-to-cart-box { display: flex; align-items: center; gap: 6px; }
+        .add-to-cart-box input { width: 40px; text-align: center; padding: 4px; background: #070d1b; border: 1px solid #1e293b; color: #fff; border-radius: 4px; font-size: 12px; }
+        .add-btn { background: #22c55e; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .add-btn:hover { background: #16a34a; }
 
-        .category-section-title { color: #f59e0b; font-size: 18px; margin-bottom: 12px; border-right: 4px solid #f59e0b; padding-right: 8px; }
+        .category-section-title { color: #f59e0b; font-size: 16px; margin-bottom: 10px; border-right: 4px solid #f59e0b; padding-right: 8px; font-weight: bold; }
     </style>
 
     <script type="module">
@@ -90,7 +96,7 @@
         let customerLat = null;
         let customerLng = null;
         let allProducts = {};
-        let cartItems = {}; // لحفظ المنتجات المضافة للسلة
+        let cartItems = {};
 
         function loadMenuFromCloud() {
             const menuRef = ref(db, 'restaurantMenu');
@@ -100,7 +106,7 @@
                 const scrollBar = document.getElementById('categoriesScrollBar');
 
                 if (!data) {
-                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد منتجات مضافة حالياً من لوحة الإدارة.</p>';
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد منتجات مضافة حالياً.</p>';
                     scrollBar.innerHTML = '';
                     return;
                 }
@@ -119,7 +125,6 @@
                     categories[item.category].items.push({ id: key, ...item });
                 });
 
-                // بناء شريط الأقسام العرضي العلوي
                 let scrollHtml = `<div class="cat-pill active" onclick="filterCategory('all')">⚡ جميع المنتجات</div>`;
                 let menuHtml = '';
 
@@ -133,7 +138,7 @@
                     `;
 
                     menuHtml += `
-                        <div class="cat-section-group" data-category="${catName}">
+                        <div class="cat-section-group" data-category="${catName}" style="margin-bottom: 20px;">
                             <div class="category-section-title">${catName}</div>
                             <div class="products-grid">
                     `;
@@ -145,7 +150,7 @@
                                 <div>
                                     <img src="${imgSrc}" class="product-img" alt="صورة المنتج">
                                     <h4 class="product-title">${p.name}</h4>
-                                    <p class="product-desc">متوفر طازج بجودة عالية ومضمونة.</p>
+                                    <p class="product-desc">متوفر طازج بجودة عالية.</p>
                                 </div>
                                 <div class="product-footer">
                                     <span class="product-price">${p.price} ج.م</span>
@@ -167,7 +172,6 @@
             });
         }
 
-        // تصفية الأقسام عند الضغط على الشريط العلوي
         window.filterCategory = function(catName) {
             document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
@@ -182,7 +186,6 @@
             });
         }
 
-        // إضافة منتج للسلة الجانبية
         window.addToCart = function(productId) {
             let qty = parseInt(document.getElementById(`qty_${productId}`).value) || 1;
             let product = allProducts[productId];
@@ -197,7 +200,6 @@
             updateCartUI();
         }
 
-        // تحديث واجهة السلة والفاتورة الاحترافية
         function updateCartUI() {
             let cartContainer = document.getElementById('cartItemsList');
             let countBadge = document.getElementById('cartItemCount');
@@ -205,11 +207,10 @@
             let totalCount = 0;
             let subtotal = 0;
             let html = '';
-
             let hasItems = Object.keys(cartItems).length > 0;
 
             if (!hasItems) {
-                cartContainer.innerHTML = '<p style="color: #64748b; text-align: center; font-size: 13px; margin: 20px 0;">السلة فارغة، أضف بعض المنتجات لطلبك</p>';
+                cartContainer.innerHTML = '<p style="color: #64748b; text-align: center; font-size: 12px; margin: 15px 0;">السلة فارغة</p>';
                 document.getElementById('invoiceDetails').style.display = 'none';
                 countBadge.innerText = '0 صنف';
                 return;
@@ -223,11 +224,11 @@
                 subtotal += (item.price * item.quantity);
 
                 html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: #070d1b; padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: #070d1b; padding: 6px 8px; border-radius: 6px; margin-bottom: 5px; font-size: 12px;">
                         <span>${item.name} (x${item.quantity})</span>
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
                             <span style="color: #f59e0b;">${item.price * item.quantity} ج.م</span>
-                            <button type="button" onclick="removeFromCart('${id}')" style="background: #ef4444; border: none; color: #fff; border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 10px;">حذف</button>
+                            <button type="button" onclick="removeFromCart('${id}')" style="background: #ef4444; border: none; color: #fff; border-radius: 3px; padding: 2px 5px; cursor: pointer; font-size: 10px;">حذف</button>
                         </div>
                     </div>
                 `;
@@ -235,7 +236,6 @@
 
             cartContainer.innerHTML = html;
             countBadge.innerText = `${totalCount} صنف`;
-            
             document.getElementById('subtotalPrice').innerText = subtotal + ' ج.م';
             document.getElementById('totalPrice').innerText = subtotal + ' ج.م';
         }
@@ -251,12 +251,12 @@
                     (position) => {
                         customerLat = position.coords.latitude;
                         customerLng = position.coords.longitude;
-                        document.getElementById('locationStatus').innerText = "✅ تم تحديد الموقع بدقة عبر GPS";
+                        document.getElementById('locationStatus').innerText = "✅ تم تحديد موقع GPS بنجاح";
                         document.getElementById('locationStatus').style.color = "#22c55e";
                     },
-                    (error) => { alert("تعذر تحديد الموقع، يرجى السماح للمتصفح بالوصول للموقع."); }
+                    (error) => { alert("تعذر تحديد الموقع تلقائياً."); }
                 );
-            } else { alert("متصفحك لا يدعم تحديد الموقع."); }
+            } else { alert("متصفحك لا يدعم GPS."); }
         }
 
         window.sendOrder = function() {
@@ -265,12 +265,12 @@
             const paymentMethod = document.getElementById('paymentMethod').value;
 
             if (!customerPhone || !customerAddress) {
-                alert('الرجاء إدخال رقم الجوال وعنوان التوصيل بالتفصيل!');
+                alert('الرجاء إدخال رقم الجوال وعنوان التوصيل!');
                 return;
             }
 
             if (Object.keys(cartItems).length === 0) {
-                alert('السلة فارغة! يرجى اختيار منتج واحد على الأقل.');
+                alert('السلة فارغة!');
                 return;
             }
 
@@ -286,7 +286,7 @@
             const orderId = Math.floor(1000 + Math.random() * 9000);
             const orderData = {
                 id: orderId,
-                customerName: 'عميل (رقم الجوال: ' + customerPhone + ')',
+                customerName: 'عميل (رقم: ' + customerPhone + ')',
                 customerAddress: customerAddress,
                 lat: customerLat || 31.57,
                 lng: customerLng || 31.25,
@@ -302,7 +302,7 @@
                     alert(`🎉 تم إرسال طلبك بنجاح! رقم الطلب: #${orderId}`);
                     location.reload();
                 })
-                .catch((error) => { alert('حدث خطأ أثناء إرسال الطلب: ' + error.message); });
+                .catch((error) => { alert('خطأ في الإرسال: ' + error.message); });
         }
 
         window.onload = function() {
@@ -312,36 +312,36 @@
 </head>
 <body>
 
-    <!-- هيدر المنصة العلوي -->
+    <!-- الهيدر العلوي -->
     <div class="navbar">
         <div class="brand">
             <span>READY</span> جاهز ⚡
         </div>
-        <div style="font-size: 13px; color: #94a3b8;">
-            📍 توصيل سريع لجميع الأقسام والأصناف
+        <div style="font-size: 12px; color: #94a3b8;">
+            📍 توصيل سريع
         </div>
     </div>
 
     <!-- التخطيط الأساسي -->
     <div class="main-layout">
         
-        <!-- سلة المشتريات والفاتورة (الجانب الأيمن أو الأيسر بتصميم احترافي) -->
+        <!-- سلة المشتريات الجانبية -->
         <div class="cart-sidebar">
             <h3>
                 🛒 سلة المشتريات
-                <span id="cartItemCount" style="background: #f59e0b; color: #000; font-size: 12px; padding: 2px 8px; border-radius: 12px;">0 صنف</span>
+                <span id="cartItemCount" style="background: #f59e0b; color: #000; font-size: 11px; padding: 2px 6px; border-radius: 10px;">0 صنف</span>
             </h3>
 
-            <div class="form-group" style="margin-top: 15px;">
+            <div class="form-group" style="margin-top: 10px;">
                 <label>رقم الجوال *</label>
                 <input type="text" id="customerPhone" placeholder="01XXXXXXXXX">
             </div>
 
             <div class="form-group">
                 <label>عنوان التوصيل *</label>
-                <input type="text" id="customerAddress" placeholder="أدخل اسم الشارع، رقم المبنى...">
-                <button type="button" class="gps-btn" onclick="getMyLocation()">📍 تحديد الموقع التلقائي (GPS)</button>
-                <p id="locationStatus" style="font-size: 11px; color: #94a3b8; margin: 4px 0 0 0;"></p>
+                <input type="text" id="customerAddress" placeholder="اسم الشارع، رقم المبنى...">
+                <button type="button" class="gps-btn" onclick="getMyLocation()">📍 تحديد الموقع (GPS)</button>
+                <p id="locationStatus" style="font-size: 10px; color: #94a3b8; margin: 3px 0 0 0;"></p>
             </div>
 
             <div class="form-group">
@@ -352,23 +352,21 @@
                 </select>
             </div>
 
-            <!-- قائمة المنتجات المختارة في السلة -->
-            <div style="max-height: 160px; overflow-y: auto; margin-top: 10px;" id="cartItemsList">
-                <p style="color: #64748b; text-align: center; font-size: 13px; margin: 20px 0;">السلة فارغة، أضف بعض المنتجات لطلبك</p>
+            <div style="max-height: 140px; overflow-y: auto; margin-top: 8px;" id="cartItemsList">
+                <p style="color: #64748b; text-align: center; font-size: 12px; margin: 15px 0;">السلة فارغة</p>
             </div>
 
-            <!-- الفاتورة الاحترافية -->
             <div id="invoiceDetails" class="invoice-box" style="display: none;">
                 <div class="invoice-row">
-                    <span>إجمالي المشتريات:</span>
+                    <span>المشتريات:</span>
                     <span id="subtotalPrice">0 ج.م</span>
                 </div>
                 <div class="invoice-row">
-                    <span>رسوم التوصيل:</span>
+                    <span>التوصيل:</span>
                     <span>مجاناً ⚡</span>
                 </div>
                 <div class="invoice-total">
-                    <span>الإجمالي النهائي:</span>
+                    <span>الإجمالي:</span>
                     <span id="totalPrice">0 ج.م</span>
                 </div>
             </div>
@@ -376,23 +374,24 @@
             <button type="button" class="checkout-btn" onclick="sendOrder()">إتمام وطلب السلة الآن 🚀</button>
         </div>
 
-        <!-- المحتوى الرئيسي (البانر والأقسام والمنتجات) -->
+        <!-- المحتوى الرئيسي (البانر والأقسام الثابتة والمنتجات) -->
         <div class="content-area">
             
-            <!-- بانر إعلاني عريض وفخم -->
             <div class="banner">
                 <h2>توصيل سريع للحوم، الأسماك، والأجبان اليومية!</h2>
                 <p>احصل على خصم بقيمة 30 ج.م باستخدام الكود: READY2026</p>
             </div>
 
-            <!-- شريط الأقسام العرضي السريع -->
-            <div id="categoriesScrollBar" class="categories-bar">
-                <!-- يتم تحميل الأقسام هنا سحابياً -->
+            <!-- شريط الأقسام العرضي الثابت (Sticky Bar) -->
+            <div class="categories-bar-wrapper">
+                <div id="categoriesScrollBar" class="categories-bar">
+                    <!-- يتم جلب الأقسام هنا -->
+                </div>
             </div>
 
             <!-- قائمة الأقسام والمنتجات -->
             <div id="menuContainer">
-                <p style="color: #94a3b8; text-align: center;">جاري تحميل المنتجات من السحابة...</p>
+                <p style="color: #94a3b8; text-align: center;">جاري تحميل المنتجات...</p>
             </div>
 
         </div>
