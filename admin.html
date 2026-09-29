@@ -73,7 +73,7 @@
             if (confirm('حذف هذا الكابتن؟')) remove(ref(db, 'driversList/' + key));
         }
 
-        // إدارة المنيو مع الصور
+        // إدارة المنيو والأقسام بصورها
         function listenToMenu() {
             const menuRef = ref(db, 'restaurantMenu');
             onValue(menuRef, (snapshot) => {
@@ -84,12 +84,16 @@
                 Object.keys(data).forEach((key) => {
                     let item = data[key];
                     let imgSrc = item.image ? item.image : 'https://via.placeholder.com/60?text=No+Img';
+                    let catImgSrc = item.categoryImage ? item.categoryImage : 'https://via.placeholder.com/40?text=Cat';
                     html += `
                         <div class="menu-item-card">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <img src="${imgSrc}" class="item-img" alt="صورة المنتج">
                                 <div>
-                                    <span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #38bdf8;">${item.category}</span>
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                                        <img src="${catImgSrc}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" alt="صورة القسم">
+                                        <span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #38bdf8;">${item.category}</span>
+                                    </div>
                                     <h4 style="margin: 4px 0; color: #fff;">${item.name}</h4>
                                     <span style="color: #22c55e; font-size: 13px;">${item.price} جنيه</span>
                                 </div>
@@ -104,6 +108,7 @@
 
         window.addMenuItem = function() {
             const category = document.getElementById('itemCategory').value.trim();
+            const categoryImage = document.getElementById('categoryImage').value.trim();
             const name = document.getElementById('itemName').value.trim();
             const price = parseFloat(document.getElementById('itemPrice').value);
             const image = document.getElementById('itemImage').value.trim();
@@ -113,11 +118,18 @@
                 return;
             }
 
-            push(ref(db, 'restaurantMenu'), { category, name, price, image: image || '' });
+            push(ref(db, 'restaurantMenu'), { 
+                category, 
+                categoryImage: categoryImage || '', 
+                name, 
+                price, 
+                image: image || '' 
+            });
+
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
             document.getElementById('itemImage').value = '';
-            alert('تمت إضافة الصنف مع صورته للمنيو بنجاح!');
+            alert('تمت إضافة الصنف وقسمه بنجاح!');
         }
 
         window.deleteMenuItem = function(key) {
@@ -192,12 +204,13 @@
         <h1>🛠️ لوحة إدارة منصة جاهز</h1>
 
         <div class="section">
-            <h2>🍽️ إدارة المنيو والأقسام (مع الصور)</h2>
+            <h2>🍽️ إدارة الأقسام والمنتجات (مع صور الأقسام والوجبات)</h2>
             <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
+            <input type="text" id="categoryImage" placeholder="رابط صورة القسم (اختياري - صورة تعبر عن القسم)">
             <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
             <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
-            <input type="text" id="itemImage" placeholder="رابط صورة المنتج (اختياري - ضع رابط مباشر للصورة)">
-            <button type="button" onclick="addMenuItem()">إضافة الصنف مع صورته للمنيو 🚀</button>
+            <input type="text" id="itemImage" placeholder="رابط صورة المنتج (اختياري)">
+            <button type="button" onclick="addMenuItem()">إضافة الصنف وقسمه للمنيو 🚀</button>
             <div id="adminMenuContainer" style="margin-top: 15px;"></div>
         </div>
 
