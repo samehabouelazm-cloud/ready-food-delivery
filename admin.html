@@ -16,6 +16,13 @@
         .menu-item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
         .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
+        
+        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; animation: alertPulse 1s infinite alternate; }
+        @keyframes alertPulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px rgba(245, 158, 11, 0.4); }
+            100% { transform: scale(1.01); box-shadow: 0 0 15px rgba(245, 158, 11, 0.8); }
+        }
+        .sound-badge { background: #334155; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 13px; border: 1px solid #475569; }
     </style>
 
     <script type="module">
@@ -36,6 +43,70 @@
         const db = getDatabase(app);
 
         let globalDrivers = [];
+        let previousTotalOrders = -1;
+        let audioContext = null;
+
+        // إدارة تفعيل الصوت للإدارة
+        function checkAdminSound() {
+            if (localStorage.getItem('jahez_admin_sound') === 'true') {
+                initAudioContext();
+            } else {
+                document.getElementById('adminSoundDiv').style.display = 'block';
+            }
+        }
+
+        function initAudioContext() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                localStorage.setItem('jahez_admin_sound', 'true');
+                document.getElementById('adminSoundDiv').style.display = 'none';
+            } catch (e) {
+                console.log("Audio error", e);
+            }
+        }
+
+        window.enableAdminSound = function() {
+            initAudioContext();
+            playAdminAlarm();
+            alert("✅ تم تفعيل وحفظ تنبيهات الطلبات الجديدة للإدارة بنجاح!");
+        }
+
+        // نغمة إنذار قوية للإدارة عند وصول طلب جديد
+        function playAdminAlarm() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                const now = audioContext.currentTime;
+                // إصدار 3 نغمات متلاحقة حماسية ومميزة للطلبات الواردة
+                [0, 0.2, 0.4].forEach((delay, index) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(500 + (index * 250), now + delay);
+                    
+                    gain.gain.setValueAtTime(0.5, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.18);
+
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.18);
+                });
+            } catch (e) {
+                console.log("Alarm play error", e);
+            }
+        }
 
         function listenToDrivers() {
             const driversRef = ref(db, 'driversList');
@@ -73,7 +144,6 @@
             if (confirm('حذف هذا الكابتن؟')) remove(ref(db, 'driversList/' + key));
         }
 
-        // إدارة المنيو والأقسام بصورها
         function listenToMenu() {
             const menuRef = ref(db, 'restaurantMenu');
             onValue(menuRef, (snapshot) => {
@@ -144,7 +214,19 @@
 
             onValue(ordersRef, (snapshot) => {
                 const data = snapshot.val();
-                if (!data) { container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>'; return; }
+                if (!data) { 
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>'; 
+                    previousTotalOrders = 0;
+                    return; 
+                }
+
+                let totalOrdersCount = Object.keys(data).length;
+
+                // إذا جاء طلب جديد من العميل، يتم تشغيل تنذار قوي للإدارة
+                if (previousTotalOrders !== -1 && totalOrdersCount > previousTotalOrders) {
+                    playAdminAlarm();
+                }
+                previousTotalOrders = totalOrdersCount;
 
                 let html = '';
                 Object.keys(data).forEach((orderKey) => {
@@ -160,8 +242,8 @@
                     let mapLink = `https://www.google.com/maps?q=${order.lat},${order.lng}`;
 
                     html += `
-                        <div style="background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569;">
-                            <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id} - ${order.time}</h3>
+                        <div class="order-card-admin">
+                            <h3 style="color: #f59e0b; margin-top: 0;">🚨 طلب جديد #${order.id} - ${order.time}</h3>
                             <p><strong>اسم العميل:</strong> ${order.customerName}</p>
                             <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
                             <p><strong>موقع العميل:</strong> <a href="${mapLink}" target="_blank" class="map-btn">🗺️ عرض موقع العميل على الخريطة</a></p>
@@ -185,7 +267,7 @@
         window.assignDriver = function(orderKey, driverName) {
             if (!driverName) return;
             update(ref(db, 'adminOrders/' + orderKey), { driver: driverName, status: 'تم الإسناد للكابتن ' + driverName });
-            alert('تم إسناد الطلب إلى: ' + driverName);
+            alert('تم إسناد الطلب إلى الكابتن: ' + driverName + ' وسيصله التنبيه الصوتي الآن!');
         }
 
         window.deleteOrder = function(orderKey) {
@@ -193,6 +275,10 @@
         }
 
         window.onload = function() {
+            loadDriversDropdown();
+            loadMenuFromCloud();
+            loadMenu();
+            checkAdminSound();
             listenToDrivers();
             listenToMenu();
             listenToOrders();
@@ -203,10 +289,15 @@
     <div class="container">
         <h1>🛠️ لوحة إدارة منصة جاهز</h1>
 
+        <div id="adminSoundDiv" class="sound-badge">
+            <span style="color: #fbbf24;">⚠️ تفعيل تنبيهات الطلبات الجديدة (للمرة الأولى فقط)</span><br><br>
+            <button type="button" style="background: #3b82f6; padding: 8px;" onclick="enableAdminSound()">🔊 تفعيل وحفظ صوت التنبيه للإدارة</button>
+        </div>
+
         <div class="section">
-            <h2>🍽️ إدارة الأقسام والمنتجات (مع صور الأقسام والوجبات)</h2>
+            <h2>🍽️ إدارة الأقسام والمنتجات</h2>
             <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
-            <input type="text" id="categoryImage" placeholder="رابط صورة القسم (اختياري - صورة تعبر عن القسم)">
+            <input type="text" id="categoryImage" placeholder="رابط صورة القسم (اختياري)">
             <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
             <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
             <input type="text" id="itemImage" placeholder="رابط صورة المنتج (اختياري)">
