@@ -5,19 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة جاهز للطلبات - العميل</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 650px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1, h2 { color: #f59e0b; text-align: center; }
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 15px; direction: rtl; margin: 0; }
+        .container { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        
+        /* هيدر المنصة والشعار */
+        .store-header { text-align: center; background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; }
+        .store-logo { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid #f59e0b; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(245,158,11,0.3); }
+        .store-header h1 { color: #f59e0b; margin: 5px 0; font-size: 22px; }
+        .store-header p { color: #94a3b8; font-size: 13px; margin: 0; }
+
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
-        input[type="text"], select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-        .category-title { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 5px; margin-top: 15px; font-size: 16px; font-weight: bold; }
-        .product-row { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #475569; gap: 10px; }
-        .product-info { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; }
-        .product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
-        .product-row input[type="number"] { width: 65px; padding: 5px; text-align: center; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 4px; margin-bottom: 0; }
-        button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 12px; background: #22c55e; color: #fff; width: 100%; font-size: 16px; }
-        button:hover { background: #16a34a; }
-        .map-btn { background: #3b82f6; margin-bottom: 10px; }
+        h2 { color: #f59e0b; font-size: 18px; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-top: 0; }
+        
+        input[type="text"], select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; font-size: 14px; }
+        
+        /* تصميم الأقسام والأصناف بشكل عمودي مرتب وفخم */
+        .category-container { margin-bottom: 20px; }
+        .category-title { color: #38bdf8; font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-right: 4px solid #38bdf8; padding-right: 8px; }
+        
+        .products-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        
+        .product-card { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 12px; border-radius: 8px; border: 1px solid #475569; transition: 0.2s; }
+        .product-card:hover { border-color: #f59e0b; }
+        
+        .product-info { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
+        .product-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #334155; }
+        .product-details strong { display: block; font-size: 15px; color: #fff; margin-bottom: 3px; }
+        .product-details span { color: #22c55e; font-size: 13px; font-weight: bold; }
+        
+        .product-action { display: flex; align-items: center; gap: 10px; }
+        .product-card input[type="number"] { width: 60px; padding: 6px; text-align: center; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 4px; margin-bottom: 0; font-size: 14px; }
+        
+        .submit-btn { cursor: pointer; font-weight: bold; border: none; border-radius: 6px; padding: 14px; background: #22c55e; color: #fff; width: 100%; font-size: 16px; transition: 0.2s; }
+        .submit-btn:hover { background: #16a34a; }
+        
+        .map-btn { background: #3b82f6; width: 100%; padding: 12px; border-radius: 6px; border: none; color: #fff; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
+        .map-btn:hover { background: #2563eb; }
     </style>
 
     <script type="module">
@@ -40,6 +63,7 @@
         let customerLat = null;
         let customerLng = null;
 
+        // جلب الأقسام والمنتجات من السحابة وعرضها بشكل عمودي مرتب
         function loadMenuFromCloud() {
             const menuRef = ref(db, 'restaurantMenu');
             onValue(menuRef, (snapshot) => {
@@ -47,7 +71,7 @@
                 const container = document.getElementById('menuContainer');
                 
                 if (!data) {
-                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد أصناف مضافة حالياً.</p>';
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد أصناف مضافة حالياً من الإدارة.</p>';
                     return;
                 }
 
@@ -60,23 +84,32 @@
 
                 let html = '';
                 Object.keys(categories).forEach(catName => {
-                    html += `<div class="category-title">📂 ${catName}</div>`;
+                    html += `
+                        <div class="category-container">
+                            <div class="category-title">📂 ${catName}</div>
+                            <div class="products-grid">
+                    `;
+                    
                     categories[catName].forEach(p => {
-                        let imgSrc = p.image ? p.image : 'https://via.placeholder.com/50?text=Food';
+                        let imgSrc = p.image ? p.image : 'https://via.placeholder.com/60?text=Jahez';
                         html += `
-                            <div class="product-row">
+                            <div class="product-card">
                                 <label class="product-info">
-                                    <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty('${p.id}')">
-                                    <img src="${imgSrc}" class="product-img" alt="صورة">
-                                    <div>
-                                        <strong style="font-size: 14px;">${p.name}</strong><br>
-                                        <span style="color: #22c55e; font-size: 13px;">${p.price} جنيه</span>
+                                    <input type="checkbox" class="product-check" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}" onchange="toggleQty('${p.id}')" style="width: 18px; height: 18px; accent-color: #f59e0b;">
+                                    <img src="${imgSrc}" class="product-img" alt="صورة المنتج">
+                                    <div class="product-details">
+                                        <strong>${p.name}</strong>
+                                        <span>${p.price} جنيه</span>
                                     </div>
                                 </label>
-                                <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
+                                <div class="product-action">
+                                    <input type="number" id="qty_${p.id}" value="1" min="1" disabled>
+                                </div>
                             </div>
                         `;
                     });
+
+                    html += `</div></div>`;
                 });
                 container.innerHTML = html;
             });
@@ -97,9 +130,9 @@
                         document.getElementById('locationStatus').innerText = "✅ تم تحديد موقعك الجغرافي بنجاح!";
                         document.getElementById('locationStatus').style.color = "#22c55e";
                     },
-                    (error) => { alert("فشل تحديد الموقع."); }
+                    (error) => { alert("فشل تحديد الموقع. تأكد من السماح بالمتصفح."); }
                 );
-            } else { alert("متصفحك لا يدعم تحديد الموقع."); }
+            } else { alert("متصفحك لا يدعم خاصية تحديد الموقع."); }
         }
 
         window.sendOrder = function() {
@@ -150,21 +183,29 @@
                     alert(`تم إرسال طلبك بنجاح! رقم الطلب: #${orderId}`);
                     location.reload();
                 })
-                .catch((error) => { alert('حدث خطأ: ' + error.message); });
+                .catch((error) => { alert('حدث خطأ أثناء الإرسال: ' + error.message); });
         }
 
-        window.onload = function() { loadMenuFromCloud(); };
+        window.onload = function() {
+            loadMenuFromCloud();
+        };
     </script>
 </head>
 <body>
     <div class="container">
-        <h1>🛒 منصة جاهز - طلبات العملاء</h1>
+        <!-- هيدر المنصة وشعار السوبر ماركت -->
+        <div class="store-header">
+            <!-- يمكنك تغيير رابط الشعار (src) بأي لوجو أو شعار خاص بك -->
+            <img src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=150" class="store-logo" alt="شعار السوبر ماركت">
+            <h1>منصة جاهز للطلبات</h1>
+            <p>أسرع خدمة توصيل لجميع احتياجاتك ووجباتك المفضلة 🚀</p>
+        </div>
 
         <div class="section">
-            <h2>بيانات التوصيل والموقع</h2>
+            <h2>📍 بيانات التوصيل والموقع</h2>
             <input type="text" id="customerName" placeholder="اسم العميل الكريم">
-            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل">
-            <button type="button" class="map-btn" onclick="getMyLocation()">📍 إرسال موقعي الحالي على الخريطة</button>
+            <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل (الشارع، رقم العمارة، الدور)">
+            <button type="button" class="map-btn" onclick="getMyLocation()">📍 إرسال موقعي الحالي على الخريطة (GPS)</button>
             <p id="locationStatus" style="font-size: 13px; color: #94a3b8; text-align: center; margin: 5px 0;">لم يتم تحديد الموقع بعد (اختياري)</p>
             <select id="paymentMethod">
                 <option value="كاش">الدفع نقداً عند الاستلام (كاش)</option>
@@ -173,11 +214,11 @@
         </div>
 
         <div class="section">
-            <h2>قائمة الأقسام والأصناف المتاحة</h2>
-            <div id="menuContainer">جاري جلب أصناف المنيو...</div>
+            <h2>🛒 الأقسام والأصناف المتاحة</h2>
+            <div id="menuContainer">جاري تحميل الأقسام من السحابة...</div>
         </div>
 
-        <button type="button" onclick="sendOrder()">إرسال الطلب الآن 🚀</button>
+        <button type="button" class="submit-btn" onclick="sendOrder()">إرسال الطلب الآن 🚀</button>
     </div>
 </body>
 </html>
