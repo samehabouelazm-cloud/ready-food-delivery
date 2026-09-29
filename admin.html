@@ -13,7 +13,8 @@
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; }
         .danger-btn { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 12px; }
         .map-btn { background: #3b82f6; padding: 6px 12px; font-size: 13px; text-decoration: none; border-radius: 4px; display: inline-block; color: #fff; }
-        .order-card, .menu-item-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; }
+        .menu-item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
         .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
     </style>
 
@@ -36,7 +37,6 @@
 
         let globalDrivers = [];
 
-        // 1. إدارة الكباتن
         function listenToDrivers() {
             const driversRef = ref(db, 'driversList');
             onValue(driversRef, (snapshot) => {
@@ -73,7 +73,7 @@
             if (confirm('حذف هذا الكابتن؟')) remove(ref(db, 'driversList/' + key));
         }
 
-        // 2. إدارة الأقسام والمنتجات سحابياً
+        // إدارة المنيو مع الصور
         function listenToMenu() {
             const menuRef = ref(db, 'restaurantMenu');
             onValue(menuRef, (snapshot) => {
@@ -83,14 +83,18 @@
                 let html = '';
                 Object.keys(data).forEach((key) => {
                     let item = data[key];
+                    let imgSrc = item.image ? item.image : 'https://via.placeholder.com/60?text=No+Img';
                     html += `
                         <div class="menu-item-card">
-                            <div>
-                                <span style="background: #334155; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: #38bdf8;">${item.category}</span>
-                                <h4 style="margin: 5px 0 0 0; color: #fff;">${item.name}</h4>
-                                <span style="color: #22c55e; font-size: 14px;">${item.price} جنيه</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="${imgSrc}" class="item-img" alt="صورة المنتج">
+                                <div>
+                                    <span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #38bdf8;">${item.category}</span>
+                                    <h4 style="margin: 4px 0; color: #fff;">${item.name}</h4>
+                                    <span style="color: #22c55e; font-size: 13px;">${item.price} جنيه</span>
+                                </div>
                             </div>
-                            <button type="button" class="danger-btn" onclick="deleteMenuItem('${key}')">حذف الصنف</button>
+                            <button type="button" class="danger-btn" onclick="deleteMenuItem('${key}')">حذف</button>
                         </div>
                     `;
                 });
@@ -102,25 +106,26 @@
             const category = document.getElementById('itemCategory').value.trim();
             const name = document.getElementById('itemName').value.trim();
             const price = parseFloat(document.getElementById('itemPrice').value);
+            const image = document.getElementById('itemImage').value.trim();
 
             if (!category || !name || isNaN(price)) {
                 alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
                 return;
             }
 
-            push(ref(db, 'restaurantMenu'), { category, name, price });
+            push(ref(db, 'restaurantMenu'), { category, name, price, image: image || '' });
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
-            alert('تمت إضافة الصنف إلى المنيو بنجاح وسيفعّل لدى العملاء فوراً!');
+            document.getElementById('itemImage').value = '';
+            alert('تمت إضافة الصنف مع صورته للمنيو بنجاح!');
         }
 
         window.deleteMenuItem = function(key) {
-            if (confirm('هل أنت متأكد من حذف هذا الصنف من المنيو؟')) {
+            if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
                 remove(ref(db, 'restaurantMenu/' + key));
             }
         }
 
-        // 3. إدارة طلبات العملاء وتتبع الخرائط
         function listenToOrders() {
             const container = document.getElementById('adminOrdersList');
             const ordersRef = ref(db, 'adminOrders');
@@ -186,13 +191,13 @@
     <div class="container">
         <h1>🛠️ لوحة إدارة منصة جاهز</h1>
 
-        <!-- قسم إدارة المنيو والأصناف -->
         <div class="section">
-            <h2>🍽️ إدارة المنيو والأقسام (إضافة / حذف أصناف)</h2>
-            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات، قسم السوبر ماركت)">
-            <input type="text" id="itemName" placeholder="اسم وجبة الطعام أو المنتج (مثلاً: سمك بلطي مشوي)">
+            <h2>🍽️ إدارة المنيو والأقسام (مع الصور)</h2>
+            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
+            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
             <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
-            <button type="button" onclick="addMenuItem()">إضافة الصنف للمنيو 🚀</button>
+            <input type="text" id="itemImage" placeholder="رابط صورة المنتج (اختياري - ضع رابط مباشر للصورة)">
+            <button type="button" onclick="addMenuItem()">إضافة الصنف مع صورته للمنيو 🚀</button>
             <div id="adminMenuContainer" style="margin-top: 15px;"></div>
         </div>
 
