@@ -3,26 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المنصة والمنتجات - جاهز</title>
+    <title>لوحة إدارة منصة جاهز</title>
     <style>
         body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1, h2, h3 { color: #f59e0b; text-align: center; }
-        .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-        button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; }
-        .danger-btn { background: #ef4444; color: #fff; padding: 5px 10px; font-size: 12px; }
-        .map-btn { background: #3b82f6; padding: 6px 12px; font-size: 13px; text-decoration: none; border-radius: 4px; display: inline-block; color: #fff; }
+        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        h1, h2 { color: #f59e0b; text-align: center; }
+        .section { background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
+        button { cursor: pointer; font-weight: bold; border: none; border-radius: 6px; padding: 12px 20px; background: #22c55e; color: #fff; width: 100%; transition: 0.3s; }
+        button:hover { opacity: 0.9; }
+        .sound-badge { background: #334155; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 20px; font-size: 14px; border: 1px solid #475569; }
+        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; }
         .menu-item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
-        .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
-        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; }
-        .sound-badge { background: #334155; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 13px; border: 1px solid #475569; }
+        .btn-danger { background: #ef4444; width: auto; padding: 6px 12px; font-size: 12px; }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
@@ -37,288 +36,64 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let globalDrivers = [];
-        let previousTotalOrders = -1;
         let audioContext = null;
+        let allOrders = [];
 
-        function checkAdminSound() {
-            if (localStorage.getItem('jahez_admin_sound') === 'true') {
-                initAudioContext();
+        window.onload = function() {
+            checkAdminSoundSetup();
+            listenToAdminOrders();
+            listenToMenuAndDrivers();
+        };
+
+        // --- نظام التنبيهات الصوتية المستمرة للإدارة ---
+        function checkAdminSoundSetup() {
+            if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
+                document.getElementById('adminSoundBadge').style.display = 'none';
             } else {
-                document.getElementById('adminSoundDiv').style.display = 'block';
+                document.getElementById('adminSoundBadge').style.display = 'block';
             }
-        }
-
-        function initAudioContext() {
-            try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-                localStorage.setItem('jahez_admin_sound', 'true');
-                document.getElementById('adminSoundDiv').style.display = 'none';
-            } catch (e) { console.log(e); }
         }
 
         window.enableAdminSound = function() {
             initAudioContext();
-            playAdminAlarm();
-            alert("✅ تم تفعيل وحفظ التنبيهات بنجاح!");
+            playAdminAlertSound();
+            localStorage.setItem('jahez_admin_sound_active', 'true');
+            document.getElementById('adminSoundBadge').style.display = 'none';
+            alert('✅ تم تفعيل التنبيهات الصوتية المستمرة للإدارة بنجاح!');
+        };
+
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
         }
 
-        function playAdminAlarm() {
+        function playAdminAlertSound() {
             try {
-                if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
-                if (audioContext.state === 'suspended') { audioContext.resume(); }
+                initAudioContext();
+                if (!audioContext) return;
                 const now = audioContext.currentTime;
-                [0, 0.2, 0.4].forEach((delay, index) => {
-                    const osc = audioContext.createOscillator();
-                    const gain = audioContext.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(500 + (index * 250), now + delay);
-                    gain.gain.setValueAtTime(0.5, now + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.18);
+                [0, 0.3, 0.6].forEach((delay, i) => {
+                    let osc = audioContext.createOscillator();
+                    let gain = audioContext.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(700 + (i * 150), now + delay);
+                    gain.gain.setValueAtTime(0.3, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
                     osc.connect(gain);
                     gain.connect(audioContext.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.18);
+                    osc.stop(now + delay + 0.2);
                 });
-            } catch (e) { console.log(e); }
-        }
-
-        function listenToDrivers() {
-            const driversRef = ref(db, 'driversList');
-            onValue(driversRef, (snapshot) => {
-                const data = snapshot.val();
-                globalDrivers = [];
-                const container = document.getElementById('driversListContainer');
-                if (!data) { container.innerHTML = '<p style="color: #94a3b8;">لا يوجد كباتن مسجلين حالياً.</p>'; return; }
-                let html = '<p><strong>الكباتن المتاحون:</strong></p>';
-                Object.keys(data).forEach((key) => {
-                    let d = data[key];
-                    globalDrivers.push({ id: key, name: d.name, phone: d.phone });
-                    html += `
-                        <div class="driver-row">
-                            <span>🚴‍♂️ ${d.name} (${d.phone})</span>
-                            <button type="button" class="danger-btn" onclick="deleteDriver('${key}')">حذف</button>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        window.addDriver = function() {
-            const name = document.getElementById('driverNameInput').value.trim();
-            const phone = document.getElementById('driverPhoneInput').value.trim();
-            if (!name || !phone) { alert('أدخل اسم ورقم الكابتن!'); return; }
-            push(ref(db, 'driversList'), { name, phone });
-            document.getElementById('driverNameInput').value = '';
-            document.getElementById('driverPhoneInput').value = '';
-            alert('تمت إضافة الكابتن بنجاح!');
-        }
-
-        window.deleteDriver = function(key) {
-            if (confirm('حذف هذا الكابتن؟')) remove(ref(db, 'driversList/' + key));
-        }
-
-        function listenToMenu() {
-            const menuRef = ref(db, 'restaurantMenu');
-            onValue(menuRef, (snapshot) => {
-                const data = snapshot.val();
-                const container = document.getElementById('adminMenuContainer');
-                if (!data) { container.innerHTML = '<p style="color: #94a3b8;">لا توجد أصناف مضافة حالياً.</p>'; return; }
-                let html = '';
-                Object.keys(data).forEach((key) => {
-                    let item = data[key];
-                    let imgSrc = item.image ? item.image : 'https://via.placeholder.com/60?text=No+Img';
-                    let catImgSrc = item.categoryImage ? item.categoryImage : 'https://via.placeholder.com/40?text=Cat';
-                    html += `
-                        <div class="menu-item-card">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <img src="${imgSrc}" class="item-img" alt="">
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-                                        <img src="${catImgSrc}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" alt="">
-                                        <span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #38bdf8;">${item.category}</span>
-                                    </div>
-                                    <h4 style="margin: 4px 0; color: #fff;">${item.name}</h4>
-                                    <span style="color: #22c55e; font-size: 13px;">${item.price} جنيه</span>
-                                </div>
-                            </div>
-                            <button type="button" class="danger-btn" onclick="deleteMenuItem('${key}')">حذف</button>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        window.addMenuItem = function() {
-            const category = document.getElementById('itemCategory').value.trim();
-            const categoryImage = document.getElementById('categoryImage').value.trim();
-            const name = document.getElementById('itemName').value.trim();
-            const price = parseFloat(document.getElementById('itemPrice').value);
-            const image = document.getElementById('itemImage').value.trim();
-
-            if (!category || !name || isNaN(price)) {
-                alert('الرجاء إدخال البيانات بشكل صحيح!');
-                return;
+            } catch (e) {
+                console.log(e);
             }
-
-            push(ref(db, 'restaurantMenu'), { category, categoryImage: categoryImage || '', name, price, image: image || '' });
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemPrice').value = '';
-            document.getElementById('itemImage').value = '';
-            alert('تمت إضافة الصنف بنجاح!');
         }
 
-        window.deleteMenuItem = function(key) {
-            if (confirm('حذف هذا الصنف؟')) remove(ref(db, 'restaurantMenu/' + key));
-        }
-
-        function listenToOrders() {
-            const container = document.getElementById('adminOrdersList');
-            const ordersRef = ref(db, 'adminOrders');
-
-            onValue(ordersRef, (snapshot) => {
-                const data = snapshot.val();
-                if (!data) { 
-                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>'; 
-                    previousTotalOrders = 0;
-                    return; 
-                }
-
-                let totalOrdersCount = Object.keys(data).length;
-                if (previousTotalOrders !== -1 && totalOrdersCount > previousTotalOrders) {
-                    playAdminAlarm();
-                }
-                previousTotalOrders = totalOrdersCount;
-
-                let html = '';
-                Object.keys(data).forEach((orderKey) => {
-                    let order = data[orderKey];
-                    let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
-                    let currentDriver = order.driver || '';
-                    let deliveryFee = order.deliveryFee || 0;
-                    let finalTotal = order.subtotal + parseFloat(deliveryFee);
-
-                    let driverOptions = `<option value="">اختر الكابتن للإسناد</option>`;
-                    globalDrivers.forEach(d => {
-                        driverOptions += `<option value="${d.name}" ${currentDriver === d.name ? 'selected' : ''}>${d.name}</option>`;
-                    });
-
-                    let mapLink = `https://www.google.com/maps?q=${order.lat},${order.lng}`;
-
-                    html += `
-                        <div class="order-card-admin">
-                            <h3 style="color: #f59e0b; margin-top: 0;">🚨 طلب جديد #${order.id} - ${order.time}</h3>
-                            <p><strong>اسم العميل:</strong> ${order.customerName}</p>
-                            <p><strong>رقم الجوال:</strong> ${order.customerPhone}</p>
-                            <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
-                            <p><strong>موقع العميل:</strong> <a href="${mapLink}" target="_blank" class="map-btn">🗺️ عرض الموقع على الخريطة</a></p>
-                            <p><strong>طريقة الدفع:</strong> <span style="color: #38bdf8; font-weight: bold;">${order.paymentMethod}</span></p>
-                            <p><strong>الأصناف:</strong> ${itemsText}</p>
-                            <p><strong>قيمة المشتريات:</strong> ${order.subtotal} جنيه</p>
-                            
-                            <!-- خانة إدخال قيمة التوصيل اليدوية -->
-                            <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #334155;">
-                                <label style="font-size: 12px; color: #fbbf24; display: block; margin-bottom: 5px;">أدخل قيمة التوصيل يدوياً (جنيه):</label>
-                                <div style="display: flex; gap: 8px;">
-                                    <input type="number" id="fee_${orderKey}" value="${deliveryFee}" placeholder="0" style="margin-bottom: 0; flex: 1;">
-                                    <button type="button" style="background: #3b82f6; padding: 5px 12px;" onclick="updateDeliveryFee('${orderKey}', ${order.subtotal})">حفظ التوصيل</button>
-                                </div>
-                            </div>
-
-                            <p style="color: #22c55e; font-weight: bold; font-size: 15px;">الإجمالي النهائي (المشتريات + التوصيل): ${finalTotal} جنيه | الحالة: ${order.status}</p>
-                            
-                            <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                                <select onchange="assignDriver('${orderKey}', this.value)" style="flex: 1; margin-bottom: 0;">
-                                    ${driverOptions}
-                                </select>
-                                <button type="button" class="danger-btn" onclick="deleteOrder('${orderKey}')">حذف الطلب</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        window.updateDeliveryFee = function(orderKey, subtotal) {
-            let feeInput = document.getElementById('fee_' + orderKey).value;
-            let fee = parseFloat(feeInput) || 0;
-            let total = subtotal + fee;
-
-            update(ref(db, 'adminOrders/' + orderKey), {
-                deliveryFee: fee,
-                total: total
-            }).then(() => {
-                alert('✅ تم تحديث قيمة التوصيل والإجمالي النهائي بنجاح!');
-            });
-        }
-
-        window.assignDriver = function(orderKey, driverName) {
-            if (!driverName) return;
-            update(ref(db, 'adminOrders/' + orderKey), { driver: driverName, status: 'تم الإسناد للكابتن ' + driverName });
-            alert('تم إسناد الطلب إلى الكابتن: ' + driverName);
-        }
-
-        window.deleteOrder = function(orderKey) {
-            if (confirm('حذف هذا الطلب؟')) remove(ref(db, 'adminOrders/' + orderKey));
-        }
-
-        window.onload = function() {
-            checkAdminSound();
-            listenToDrivers();
-            listenToMenu();
-            listenToOrders();
-        };
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h1>🛠️ لوحة إدارة منصة جاهز</h1>
-
-        <div id="adminSoundDiv" class="sound-badge">
-            <span style="color: #fbbf24;">⚠️ تفعيل تنبيهات الطلبات الجديدة (للمرة الأولى فقط)</span><br><br>
-            <button type="button" style="background: #3b82f6; padding: 8px;" onclick="enableAdminSound()">🔊 تفعيل وحفظ صوت التنبيه للإدارة</button>
-        </div>
-
-<div class="section">
-            <h2>🍽️ إدارة الأقسام والمنتجات</h2>
-            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة القسم (اختر من الكمبيوتر):</label>
-            <input type="file" id="categoryImageFile" accept="image/*" style="padding: 6px;">
-            
-            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
-            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة المنتج (اختر من الكمبيوتر):</label>
-            <input type="file" id="itemImageFile" accept="image/*" style="padding: 6px;">
-            
-            <button type="button" onclick="addMenuItemWithImages()">إضافة الصنف وقسمه للمنيو 🚀</button>
-            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
-        </div>
-        <div class="section">
-            <h2>🚴 إدارة فريق الكباتن السحابي</h2>
-            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
-            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
-            <button type="button" onclick="addDriver()">إضافة كابتن</button>
-            <div id="driversListContainer" style="margin-top: 15px;"></div>
-        </div>
-
-        <div class="section">
-            <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
-            <div id="adminOrdersList">جاري الاتصال...</div>
-        </div>
-    </div>
-    </script>
-    <script>
-        // دالة مساعدة لتحويل الصورة المرفوعة من الكمبيوتر إلى Base64
+        // --- دالة مساعدة لتحويل الصورة المرفوعة من الكمبيوتر إلى Base64 ---
         function convertImageFileToBase64(fileInputId) {
             return new Promise((resolve) => {
                 const fileInput = document.getElementById(fileInputId);
@@ -334,6 +109,7 @@
             });
         }
 
+        // --- إضافة الصنف مع صور الكمبيوتر ---
         window.addMenuItemWithImages = async function() {
             const category = document.getElementById('itemCategory').value.trim();
             const name = document.getElementById('itemName').value.trim();
@@ -344,7 +120,6 @@
                 return;
             }
 
-            // تحويل الصور المرفوعة من الكمبيوتر
             const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
             const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
 
@@ -364,8 +139,274 @@
                 alert('خطأ في الإضافة: ' + error.message);
             });
         };
+
+        window.deleteMenuItem = function(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+                remove(ref(db, 'restaurantMenu/' + id));
+            }
+        };
+
+        // --- إدارة الكباتن ---
+        window.addDriver = function() {
+            const name = document.getElementById('driverNameInput').value.trim();
+            const phone = document.getElementById('driverPhoneInput').value.trim();
+            if (!name || !phone) {
+                alert('الرجاء إدخال اسم ورقم هاتف الكابتن!');
+                return;
+            }
+            push(ref(db, 'driversTeam'), { name: name, phone: phone }).then(() => {
+                document.getElementById('driverNameInput').value = '';
+                document.getElementById('driverPhoneInput').value = '';
+                alert('✅ تمت إضافة الكابتن بنجاح');
+            });
+        };
+
+        window.deleteDriver = function(id) {
+            remove(ref(db, 'driversTeam/' + id));
+        };
+
+        // --- تحديث إسناد الكابتن وقيمة التوصيل للطلب ---
+        window.updateOrderDriverAndDelivery = function(orderId) {
+            let driverSelect = document.getElementById('driver_select_' + orderId);
+            let deliveryInput = document.getElementById('delivery_fee_' + orderId);
+            
+            let selectedDriver = driverSelect ? driverSelect.value : '';
+            let deliveryFee = deliveryInput ? parseFloat(deliveryInput.value) || 0 : 0;
+
+            update(ref(db, 'adminOrders/' + orderId), {
+                driver: selectedDriver,
+                deliveryFee: deliveryFee
+            }).then(() => {
+                alert('✅ تم تحديث بيانات التوصيل والكابتن بنجاح!');
+            });
+        };
+
+        // --- طباعة الفاتورة النهائية الشاملة لقيمة التوصيل ---
+        window.printOrderInvoice = function(orderId) {
+            let order = allOrders.find(o => o.id == orderId);
+            if (!order) return;
+
+            let deliveryFee = parseFloat(order.deliveryFee || 0);
+            let itemsTotal = parseFloat(order.total || 0);
+            let finalTotal = itemsTotal + deliveryFee;
+
+            let printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html dir="rtl">
+                <head>
+                    <title>فاتورة شراء رقم #${order.id}</title>
+                    <style>
+                        body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; color: #333; }
+                        .invoice-box { max-width: 450px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+                        h2 { text-align: center; color: #f59e0b; }
+                        table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+                        table td { padding: 10px; border-bottom: 1px solid #eee; text-align: right; }
+                        table tr.total td { font-weight: bold; border-top: 2px solid #333; font-size: 16px; color: #0f172a; }
+                    </style>
+                </head>
+                <body>
+                    <div class="invoice-box">
+                        <h2>منصة جاهز - فاتورة المشتريات</h2>
+                        <p><strong>رقم الطلب:</strong> #${order.id}</p>
+                        <p><strong>اسم العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
+                        <p><strong>رقم الجوال:</strong> ${order.customerPhone || 'غير متوفر'}</p>
+                        <p><strong>العنوان:</strong> ${order.customerAddress || 'غير متوفر'}</p>
+                        <p><strong>الكابتن المسند:</strong> ${order.driver || 'لم يُحدد بعد'}</p>
+                        <hr>
+                        <table>
+                            <tr>
+                                <td>قيمة المشتريات (الأصناف)</td>
+                                <td>${itemsTotal.toFixed(2)} جنيه</td>
+                            </tr>
+                            <tr>
+                                <td>قيمة التوصيل المضافة</td>
+                                <td>${deliveryFee.toFixed(2)} جنيه</td>
+                            </tr>
+                            <tr class="total">
+                                <td>الإجمالي النهائي المطلوب</td>
+                                <td>${finalTotal.toFixed(2)} جنيه</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <p style="text-align: center; font-size: 12px; color: #666;">شكراً لاستخدامكم منصة جاهز 🚀</p>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        };
+
+        // --- ج والاستماع للبيانات من Firebase ---
+        let previousOrdersCount = -1;
+        let driversListGlobal = [];
+
+        function listenToAdminOrders() {
+            const ordersRef = ref(db, 'adminOrders');
+            onValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('adminOrdersContainer');
+                if (!data) {
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>';
+                    allOrders = [];
+                    previousOrdersCount = 0;
+                    return;
+                }
+
+                allOrders = [];
+                Object.keys(data).forEach(key => {
+                    allOrders.push({ id: key, ...data[key] });
+                });
+
+                // تفعيل التنبيه الصوتي عند ورود طلب جديد
+                if (previousOrdersCount !== -1 && allOrders.length > previousOrdersCount) {
+                    if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
+                        playAdminAlertSound();
+                    }
+                }
+                previousOrdersCount = allOrders.length;
+
+                let html = '';
+                allOrders.forEach(order => {
+                    let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
+                    let currentDeliveryFee = order.deliveryFee || 0;
+                    let calculatedTotal = parseFloat(order.total || 0) + parseFloat(currentDeliveryFee);
+
+                    let driversOptions = '<option value="">-- اختر الكابتن --</option>';
+                    driversListGlobal.forEach(d => {
+                        let selected = (order.driver === d.name) ? 'selected' : '';
+                        driversOptions += `<option value="${d.name}" ${selected}>${d.name} (${d.phone})</option>`;
+                    });
+
+                    html += `
+                        <div class="order-card-admin">
+                            <h3 style="color: #f59e0b; margin-top: 0;">📦 طلب رقم #${order.id}</h3>
+                            <p><strong>اسم العميل:</strong> ${order.customerName}</p>
+                            <p><strong>رقم الجوال:</strong> ${order.customerPhone}</p>
+                            <p><strong>العنوان:</strong> ${order.customerAddress}</p>
+                            <p><strong>الأصناف:</strong> ${itemsText}</p>
+                            <p><strong>إجمالي المشتريات:</strong> ${order.total} جنيه</p>
+                            
+                            <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                                <label style="font-size: 13px; color: #fbbf24;">إسناد للكابتن:</label>
+                                <select id="driver_select_${order.id}">${driversOptions}</select>
+                                
+                                <label style="font-size: 13px; color: #fbbf24;">قيمة التوصيل اليدوية (جنيه):</label>
+                                <input type="number" id="delivery_fee_${order.id}" value="${currentDeliveryFee}" placeholder="أدخل قيمة التوصيل">
+                                
+                                <button type="button" style="background: #3b82f6; padding: 8px; margin-top: 5px;" onclick="updateOrderDriverAndDelivery('${order.id}')">💾 حفظ تعيين الكابتن والتوصيل</button>
+                            </div>
+
+                            <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب (المشتريات + التوصيل): ${calculatedTotal.toFixed(2)} جنيه</p>
+                            <p><strong>الحالة:</strong> ${order.status}</p>
+
+                            <button type="button" style="background: #8b5cf6; margin-top: 8px; padding: 10px;" onclick="printOrderInvoice('${order.id}')">🖨️ طباعة فاتورة المشتريات والتوصيل</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        function listenToMenuAndDrivers() {
+            // الاستماع للكباتن
+            onValue(ref(db, 'driversTeam'), (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('driversListContainer');
+                driversListGlobal = [];
+                if (!data) {
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد كباتن مسجلة حالياً.</p>';
+                    return;
+                }
+                let html = '';
+                Object.keys(data).forEach(key => {
+                    let d = data[key];
+                    driversListGlobal.push(d);
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                            <span>🚴 ${d.name} (${d.phone})</span>
+                            <button class="btn-danger" onclick="deleteDriver('${key}')">حذف</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+
+            // الاستماع للمنيو والأصناف
+            onValue(ref(db, 'restaurantMenu'), (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('adminMenuContainer');
+                if (!data) {
+                    container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد أصناف مضافة حالياً.</p>';
+                    return;
+                }
+                let html = '';
+                Object.keys(data).forEach(key => {
+                    let item = data[key];
+                    let imgSrc = item.image ? item.image : 'https://via.placeholder.com/60';
+                    html += `
+                        <div class="menu-item-card">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="${imgSrc}" class="item-img">
+                                <div>
+                                    <h4 style="margin: 0; color: #fff;">${item.name}</h4>
+                                    <span style="font-size: 12px; color: #f59e0b;">${item.category}</span>
+                                    <p style="margin: 4px 0 0 0; color: #22c55e; font-weight: bold;">${item.price} جنيه</p>
+                                </div>
+                            </div>
+                            <button class="btn-danger" onclick="deleteMenuItem('${key}')">حذف</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
     </script>
-</body>
-</html>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ لوحة إدارة منصة جاهز</h1>
+
+        <!-- شريط تفعيل الصوت للإدارة -->
+        <div id="adminSoundBadge" class="sound-badge">
+            <span style="color: #fbbf24;">⚠️ التنبيهات الصوتية للطلبات الجديدة متوقفة حالياً</span><br><br>
+            <button type="button" style="background: #3b82f6; width: auto; padding: 10px 20px;" onclick="enableAdminSound()">🔊 اضغط هنا لتفعيل تنبيهات الصوت الدائمة</button>
+        </div>
+
+        <!-- إدارة الأقسام والمنتجات مع صور الكمبيوتر -->
+        <div class="section">
+            <h2>🍽️ إدارة الأقسام والمنتجات</h2>
+            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
+            
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة القسم (اختر من الكمبيوتر):</label>
+            <input type="file" id="categoryImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
+            
+            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
+            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
+            
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة المنتج (اختر من الكمبيوتر):</label>
+            <input type="file" id="itemImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
+            
+            <button type="button" onclick="addMenuItemWithImages()">إضافة الصنف وقسمه للمنيو 🚀</button>
+            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- إدارة الكباتن -->
+        <div class="section">
+            <h2>🚴 إدارة فريق الكابتن السحابي</h2>
+            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
+            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
+            <button type="button" onclick="addDriver()">إضافة كابتن</button>
+            <div id="driversListContainer" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- طلبات العملاء -->
+        <div class="section">
+            <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
+            <div id="adminOrdersContainer">جاري تحميل الطلبات...</div>
+        </div>
+    </div>
 </body>
 </html>
