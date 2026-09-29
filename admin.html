@@ -18,6 +18,50 @@
         .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
         .btn-danger { background: #ef4444; width: auto; padding: 6px 12px; font-size: 12px; }
     </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ لوحة إدارة منصة جاهز</h1>
+
+        <!-- شريط تفعيل الصوت للإدارة -->
+        <div id="adminSoundBadge" class="sound-badge">
+            <span style="color: #fbbf24;">⚠️ التنبيهات الصوتية للطلبات الجديدة متوقفة حالياً</span><br><br>
+            <button type="button" style="background: #3b82f6; width: auto; padding: 10px 20px;" onclick="enableAdminSound()">🔊 اضغط هنا لتفعيل تنبيهات الصوت الدائمة</button>
+        </div>
+
+        <!-- إدارة الأقسام والمنتجات مع صور الكمبيوتر -->
+        <div class="section">
+            <h2>🍽️ إدارة الأقسام والمنتجات</h2>
+            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
+            
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة القسم (اختر من الكمبيوتر):</label>
+            <input type="file" id="categoryImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
+            
+            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
+            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
+            
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة المنتج (اختر من الكمبيوتر):</label>
+            <input type="file" id="itemImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
+            
+            <button type="button" onclick="addMenuItemWithImages()">إضافة الصنف وقسمه للمنيو 🚀</button>
+            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- إدارة الكباتن -->
+        <div class="section">
+            <h2>🚴 إدارة فريق الكابتن السحابي</h2>
+            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
+            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
+            <button type="button" onclick="addDriver()">إضافة كابتن</button>
+            <div id="driversListContainer" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- طلبات العملاء -->
+        <div class="section">
+            <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
+            <div id="adminOrdersContainer">جاري تحميل الطلبات...</div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -38,6 +82,8 @@
 
         let audioContext = null;
         let allOrders = [];
+        let previousOrdersCount = -1;
+        let driversListGlobal = [];
 
         window.onload = function() {
             checkAdminSoundSetup();
@@ -93,7 +139,7 @@
             }
         }
 
-        // --- دالة مساعدة لتحويل الصورة المرفوعة من الكمبيوتر إلى Base64 ---
+        // --- دالة مساعدة لتحويل الصورة المرفوعة إلى Base64 ---
         function convertImageFileToBase64(fileInputId) {
             return new Promise((resolve) => {
                 const fileInput = document.getElementById(fileInputId);
@@ -165,7 +211,6 @@
             remove(ref(db, 'driversTeam/' + id));
         };
 
-        // --- تحديث إسناد الكابتن وقيمة التوصيل للطلب ---
         window.updateOrderDriverAndDelivery = function(orderId) {
             let driverSelect = document.getElementById('driver_select_' + orderId);
             let deliveryInput = document.getElementById('delivery_fee_' + orderId);
@@ -181,7 +226,6 @@
             });
         };
 
-        // --- طباعة الفاتورة النهائية الشاملة لقيمة التوصيل ---
         window.printOrderInvoice = function(orderId) {
             let order = allOrders.find(o => o.id == orderId);
             if (!order) return;
@@ -239,10 +283,6 @@
             printWindow.document.close();
         };
 
-        // --- ج والاستماع للبيانات من Firebase ---
-        let previousOrdersCount = -1;
-        let driversListGlobal = [];
-
         function listenToAdminOrders() {
             const ordersRef = ref(db, 'adminOrders');
             onValue(ordersRef, (snapshot) => {
@@ -260,7 +300,6 @@
                     allOrders.push({ id: key, ...data[key] });
                 });
 
-                // تفعيل التنبيه الصوتي عند ورود طلب جديد
                 if (previousOrdersCount !== -1 && allOrders.length > previousOrdersCount) {
                     if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
                         playAdminAlertSound();
@@ -299,7 +338,7 @@
                                 <button type="button" style="background: #3b82f6; padding: 8px; margin-top: 5px;" onclick="updateOrderDriverAndDelivery('${order.id}')">💾 حفظ تعيين الكابتن والتوصيل</button>
                             </div>
 
-                            <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب (المشتريات + التوصيل): ${calculatedTotal.toFixed(2)} جنيه</p>
+                            <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب: ${calculatedTotal.toFixed(2)} جنيه</p>
                             <p><strong>الحالة:</strong> ${order.status}</p>
 
                             <button type="button" style="background: #8b5cf6; margin-top: 8px; padding: 10px;" onclick="printOrderInvoice('${order.id}')">🖨️ طباعة فاتورة المشتريات والتوصيل</button>
@@ -311,7 +350,6 @@
         }
 
         function listenToMenuAndDrivers() {
-            // الاستماع للكباتن
             onValue(ref(db, 'driversTeam'), (snapshot) => {
                 const data = snapshot.val();
                 const container = document.getElementById('driversListContainer');
@@ -334,7 +372,6 @@
                 container.innerHTML = html;
             });
 
-            // الاستماع للمنيو والأصناف
             onValue(ref(db, 'restaurantMenu'), (snapshot) => {
                 const data = snapshot.val();
                 const container = document.getElementById('adminMenuContainer');
@@ -364,49 +401,5 @@
             });
         }
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>🛠️ لوحة إدارة منصة جاهز</h1>
-
-        <!-- شريط تفعيل الصوت للإدارة -->
-        <div id="adminSoundBadge" class="sound-badge">
-            <span style="color: #fbbf24;">⚠️ التنبيهات الصوتية للطلبات الجديدة متوقفة حالياً</span><br><br>
-            <button type="button" style="background: #3b82f6; width: auto; padding: 10px 20px;" onclick="enableAdminSound()">🔊 اضغط هنا لتفعيل تنبيهات الصوت الدائمة</button>
-        </div>
-
-        <!-- إدارة الأقسام والمنتجات مع صور الكمبيوتر -->
-        <div class="section">
-            <h2>🍽️ إدارة الأقسام والمنتجات</h2>
-            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة القسم (اختر من الكمبيوتر):</label>
-            <input type="file" id="categoryImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
-            
-            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
-            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة المنتج (اختر من الكمبيوتر):</label>
-            <input type="file" id="itemImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
-            
-            <button type="button" onclick="addMenuItemWithImages()">إضافة الصنف وقسمه للمنيو 🚀</button>
-            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- إدارة الكباتن -->
-        <div class="section">
-            <h2>🚴 إدارة فريق الكابتن السحابي</h2>
-            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
-            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
-            <button type="button" onclick="addDriver()">إضافة كابتن</button>
-            <div id="driversListContainer" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- طلبات العملاء -->
-        <div class="section">
-            <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
-            <div id="adminOrdersContainer">جاري تحميل الطلبات...</div>
-        </div>
-    </div>
 </body>
 </html>
