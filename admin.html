@@ -16,12 +16,7 @@
         .menu-item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
         .driver-row { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 12px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #475569; }
-        
-        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; animation: alertPulse 1s infinite alternate; }
-        @keyframes alertPulse {
-            0% { transform: scale(1); box-shadow: 0 0 5px rgba(245, 158, 11, 0.4); }
-            100% { transform: scale(1.01); box-shadow: 0 0 15px rgba(245, 158, 11, 0.8); }
-        }
+        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; }
         .sound-badge { background: #334155; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 13px; border: 1px solid #475569; }
     </style>
 
@@ -46,7 +41,6 @@
         let previousTotalOrders = -1;
         let audioContext = null;
 
-        // إدارة تفعيل الصوت للإدارة
         function checkAdminSound() {
             if (localStorage.getItem('jahez_admin_sound') === 'true') {
                 initAudioContext();
@@ -65,47 +59,33 @@
                 }
                 localStorage.setItem('jahez_admin_sound', 'true');
                 document.getElementById('adminSoundDiv').style.display = 'none';
-            } catch (e) {
-                console.log("Audio error", e);
-            }
+            } catch (e) { console.log(e); }
         }
 
         window.enableAdminSound = function() {
             initAudioContext();
             playAdminAlarm();
-            alert("✅ تم تفعيل وحفظ تنبيهات الطلبات الجديدة للإدارة بنجاح!");
+            alert("✅ تم تفعيل وحفظ التنبيهات بنجاح!");
         }
 
-        // نغمة إنذار قوية للإدارة عند وصول طلب جديد
         function playAdminAlarm() {
             try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-
+                if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
+                if (audioContext.state === 'suspended') { audioContext.resume(); }
                 const now = audioContext.currentTime;
-                // إصدار 3 نغمات متلاحقة حماسية ومميزة للطلبات الواردة
                 [0, 0.2, 0.4].forEach((delay, index) => {
                     const osc = audioContext.createOscillator();
                     const gain = audioContext.createGain();
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(500 + (index * 250), now + delay);
-                    
                     gain.gain.setValueAtTime(0.5, now + delay);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.18);
-
                     osc.connect(gain);
                     gain.connect(audioContext.destination);
-
                     osc.start(now + delay);
                     osc.stop(now + delay + 0.18);
                 });
-            } catch (e) {
-                console.log("Alarm play error", e);
-            }
+            } catch (e) { console.log(e); }
         }
 
         function listenToDrivers() {
@@ -149,7 +129,7 @@
             onValue(menuRef, (snapshot) => {
                 const data = snapshot.val();
                 const container = document.getElementById('adminMenuContainer');
-                if (!data) { container.innerHTML = '<p style="color: #94a3b8;">لا توجد أصناف مضافة حالياً في المنيو.</p>'; return; }
+                if (!data) { container.innerHTML = '<p style="color: #94a3b8;">لا توجد أصناف مضافة حالياً.</p>'; return; }
                 let html = '';
                 Object.keys(data).forEach((key) => {
                     let item = data[key];
@@ -158,10 +138,10 @@
                     html += `
                         <div class="menu-item-card">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <img src="${imgSrc}" class="item-img" alt="صورة المنتج">
+                                <img src="${imgSrc}" class="item-img" alt="">
                                 <div>
                                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-                                        <img src="${catImgSrc}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" alt="صورة القسم">
+                                        <img src="${catImgSrc}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;" alt="">
                                         <span style="background: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #38bdf8;">${item.category}</span>
                                     </div>
                                     <h4 style="margin: 4px 0; color: #fff;">${item.name}</h4>
@@ -184,28 +164,19 @@
             const image = document.getElementById('itemImage').value.trim();
 
             if (!category || !name || isNaN(price)) {
-                alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+                alert('الرجاء إدخال البيانات بشكل صحيح!');
                 return;
             }
 
-            push(ref(db, 'restaurantMenu'), { 
-                category, 
-                categoryImage: categoryImage || '', 
-                name, 
-                price, 
-                image: image || '' 
-            });
-
+            push(ref(db, 'restaurantMenu'), { category, categoryImage: categoryImage || '', name, price, image: image || '' });
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
             document.getElementById('itemImage').value = '';
-            alert('تمت إضافة الصنف وقسمه بنجاح!');
+            alert('تمت إضافة الصنف بنجاح!');
         }
 
         window.deleteMenuItem = function(key) {
-            if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
-                remove(ref(db, 'restaurantMenu/' + key));
-            }
+            if (confirm('حذف هذا الصنف؟')) remove(ref(db, 'restaurantMenu/' + key));
         }
 
         function listenToOrders() {
@@ -221,8 +192,6 @@
                 }
 
                 let totalOrdersCount = Object.keys(data).length;
-
-                // إذا جاء طلب جديد من العميل، يتم تشغيل تنذار قوي للإدارة
                 if (previousTotalOrders !== -1 && totalOrdersCount > previousTotalOrders) {
                     playAdminAlarm();
                 }
@@ -233,6 +202,8 @@
                     let order = data[orderKey];
                     let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
                     let currentDriver = order.driver || '';
+                    let deliveryFee = order.deliveryFee || 0;
+                    let finalTotal = order.subtotal + parseFloat(deliveryFee);
 
                     let driverOptions = `<option value="">اختر الكابتن للإسناد</option>`;
                     globalDrivers.forEach(d => {
@@ -245,11 +216,23 @@
                         <div class="order-card-admin">
                             <h3 style="color: #f59e0b; margin-top: 0;">🚨 طلب جديد #${order.id} - ${order.time}</h3>
                             <p><strong>اسم العميل:</strong> ${order.customerName}</p>
+                            <p><strong>رقم الجوال:</strong> ${order.customerPhone}</p>
                             <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
-                            <p><strong>موقع العميل:</strong> <a href="${mapLink}" target="_blank" class="map-btn">🗺️ عرض موقع العميل على الخريطة</a></p>
+                            <p><strong>موقع العميل:</strong> <a href="${mapLink}" target="_blank" class="map-btn">🗺️ عرض الموقع على الخريطة</a></p>
                             <p><strong>طريقة الدفع:</strong> <span style="color: #38bdf8; font-weight: bold;">${order.paymentMethod}</span></p>
                             <p><strong>الأصناف:</strong> ${itemsText}</p>
-                            <p style="color: #22c55e; font-weight: bold;">الإجمالي: ${order.total} جنيه | الحالة: ${order.status}</p>
+                            <p><strong>قيمة المشتريات:</strong> ${order.subtotal} جنيه</p>
+                            
+                            <!-- خانة إدخال قيمة التوصيل اليدوية -->
+                            <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0; border: 1px solid #334155;">
+                                <label style="font-size: 12px; color: #fbbf24; display: block; margin-bottom: 5px;">أدخل قيمة التوصيل يدوياً (جنيه):</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="number" id="fee_${orderKey}" value="${deliveryFee}" placeholder="0" style="margin-bottom: 0; flex: 1;">
+                                    <button type="button" style="background: #3b82f6; padding: 5px 12px;" onclick="updateDeliveryFee('${orderKey}', ${order.subtotal})">حفظ التوصيل</button>
+                                </div>
+                            </div>
+
+                            <p style="color: #22c55e; font-weight: bold; font-size: 15px;">الإجمالي النهائي (المشتريات + التوصيل): ${finalTotal} جنيه | الحالة: ${order.status}</p>
                             
                             <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                                 <select onchange="assignDriver('${orderKey}', this.value)" style="flex: 1; margin-bottom: 0;">
@@ -264,10 +247,23 @@
             });
         }
 
+        window.updateDeliveryFee = function(orderKey, subtotal) {
+            let feeInput = document.getElementById('fee_' + orderKey).value;
+            let fee = parseFloat(feeInput) || 0;
+            let total = subtotal + fee;
+
+            update(ref(db, 'adminOrders/' + orderKey), {
+                deliveryFee: fee,
+                total: total
+            }).then(() => {
+                alert('✅ تم تحديث قيمة التوصيل والإجمالي النهائي بنجاح!');
+            });
+        }
+
         window.assignDriver = function(orderKey, driverName) {
             if (!driverName) return;
             update(ref(db, 'adminOrders/' + orderKey), { driver: driverName, status: 'تم الإسناد للكابتن ' + driverName });
-            alert('تم إسناد الطلب إلى الكابتن: ' + driverName + ' وسيصله التنبيه الصوتي الآن!');
+            alert('تم إسناد الطلب إلى الكابتن: ' + driverName);
         }
 
         window.deleteOrder = function(orderKey) {
@@ -275,9 +271,6 @@
         }
 
         window.onload = function() {
-            loadDriversDropdown();
-            loadMenuFromCloud();
-            loadMenu();
             checkAdminSound();
             listenToDrivers();
             listenToMenu();
