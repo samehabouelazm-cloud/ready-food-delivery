@@ -10,14 +10,14 @@
         h1, h2 { color: #f59e0b; text-align: center; }
         .section { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-        button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; width: 100%; }
+        button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 12px 15px; background: #22c55e; color: #fff; width: 100%; font-size: 15px; }
         .map-btn { background: #3b82f6; display: block; text-align: center; padding: 10px; text-decoration: none; border-radius: 5px; color: #fff; font-weight: bold; margin-top: 10px; }
-        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { border-color: #475569; }
-            50% { border-color: #f59e0b; }
-            100% { border-color: #475569; }
+        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; animation: alertPulse 1s infinite alternate; }
+        @keyframes alertPulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px rgba(245, 158, 11, 0.5); }
+            100% { transform: scale(1.01); box-shadow: 0 0 20px rgba(245, 158, 11, 0.9); }
         }
+        .sound-badge { background: #334155; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 13px; border: 1px solid #475569; }
     </style>
 
     <script type="module">
@@ -39,29 +39,53 @@
 
         let currentDriverName = localStorage.getItem('jahez_logged_driver') || '';
         let previousOrdersCount = -1;
+        let audioContext = null;
 
-        // دالة تشغيل صوت التنبيه (تنبيه موسيقي / نغمة تنبيه واضحة)
-        function playAlertSound() {
+        // دالة تفعيل وتجهيز الصوت في المتصفح
+        window.enableSoundAlerts = function() {
             try {
-                // استخدام صوت تنبيه مدمج عبر مكتبة الصوت في المتصفح أو رنين موجي
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // نغمة D5
-                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // نغمة A5
-                
-                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.6);
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                playBeep();
+                document.getElementById('soundStatus').innerHTML = "✅ تم تفعيل التنبيهات الصوتية بنجاح!";
+                document.getElementById('soundStatus').style.color = "#22c55e";
+                document.getElementById('enableSoundBtn').style.display = "none";
             } catch (e) {
-                console.log("Audio not supported or blocked", e);
+                alert("متصفحك يحظر الصوت، يرجى النقر مرة أخرى.");
+            }
+        }
+
+        // دالة إصدار صفارة الإنذار والتنبيه
+        function playBeep() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                // إصدار نغمتين متتاليتين للتنبيه الواضح
+                const now = audioContext.currentTime;
+                
+                const osc1 = audioContext.createOscillator();
+                const gain1 = audioContext.createGain();
+                osc1.type = 'square';
+                osc1.frequency.setValueAtTime(600, now);
+                osc1.frequency.setValueAtTime(900, now + 0.2);
+                
+                gain1.gain.setValueAtTime(0.4, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                osc1.connect(gain1);
+                gain1.connect(audioContext.destination);
+
+                osc1.start(now);
+                osc1.stop(now + 0.5);
+            } catch (e) {
+                console.log("Audio play error: ", e);
             }
         }
 
@@ -91,8 +115,8 @@
             document.getElementById('driverDashboard').style.display = 'block';
             document.getElementById('welcomeDriverTitle').innerText = 'أهلاً بك يا كابتن: ' + name;
             
-            // تفعيل صوت مبدئي لتنشيط المتصفح
-            playAlertSound();
+            // محاولة تشغيل الصوت تلقائياً عند الدخول
+            enableSoundAlerts();
             listenToAssignedOrders();
         }
 
@@ -122,7 +146,7 @@
 
                         html += `
                             <div class="order-card">
-                                <h3 style="color: #f59e0b; margin-top: 0;">طلب جديد #${order.id} 🚨</h3>
+                                <h3 style="color: #f59e0b; margin-top: 0;">🚨 طلب جديد رقم #${order.id}</h3>
                                 <p><strong>اسم العميل:</strong> ${order.customerName}</p>
                                 <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
                                 <a href="${mapLink}" target="_blank" class="map-btn">🧭 افتح خريطة التوجيه للعميل (Google Maps)</a>
@@ -136,9 +160,9 @@
                     }
                 });
 
-                // إذا زاد عدد الطلبات المسندة، قم بتشغيل التنبيه الصوتي فوراً!
+                // إذا زاد عدد الطلبات الجديدة، يتم إطلاق صوت التنبيه فوراً
                 if (previousOrdersCount !== -1 && currentAssignedCount > previousOrdersCount) {
-                    playAlertSound();
+                    playBeep();
                 }
                 previousOrdersCount = currentAssignedCount;
 
@@ -180,6 +204,13 @@
 
         <div id="driverDashboard" class="section" style="display: none;">
             <h2 id="welcomeDriverTitle" style="font-size: 18px; color: #fbbf24;"></h2>
+            
+            <!-- زر تفعيل التنبيهات الصوتية لضمان عمل الصوت في المتصفح -->
+            <div class="sound-badge">
+                <span id="soundStatus" style="color: #fbbf24;">⚠️ التنبيهات الصوتية غير مفعلة بالمتصفح</span><br><br>
+                <button type="button" id="enableSoundBtn" style="background: #3b82f6; padding: 8px;" onclick="enableSoundAlerts()">🔊 اضغط هنا لتفعيل التنبيه الصوتي الآن</button>
+            </div>
+
             <h3 style="color: #fff; border-bottom: 1px solid #334155; padding-bottom: 8px;">📦 الطلبات المسندة إليك (تحديث حي 🔴)</h3>
             <div id="driverOrdersList">جاري جلب الطلبات...</div>
             <br>
