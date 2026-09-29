@@ -17,7 +17,7 @@
             0% { transform: scale(1); box-shadow: 0 0 5px rgba(245, 158, 11, 0.5); }
             100% { transform: scale(1.01); box-shadow: 0 0 20px rgba(245, 158, 11, 0.9); }
         }
-        .sound-badge { background: #334155; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 13px; border: 1px solid #475569; }
+        .sound-badge { background: #334155; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px; font-size: 13px; border: 1px solid #475569; display: none; }
     </style>
 
     <script type="module">
@@ -41,23 +41,38 @@
         let previousOrdersCount = -1;
         let audioContext = null;
 
-        // دالة تفعيل وتجهيز الصوت في المتصفح
-        window.enableSoundAlerts = function() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-                playBeep();
-                document.getElementById('soundStatus').innerHTML = "✅ تم تفعيل التنبيهات الصوتية بنجاح!";
-                document.getElementById('soundStatus').style.color = "#22c55e";
-                document.getElementById('enableSoundBtn').style.display = "none";
-            } catch (e) {
-                alert("متصفحك يحظر الصوت، يرجى النقر مرة أخرى.");
+        // التحقق مما إذا كان الصوت مفعل مسبقاً في ذاكرة المتصفح
+        function checkAutoSound() {
+            const isSoundEnabled = localStorage.getItem('jahez_sound_enabled');
+            if (isSoundEnabled === 'true') {
+                initAudioContext();
+            } else {
+                document.getElementById('soundStatusDiv').style.display = 'block';
             }
         }
 
-        // دالة إصدار صفارة الإنذار والتنبيه
+        function initAudioContext() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                localStorage.setItem('jahez_sound_enabled', 'true');
+                document.getElementById('soundStatusDiv').style.display = 'none';
+            } catch (e) {
+                console.log("Audio init error", e);
+            }
+        }
+
+        window.enableSoundAlerts = function() {
+            initAudioContext();
+            playBeep();
+            alert("✅ تم حفظ وتفعيل التنبيهات الصوتية دائماً بنجاح!");
+        }
+
+        // دالة إصدار صفارة الإنذار والتنبيه الصوتي
         function playBeep() {
             try {
                 if (!audioContext) {
@@ -67,11 +82,10 @@
                     audioContext.resume();
                 }
 
-                // إصدار نغمتين متتاليتين للتنبيه الواضح
                 const now = audioContext.currentTime;
-                
                 const osc1 = audioContext.createOscillator();
                 const gain1 = audioContext.createGain();
+                
                 osc1.type = 'square';
                 osc1.frequency.setValueAtTime(600, now);
                 osc1.frequency.setValueAtTime(900, now + 0.2);
@@ -109,14 +123,17 @@
             const select = document.getElementById('driverSelect');
             const name = select.value.trim();
             if (!name) { alert('الرجاء اختيار اسمك من القائمة!'); return; }
+            
             currentDriverName = name;
             localStorage.setItem('jahez_logged_driver', name);
+            
+            // تفعيل الصوت تلقائياً عند تسجيل الدخول (إذا تم تفعيله مسبقاً)
+            initAudioContext();
+
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('driverDashboard').style.display = 'block';
             document.getElementById('welcomeDriverTitle').innerText = 'أهلاً بك يا كابتن: ' + name;
             
-            // محاولة تشغيل الصوت تلقائياً عند الدخول
-            enableSoundAlerts();
             listenToAssignedOrders();
         }
 
@@ -183,6 +200,7 @@
 
         window.onload = function() {
             loadDriversDropdown();
+            checkAutoSound();
             if (currentDriverName) {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('driverDashboard').style.display = 'block';
@@ -205,10 +223,10 @@
         <div id="driverDashboard" class="section" style="display: none;">
             <h2 id="welcomeDriverTitle" style="font-size: 18px; color: #fbbf24;"></h2>
             
-            <!-- زر تفعيل التنبيهات الصوتية لضمان عمل الصوت في المتصفح -->
-            <div class="sound-badge">
-                <span id="soundStatus" style="color: #fbbf24;">⚠️ التنبيهات الصوتية غير مفعلة بالمتصفح</span><br><br>
-                <button type="button" id="enableSoundBtn" style="background: #3b82f6; padding: 8px;" onclick="enableSoundAlerts()">🔊 اضغط هنا لتفعيل التنبيه الصوتي الآن</button>
+            <!-- زر تفعيل الصوت يظهر لمرة واحدة فقط ويحفظ نهائياً -->
+            <div id="soundStatusDiv" class="sound-badge">
+                <span style="color: #fbbf24;">⚠️ تفعيل التنبيهات الصوتية (للمرة الأولى فقط)</span><br><br>
+                <button type="button" style="background: #3b82f6; padding: 8px;" onclick="enableSoundAlerts()">🔊 اضغط هنا لحفظ وتفعيل الصوت دائماً</button>
             </div>
 
             <h3 style="color: #fff; border-bottom: 1px solid #334155; padding-bottom: 8px;">📦 الطلبات المسندة إليك (تحديث حي 🔴)</h3>
