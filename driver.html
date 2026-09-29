@@ -12,7 +12,12 @@
         select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 5px; padding: 10px 15px; background: #22c55e; color: #fff; width: 100%; }
         .map-btn { background: #3b82f6; display: block; text-align: center; padding: 10px; text-decoration: none; border-radius: 5px; color: #fff; font-weight: bold; margin-top: 10px; }
-        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; }
+        .order-card { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { border-color: #475569; }
+            50% { border-color: #f59e0b; }
+            100% { border-color: #475569; }
+        }
     </style>
 
     <script type="module">
@@ -33,6 +38,32 @@
         const db = getDatabase(app);
 
         let currentDriverName = localStorage.getItem('jahez_logged_driver') || '';
+        let previousOrdersCount = -1;
+
+        // دالة تشغيل صوت التنبيه (تنبيه موسيقي / نغمة تنبيه واضحة)
+        function playAlertSound() {
+            try {
+                // استخدام صوت تنبيه مدمج عبر مكتبة الصوت في المتصفح أو رنين موجي
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // نغمة D5
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // نغمة A5
+                
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.6);
+            } catch (e) {
+                console.log("Audio not supported or blocked", e);
+            }
+        }
 
         function loadDriversDropdown() {
             const driversRef = ref(db, 'driversList');
@@ -59,6 +90,9 @@
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('driverDashboard').style.display = 'block';
             document.getElementById('welcomeDriverTitle').innerText = 'أهلاً بك يا كابتن: ' + name;
+            
+            // تفعيل صوت مبدئي لتنشيط المتصفح
+            playAlertSound();
             listenToAssignedOrders();
         }
 
@@ -70,22 +104,25 @@
                 const data = snapshot.val();
                 if (!data) {
                     container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات مسندة إليك حالياً.</p>';
+                    previousOrdersCount = 0;
                     return;
                 }
 
                 let html = '';
                 let found = false;
+                let currentAssignedCount = 0;
 
                 Object.keys(data).forEach((orderKey) => {
                     let order = data[orderKey];
                     if (order.driver && order.driver.trim() === currentDriverName.trim()) {
                         found = true;
+                        currentAssignedCount++;
                         let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
                         let mapLink = `https://www.google.com/maps/dir/?api=1&destination=${order.lat},${order.lng}`;
 
                         html += `
                             <div class="order-card">
-                                <h3 style="color: #f59e0b; margin-top: 0;">طلب #${order.id}</h3>
+                                <h3 style="color: #f59e0b; margin-top: 0;">طلب جديد #${order.id} 🚨</h3>
                                 <p><strong>اسم العميل:</strong> ${order.customerName}</p>
                                 <p><strong>العنوان بالتفصيل:</strong> ${order.customerAddress}</p>
                                 <a href="${mapLink}" target="_blank" class="map-btn">🧭 افتح خريطة التوجيه للعميل (Google Maps)</a>
@@ -98,6 +135,12 @@
                         `;
                     }
                 });
+
+                // إذا زاد عدد الطلبات المسندة، قم بتشغيل التنبيه الصوتي فوراً!
+                if (previousOrdersCount !== -1 && currentAssignedCount > previousOrdersCount) {
+                    playAlertSound();
+                }
+                previousOrdersCount = currentAssignedCount;
 
                 if (!found) {
                     container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات مسندة إليك حالياً.</p>';
