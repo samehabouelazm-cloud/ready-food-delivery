@@ -37,10 +37,10 @@ window.enableAdminSound = function() {
     initAudioContext();
     playAdminAlertSound();
     localStorage.setItem('jahez_admin_sound_active', 'true');
-    document.getElementById('adminSoundBadge').style.display = 'none';
+    const badge = document.getElementById('adminSoundBadge');
+    if(badge) badge.style.display = 'none';
     alert('✅ تم تفعيل التنبيهات الصوتية المستمرة للإدارة بنجاح!');
 };
-
 function initAudioContext() {
     if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -86,20 +86,21 @@ function convertImageFileToBase64(fileInputId) {
         }
     });
 }
-
 window.addMenuItemWithImages = async function() {
-    const category = document.getElementById('itemCategory').value.trim();
-    const name = document.getElementById('itemName').value.trim();
-    const price = parseFloat(document.getElementById('itemPrice').value);
+    const categoryInput = document.getElementById('itemCategory');
+    const nameInput = document.getElementById('itemName');
+    const priceInput = document.getElementById('itemPrice');
+
+    const category = categoryInput ? categoryInput.value.trim() : '';
+    const name = nameInput ? nameInput.value.trim() : '';
+    const price = priceInput ? parseFloat(priceInput.value) : NaN;
 
     if (!category || !name || isNaN(price)) {
-        alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+        alert('❌ الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
         return;
     }
-
-    const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
+const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
     const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
-
     push(ref(db, 'restaurantMenu'), { 
         category: category, 
         categoryImage: categoryImageBase64, 
@@ -444,7 +445,7 @@ window.addMenuItemWithImages = async function() {
     const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
     const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
 
-    const newItemData = {
+const newItemData = {
         category: category,
         categoryImage: categoryImageBase64 || '',
         name: name,
@@ -453,19 +454,18 @@ window.addMenuItemWithImages = async function() {
         timestamp: Date.now()
     };
 
-    console.جاري_الحفظ: "جاري حفظ المنتج...", newItemData;
-
     push(ref(db, 'restaurantMenu'), newItemData)
         .then(() => {
-            alert('✅ تم إضافة الصنف وقسمه بنجاح وحفظه على المنصة!');
+            alert('✅ تم حفظ المنتج ورفعه على المنصة بنجاح!');
             if(nameInput) nameInput.value = '';
             if(priceInput) priceInput.value = '';
         })
         .catch((error) => {
             console.error('Firebase Error:', error);
-            alert('❌ حدث خطأ أثناء الحفظ على المنصة: ' + error.message);
+            alert('❌ خطأ في الحفظ: ' + error.message);
         });
 };
+الخطوة الثانية: ربط الأزرار مباشرة في ملف admin.html
 window.addDriver = function() {
     const name = document.getElementById('driverNameInput').value.trim();
     const phone = document.getElementById('driverPhoneInput').value.trim();
