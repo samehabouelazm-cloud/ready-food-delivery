@@ -161,8 +161,12 @@ window.printOrderInvoice = function(orderId) {
     if (!order) return;
 
     let deliveryFee = parseFloat(order.deliveryFee || 0);
-    let itemsTotal = parseFloat(order.total || 0);
+    let itemsTotal = parseFloat(order.total || order.subtotal || 0);
     let finalTotal = itemsTotal + deliveryFee;
+
+    let cName = order.customerName || order.name || order.fullName || 'غير متوفر';
+    let cPhone = order.customerPhone || order.phone || order.mobile || 'غير متوفر';
+    let cAddress = order.customerAddress || order.address || order.location || 'غير متوفر';
 
     let printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -182,9 +186,9 @@ window.printOrderInvoice = function(orderId) {
             <div class="invoice-box">
                 <h2>منصة جاهز - فاتورة المشتريات</h2>
                 <p><strong>رقم الطلب:</strong> #${order.id}</p>
-                <p><strong>اسم العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
-                <p><strong>رقم الجوال:</strong> ${order.customerPhone || 'غير متوفر'}</p>
-                <p><strong>العنوان:</strong> ${order.customerAddress || 'غير متوفر'}</p>
+                <p><strong>اسم العميل:</strong> ${cName}</p>
+                <p><strong>رقم الجوال:</strong> ${cPhone}</p>
+                <p><strong>العنوان:</strong> ${cAddress}</p>
                 <p><strong>الكابتن المسند:</strong> ${order.driver || 'لم يُحدد بعد'}</p>
                 <hr>
                 <table>
@@ -239,9 +243,14 @@ function listenToAdminOrders() {
 
         let html = '';
         allOrders.forEach(order => {
-            let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
-            let currentDeliveryFee = order.deliveryFee || 0;
-            let calculatedTotal = parseFloat(order.total || 0) + parseFloat(currentDeliveryFee);
+            let cName = order.customerName || order.name || order.fullName || 'غير متوفر';
+            let cPhone = order.customerPhone || order.phone || order.mobile || 'غير متوفر';
+            let cAddress = order.customerAddress || order.address || order.location || 'غير متوفر';
+            
+            let itemsText = order.items ? order.items.map(i => `${i.name || i.title || 'صنف'} (x${i.quantity || 1})`).join(', ') : 'لا توجد أصناف';
+            let currentDeliveryFee = parseFloat(order.deliveryFee || 0);
+            let itemsTotal = parseFloat(order.total || order.subtotal || 0);
+            let calculatedTotal = itemsTotal + currentDeliveryFee;
 
             let driversOptions = '<option value="">-- اختر الكابتن --</option>';
             driversListGlobal.forEach(d => {
@@ -252,11 +261,11 @@ function listenToAdminOrders() {
             html += `
                 <div class="order-card-admin">
                     <h3 style="color: #f59e0b; margin-top: 0;">📦 طلب رقم #${order.id}</h3>
-                    <p><strong>اسم العميل:</strong> ${order.customerName}</p>
-                    <p><strong>رقم الجوال:</strong> ${order.customerPhone}</p>
-                    <p><strong>العنوان:</strong> ${order.customerAddress}</p>
+                    <p><strong>اسم العميل:</strong> ${cName}</p>
+                    <p><strong>رقم الجوال:</strong> ${cPhone}</p>
+                    <p><strong>العنوان:</strong> ${cAddress}</p>
                     <p><strong>الأصناف:</strong> ${itemsText}</p>
-                    <p><strong>إجمالي المشتريات:</strong> ${order.total} جنيه</p>
+                    <p><strong>إجمالي المشتريات:</strong> ${itemsTotal.toFixed(2)} جنيه</p>
                     
                     <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0;">
                         <label style="font-size: 13px; color: #fbbf24;">إسناد للكابتن:</label>
@@ -269,7 +278,7 @@ function listenToAdminOrders() {
                     </div>
 
                     <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب: ${calculatedTotal.toFixed(2)} جنيه</p>
-                    <p><strong>الحالة:</strong> ${order.status}</p>
+                    <p><strong>الحالة:</strong> <span style="color: #38bdf8;">${order.status || 'جديد'}</span></p>
 
                     <button type="button" style="background: #8b5cf6; margin-top: 8px; padding: 10px;" onclick="printOrderInvoice('${order.id}')">🖨️ طباعة فاتورة المشتريات والتوصيل</button>
                 </div>
