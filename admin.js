@@ -594,3 +594,103 @@ function listenToMenuAndDrivers() {
         container.innerHTML = html;
     });
 }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
+    authDomain: "readystore-542e0.firebaseapp.com",
+    projectId: "readystore-542e0",
+    storageBucket: "readystore-542e0.firebasestorage.app",
+    messagingSenderId: "698121296035",
+    appId: "1:698121296035:web:6d237104d976e11120c716",
+    measurementId: "G-56NZSGK3P2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.onload = function() {
+    console.log("تم تحميل لوحة الإدارة بنجاح...");
+    
+    // ربط زرار إضافة المنتج برمجياً لضمان الاستجابة الفورية
+    const addBtn = document.querySelector('button[onclick*="addMenuItemWithImages"]') || document.getElementById('addMenuBtn');
+    if (addBtn) {
+        addBtn.removeAttribute('onclick'); // إزالة الـ onclick القديم لمنع التعارض
+        addBtn.addEventListener('click', handleAddMenuItem);
+    }
+
+    // ربط زرار الصوت
+    const soundBadge = document.getElementById('adminSoundBadge');
+    if (soundBadge) {
+        soundBadge.addEventListener('click', enableAdminSound);
+    }
+};
+
+function enableAdminSound() {
+    localStorage.setItem('jahez_admin_sound_active', 'true');
+    const badge = document.getElementById('adminSoundBadge');
+    if(badge) badge.style.display = 'none';
+    alert('✅ تم تفعيل التنبيهات الصوتية بنجاح!');
+}
+
+async function handleAddMenuItem() {
+    const categoryInput = document.getElementById('itemCategory');
+    const nameInput = document.getElementById('itemName');
+    const priceInput = document.getElementById('itemPrice');
+
+    const category = categoryInput ? categoryInput.value.trim() : '';
+    const name = nameInput ? nameInput.value.trim() : '';
+    const price = priceInput ? parseFloat(priceInput.value) : NaN;
+
+    if (!category || !name || isNaN(price)) {
+        alert('❌ الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+        return;
+    }
+
+    let categoryImageBase64 = '';
+    let itemImageBase64 = '';
+
+    try {
+        categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
+        itemImageBase64 = await convertImageFileToBase64('itemImageFile');
+    } catch (e) {
+        console.log("خطأ في قراءة الصور، سيتم المتابعة بدون صور:", e);
+    }
+
+    const newItemData = {
+        category: category,
+        categoryImage: categoryImageBase64 || '',
+        name: name,
+        price: price,
+        image: itemImageBase64 || '',
+        timestamp: Date.now()
+    };
+
+    console.log("جاري إرسال البيانات لقاعدة البيانات...", newItemData);
+
+    push(ref(db, 'restaurantMenu'), newItemData)
+        .then(() => {
+            alert('✅ تم حفظ المنتج ورفعه على المنصة بنجاح!');
+            if(nameInput) nameInput.value = '';
+            if(priceInput) priceInput.value = '';
+        })
+        .catch((error) => {
+            console.error('Firebase Error:', error);
+            alert('❌ فشل الحفظ في قاعدة البيانات: ' + error.message);
+        });
+}
+
+function convertImageFileToBase64(fileInputId) {
+    return new Promise((resolve) => {
+        const fileInput = document.getElementById(fileInputId);
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) { resolve(e.target.result); };
+            reader.onerror = function() { resolve(''); };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            resolve('');
+        }
+    });
+}
