@@ -233,3 +233,114 @@
     </div>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الكابتن - منصة جاهز</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        h1 { color: #f59e0b; text-align: center; }
+        .order-card { background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; }
+        button { cursor: pointer; font-weight: bold; border: none; border-radius: 6px; padding: 10px 15px; background: #22c55e; color: #fff; width: 100%; margin-top: 8px; }
+        .btn-delivering { background: #3b82f6; }
+        .btn-done { background: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚴 لوحة الكابتن السحابي</h1>
+        
+        <div style="margin-bottom: 15px;">
+            <label>اختر اسمك (الكابتن):</label>
+            <input type="text" id="driverNameLogin" placeholder="أدخل اسمك المسجل بالإدارة" style="width:100%; padding:10px; margin-top:5px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:6px; box-sizing:border-box;">
+            <button onclick="saveDriverLogin()">💾 حفظ اسمي ومتابعة الطلبات</button>
+        </div>
+
+        <hr style="border-color: #334155; margin: 20px 0;">
+        
+        <h3>📦 الطلبات المسندة إليك:</h3>
+        <div id="driverOrdersContainer">جاري تحميل طلباتك...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
+            authDomain: "readystore-542e0.firebaseapp.com",
+            projectId: "readystore-542e0",
+            storageBucket: "readystore-542e0.firebasestorage.app",
+            messagingSenderId: "698121296035",
+            appId: "1:698121296035:web:6d237104d976e11120c716",
+            measurementId: "G-56NZSGK3P2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.saveDriverLogin = function() {
+            const name = document.getElementById('driverNameLogin').value.trim();
+            if(!name) { alert('الرجاء كتابة اسمك أولاً'); return; }
+            localStorage.setItem('jahez_active_driver', name);
+            alert('✅ تم حفظ اسمك بنجاح، سيتم عرض طلباتك الآن.');
+            location.reload();
+        };
+
+        window.onload = function() {
+            const savedName = localStorage.getItem('jahez_active_driver');
+            if(savedName) {
+                document.getElementById('driverNameLogin').value = savedName;
+                listenToDriverOrders(savedName);
+            }
+        };
+
+        function listenToDriverOrders(driverName) {
+            const ordersRef = ref(db, 'adminOrders');
+            onValue(ordersRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('driverOrdersContainer');
+                if(!data) {
+                    container.innerHTML = '<p style="color:#94a3b8;">لا توجد طلبات حالياً.</p>';
+                    return;
+                }
+
+                let html = '';
+                Object.keys(data).forEach(key => {
+                    let order = data[key];
+                    // عرض الطلبات المخصصة لهذا الكابتن فقط
+                    if(order.driver === driverName && order.status !== 'مكتمل') {
+                        let itemsText = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(', ') : '';
+                        html += `
+                            <div class="order-card">
+                                <h4>طلب رقم #${key}</h4>
+                                <p><strong>العميل:</strong> ${order.customerName}</p>
+                                <p><strong>الهاتف:</strong> <a href="tel:${order.customerPhone}" style="color:#60a5fa;">${order.customerPhone}</a></p>
+                                <p><strong>العنوان:</strong> ${order.customerAddress}</p>
+                                <p><strong>الأصناف:</strong> ${itemsText}</p>
+                                <p><strong>الإجمالي المطلوب:</strong> ${(parseFloat(order.total || 0) + parseFloat(order.deliveryFee || 0))} جنيه</p>
+                                <p><strong>الحالة الحالية:</strong> <span style="color:#f59e0b;">${order.status || 'جديد'}</span></p>
+                                
+                                <button class="btn-delivering" onclick="updateOrderStatus('${key}', 'جاري التوصيل')">🚀 بدء التوصيل في الطريق</button>
+                                <button class="btn-done" onclick="updateOrderStatus('${key}', 'مكتمل')">✅ تم تسليم الطلب للعميل بنجاح</button>
+                            </div>
+                        `;
+                    }
+                });
+                container.innerHTML = html || '<p style="color:#94a3b8;">لا توجد طلبات جديدة مسندة إليك حالياً.</p>';
+            });
+        }
+
+        window.updateOrderStatus = function(orderId, newStatus) {
+            update(ref(db, 'adminOrders/' + orderId), {
+                status: newStatus
+            }).then(() => {
+                alert('✅ تم تحديث حالة الطلب أوتوماتيكياً بنجاح!');
+            });
+        };
+    </script>
+</body>
+</html>
