@@ -427,33 +427,45 @@ function convertImageFileToBase64(fileInputId) {
 }
 
 window.addMenuItemWithImages = async function() {
-    const category = document.getElementById('itemCategory').value.trim();
-    const name = document.getElementById('itemName').value.trim();
-    const price = parseFloat(document.getElementById('itemPrice').value);
+    const categoryInput = document.getElementById('itemCategory');
+    const nameInput = document.getElementById('itemName');
+    const priceInput = document.getElementById('itemPrice');
+
+    const category = categoryInput ? categoryInput.value.trim() : '';
+    const name = nameInput ? nameInput.value.trim() : '';
+    const price = priceInput ? parseFloat(priceInput.value) : NaN;
 
     if (!category || !name || isNaN(price)) {
-        alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+        alert('❌ الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
         return;
     }
 
+    // تحويل الصور بسلامة وبدون إيقاف الكود لو مش موجودة
     const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
     const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
 
-    push(ref(db, 'restaurantMenu'), { 
-        category, categoryImage: categoryImageBase64, name, price, image: itemImageBase64 
-    }).then(() => {
-        alert('✅ تم إضافة الصنف وقسمه بنجاح!');
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemPrice').value = '';
-    });
-};
+    const newItemData = {
+        category: category,
+        categoryImage: categoryImageBase64 || '',
+        name: name,
+        price: price,
+        image: itemImageBase64 || '',
+        timestamp: Date.now()
+    };
 
-window.deleteMenuItem = function(id) {
-    if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
-        remove(ref(db, 'restaurantMenu/' + id));
-    }
-};
+    console.جاري_الحفظ: "جاري حفظ المنتج...", newItemData;
 
+    push(ref(db, 'restaurantMenu'), newItemData)
+        .then(() => {
+            alert('✅ تم إضافة الصنف وقسمه بنجاح وحفظه على المنصة!');
+            if(nameInput) nameInput.value = '';
+            if(priceInput) priceInput.value = '';
+        })
+        .catch((error) => {
+            console.error('Firebase Error:', error);
+            alert('❌ حدث خطأ أثناء الحفظ على المنصة: ' + error.message);
+        });
+};
 window.addDriver = function() {
     const name = document.getElementById('driverNameInput').value.trim();
     const phone = document.getElementById('driverPhoneInput').value.trim();
