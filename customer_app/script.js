@@ -66,3 +66,26 @@ window.onload = function() {
         }
     }
 };
+// دالة إرسال الطلب من تطبيق العميل لتتطابق تماماً مع لوحة الإدارة والكابتن
+function sendCustomerOrder(cartItems, customerDetails) {
+    const ordersRef = ref(db, 'adminOrders');
+    
+    let subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    const newOrderData = {
+        customerName: customerDetails.name,       // اسم العميل
+        customerPhone: customerDetails.phone,     // رقم الجوال
+        customerAddress: customerDetails.address, // العنوان
+        items: cartItems,                         // قائمة الأصناف والكميات
+        total: subtotal,                          // إجمالي المشتريات
+        deliveryFee: 20,                          // قيمة التوصيل الافتراضية
+        status: 'جديد',                           // حالة الطلب الابتدائية
+        timestamp: Date.now()
+    };
+
+    push(ordersRef, newOrderData).then(() => {
+        alert('✅ تم إرسال طلبك بنجاح! جاري متابعته من الإدارة.');
+    }).catch((error) => {
+        alert('حدث خطأ أثناء إرسال الطلب: ' + error.message);
+    });
+}

@@ -339,3 +339,246 @@ function listenToMenuAndDrivers() {
         container.innerHTML = html;
     });
 }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
+    authDomain: "readystore-542e0.firebaseapp.com",
+    projectId: "readystore-542e0",
+    storageBucket: "readystore-542e0.firebasestorage.app",
+    messagingSenderId: "698121296035",
+    appId: "1:698121296035:web:6d237104d976e11120c716",
+    measurementId: "G-56NZSGK3P2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let audioContext = null;
+let allOrders = [];
+let previousOrdersCount = -1;
+let driversListGlobal = [];
+
+window.onload = function() {
+    checkAdminSoundSetup();
+    listenToAdminOrders();
+    listenToMenuAndDrivers();
+};
+
+function checkAdminSoundSetup() {
+    if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
+        const badge = document.getElementById('adminSoundBadge');
+        if(badge) badge.style.display = 'none';
+    }
+}
+
+window.enableAdminSound = function() {
+    initAudioContext();
+    playAdminAlertSound();
+    localStorage.setItem('jahez_admin_sound_active', 'true');
+    const badge = document.getElementById('adminSoundBadge');
+    if(badge) badge.style.display = 'none';
+    alert('✅ تم تفعيل التنبيهات الصوتية المستمرة للإدارة بنجاح!');
+};
+
+function initAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}
+
+function playAdminAlertSound() {
+    try {
+        initAudioContext();
+        if (!audioContext) return;
+        const now = audioContext.currentTime;
+        [0, 0.3, 0.6].forEach((delay, i) => {
+            let osc = audioContext.createOscillator();
+            let gain = audioContext.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(700 + (i * 150), now + delay);
+            gain.gain.setValueAtTime(0.3, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.start(now + delay);
+            osc.stop(now + delay + 0.2);
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+function convertImageFileToBase64(fileInputId) {
+    return new Promise((resolve) => {
+        const fileInput = document.getElementById(fileInputId);
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) { resolve(e.target.result); };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            resolve('');
+        }
+    });
+}
+
+window.addMenuItemWithImages = async function() {
+    const category = document.getElementById('itemCategory').value.trim();
+    const name = document.getElementById('itemName').value.trim();
+    const price = parseFloat(document.getElementById('itemPrice').value);
+
+    if (!category || !name || isNaN(price)) {
+        alert('الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+        return;
+    }
+
+    const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
+    const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
+
+    push(ref(db, 'restaurantMenu'), { 
+        category, categoryImage: categoryImageBase64, name, price, image: itemImageBase64 
+    }).then(() => {
+        alert('✅ تم إضافة الصنف وقسمه بنجاح!');
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemPrice').value = '';
+    });
+};
+
+window.deleteMenuItem = function(id) {
+    if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
+        remove(ref(db, 'restaurantMenu/' + id));
+    }
+};
+
+window.addDriver = function() {
+    const name = document.getElementById('driverNameInput').value.trim();
+    const phone = document.getElementById('driverPhoneInput').value.trim();
+    if (!name || !phone) {
+        alert('الرجاء إدخال اسم ورقم هاتف الكابتن!');
+        return;
+    }
+    push(ref(db, 'driversTeam'), { name, phone }).then(() => {
+        document.getElementById('driverNameInput').value = '';
+        document.getElementById('driverPhoneInput').value = '';
+        alert('✅ تمت إضافة الكابتن بنجاح');
+    });
+};
+
+window.deleteDriver = function(id) {
+    remove(ref(db, 'driversTeam/' + id));
+};
+
+window.updateOrderDriverAndDelivery = function(orderId) {
+    let driverSelect = document.getElementById('driver_select_' + orderId);
+    let deliveryInput = document.getElementById('delivery_fee_' + orderId);
+    
+    let selectedDriver = driverSelect ? driverSelect.value : '';
+    let deliveryFee = deliveryInput ? parseFloat(deliveryInput.value) || 0 : 0;
+
+    update(ref(db, 'adminOrders/' + orderId), {
+        driver: selectedDriver,
+        deliveryFee: deliveryFee
+    }).then(() => {
+        alert('✅ تم تحديث بيانات التوصيل والكابتن بنجاح!');
+    });
+};
+
+function listenToAdminOrders() {
+    const ordersRef = ref(db, 'adminOrders');
+    onValue(ordersRef, (snapshot) => {
+        const data = snapshot.val();
+        const container = document.getElementById('adminOrdersContainer');
+        if (!container) return;
+        
+        if (!data) {
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>';
+            allOrders = [];
+            previousOrdersCount = 0;
+            return;
+        }
+
+        allOrders = [];
+        Object.keys(data).forEach(key => {
+            allOrders.push({ id: key, ...data[key] });
+        });
+
+        if (previousOrdersCount !== -1 && allOrders.length > previousOrdersCount) {
+            if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
+                playAdminAlertSound();
+            }
+        }
+        previousOrdersCount = allOrders.length;
+
+        let html = '';
+        allOrders.forEach(order => {
+            let cName = order.customerName || order.name || order.fullName || 'غير متوفر';
+            let cPhone = order.customerPhone || order.phone || order.mobile || 'غير متوفر';
+            let cAddress = order.customerAddress || order.address || order.location || 'غير متوفر';
+            
+            let itemsText = order.items ? order.items.map(i => `${i.name || i.title || 'صنف'} (x${i.quantity || 1})`).join(', ') : 'لا توجد أصناف';
+            let currentDeliveryFee = parseFloat(order.deliveryFee || 0);
+            let itemsTotal = parseFloat(order.total || order.subtotal || 0);
+            let calculatedTotal = itemsTotal + currentDeliveryFee;
+
+            let driversOptions = '<option value="">-- اختر الكابتن --</option>';
+            driversListGlobal.forEach(d => {
+                let selected = (order.driver === d.name) ? 'selected' : '';
+                driversOptions += `<option value="${d.name}" ${selected}>${d.name} (${d.phone})</option>`;
+            });
+
+            html += `
+                <div class="order-card-admin" style="background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b;">
+                    <h3 style="color: #f59e0b; margin-top: 0;">📦 طلب رقم #${order.id}</h3>
+                    <p><strong>اسم العميل:</strong> ${cName}</p>
+                    <p><strong>رقم الجوال:</strong> ${cPhone}</p>
+                    <p><strong>العنوان:</strong> ${cAddress}</p>
+                    <p><strong>الأصناف:</strong> ${itemsText}</p>
+                    <p><strong>إجمالي المشتريات:</strong> ${itemsTotal.toFixed(2)} جنيه</p>
+                    
+                    <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                        <label style="font-size: 13px; color: #fbbf24; display:block; margin-bottom:5px;">إسناد للكابتن:</label>
+                        <select id="driver_select_${order.id}" style="width:100%; padding:8px; margin-bottom:8px; background:#1e293b; color:#fff; border-radius:4px;">${driversOptions}</select>
+                        
+                        <label style="font-size: 13px; color: #fbbf24; display:block; margin-bottom:5px;">قيمة التوصيل (جنيه):</label>
+                        <input type="number" id="delivery_fee_${order.id}" value="${currentDeliveryFee}" style="width:100%; padding:8px; margin-bottom:8px; background:#1e293b; color:#fff; border-radius:4px;">
+                        
+                        <button type="button" style="background: #3b82f6; padding: 8px; width:100%; border:none; color:#fff; border-radius:4px; cursor:pointer;" onclick="updateOrderDriverAndDelivery('${order.id}')">💾 حفظ التعيين والتوصيل</button>
+                    </div>
+
+                    <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب: ${calculatedTotal.toFixed(2)} جنيه</p>
+                    <p><strong>الحالة:</strong> <span style="color: #38bdf8;">${order.status || 'جديد'}</span></p>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    });
+}
+
+function listenToMenuAndDrivers() {
+    onValue(ref(db, 'driversTeam'), (snapshot) => {
+        const data = snapshot.val();
+        const container = document.getElementById('driversListContainer');
+        if (!container) return;
+        driversListGlobal = [];
+        if (!data) {
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد كباتن مسجلة.</p>';
+            return;
+        }
+        let html = '';
+        Object.keys(data).forEach(key => {
+            let d = data[key];
+            driversListGlobal.push(d);
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                    <span>🚴 ${d.name} (${d.phone})</span>
+                    <button style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="deleteDriver('${key}')">حذف</button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    });
+}
