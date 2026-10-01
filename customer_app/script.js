@@ -43,3 +43,37 @@ function renderProductsManually(products) {
         </div>
     `).join('');
 }
+// الكود الثالث: إرسال الطلب من صفحة العميل إلى لوحة التحكم مباشرة
+function checkoutOrder() {
+    // 1. جلب سلة المشتريات الحالية للعميل
+    const cart = JSON.parse(localStorage.getItem('ready_cart')) || [];
+    
+    if (cart.length === 0) {
+        alert('سلة المشتريات فارغة! أضف منتجات أولاً 🛒');
+        return;
+    }
+
+    // 2. تجهيز هيكل الطلب الجديد
+    const newOrder = {
+        id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+        items: cart,
+        total: cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty || 1)), 0),
+        status: 'قيد المراجعة',
+        time: new Date().toLocaleTimeString('ar-SA'),
+        date: new Date().toLocaleDateString('ar-SA')
+    };
+
+    // 3. جلب الطلبات السابقة وحفظ الطلب الجديد في المفتاح المشترك
+    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+    orders.unshift(newOrder); // وضع الطلب الجديد في البداية
+    localStorage.setItem('ready_orders', JSON.stringify(orders));
+
+    // 4. تفريغ السلة بعد نجاح الطلب
+    localStorage.removeItem('ready_cart');
+    
+    // 5. إشعار العميل وتوجيهه لصفحة التتبع أو الرئيسية
+    alert('تم إرسال طلبك بنجاح إلى الإدارة! 🎉 سيتم متابعته فوراً.');
+    
+    // إعادة تحميل الصفحة أو التوجيه لصفحة التتبع إن وجدت
+    window.location.reload();
+}
