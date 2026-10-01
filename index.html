@@ -3,55 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق التوصيل - جاهز</title>
+    <title>تطبيق جاهز - التوصيل السريع</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; color: #f59e0b; }
-        .section { background: #1e293b; padding: 15px; margin-bottom: 20px; border-radius: 10px; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; }
-        .product-card { background: #334155; padding: 15px; border-radius: 8px; text-align: center; }
-        .product-card button { background: #f59e0b; color: #fff; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .cart-box { background: #1e293b; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        .cart-box input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
-        #checkoutBtn { background: #22c55e; color: #fff; padding: 15px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; padding: 15px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* البنر الاحترافي */
+        .hero-banner {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+        .hero-banner h1 { font-size: 28px; margin-bottom: 8px; font-weight: bold; }
+        .hero-banner p { font-size: 16px; opacity: 0.9; }
+
+        /* الأقسام والمنتجات */
+        .section { background: #1e293b; padding: 20px; margin-bottom: 25px; border-radius: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .section h2 { color: #f59e0b; margin-bottom: 15px; font-size: 20px; border-bottom: 2px solid #334155; padding-bottom: 8px; }
+        
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        
+        .product-card {
+            background: #334155;
+            border-radius: 12px;
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.3); }
+        
+        .product-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background: #475569;
+        }
+        
+        .product-info { padding: 12px; }
+        .product-info h3 { font-size: 16px; margin-bottom: 5px; color: #fff; }
+        .product-info .price { color: #34d399; font-weight: bold; font-size: 15px; margin-bottom: 10px; }
+        
+        .product-card button {
+            background: #f59e0b;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .product-card button:hover { background: #d97706; }
+
+        /* سلة المشتريات */
+        .cart-box {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: 1px solid #334155;
+        }
+        .cart-box h3 { color: #f59e0b; margin-bottom: 12px; font-size: 20px; }
+        .cart-summary { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; color: #38bdf8; font-weight: bold; }
+        
+        .cart-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            font-size: 14px;
+        }
+        .cart-box input:focus { border-color: #f59e0b; outline: none; }
+        
+        #checkoutBtn {
+            background: #22c55e;
+            color: #fff;
+            padding: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 17px;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+        #checkoutBtn:hover { background: #16a34a; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🚀 تطبيق جاهز للتوصيل السريع</h1>
+    <!-- البنر الاحترافي -->
+    <div class="hero-banner">
+        <h1>🚀 تطبيق جاهز - التوصيل السريع والآمن</h1>
+        <p>اطلب كل احتياجاتك بضغط زر واحدة وتوصلك لحد باب البيت!</p>
+    </div>
     
+    <!-- الأقسام والمنتجات بالصور -->
     <div id="menuContainer">
+        <!-- قسم المشويات -->
         <div class="section">
-            <h2>قسم المشويات</h2>
+            <h2>🥩 قسم المشويات الطازجة</h2>
             <div class="products-grid">
                 <div class="product-card">
-                    <h3>سمك بلطي مشوي - للكيلو</h3>
-                    <p>100 ج.م</p>
-                    <button onclick="addToCart('سمك بلطي مشوي', 100)">إضافة للسلة</button>
+                    <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=500" alt="سمك بلطي مشوي" class="product-img">
+                    <div class="product-info">
+                        <h3>سمك بلطي مشوي - للكيلو</h3>
+                        <div class="price">100 ج.م</div>
+                    </div>
+                    <button onclick="addToCart('سمك بلطي مشوي', 100)">إضافة للسلة 🛒</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500" alt="مشاوي مشكلة" class="product-img">
+                    <div class="product-info">
+                        <h3>مشاوي مشكلة ممتازة</h3>
+                        <div class="price">250 ج.م</div>
+                    </div>
+                    <button onclick="addToCart('مشاوي مشكلة ممتازة', 250)">إضافة للسلة 🛒</button>
                 </div>
             </div>
         </div>
+
+        <!-- قسم البيض والأجبان -->
         <div class="section">
-            <h2>قسم البيض والأجبان</h2>
+            <h2>🧀 قسم البيض والأجبان</h2>
             <div class="products-grid">
                 <div class="product-card">
-                    <h3>بيض بلدي - 30 بيضة</h3>
-                    <p>130 ج.م</p>
-                    <button onclick="addToCart('بيض بلدي - 30 بيضة', 130)">إضافة للسلة</button>
+                    <img src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=500" alt="بيض بلدي" class="product-img">
+                    <div class="product-info">
+                        <h3>بيض بلدي - 30 بيضة</h3>
+                        <div class="price">130 ج.م</div>
+                    </div>
+                    <button onclick="addToCart('بيض بلدي - 30 بيضة', 130)">إضافة للسلة 🛒</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1452195100486-9cc805987862?w=500" alt="جبنة أبيض براميلي" class="product-img">
+                    <div class="product-info">
+                        <h3>جبنة أبيض براميلي - كيلو</h3>
+                        <div class="price">90 ج.م</div>
+                    </div>
+                    <button onclick="addToCart('جبنة أبيض براميلي - كيلو', 90)">إضافة للسلة 🛒</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- سلة المشتريات وإتمام الطلب -->
     <div class="cart-box">
         <h3>🛒 سلة المشتريات</h3>
-        <p id="cartSummary">السلة فارغة</p>
+        <div class="cart-summary" id="cartSummary">السلة فارغة حالياً.. اختر منتجك المفضل!</div>
         
-        <input type="text" id="customerName" placeholder="اسم العميل *">
-        <input type="text" id="customerPhone" placeholder="رقم الجوال * (مثال: 010xxxxxxxx)">
-        <input type="text" id="customerAddress" placeholder="عنوان التوصيل *">
+        <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
+        <input type="text" id="customerPhone" placeholder="رقم الجوال (مثال: 010xxxxxxxx) *">
+        <input type="text" id="customerAddress" placeholder="عنوان التوصيل بالتفصيل *">
 
         <button id="checkoutBtn" onclick="checkoutOrder()">إتمام وطلب السلة الآن عبر الواتساب 🚀</button>
     </div>
@@ -62,8 +178,8 @@
 
     function addToCart(name, price) {
         cartItem = { name, price };
-        document.getElementById('cartSummary').innerHTML = `📦 <b>${name}</b> - ${price} ج.م`;
-        alert(`تمت إضافة ${name} بنجاح إلى السلة!`);
+        document.getElementById('cartSummary').innerHTML = `📦 المنتج المختار: <b>${name}</b> - السعر: <b>${price} ج.م</b>`;
+        alert(`تمت إضافة "${name}" بنجاح إلى السلة!`);
     }
 
     function checkoutOrder() {
@@ -71,8 +187,8 @@
         const phone = document.getElementById('customerPhone').value.trim();
         const address = document.getElementById('customerAddress').value.trim();
 
-        if (!name || !phone) {
-            alert('من فضلك ادخل الاسم ورقم الجوال على الأقل!');
+        if (!name || !phone || !address) {
+            alert('من فضلك ادخل (الاسم، رقم الجوال، العنوان) لإتمام الطلب!');
             return;
         }
 
@@ -81,11 +197,11 @@
             return;
         }
 
-        let msg = `🛒 طلب جديد عبر المنصة:\n`;
+        let msg = `🛒 طلب جديد عبر منصة جاهز:\n\n`;
         msg += `👤 الاسم: ${name}\n`;
         msg += `📱 الجوال: ${phone}\n`;
-        msg += `📍 العنوان: ${address || 'توصيل سريع'}\n`;
-        msg += `📦 المنتج: ${cartItem.name} (${cartItem.price} ج.م)\n`;
+        msg += `📍 العنوان: ${address}\n\n`;
+        msg += `📦 المنتج المطلـوب:\n- ${cartItem.name} (${cartItem.price} ج.م)\n`;
 
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
     }
