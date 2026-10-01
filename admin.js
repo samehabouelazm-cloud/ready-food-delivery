@@ -265,6 +265,18 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 let lastOrderCount = (JSON.parse(localStorage.getItem('ready_orders')) || []).length;
+// 1. دالة تفعيل التنبيهات الصوتية عبر تفاعل حقيقي من المستخدم
+window.enableAudioAlerts = function() {
+    localStorage.setItem('audio_allowed', 'true');
+    const testAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+    testAudio.play().then(() => {
+        alert("✅ تم تفعيل التنبيهات الصوتية الدائمة بنجاح!");
+    }).catch(e => {
+        console.log("Audio unlock failed", e);
+    });
+};
+
+// 2. دالة تحميل وعرض الطلبات في اللوحة
 function loadAdminOrders() {
     const ordersContainer = document.getElementById('orders-container');
     if (!ordersContainer) return;
@@ -276,7 +288,7 @@ function loadAdminOrders() {
         return;
     }
 
-    ordersContainer.innerHTML = ''; // تفريغ القائمة لتجنب التكرار
+    ordersContainer.innerHTML = ''; // تفريغ الحاوية قبل العرض
 
     orders.forEach((order, index) => {
         let card = document.createElement('div');
@@ -284,7 +296,7 @@ function loadAdminOrders() {
         card.innerHTML = `
             <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📦 طلب رقم #${order.id || (index + 1)}</h4>
             <p><strong>👤 العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
-            <p><strong>🛒 التفاصيل:</strong> ${order.details || (order.items ? JSON.stringify(order.items) : 'طلب جديد')}</p>
+            <p><strong>🛒 التفاصيل:</strong> ${typeof order.details === 'object' ? JSON.stringify(order.details) : (order.details || 'طلب جديد')}</p>
             <p><strong>💰 الإجمالي:</strong> ${order.total || 0} جنيه</p>
             <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">التاريخ: ${order.createdAt || 'الآن'}</p>
         `;
@@ -292,21 +304,25 @@ function loadAdminOrders() {
     });
 }
 
-// تشغيل التحميل عند فتح الصفحة
+// 3. التشغيل عند تحميل الصفحة
 window.addEventListener('DOMContentLoaded', () => {
     loadAdminOrders();
 });
 
+// 4. نظام المراقبة والتنبيهات الحية
 let lastOrderCount = (JSON.parse(localStorage.getItem('ready_orders')) || []).length;
 
 function checkNewOrdersSound() {
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
     if (orders.length > lastOrderCount) {
-        try {
-            const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            adminAudio.play().catch(e => {});
-        } catch (e) {}
-        loadAdminOrders(); // تحديث فوري للقائمة عند وصول طلب جديد
+        // تشغيل الصوت فقط في حال منح الإذن مسبقاً
+        if (localStorage.getItem('audio_allowed') === 'true') {
+            try {
+                const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                adminAudio.play().catch(e => console.log("Audio play prevented"));
+            } catch (e) {}
+        }
+        loadAdminOrders(); // تحديث فوري للقائمة
     }
     lastOrderCount = orders.length;
 }
