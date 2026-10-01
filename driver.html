@@ -456,3 +456,17 @@
     </script>
 </body>
 </html>
+<script>
+// كود تعبئة قائمة الكباتن في صفحة الكابتن driver.html
+document.addEventListener('DOMContentLoaded', () => {
+    const captainSelect = document.getElementById('captainSelect') || document.querySelector('select');
+    
+    if (captainSelect) {
+        let captains = JSON.parse(localStorage.getItem('ready_captains')) || ['مهند سامح', 'كابتن أحمد', 'كابتن محمد'];
+        localStorage.setItem('ready_captains', JSON.stringify(captains));
+        
+        captainSelect.innerHTML = '<option value="">-- اختر اسم الكابتن --</option>' + 
+            captains.map(name => `<option value="${name}">${name}</option>`).join('');
+    }
+});
+</script>
