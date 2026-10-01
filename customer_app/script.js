@@ -1,33 +1,39 @@
 function sendOrderToSystem(orderData) {
-    // 1. جلب الطلبات الحالية من المفتاح المشترك
-    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-    
-    // 2. تجهيز كائن الطلب الجديد بكامل بياناته
-    const newOrder = {
-        id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-        customerName: orderData && orderData.name ? orderData.name : 'عميل كريم',
-        phone: orderData && orderData.phone ? orderData.phone : '',
-        address: orderData && orderData.address ? orderData.address : '',
-        items: orderData && orderData.items ? orderData.items : (JSON.parse(localStorage.getItem('ready_cart')) || []),
-        total: orderData && orderData.total ? orderData.total : 0,
-        status: 'جديد',
-        captain: '',
-        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    // 3. إضافة الطلب للقائمة وحفظه في الـ localStorage فوراً (الخطوة الأهم)
-    orders.push(newOrder);
-    localStorage.setItem('ready_orders', JSON.stringify(orders));
-    localStorage.removeItem('ready_cart');
-    
-    // 4. تشغيل صوت تنبيه (Notification Sound) للتاكيد
     try {
-        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-        audio.play().catch(e => console.log("Audio play blocked:", e));
-    } catch (err) {
-        console.log("Sound error:", err);
+        // تجهيز بيانات الطلب الجديد
+        const newOrder = {
+            id: 'ORD-' + Date.now(),
+            items: orderData.items || [],
+            total: orderData.total || 0,
+            customerName: orderData.customerName || 'عميل كريم',
+            phone: orderData.phone || '',
+            address: orderData.address || '',
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        };
+
+        // جلب الطلبات الحالية من التخزين المشترك
+        let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+        orders.push(newOrder);
+        
+        // حفظ القائمة المحدثة
+        localStorage.setItem('ready_orders', JSON.stringify(orders));
+        localStorage.removeItem('ready_cart');
+
+        // تنبيه صوتي لو متاح
+        try {
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            audio.play().catch(e => console.log("Audio blocked"));
+        } catch (e) {}
+
+        console.log("تم حفظ الطلب بنجاح:", newOrder);
+        alert("🎉 تم إرسال طلبك بنجاح!");
+
+        // الانتقال لصفحة تتبع الطلب لو حابب (مثلا order-status.html أو تظبيط الصفحة الحالية)
+        // window.location.href = 'tracking.html'; // فعلها لو عندك صفحة تتبع
+
+    } catch (error) {
+        console.error("خطأ في إرسال الطلب:", error);
+        alert("حدث خطأ أثناء إرسال الطلب، برجاء المحاولة مرة أخرى.");
     }
-    
-    console.log("تم إرسال الطلب بنجاح:", newOrder);
-    alert("تم إرسال طلبك بنجاح يا بطل! 🚀");
 }
