@@ -315,16 +315,46 @@
     </script>
 </head>
 <body>
+<!-- شاشة البانرات الإعلانية المتحركة داخل التطبيق -->
+<div class="hero-banner-container" style="margin-bottom: 20px; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+    <div id="promoSlider" style="display: flex; transition: transform 0.5s ease-in-out; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 30px 20px; text-align: center; width: 100%;">
+        
+        <!-- الإعلان الأول -->
+        <div class="promo-slide" style="min-width: 100%; box-sizing: border-box;">
+            <div style="font-size: 22px; font-weight: bold; margin-bottom: 8px;">🚀 توصيل سريع للحوم، الأسماك، والأجبان اليومية!</div>
+            <div style="font-size: 15px; opacity: 0.95;">طازجة ومنتقاة بعناية لتبدع في مطبخك كل يوم 🥩🐟</div>
+        </div>
 
-    <div class="navbar">
-        <div class="brand">
-            <span>READY</span> جاهز ⚡
+        <!-- الإعلان الثاني -->
+        <div class="promo-slide" style="min-width: 100%; box-sizing: border-box;">
+            <div style="font-size: 22px; font-weight: bold; margin-bottom: 8px;">⭐ جودة مضمونة 100%</div>
+            <div style="font-size: 15px; opacity: 0.95;">أسعار منافسة وتوصيل مباشر حتى باب بيتك بكل سهولة 🛵</div>
         </div>
-        <div style="font-size: 12px; color: #94a3b8;">
-            📍 توصيل سريع
+
+        <!-- الإعلان الثالث -->
+        <div class="promo-slide" style="min-width: 100%; box-sizing: border-box;">
+            <div style="font-size: 22px; font-weight: bold; margin-bottom: 8px;">🔥 عروض الكيلو الطازج</div>
+            <div style="font-size: 15px; opacity: 0.95;">اطلب الآن واستفيد بأقوى تشكيلة منتجات اليوم 🛒</div>
         </div>
+
     </div>
+</div>
 
+<!-- شاشة الإعلانات -->
+<!-- شاشة الإعلانات -->
+<div class="hero-banner-container" style="margin-bottom: 20px; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 25px; text-align: center;">
+    <div style="font-size: 22px; font-weight: bold; margin-bottom: 8px;">🚀 توصيل سريع للحوم، الأسماك، والأجبان اليومية!</div>
+    <div style="font-size: 15px; opacity: 0.95;">طازجة ومنتقاة بعناية لتبدع في مطبخك كل يوم 🥩🐟</div>
+</div>
+
+<div class="navbar">
+    <div class="brand">
+        <span>READY</span> جاهز ⚡
+    </div>
+    <div style="font-size: 12px; color: #94a3b8;">
+        📍 توصيل سريع
+    </div>
+</div>
     <div class="main-layout">
         
         <div class="cart-sidebar">
@@ -376,12 +406,6 @@
 
             <button type="button" class="checkout-btn" onclick="sendOrder()">إتمام وطلب السلة الآن 🚀</button>
         </div>
-
-        <div class="content-area">
-            <div class="banner">
-                <h2>توصيل سريع للحوم، الأسماك، والأجبان اليومية!</h2>
-                <p>احصل على خصم بقيمة 30 ج.م باستخدام الكود: READY2026</p>
-            </div>
 
             <div class="categories-bar-wrapper">
                 <div id="categoriesScrollBar" class="categories-bar"></div>
