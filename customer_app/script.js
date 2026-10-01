@@ -1,3 +1,16 @@
+// دمج المنتجات المخزنة محلياً مع المنتجات الافتراضية
+document.addEventListener("DOMContentLoaded", function() {
+    let savedProducts = JSON.parse(localStorage.getItem("ready_products")) || [];
+    if (savedProducts.length > 0 && typeof menuItems !== 'undefined') {
+        // دمج المنتجات المضافة لو مش موجودة
+        savedProducts.forEach(sp => {
+            if (!menuItems.some(m => m.id === sp.id)) {
+                menuItems.push(sp);
+            }
+        });
+        if (typeof renderMenu === 'function') renderMenu();
+    }
+});
 let currentQty = 1;
 
 // دالة تغيير الكمية (تعمل الآن بالموجب والسالب بدقة)

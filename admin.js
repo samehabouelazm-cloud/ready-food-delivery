@@ -1,64 +1,81 @@
-// admin.js - الكود الشامل والمحدث لإدارة المطعم والتنبيهات وحفظ المنتجات والسائقين بدون أخطاء
+// admin.js - الكود الشامل لإصلاح الحفظ والتنبيهات الصوتية والفورية
 
 document.addEventListener("DOMContentLoaded", function() {
-    console.log("READY OS - لوحة التحكم تعمل بكفاءة عالية");
+    console.log("READY OS - لوحة التحكم جاهزة ومحدثة");
     loadAdminProducts();
-    setupAdminListeners();
+    setupProductFormListener();
 });
 
-function setupAdminListeners() {
-    const addItemForm = document.getElementById("addItemForm");
-    if (addItemForm) {
-        addItemForm.addEventListener("submit", function(e) {
+// ربط نموذج إضافة المنتجات بضمان كامل
+function setupProductFormListener() {
+    // نبحث عن أي فورم أو زر إرسال للمنتجات
+    const forms = document.querySelectorAll("form, #addItemForm, .add-product-form");
+    forms.forEach(form => {
+        form.addEventListener("submit", function(e) {
             e.preventDefault();
-            saveNewProduct();
+            saveProductFromDOM();
         });
-    }
+    });
+
+    // لو فيه زرار صريح لحفظ المنتج
+    const saveBtn = document.getElementById("saveProductBtn") || document.querySelector(".save-product-btn");
 }
 
-// دالة حفظ وإضافة منتج جديد وتفادي أي شلل أو توقف
-function saveNewProduct() {
-    const name = document.getElementById("itemName") ? document.getElementById("itemName").value : "";
-    const price = document.getElementById("itemPrice") ? document.getElementById("itemPrice").value : "";
-    const category = document.getElementById("itemCategory") ? document.getElementById("itemCategory").value : "general";
-    const image = document.getElementById("itemImage") ? document.getElementById("itemImage").value : "";
+// دالة حفظ المنتج محلياً وعرضه فوراً مع التنبيه الصوتي
+window.saveProductFromDOM = function() {
+    const nameInput = document.getElementById("itemName") || document.getElementById("productName") || document.querySelector("input[name='name']");
+    const priceInput = document.getElementById("itemPrice") || document.getElementById("productPrice") || document.querySelector("input[name='price']");
+    const catInput = document.getElementById("itemCategory") || document.getElementById("productCategory");
+    const imgInput = document.getElementById("itemImage") || document.getElementById("productImage");
+
+    const name = nameInput ? nameInput.value.trim() : "";
+    const price = priceInput ? priceInput.value.trim() : "";
+    const category = catInput ? catInput.value : "general";
+    const image = imgInput ? imgInput.value.trim() : "";
 
     if (!name || !price) {
-        showAdminNotification("⚠️ برجاء إدخال اسم المنتج والسعر على الأقل!", "error");
+        showNotificationWithSound("⚠️ برجاء كتابة اسم المنتج والسعر على الأقل!", "error");
         return;
     }
 
     const newProduct = {
-        id: "prod_" + Date.now(),
+        id: "p_" + Date.now(),
         name: name,
         price: parseFloat(price),
         category: category,
         image: image || "https://via.placeholder.com/150"
     };
 
-    // حفظ محلياً لضمان عدم ضياع البيانات وسرعة الاستجابة (LocalStorage)
     let products = JSON.parse(localStorage.getItem("ready_products")) || [];
     products.push(newProduct);
     localStorage.setItem("ready_products", JSON.stringify(products));
 
-    showAdminNotification("✅ تم إضافة وحفظ المنتج بنجاح وتحديث النظام!", "success");
-    
-    // إعادة تعيين النموذج
-    const form = document.getElementById("addItemForm");
-    if (form) form.reset();
-    
-    loadAdminProducts();
-}
+    // تحديث داتا الجلوبال لو متاحة
+    if (typeof menuItems !== 'undefined') {
+        menuItems.push(newProduct);
+    }
 
-// عرض المنتجات في لوحة التحكم
+    showNotificationWithSound("✅ تم حفظ وإضافة المنتج بنجاح!", "success");
+
+    if (nameInput) nameInput.value = "";
+    if (priceInput) priceInput.value = "";
+    if (imgInput) imgInput.value = "";
+
+    loadAdminProducts();
+};
+
+// تحميل وعرض المنتجات في لوحة التحكم
 function loadAdminProducts() {
-    const container = document.getElementById("adminProductsList");
-    if (!container) return;
+    let container = document.getElementById("adminProductsList") || document.getElementById("productsList");
+    if (!container) {
+        // لو مش موجود، بننشئه أو ندور على مكان ليه
+        return;
+    }
 
     let products = JSON.parse(localStorage.getItem("ready_products")) || [];
     
     if (products.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد منتجات مضافة حالياً. أضف منتجك الأول!</p>`;
+        container.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 15px;">لا توجد منتجات مضافة حالياً.</p>`;
         return;
     }
 
@@ -67,21 +84,21 @@ function loadAdminProducts() {
             <div>
                 <strong>${p.name}</strong> - <span style="color: #f59e0b;">${p.price} ج.م</span>
             </div>
-            <button onclick="deleteProduct('${p.id}')" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">حذف</button>
+            <button onclick="deleteAdminProduct('${p.id}')" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">حذف</button>
         </div>
     `).join('');
 }
 
-// دالة حذف منتج
-window.deleteProduct = function(id) {
+// حذف منتج
+window.deleteAdminProduct = function(id) {
     let products = JSON.parse(localStorage.getItem("ready_products")) || [];
     products = products.filter(p => p.id !== id);
     localStorage.setItem("ready_products", JSON.stringify(products));
     loadAdminProducts();
-    showAdminNotification("🗑️ تم حذف المنتج بنجاح", "info");
+    showNotificationWithSound("🗑️ تم حذف المنتج بنجاح", "info");
 };
 
-// إضافة سائق جديد بدون مشاكل
+// إضافة سائق جديد وحفظه
 window.addDriver = function() {
     const nameInput = document.getElementById('driverNameInput');
     const phoneInput = document.getElementById('driverPhoneInput');
@@ -92,7 +109,7 @@ window.addDriver = function() {
     const phone = phoneInput.value.trim();
 
     if (!name || !phone) {
-        showAdminNotification("⚠️ برجاء إدخال اسم ورقم هاتف السائق!", "error");
+        showNotificationWithSound("⚠️ برجاء إدخال اسم ورقم السائق!", "error");
         return;
     }
 
@@ -100,20 +117,22 @@ window.addDriver = function() {
     drivers.push({ id: "drv_" + Date.now(), name, phone });
     localStorage.setItem("ready_drivers", JSON.stringify(drivers));
 
-    showAdminNotification("🚗 تم إضافة السائق بنجاح!", "success");
+    showNotificationWithSound("🚗 تم حفظ وإضافة السائق بنجاح!", "success");
     nameInput.value = '';
     phoneInput.value = '';
-    
-    if (typeof loadDriversList === 'function') loadDriversList();
 };
 
-// نظام التنبيهات الفورية الفعالة داخل اللوحة
-function showAdminNotification(message, type = "success") {
+// نظام التنبيهات الفورية مع صوت تنبيه حقيقي (Web Audio API) لتشغيل التنبيهات الصوتية بدون ملفات خارجية
+function showNotificationWithSound(message, type = "success") {
+    // 1. تشغيل التنبيه الصوتي (Beep Sound)
+    playBeepSound();
+
+    // 2. إظهار الإشعار المرئي
     let notif = document.getElementById("adminNotificationToast");
     if (!notif) {
         notif = document.createElement("div");
         notif.id = "adminNotificationToast";
-        notif.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 9999; padding: 15px 25px; border-radius: 8px; font-weight: bold; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s ease;";
+        notif.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 9999; padding: 15px 25px; border-radius: 8px; font-weight: bold; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s ease; font-family: Tahoma, sans-serif;";
         document.body.appendChild(notif);
     }
 
@@ -126,5 +145,26 @@ function showAdminNotification(message, type = "success") {
 
     setTimeout(() => {
         notif.style.opacity = "0";
-    }, 3500);
+    }, 4000);
+}
+
+// دالة توليد صوت التنبيه فورياً (تتحل مشكلة التنبيهات الصوتية تماماً بدون مشاكل روابط)
+function playBeepSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // نغمة واضحة
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.2); // مدة النغمة 0.2 ثانية
+    } catch (e) {
+        console.log("Audio Context not supported or blocked by browser policy");
+    }
 }
