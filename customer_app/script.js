@@ -77,3 +77,25 @@ function checkoutOrder() {
     // إعادة تحميل الصفحة أو التوجيه لصفحة التتبع إن وجدت
     window.location.reload();
 }
+// دالة إرسال الطلب من صفحة العميل وحفظه بشكل صحيح
+function sendOrderToSystem(orderData) {
+    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+    
+    const newOrder = {
+        id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+        customerName: orderData ? orderData.name : 'عميل كريم',
+        phone: orderData ? orderData.phone : '',
+        address: orderData ? orderData.address : '',
+        items: orderData ? orderData.items : [],
+        total: orderData ? orderData.total : 0,
+        status: 'جديد',
+        captain: '',
+        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    orders.push(newOrder);
+    localStorage.setItem('ready_orders', JSON.stringify(orders));
+    
+    console.log("تم إرسال الطلب بنجاح:", newOrder);
+    alert("تم إرسال طلبك بنجاح يا بطل! 🚀");
+}
