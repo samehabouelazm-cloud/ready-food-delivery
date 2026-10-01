@@ -83,18 +83,18 @@ function sendOrderToSystem(orderData) {
     
     const newOrder = {
         id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-        customerName: orderData ? orderData.name : 'عميل كريم',
-        phone: orderData ? orderData.phone : '',
-        address: orderData ? orderData.address : '',
-        items: orderData ? orderData.items : [],
-        total: orderData ? orderData.total : 0,
+        customerName: orderData && orderData.name ? orderData.name : 'عميل كريم',
+        phone: orderData && orderData.phone ? orderData.phone : '',
+        address: orderData && orderData.address ? orderData.address : '',
+        items: orderData && orderData.items ? orderData.items : (JSON.parse(localStorage.getItem('ready_cart')) || []),
+        total: orderData && orderData.total ? orderData.total : 0,
         status: 'جديد',
         captain: '',
         time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
     };
     
     orders.push(newOrder);
-    localStorage.setItem('ready_orders', JSON.stringify(orders));
+localStorage.removeItem('ready_cart');
     
     console.log("تم إرسال الطلب بنجاح:", newOrder);
     alert("تم إرسال طلبك بنجاح يا بطل! 🚀");
