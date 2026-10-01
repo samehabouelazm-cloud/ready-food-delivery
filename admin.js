@@ -207,3 +207,19 @@ function loadAdminOrders() {
 // تشغيل نظام التحديث الحي تلقائياً كل 3 ثواني
 setInterval(loadAdminOrders, 3000);
 window.addEventListener('DOMContentLoaded', loadAdminOrders);
+let lastOrderCount = (JSON.parse(localStorage.getItem('ready_orders')) || []).length;
+
+function checkNewOrdersSound() {
+    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+    if (orders.length > lastOrderCount) {
+        // تشغيل صوت تنبيه للإدارة
+        try {
+            const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            adminAudio.play();
+        } catch (e) {}
+    }
+    lastOrderCount = orders.length;
+}
+
+// فحص دوري للتنبيهات والطلبات كل ثانيتين
+setInterval(checkNewOrdersSound, 2000);
