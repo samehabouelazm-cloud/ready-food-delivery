@@ -178,48 +178,137 @@ function playBeepSound() {
 }
 // الكود الثاني: نظام جلب وعرض طلبات العملاء وتحديثها حياً في لوحة التحكم
 function loadAdminOrders() {
-    // البحث عن الحاوية المخصصة لعرض الطلبات في صفحة admin.html
-    const ordersContainer = document.getElementById('ordersContainer') || document.querySelector('.orders-section') || document.getElementById('ordersList');
+    const ordersContainer = document.getElementById('orders-container') || document.querySelector('.orders-container') || document.body;
     
+    try {
+        // قراءة الطلبات بـ Safety Fallback كامل
+        let rawData = localStorage.getItem('ready_orders');
+        let orders = [];
+        
+        if (rawData) {
+            orders = JSON.parse(rawData);
+        }
+        
+        // لو مش مصفوفة، نرجّعها مصفوفة فاضية عشان السيستم ما يوقعش
+        if (!Array.isArray(orders)) {
+            orders = [];
+        }
+
+        console.log("Loaded orders in admin:", orders);
+
+        // البحث عن مكان عرض الطلبات أو إنشائه لو مش موجود
+        let targetBox = document.getElementById('orders-container');
+        if (!targetBox) {
+            // لو مش محطوط ID صريح، ندور في الصفحة
+            targetBox = document.querySelector('div:has(#orders-container)') || document.body;
+        }
+
+        if (orders.length === 0) {
+            // تحديث رسالة التحميل بوضوح
+            const loadingText = document.querySelector('p');
+            if (loadingText && loadingText.innerText.includes('جاري تحميل')) {
+                loadingText.innerText = 'لا توجد طلبات جديدة حالياً';
+            }
+            return;
+        }
+
+        // تفريغ وعرض الطلبات
+        let htmlContent = '<div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">';
+        orders.forEach((order, index) => {
+            htmlContent.innerHTML += ''; // سيتم بناء الكارد
+            let card = document.createElement('div');
+            card.style.cssText = "background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 10px;";
+            card.innerHTML = `
+                <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📦 طلب رقم #${order.id || (index + 1)}</h4>
+                <p><strong>👤 العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
+                <p><strong>🛒 التفاصيل:</strong> ${JSON.stringify(order.items || order.details || 'طلب عام')}</p>
+                <p><strong>💰 الإجمالي:</strong> ${order.total || 0} جنيه</p>
+                <p style="font-size: 12px; color: #94a3b8;">التاريخ: ${order.createdAt || 'الآن'}</p>
+            `;
+            // نتأكد نضيفه مكان "جاري تحميل الطلبات"
+        });
+        
+    } catch (e) {
+        console.error("Error loading admin orders:", e);
+    }
+}
+function loadAdminOrders() {
+    const ordersContainer = document.getElementById('orders-container');
     if (!ordersContainer) return;
 
-    // جلب الطلبات من الـ localStorage المشترك
-    const orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-
+    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+    
     if (orders.length === 0) {
-        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px; font-size:15px;">لا توجد طلبات جديدة حالياً 📭</p>';
+        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 20px;">لا توجد طلبات جديدة حالياً</p>';
         return;
     }
 
-    // عرض الطلبات بتصميم احترافي ومنظم
-    ordersContainer.innerHTML = orders.map(order => `
-        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; margin-bottom: 15px; color: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
-                <span style="font-weight: bold; color: #f59e0b; font-size: 16px;">📦 رقم الطلب: ${order.id}</span>
-                <span style="background: #0d9488; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold;">${order.status || 'قيد المراجعة'}</span>
-            </div>
-            <div style="font-size: 14px; margin-bottom: 6px; color: #e2e8f0;">💰 الإجمالي: <b style="color: #34d399;">${order.total} ر.س</b></div>
-            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">⏰ ووقت الطلب: ${order.time || 'الآن'}</div>
-        </div>
-    `).join('');
+    ordersContainer.innerHTML = ''; // تفريغ القائمة لتجنب التكرار
+
+    orders.forEach((order, index) => {
+        let card = document.createElement('div');
+        card.style.cssText = "background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 12px;";
+        card.innerHTML = `
+            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📦 طلب رقم #${order.id || (index + 1)}</h4>
+            <p><strong>👤 العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
+            <p><strong>🛒 التفاصيل:</strong> ${order.details || (order.items ? JSON.stringify(order.items) : 'طلب جديد')}</p>
+            <p><strong>💰 الإجمالي:</strong> ${order.total || 0} جنيه</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">التاريخ: ${order.createdAt || 'الآن'}</p>
+        `;
+        ordersContainer.appendChild(card);
+    });
 }
 
-// تشغيل نظام التحديث الحي تلقائياً كل 3 ثواني
-setInterval(loadAdminOrders, 3000);
-window.addEventListener('DOMContentLoaded', loadAdminOrders);
+// تشغيل التحميل والتنبيهات بانتظام
+window.addEventListener('DOMContentLoaded', () => {
+    loadAdminOrders();
+});
+
+let lastOrderCount = (JSON.parse(localStorage.getItem('ready_orders')) || []).length;
+function loadAdminOrders() {
+    const ordersContainer = document.getElementById('orders-container');
+    if (!ordersContainer) return;
+
+    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+    
+    if (orders.length === 0) {
+        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 20px;">لا توجد طلبات جديدة حالياً</p>';
+        return;
+    }
+
+    ordersContainer.innerHTML = ''; // تفريغ القائمة لتجنب التكرار
+
+    orders.forEach((order, index) => {
+        let card = document.createElement('div');
+        card.style.cssText = "background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 12px;";
+        card.innerHTML = `
+            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📦 طلب رقم #${order.id || (index + 1)}</h4>
+            <p><strong>👤 العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
+            <p><strong>🛒 التفاصيل:</strong> ${order.details || (order.items ? JSON.stringify(order.items) : 'طلب جديد')}</p>
+            <p><strong>💰 الإجمالي:</strong> ${order.total || 0} جنيه</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">التاريخ: ${order.createdAt || 'الآن'}</p>
+        `;
+        ordersContainer.appendChild(card);
+    });
+}
+
+// تشغيل التحميل عند فتح الصفحة
+window.addEventListener('DOMContentLoaded', () => {
+    loadAdminOrders();
+});
+
 let lastOrderCount = (JSON.parse(localStorage.getItem('ready_orders')) || []).length;
 
 function checkNewOrdersSound() {
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
     if (orders.length > lastOrderCount) {
-        // تشغيل صوت تنبيه للإدارة
         try {
             const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            adminAudio.play();
+            adminAudio.play().catch(e => {});
         } catch (e) {}
+        loadAdminOrders(); // تحديث فوري للقائمة عند وصول طلب جديد
     }
     lastOrderCount = orders.length;
 }
 
-// فحص دوري للتنبيهات والطلبات كل ثانيتين
 setInterval(checkNewOrdersSound, 2000);
