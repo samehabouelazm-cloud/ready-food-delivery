@@ -1,26 +1,34 @@
 // admin.js - الكود الشامل لإصلاح الحفظ والتنبيهات الصوتية والفورية
 
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("READY OS - لوحة التحكم جاهزة ومحدثة");
-    loadAdminProducts();
-    setupProductFormListener();
-});
+// الكود الأول: إضافة وحفظ المنتجات لعرضها فوراً للعملاء
+function addNewProduct(event) {
+    if (event) event.preventDefault();
+    
+    // تأكد أن أسماء الـ IDs هنا مطابقة للي عندك في نموذج الإضافة في admin.html
+    const nameInput = document.getElementById('productName') || document.getElementById('itemName');
+    const priceInput = document.getElementById('productPrice') || document.getElementById('itemPrice');
+    const imageInput = document.getElementById('productImage') || document.getElementById('itemImage');
 
-// ربط نموذج إضافة المنتجات بضمان كامل
-function setupProductFormListener() {
-    // نبحث عن أي فورم أو زر إرسال للمنتجات
-    const forms = document.querySelectorAll("form, #addItemForm, .add-product-form");
-    forms.forEach(form => {
-        form.addEventListener("submit", function(e) {
-            e.preventDefault();
-            saveProductFromDOM();
-        });
-    });
+    if (!nameInput || !priceInput) {
+        alert('يرجى التأكد من حقول ادخال اسم السعر والاسم في لوحة التحكم.');
+        return;
+    }
 
-    // لو فيه زرار صريح لحفظ المنتج
-    const saveBtn = document.getElementById("saveProductBtn") || document.querySelector(".save-product-btn");
+    const newProduct = {
+        id: Date.now(),
+        name: nameInput.value,
+        price: parseFloat(priceInput.value),
+        image: imageInput ? imageInput.value : 'https://via.placeholder.com/150'
+    };
+
+    // حفظ المنتج في الـ localStorage بمفتاح ready_products المشترك مع العميل
+    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
+    products.push(newProduct);
+    localStorage.setItem('ready_products', JSON.stringify(products));
+
+    alert('تم إضافة المنتج بنجاح وحفظه للعملاء! 🚀');
+    location.reload();
 }
-
 // دالة حفظ المنتج محلياً وعرضه فوراً مع التنبيه الصوتي
 window.saveProductFromDOM = function() {
     const nameInput = document.getElementById("itemName") || document.getElementById("productName") || document.querySelector("input[name='name']");
@@ -168,3 +176,34 @@ function playBeepSound() {
         console.log("Audio Context not supported or blocked by browser policy");
     }
 }
+// الكود الثاني: نظام جلب وعرض طلبات العملاء وتحديثها حياً في لوحة التحكم
+function loadAdminOrders() {
+    // البحث عن الحاوية المخصصة لعرض الطلبات في صفحة admin.html
+    const ordersContainer = document.getElementById('ordersContainer') || document.querySelector('.orders-section') || document.getElementById('ordersList');
+    
+    if (!ordersContainer) return;
+
+    // جلب الطلبات من الـ localStorage المشترك
+    const orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+
+    if (orders.length === 0) {
+        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px; font-size:15px;">لا توجد طلبات جديدة حالياً 📭</p>';
+        return;
+    }
+
+    // عرض الطلبات بتصميم احترافي ومنظم
+    ordersContainer.innerHTML = orders.map(order => `
+        <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; margin-bottom: 15px; color: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+                <span style="font-weight: bold; color: #f59e0b; font-size: 16px;">📦 رقم الطلب: ${order.id}</span>
+                <span style="background: #0d9488; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold;">${order.status || 'قيد المراجعة'}</span>
+            </div>
+            <div style="font-size: 14px; margin-bottom: 6px; color: #e2e8f0;">💰 الإجمالي: <b style="color: #34d399;">${order.total} ر.س</b></div>
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">⏰ ووقت الطلب: ${order.time || 'الآن'}</div>
+        </div>
+    `).join('');
+}
+
+// تشغيل نظام التحديث الحي تلقائياً كل 3 ثواني
+setInterval(loadAdminOrders, 3000);
+window.addEventListener('DOMContentLoaded', loadAdminOrders);
