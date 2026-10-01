@@ -3,57 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - إدارة المتجر</title>
+    <title>لوحة التحكم الاحترافية - إدارة المتجر</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .container { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h1 { color: #f59e0b; text-align: center; margin-bottom: 20px; font-size: 22px; }
+        .container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        h1 { color: #f59e0b; text-align: center; margin-bottom: 25px; font-size: 24px; border-bottom: 2px solid #334155; padding-bottom: 15px; }
+        
+        .form-section { background: #0f172a; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #334155; }
+        .form-section h3 { color: #38bdf8; margin-bottom: 15px; font-size: 18px; }
+        
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #cbd5e1; font-size: 14px; }
-        input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
-        button { background: #22c55e; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #16a34a; }
-        .preview { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 8px; }
-        .preview h3 { color: #38bdf8; margin-bottom: 10px; }
-        ul { list-style: none; }
-        li { background: #1e293b; padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn { background: #ef4444; padding: 4px 8px; font-size: 12px; width: auto; margin: 0; }
-        .link-store { display: block; text-align: center; margin-top: 15px; color: #f59e0b; text-decoration: none; font-weight: bold; }
+        label { display: block; margin-bottom: 6px; color: #cbd5e1; font-size: 14px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
+        input[type="file"] { padding: 8px; background: #0f172a; cursor: pointer; }
+        input:focus, select:focus { border-color: #f59e0b; outline: none; }
+        
+        .btn-add { background: #22c55e; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-add:hover { background: #16a34a; }
+        
+        .preview-box { margin-top: 25px; background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
+        .preview-box h3 { color: #f59e0b; margin-bottom: 15px; }
+        
+        .product-list-item { background: #1e293b; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
+        .product-info-flex { display: flex; align-items: center; gap: 12px; }
+        .product-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #475569; }
+        
+        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .delete-btn:hover { background: #dc2626; }
+        
+        .link-store { display: block; text-align: center; margin-top: 20px; color: #f59e0b; text-decoration: none; font-weight: bold; font-size: 15px; }
+        .link-store:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚙️ لوحة تحكم المتجر</h1>
+    <h1>🍽️ لوحة إدارة الأقسام والمنتجات</h1>
     
-    <div class="form-group">
-        <label>اسم القسم (مثل: المشويات، الأجبان):</label>
-        <input type="text" id="catName" placeholder="أدخل اسم القسم">
+    <div class="form-section">
+        <h3>➕ إضافة صنف جديد للمنيو</h3>
+        
+        <div class="form-group">
+            <label>اسم القسم (مثال: قسم المشويات، قسم الأجبان):</label>
+            <input type="text" id="catName" placeholder="أدخل اسم القسم">
+        </div>
+
+        <div class="form-group">
+            <label>اسم الصنف / المنتج (مثال: سمك بلطي مشوي):</label>
+            <input type="text" id="prodName" placeholder="أدخل اسم الصنف">
+        </div>
+
+        <div class="form-group">
+            <label>السعر بالجنيه (مثال: 120):</label>
+            <input type="number" id="prodPrice" placeholder="أدخل السعر">
+        </div>
+
+        <div class="form-group">
+            <label>صورة المنتج (اختر من الكمبيوتر):</label>
+            <input type="file" id="prodImgFile" accept="image/*">
+        </div>
+
+        <button class="btn-add" onclick="addNewProduct()">إضافة الصنف وقسمه للمنيو 🚀</button>
     </div>
 
-    <div class="form-group">
-        <label>اسم المنتج (مثل: سمك بلطي مشوي):</label>
-        <input type="text" id="prodName" placeholder="أدخل اسم المنتج">
-    </div>
+    <a href="index.html" class="link-store">🔗 الانتقال إلى صفحة عرض المتجر (للعملاء)</a>
 
-    <div class="form-group">
-        <label>السعر بالجنيه:</label>
-        <input type="number" id="prodPrice" placeholder="أدخل السعر (مثل: 100)">
-    </div>
-
-    <div class="form-group">
-        <label>رابط صورة المنتج (رابط مباشر للصورة):</label>
-        <input type="text" id="prodImg" placeholder="https://example.com/image.jpg">
-    </div>
-
-    <button onclick="addProduct()">إضافة المنتج للمتجر 🚀</button>
-
-    <a href="index.html" class="link-store">🔗 عرض متجر العملاء</a>
-
-    <div class="preview">
-        <h3>📦 المنتجات المضافة حالياً:</h3>
-        <ul id="productsList"></ul>
+    <div class="preview-box">
+        <h3>📦 المنتجات المسجلة في النظام:</h3>
+        <div id="adminProductsList"></div>
     </div>
 </div>
 
@@ -66,57 +84,78 @@
         localStorage.setItem('storeProducts', JSON.stringify(products));
     }
 
-    function renderAdminList() {
+    function renderAdminProducts() {
         const products = getProducts();
-        const list = document.getElementById('productsList');
-        list.innerHTML = '';
-        
+        const container = document.getElementById('adminProductsList');
+        container.innerHTML = '';
+
         if (products.length === 0) {
-            list.innerHTML = '<li style="color:#94a3b8; text-align:center;">لا توجد منتجات مضافة بعد.</li>';
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد منتجات مضافة حتى الآن.</p>';
             return;
         }
 
         products.forEach((p, index) => {
-            list.innerHTML += `
-                <li>
-                    <span><b>[${p.category}]</b> ${p.name} - ${p.price} ج.م</span>
+            container.innerHTML += `
+                <div class="product-list-item">
+                    <div class="product-info-flex">
+                        <img src="${p.image}" alt="${p.name}" class="product-thumb">
+                        <div>
+                            <div style="font-weight: bold; color: #fff; font-size: 15px;">${p.name}</div>
+                            <div style="font-size: 13px; color: #38bdf8;">القسم: ${p.category} | السعر: ${p.price} ج.م</div>
+                        </div>
+                    </div>
                     <button class="delete-btn" onclick="deleteProduct(${index})">حذف</button>
-                </li>
+                </div>
             `;
         });
     }
 
-    function addProduct() {
+    function addNewProduct() {
         const category = document.getElementById('catName').value.trim();
         const name = document.getElementById('prodName').value.trim();
         const price = document.getElementById('prodPrice').value.trim();
-        const image = document.getElementById('prodImg').value.trim() || 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500';
+        const fileInput = document.getElementById('prodImgFile');
 
         if (!category || !name || !price) {
-            alert('من فضلك املأ (الاسم، القسم، والسعر) على الأقل!');
+            alert('من فضلك أكمل حقول (اسم القسم، اسم الصنف، السعر)!');
             return;
         }
 
+        let defaultImage = 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500';
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                saveAndFinish(category, name, price, e.target.result);
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            saveAndFinish(category, name, price, defaultImage);
+        }
+    }
+
+    function saveAndFinish(category, name, price, image) {
         let products = getProducts();
         products.push({ category, name, price, image });
         saveProducts(products);
 
+        // تفريغ الحقول
         document.getElementById('prodName').value = '';
         document.getElementById('prodPrice').value = '';
-        document.getElementById('prodImg').value = '';
-        
-        renderAdminList();
-        alert('تمت إضافة المنتج بنجاح وسيعرض فوراً للعملاء!');
+        document.getElementById('prodImgFile').value = '';
+
+        renderAdminProducts();
+        alert('تمت إضافة المنتج بنجاح إلى المنيو وسيعرض للعملاء فوراً!');
     }
 
     function deleteProduct(index) {
         let products = getProducts();
         products.splice(index, 1);
         saveProducts(products);
-        renderAdminList();
+        renderAdminProducts();
     }
 
-    window.onload = renderAdminList;
+    window.onload = renderAdminProducts;
 </script>
 
 </body>
