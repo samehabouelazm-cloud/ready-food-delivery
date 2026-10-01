@@ -377,23 +377,15 @@
                 </div>
             </div>
 
-<button id="checkoutBtn" style="background:#f59e0b; color:#fff; padding:15px; font-weight:bold; border:none; border-radius:8px; width:100%; cursor:pointer;">
+<button id="checkoutBtn" onclick="
+    let name = document.querySelector('input[placeholder*=\'اسم\']')?.value || document.getElementById('customerName')?.value || 'عميل';
+    let phone = document.querySelector('input[placeholder*=\'الجوال\']')?.value || document.getElementById('customerPhone')?.value || '';
+<button id="checkoutBtn" onclick="
+    let name = document.querySelector('input[placeholder*=\'اسم\']')?.value || document.getElementById('customerName')?.value || 'عميل';
+    let phone = document.querySelector('input[placeholder*=\'الجوال\']')?.value || document.getElementById('customerPhone')?.value || '';
+<button id="checkoutBtn" onclick="
+    let name = document.querySelector('input[placeholder*=\'اسم\']')?.value || document.getElementById('customerName')?.value || 'عميل';
+    let phone = document.querySelector('input[placeholder*=\'الجوال\']')?.value || document.getElementById('customerPhone')?.value || '';
+<button id="checkoutBtn" style="background:#f59e0b; color:#fff; padding:15px; font-weight:bold; border:none; border-radius:8px; width:100%; cursor:pointer; margin-top:10px;">
     إتمام وطلب السلة الآن 🚀
-</button>        </div>
-
-            <div class="categories-bar-wrapper">
-                <div id="categoriesScrollBar" class="categories-bar"></div>
-            </div>
-
-            <div id="menuContainer">
-                <p style="color: #94a3b8; text-align: center;">جاري تحميل المنتجات...</p>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- نافذة الفاتورة المنبثقة -->
-    <div id="invoiceModal"></div>
-
-</body>
-</html>
+</button>
