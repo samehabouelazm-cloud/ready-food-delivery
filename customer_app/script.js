@@ -1,86 +1,50 @@
-function sendOrderToSystem(orderData) {
+document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const newOrder = {
-            id: 'ORD-' + Date.now(),
-            customerName: orderData.customerName || 'عميل كريم',
-            details: orderData.details || orderData.items || 'طلب جديد',
-            total: orderData.total || 0,
-            createdAt: new Date().toLocaleTimeString()
-        };
-
-        // جلب الطلبات أو إنشاء مصفوفة جديدة
-        let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-        orders.push(newOrder);
+        // تحميل المنتجات وعرضها
+        const response = await fetch('../data.json');
+        const data = await response.json();
         
-        // حفظ إجباري في التخزين المشترك
-        localStorage.setItem('ready_orders', JSON.stringify(orders));
-        
-        // تنبيه صوتي فوري للعميل أو للسيستم
-        try {
-            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play().catch(e => {});
-        } catch (e) {}
-
-        alert("🎉 تم إرسال طلبك بنجاح!");
-
-    } catch (err) {
-        console.error("خطأ في إرسال الطلب:", err);
+        const menuContainer = document.getElementById('menuContainer');
+        if (menuContainer && data && data.categories) {
+            let html = '';
+            data.categories.forEach(category => {
+                html += `<div class="category-section"><h2>${category.name}</h2><div class="products-grid">`;
+                category.products.forEach(product => {
+                    html += `
+                        <div class="product-card">
+                            <h3>${product.name}</h3>
+                            <p>${product.price} ج.م</p>
+                            <button onclick="addToCart('${product.id}', '${product.name}', ${product.price})" style="background:#f59e0b; color:#fff; padding:8px 12px; border:none; border-radius:5px; cursor:pointer;">إضافة</button>
+                        </div>`;
+                });
+                html += `</div></div>`;
+            });
+            menuContainer.innerHTML = html;
+        }
+    } catch (e) {
+        console.error("خطأ في تحميل المنتجات:", e);
     }
-}
-// دالة إتمام الطلب وحفظه في التخزين المشترك
-function checkoutOrder() {
-    try {
-        // جمع بيانات العميل من الحقول الموجودة في الصفحة
+});
+
+// دالة إتمام الطلب وعارضه عبر الواتساب مباشرة
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'checkoutBtn') {
         const nameInput = document.querySelector('input[placeholder*="اسم"]') || document.getElementById('customerName');
         const phoneInput = document.querySelector('input[placeholder*="الجوال"]') || document.getElementById('customerPhone');
-        const addressInput = document.querySelector('input[placeholder*="العنوان"]') || document.getElementById('customerAddress');
-
-        const customerName = nameInput ? nameInput.value.trim() : '';
-        const customerPhone = phoneInput ? phoneInput.value.trim() : '';
-        const customerAddress = addressInput ? addressInput.value.trim() : '';
-
-        // التحقق من إدخال البيانات الأساسية
-        if (!customerName || !customerPhone) {
-            alert("من فضلك أدخل الاسم ورقم الجوال لتمكننا من تنفيذ طلبك.");
+        
+        const name = nameInput ? nameInput.value.trim() : 'عميل';
+        const phone = phoneInput ? phoneInput.value.trim() : '';
+        
+        if (!phone) {
+            alert('من فضلك أدخل رقم الجوال على الأقل لتتمكن من إتمام الطلب.');
             return;
         }
-
-        // رقم واتساب المطعم/الإدارة الخاص بك (حط رقمك هنا بالدولة، مثلاً: 201xxxxxxxx+)
-        const adminWhatsAppNumber = "201034101822"; // استبدل هذا الرقم برقمك الصحيح
-
-        // تجهيز نص رسالة الطلب
-        let message = `🛒 *طلب جديد عبر منصة جاهز*\n\n`;
-        message += `👤 *الاسم:* ${customerName}\n`;
-        message += `📱 *الجوال:* ${customerPhone}\n`;
-        message += `📍 *العنوان:* ${customerAddress || 'توصيل سريع'}\n\n`;
-        message += `🚀 *تم إرسال الطلب بنجاح بانتظار التأكيد!*`;
-
-        // ترميز الرسالة لتتوافق مع روابط الواتساب
-        const encodedMessage = encodeURIComponent(message);
         
-        // فتح تطبيق واتساب أو الويب مباشرة بالرسالة الجاهزة
-        const whatsappURL = `https://wa.me/${adminWhatsAppNumber}?text=${encodedMessage}`;
-        
-        window.open(whatsappURL, '_blank');
-        
-        alert("🎉 تم إرسال طلبك وتحويلك للواتساب بنجاح!");
-
-    } catch (err) {
-        console.error("خطأ أثناء معالجة الطلب:", err);
-        alert("حدث خطأ بسيط، يرجى المحاولة مرة أخرى.");
+        let msg = `🛒 طلب جديد:\n👤 الاسم: ${name}\n📱 الجوال: ${phone}\n🚀 تم إرسال الطلب بنجاح!`;
+        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
     }
-}
-
-// ربط الدالة بزرار إتمام الطلب تلقائياً
-document.addEventListener('DOMContentLoaded', () => {
-    // البحث عن زر إتمام الطلب بناءً على النصوص الشائعة
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(btn => {
-        if (btn.textContent.includes('إتمام') || btn.textContent.includes('طلب') || btn.textContent.includes('السلة')) {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                checkoutOrder();
-            });
-        }
-    });
 });
+
+function addToCart(id, name, price) {
+    alert(`تمت إضافة ${name} إلى السلة بنجاح!`);
+}
