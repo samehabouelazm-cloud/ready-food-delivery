@@ -284,17 +284,17 @@ function loadAdminOrders() {
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
     
     if (orders.length === 0) {
-        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 20px;">لا توجد طلبات جديدة حالياً</p>';
+        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 20px; font-size: 16px;">لا توجد طلبات جديدة حالياً</p>';
         return;
     }
 
-    ordersContainer.innerHTML = ''; // تفريغ الحاوية قبل العرض
+    ordersContainer.innerHTML = ''; // تفريغ الحاوية لعرض الداتا الجديدة
 
     orders.forEach((order, index) => {
         let card = document.createElement('div');
-        card.style.cssText = "background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 12px;";
+        card.style.cssText = "background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);";
         card.innerHTML = `
-            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📦 طلب رقم #${order.id || (index + 1)}</h4>
+            <h4 style="color: #38bdf8; margin: 0 0 10px 0; font-size: 18px;">📦 طلب رقم #${order.id || (index + 1)}</h4>
             <p><strong>👤 العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
             <p><strong>🛒 التفاصيل:</strong> ${typeof order.details === 'object' ? JSON.stringify(order.details) : (order.details || 'طلب جديد')}</p>
             <p><strong>💰 الإجمالي:</strong> ${order.total || 0} جنيه</p>
@@ -304,27 +304,24 @@ function loadAdminOrders() {
     });
 }
 
-// 3. التشغيل عند تحميل الصفحة
+// التشغيل الفوري عند فتح لوحة الإدارة
 window.addEventListener('DOMContentLoaded', () => {
     loadAdminOrders();
 });
 
-// 4. نظام المراقبة والتنبيهات الحية
+// مراقبة التغييرات كل ثانية وتنبيه الإدارة صوتياً
 let lastOrderCount = (JSON.parse(localStorage.getItem('ready_orders')) || []).length;
 
-function checkNewOrdersSound() {
+setInterval(() => {
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-    if (orders.length > lastOrderCount) {
-        // تشغيل الصوت فقط في حال منح الإذن مسبقاً
-        if (localStorage.getItem('audio_allowed') === 'true') {
+    if (orders.length !== lastOrderCount) {
+        if (orders.length > lastOrderCount) {
             try {
                 const adminAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                adminAudio.play().catch(e => console.log("Audio play prevented"));
+                adminAudio.play().catch(e => {});
             } catch (e) {}
         }
-        loadAdminOrders(); // تحديث فوري للقائمة
+        lastOrderCount = orders.length;
+        loadAdminOrders();
     }
-    lastOrderCount = orders.length;
-}
-
-setInterval(checkNewOrdersSound, 2000);
+}, 1000);
