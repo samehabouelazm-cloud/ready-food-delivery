@@ -3,183 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق جاهز - التوصيل السريع</title>
+    <title>تطبيق التوصيل - متجرنا</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 15px; }
         .container { max-width: 1000px; margin: 0 auto; }
         
-        /* البنر الاحترافي */
         .hero-banner {
             background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #fff;
-            padding: 30px;
-            border-radius: 16px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+            color: #fff; padding: 25px; border-radius: 14px; text-align: center; margin-bottom: 20px;
         }
-        .hero-banner h1 { font-size: 28px; margin-bottom: 8px; font-weight: bold; }
-        .hero-banner p { font-size: 16px; opacity: 0.9; }
+        .hero-banner h1 { font-size: 24px; margin-bottom: 5px; }
+        
+        .admin-link { display: block; text-align: center; margin-bottom: 20px; color: #38bdf8; text-decoration: none; font-size: 14px; }
 
-        /* الأقسام والمنتجات */
-        .section { background: #1e293b; padding: 20px; margin-bottom: 25px; border-radius: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-        .section h2 { color: #f59e0b; margin-bottom: 15px; font-size: 20px; border-bottom: 2px solid #334155; padding-bottom: 8px; }
+        .section { background: #1e293b; padding: 15px; margin-bottom: 20px; border-radius: 12px; }
+        .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; }
+        .section-header h2 { color: #f59e0b; font-size: 18px; }
+        .category-thumb { width: 35px; height: 35px; object-fit: cover; border-radius: 50%; background: #475569; }
         
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .product-card { background: #334155; border-radius: 10px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #475569; }
+        .product-img { width: 100%; height: 130px; object-fit: cover; background: #475569; }
+        .product-info { padding: 10px; }
+        .product-info h3 { font-size: 15px; margin-bottom: 5px; color: #fff; }
+        .product-info .price { color: #34d399; font-weight: bold; font-size: 14px; margin-bottom: 8px; }
         
-        .product-card {
-            background: #334155;
-            border-radius: 12px;
-            overflow: hidden;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.3); }
-        
-        .product-img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            background: #475569;
-        }
-        
-        .product-info { padding: 12px; }
-        .product-info h3 { font-size: 16px; margin-bottom: 5px; color: #fff; }
-        .product-info .price { color: #34d399; font-weight: bold; font-size: 15px; margin-bottom: 10px; }
-        
-        .product-card button {
-            background: #f59e0b;
-            color: #fff;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
+        .product-card button { background: #f59e0b; color: #fff; border: none; padding: 8px; width: 100%; cursor: pointer; font-weight: bold; font-size: 14px; }
         .product-card button:hover { background: #d97706; }
 
-        /* سلة المشتريات */
-        .cart-box {
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 14px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            border: 1px solid #334155;
-        }
-        .cart-box h3 { color: #f59e0b; margin-bottom: 12px; font-size: 20px; }
-        .cart-summary { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; color: #38bdf8; font-weight: bold; }
+        .cart-box { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-top: 20px; }
+        .cart-box h3 { color: #f59e0b; margin-bottom: 10px; }
+        .cart-summary { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 12px; color: #38bdf8; font-weight: bold; font-size: 14px; }
         
-        .cart-box input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: #fff;
-            font-size: 14px;
-        }
-        .cart-box input:focus { border-color: #f59e0b; outline: none; }
-        
-        #checkoutBtn {
-            background: #22c55e;
-            color: #fff;
-            padding: 15px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            width: 100%;
-            cursor: pointer;
-            font-size: 17px;
-            margin-top: 15px;
-            transition: background 0.2s;
-        }
+        .cart-box input { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
+        #checkoutBtn { background: #22c55e; color: #fff; padding: 12px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 15px; margin-top: 10px; }
         #checkoutBtn:hover { background: #16a34a; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- البنر الاحترافي -->
     <div class="hero-banner">
-        <h1>🚀 تطبيق جاهز - التوصيل السريع والآمن</h1>
-        <p>اطلب كل احتياجاتك بضغط زر واحدة وتوصلك لحد باب البيت!</p>
-    </div>
-    
-    <!-- الأقسام والمنتجات بالصور -->
-    <div id="menuContainer">
-        <!-- قسم المشويات -->
-        <div class="section">
-            <h2>🥩 قسم المشويات الطازجة</h2>
-            <div class="products-grid">
-                <div class="product-card">
-                    <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=500" alt="سمك بلطي مشوي" class="product-img">
-                    <div class="product-info">
-                        <h3>سمك بلطي مشوي - للكيلو</h3>
-                        <div class="price">100 ج.م</div>
-                    </div>
-                    <button onclick="addToCart('سمك بلطي مشوي', 100)">إضافة للسلة 🛒</button>
-                </div>
-                <div class="product-card">
-                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=500" alt="مشاوي مشكلة" class="product-img">
-                    <div class="product-info">
-                        <h3>مشاوي مشكلة ممتازة</h3>
-                        <div class="price">250 ج.م</div>
-                    </div>
-                    <button onclick="addToCart('مشاوي مشكلة ممتازة', 250)">إضافة للسلة 🛒</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- قسم البيض والأجبان -->
-        <div class="section">
-            <h2>🧀 قسم البيض والأجبان</h2>
-            <div class="products-grid">
-                <div class="product-card">
-                    <img src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=500" alt="بيض بلدي" class="product-img">
-                    <div class="product-info">
-                        <h3>بيض بلدي - 30 بيضة</h3>
-                        <div class="price">130 ج.م</div>
-                    </div>
-                    <button onclick="addToCart('بيض بلدي - 30 بيضة', 130)">إضافة للسلة 🛒</button>
-                </div>
-                <div class="product-card">
-                    <img src="https://images.unsplash.com/photo-1452195100486-9cc805987862?w=500" alt="جبنة أبيض براميلي" class="product-img">
-                    <div class="product-info">
-                        <h3>جبنة أبيض براميلي - كيلو</h3>
-                        <div class="price">90 ج.م</div>
-                    </div>
-                    <button onclick="addToCart('جبنة أبيض براميلي - كيلو', 90)">إضافة للسلة 🛒</button>
-                </div>
-            </div>
-        </div>
+        <h1>🚀 متجر التوصيل السريع</h1>
+        <p>اطلب بسهولة واصلك لحد باب البيت</p>
     </div>
 
-    <!-- سلة المشتريات وإتمام الطلب -->
+    <a href="admin.html" class="admin-link">⚙️ الانتقال إلى لوحة التحكم لتعديل وإضافة المنتجات</a>
+
+    <div id="dynamicMenu"></div>
+
     <div class="cart-box">
         <h3>🛒 سلة المشتريات</h3>
         <div class="cart-summary" id="cartSummary">السلة فارغة حالياً.. اختر منتجك المفضل!</div>
         
         <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
         <input type="text" id="customerPhone" placeholder="رقم الجوال (مثال: 010xxxxxxxx) *">
-        <input type="text" id="customerAddress" placeholder="عنوان التوصيل بالتفصيل *">
+        <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل *">
 
-        <button id="checkoutBtn" onclick="checkoutOrder()">إتمام وطلب السلة الآن عبر الواتساب 🚀</button>
+        <button id="checkoutBtn" onclick="checkoutOrder()">إتمام وطلب السلة عبر الواتساب 🚀</button>
     </div>
 </div>
 
 <script>
     let cartItem = null;
 
+    function loadStoreProducts() {
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+        const menuContainer = document.getElementById('dynamicMenu');
+        menuContainer.innerHTML = '';
+
+        if (products.length === 0) {
+            menuContainer.innerHTML = '<div class="section" style="text-align: center; color: #94a3b8;">لا توجد منتجات معروضة حالياً. استخدم لوحة التحكم لإضافة المنتجات.</div>';
+            return;
+        }
+
+        let categories = {};
+        products.forEach(p => {
+            if (!categories[p.category]) {
+                categories[p.category] = {
+                    image: p.categoryImage || '', // صورة القسم إن وجدت
+                    items: []
+                };
+            }
+            categories[p.category].items.push(p);
+        });
+
+        for (let cat in categories) {
+            let catData = categories[cat];
+            let imgTag = catData.image ? `<img src="${catData.image}" class="category-thumb">` : '📂';
+            
+            let sectionHtml = `
+                <div class="section">
+                    <div class="section-header">
+                        ${imgTag}
+                        <h2>${cat}</h2>
+                    </div>
+                    <div class="products-grid">
+            `;
+
+            catData.items.forEach(p => {
+                sectionHtml += `
+                    <div class="product-card">
+                        <img src="${p.image}" alt="${p.name}" class="product-img">
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <div class="price">${p.price} ج.م</div>
+                        </div>
+                        <button onclick="addToCart('${p.name}', ${p.price})">إضافة للسلة 🛒</button>
+                    </div>
+                `;
+            });
+
+            sectionHtml += `</div></div>`;
+            menuContainer.innerHTML += sectionHtml;
+        }
+    }
+
     function addToCart(name, price) {
         cartItem = { name, price };
-        document.getElementById('cartSummary').innerHTML = `📦 المنتج المختار: <b>${name}</b> - السعر: <b>${price} ج.م</b>`;
-        alert(`تمت إضافة "${name}" بنجاح إلى السلة!`);
+        document.getElementById('cartSummary').innerHTML = `📦 <b>${name}</b> - ${price} ج.م`;
+        alert(`تمت إضافة "${name}" إلى السلة بنجاح!`);
     }
 
     function checkoutOrder() {
@@ -188,23 +132,20 @@
         const address = document.getElementById('customerAddress').value.trim();
 
         if (!name || !phone || !address) {
-            alert('من فضلك ادخل (الاسم، رقم الجوال، العنوان) لإتمام الطلب!');
+            alert('من فضلك ادخل (الاسم، الجوال، العنوان) لإتمام الطلب!');
             return;
         }
 
         if (!cartItem) {
-            alert('السلة فارغة، من فضلك اختر منتجاً أولاً!');
+            alert('السلة فارغة، اختر منتجاً أولاً!');
             return;
         }
 
-        let msg = `🛒 طلب جديد عبر منصة جاهز:\n\n`;
-        msg += `👤 الاسم: ${name}\n`;
-        msg += `📱 الجوال: ${phone}\n`;
-        msg += `📍 العنوان: ${address}\n\n`;
-        msg += `📦 المنتج المطلـوب:\n- ${cartItem.name} (${cartItem.price} ج.م)\n`;
-
+        let msg = `🛒 طلب جديد:\n👤 الاسم: ${name}\n📱 الجوال: ${phone}\n📍 العنوان: ${address}\n📦 المنتج: ${cartItem.name} (${cartItem.price} ج.م)`;
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
     }
+
+    window.onload = loadStoreProducts;
 </script>
 
 </body>
