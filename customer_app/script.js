@@ -1,104 +1,45 @@
-// دمج المنتجات المخزنة محلياً مع المنتجات الافتراضية
+// دالة شاملة لضمان جلب وعرض المنتجات المحلية في الواجهة فوراً
 document.addEventListener("DOMContentLoaded", function() {
-    let savedProducts = JSON.parse(localStorage.getItem("ready_products")) || [];
-    if (savedProducts.length > 0 && typeof menuItems !== 'undefined') {
-        // دمج المنتجات المضافة لو مش موجودة
-        savedProducts.forEach(sp => {
-            if (!menuItems.some(m => m.id === sp.id)) {
-                menuItems.push(sp);
-            }
-        });
-        if (typeof renderMenu === 'function') renderMenu();
-    }
+    loadAndRenderProducts();
 });
-let currentQty = 1;
 
-// دالة تغيير الكمية (تعمل الآن بالموجب والسالب بدقة)
-function changeQty(val) {
-    currentQty += val;
-    if (currentQty < 1) currentQty = 1;
-    const qtyDisplay = document.getElementById('qty_display');
-    if (qtyDisplay) {
-        qtyDisplay.innerText = currentQty;
-    }
-}
-
-// دالة حفظ بيانات العميل في localStorage لضمان استمراريتها
-function saveDetails() {
-    const nameEl = document.getElementById('customerName');
-    const phoneEl = document.getElementById('customerPhone');
-    const addressEl = document.getElementById('customerAddress');
-
-    if (!nameEl || !phoneEl || !addressEl) return;
-
-    const customerData = {
-        name: nameEl.value.trim(),
-        phone: phoneEl.value.trim(),
-        address: addressEl.value.trim()
-    };
-
-    localStorage.setItem('jahez_saved_customer', JSON.stringify(customerData));
-    alert('تم حفظ بيانات التوصيل بنجاح!');
-}
-
-// إضافة المنتج للسلة مع الكمية المختارة
-function addToCart(itemName, itemPrice) {
-    saveDetails(); // حفظ البيانات تلقائياً عند الإضافة
-    let cart = JSON.parse(localStorage.getItem('jahez_cart')) || [];
+function loadAndRenderProducts() {
+    let savedProducts = JSON.parse(localStorage.getItem("ready_products")) || [];
     
-    cart.push({
-        name: itemName,
-        price: itemPrice,
-        quantity: currentQty
-    });
+    if (savedProducts.length > 0) {
+        // لو مصفوفة المنتجات الأساسية موجودة، نضيف عليها المنتجات الجديدة لو مش موجودة
+        if (typeof menuItems !== 'undefined' && Array.isArray(menuItems)) {
+            savedProducts.forEach(sp => {
+                if (!menuItems.some(m => m.id === sp.id)) {
+                    menuItems.unshift(sp); // إضافته في أول القائمة
+                }
+            });
+        } else {
+            // لو مفيش مصفوفة أساسية، بنعرفها بالمنتجات المحفوظة
+            window.menuItems = savedProducts;
+        }
 
-    localStorage.setItem('jahez_cart', JSON.stringify(cart));
-    alert(`تمت إضافة ${currentQty} من (${itemName}) إلى السلة بنجاح!`);
-    
-    // إعادة تعيين الكمية إلى 1 بعد الإضافة
-    currentQty = 1;
-    const qtyDisplay = document.getElementById('qty_display');
-    if (qtyDisplay) qtyDisplay.innerText = '1';
-}
-
-// استرجاع البيانات المحفوظة تلقائياً عند فتح الصفحة
-window.onload = function() {
-    const saved = localStorage.getItem('jahez_saved_customer');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            const nameEl = document.getElementById('customerName');
-            const phoneEl = document.getElementById('customerPhone');
-            const addressEl = document.getElementById('customerAddress');
-
-            if (nameEl && data.name) nameEl.value = data.name;
-            if (phoneEl && data.phone) phoneEl.value = data.phone;
-            if (addressEl && data.address) addressEl.value = data.address;
-        } catch (e) {
-            console.error("Error loading saved customer data", e);
+        // إعادة تشغيل دالة العرض في الموقع لو موجودة
+        if (typeof renderMenu === 'function') {
+            renderMenu();
+        } else {
+            // عرض يدوي لو الدالة مش معرفة بالاسم ده
+            renderProductsManually(savedProducts);
         }
     }
-};
-// دالة إرسال الطلب من تطبيق العميل لتتطابق تماماً مع لوحة الإدارة والكابتن
-function sendCustomerOrder(cartItems, customerDetails) {
-    const ordersRef = ref(db, 'adminOrders');
-    
-    let subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+}
 
-    const newOrderData = {
-        customerName: customerDetails.name,       // اسم العميل
-        customerPhone: customerDetails.phone,     // رقم الجوال
-        customerAddress: customerDetails.address, // العنوان
-        items: cartItems,                         // قائمة الأصناف والكميات
-        total: subtotal,                          // إجمالي المشتريات
-        deliveryFee: 20,                          // قيمة التوصيل الافتراضية
-        status: 'جديد',                           // حالة الطلب الابتدائية
-        timestamp: Date.now()
-    };
+function renderProductsManually(products) {
+    // البحث عن مكان عرض المنتجات في صفحة العميل
+    let container = document.getElementById("menuContainer") || document.getElementById("productsGrid") || document.querySelector(".products-grid");
+    if (!container) return;
 
-    push(ordersRef, newOrderData).then(() => {
-        alert('✅ تم إرسال طلبك بنجاح! جاري متابعته من الإدارة.');
-    }).catch((error) => {
-        alert('حدث خطأ أثناء إرسال الطلب: ' + error.message);
-    });
+    container.innerHTML = products.map(p => `
+        <div class="product-card" style="background: #1e293b; border-radius: 12px; padding: 15px; color: #fff; border: 1px solid #334155;">
+            <img src="${p.image}" alt="${p.name}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px;">
+            <h3 style="margin: 10px 0 5px; font-size: 16px;">${p.name}</h3>
+            <p style="color: #f59e0b; font-weight: bold; margin-bottom: 10px;">${p.price} ج.م</p>
+            <button onclick="addToCart('${p.id}')" style="background: #10b981; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; width: 100%;">إضافة للسلة</button>
+        </div>
+    `).join('');
 }
