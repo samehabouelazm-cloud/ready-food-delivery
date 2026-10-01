@@ -7,37 +7,38 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 15px; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         
         .hero-banner {
             background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #fff; padding: 25px; border-radius: 14px; text-align: center; margin-bottom: 20px;
+            color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px;
         }
-        .hero-banner h1 { font-size: 24px; margin-bottom: 5px; }
+        .hero-banner h1 { font-size: 22px; margin-bottom: 5px; }
         
-        .admin-link { display: block; text-align: center; margin-bottom: 20px; color: #38bdf8; text-decoration: none; font-size: 14px; }
+        .admin-link { display: block; text-align: center; margin-bottom: 15px; color: #38bdf8; text-decoration: none; font-size: 14px; font-weight: bold; }
+        .admin-link:hover { text-decoration: underline; }
 
-        .section { background: #1e293b; padding: 15px; margin-bottom: 20px; border-radius: 12px; }
-        .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 2px solid #334155; padding-bottom: 8px; }
-        .section-header h2 { color: #f59e0b; font-size: 18px; }
-        .category-thumb { width: 35px; height: 35px; object-fit: cover; border-radius: 50%; background: #475569; }
+        .section { background: #1e293b; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #334155; }
+        .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 6px; }
+        .section-header h2 { color: #f59e0b; font-size: 16px; }
         
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .product-card { background: #334155; border-radius: 10px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #475569; }
-        .product-img { width: 100%; height: 130px; object-fit: cover; background: #475569; }
-        .product-info { padding: 10px; }
-        .product-info h3 { font-size: 15px; margin-bottom: 5px; color: #fff; }
-        .product-info .price { color: #34d399; font-weight: bold; font-size: 14px; margin-bottom: 8px; }
+        /* شبكة المنتجات لتظهر بشكل صغير ومضغوط ومنظم بالطول والعرض بجانب بعضها */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .product-card { background: #334155; border-radius: 8px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #475569; }
+        .product-img { width: 100%; height: 95px; object-fit: cover; background: #475569; }
+        .product-info { padding: 8px; }
+        .product-info h3 { font-size: 13px; margin-bottom: 4px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-info .price { color: #34d399; font-weight: bold; font-size: 12px; margin-bottom: 6px; }
         
-        .product-card button { background: #f59e0b; color: #fff; border: none; padding: 8px; width: 100%; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .product-card button { background: #f59e0b; color: #fff; border: none; padding: 6px; width: 100%; cursor: pointer; font-weight: bold; font-size: 12px; transition: background 0.2s; }
         .product-card button:hover { background: #d97706; }
 
-        .cart-box { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-top: 20px; }
-        .cart-box h3 { color: #f59e0b; margin-bottom: 10px; }
-        .cart-summary { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 12px; color: #38bdf8; font-weight: bold; font-size: 14px; }
+        .cart-box { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; margin-top: 15px; }
+        .cart-box h3 { color: #f59e0b; margin-bottom: 8px; font-size: 16px; }
+        .cart-summary { background: #0f172a; padding: 8px; border-radius: 6px; margin-bottom: 10px; color: #38bdf8; font-weight: bold; font-size: 13px; }
         
-        .cart-box input { width: 100%; padding: 10px; margin: 6px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
-        #checkoutBtn { background: #22c55e; color: #fff; padding: 12px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 15px; margin-top: 10px; }
+        .cart-box input { width: 100%; padding: 8px; margin: 4px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
+        #checkoutBtn { background: #22c55e; color: #fff; padding: 10px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 14px; margin-top: 8px; }
         #checkoutBtn:hover { background: #16a34a; }
     </style>
 </head>
@@ -49,7 +50,7 @@
         <p>اطلب بسهولة واصلك لحد باب البيت</p>
     </div>
 
-    <a href="admin.html" class="admin-link">⚙️ الانتقال إلى لوحة التحكم لتعديل وإضافة المنتجات</a>
+    <a href="admin.html" class="admin-link">⚙️ الانتقال إلى لوحة التحكم لإضافة وتعديل المنتجات</a>
 
     <div id="dynamicMenu"></div>
 
@@ -74,35 +75,30 @@
         menuContainer.innerHTML = '';
 
         if (products.length === 0) {
-            menuContainer.innerHTML = '<div class="section" style="text-align: center; color: #94a3b8;">لا توجد منتجات معروضة حالياً. استخدم لوحة التحكم لإضافة المنتجات.</div>';
+            menuContainer.innerHTML = '<div class="section" style="text-align: center; color: #94a3b8; font-size: 13px;">لا توجد منتجات معروضة حالياً. استخدم لوحة التحكم لإضافة المنتجات.</div>';
             return;
         }
 
         let categories = {};
         products.forEach(p => {
             if (!categories[p.category]) {
-                categories[p.category] = {
-                    image: p.categoryImage || '', // صورة القسم إن وجدت
-                    items: []
-                };
+                categories[p.category] = [];
             }
-            categories[p.category].items.push(p);
+            categories[p.category].push(p);
         });
 
         for (let cat in categories) {
-            let catData = categories[cat];
-            let imgTag = catData.image ? `<img src="${catData.image}" class="category-thumb">` : '📂';
+            let items = categories[cat];
             
             let sectionHtml = `
                 <div class="section">
                     <div class="section-header">
-                        ${imgTag}
-                        <h2>${cat}</h2>
+                        <h2>📂 ${cat}</h2>
                     </div>
                     <div class="products-grid">
             `;
 
-            catData.items.forEach(p => {
+            items.forEach(p => {
                 sectionHtml += `
                     <div class="product-card">
                         <img src="${p.image}" alt="${p.name}" class="product-img">
@@ -127,7 +123,7 @@
     }
 
     function checkoutOrder() {
-        const name = document.getElementById('customerName').value.trim();
+        const name = document.getElementById('customerName'].value.trim();
         const phone = document.getElementById('customerPhone').value.trim();
         const address = document.getElementById('customerAddress').value.trim();
 
