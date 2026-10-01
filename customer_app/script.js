@@ -30,40 +30,57 @@ function sendOrderToSystem(orderData) {
 // دالة إتمام الطلب وحفظه في التخزين المشترك
 function checkoutOrder() {
     try {
-        // جمع بيانات العميل من الحقول
-        const customerNameInput = document.querySelector('input[placeholder*="اسم"]') || document.getElementById('customerName');
-        const customerPhoneInput = document.querySelector('input[placeholder*="الجوال"]') || document.getElementById('customerPhone');
-        const customerAddressInput = document.querySelector('input[placeholder*="العنوان"]') || document.getElementById('customerAddress');
+        // جمع بيانات العميل من الحقول الموجودة في الصفحة
+        const nameInput = document.querySelector('input[placeholder*="اسم"]') || document.getElementById('customerName');
+        const phoneInput = document.querySelector('input[placeholder*="الجوال"]') || document.getElementById('customerPhone');
+        const addressInput = document.querySelector('input[placeholder*="العنوان"]') || document.getElementById('customerAddress');
 
-        const orderData = {
-            id: 'ORD-' + Date.now(),
-            customerName: customerNameInput ? customerNameInput.value : 'عميل كريم',
-            phone: customerPhoneInput ? customerPhoneInput.value : 'غير متوفر',
-            address: customerAddressInput ? customerAddressInput.value : 'توصيل سريع',
-            details: 'طلب جديد من قائمة المأكولات',
-            total: 0, // أو القيمة الإجمالية من السلة
-            createdAt: new Date().toLocaleTimeString()
-        };
+        const customerName = nameInput ? nameInput.value.trim() : '';
+        const customerPhone = phoneInput ? phoneInput.value.trim() : '';
+        const customerAddress = addressInput ? addressInput.value.trim() : '';
 
-        // جلب الطلبات القديمة أو مصفوفة فارغة
-        let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-        orders.push(orderData);
+        // التحقق من إدخال البيانات الأساسية
+        if (!customerName || !customerPhone) {
+            alert("من فضلك أدخل الاسم ورقم الجوال لتمكننا من تنفيذ طلبك.");
+            return;
+        }
+
+        // رقم واتساب المطعم/الإدارة الخاص بك (حط رقمك هنا بالدولة، مثلاً: 201xxxxxxxx+)
+        const adminWhatsAppNumber = "201034101822"; // استبدل هذا الرقم برقمك الصحيح
+
+        // تجهيز نص رسالة الطلب
+        let message = `🛒 *طلب جديد عبر منصة جاهز*\n\n`;
+        message += `👤 *الاسم:* ${customerName}\n`;
+        message += `📱 *الجوال:* ${customerPhone}\n`;
+        message += `📍 *العنوان:* ${customerAddress || 'توصيل سريع'}\n\n`;
+        message += `🚀 *تم إرسال الطلب بنجاح بانتظار التأكيد!*`;
+
+        // ترميز الرسالة لتتوافق مع روابط الواتساب
+        const encodedMessage = encodeURIComponent(message);
         
-        // حفظ البيانات في localStorage
-        localStorage.setItem('ready_orders', JSON.stringify(orders));
+        // فتح تطبيق واتساب أو الويب مباشرة بالرسالة الجاهزة
+        const whatsappURL = `https://wa.me/${adminWhatsAppNumber}?text=${encodedMessage}`;
         
-        alert("🎉 تم إرسال طلبك بنجاح! سيتم تحويله للوحة الإدارة فوراً.");
+        window.open(whatsappURL, '_blank');
         
-        // تحديث الصفحة أو تصفير السلة إن أمكن
+        alert("🎉 تم إرسال طلبك وتحويلك للواتساب بنجاح!");
+
     } catch (err) {
-        console.error("خطأ أثناء إرسال الطلب:", err);
+        console.error("خطأ أثناء معالجة الطلب:", err);
+        alert("حدث خطأ بسيط، يرجى المحاولة مرة أخرى.");
     }
 }
 
-// ربط الدالة بزرار إتمام الطلب تلقائياً عند تحميل الصفحة
+// ربط الدالة بزرار إتمام الطلب تلقائياً
 document.addEventListener('DOMContentLoaded', () => {
-    const checkoutBtn = document.querySelector('button[id*="checkout"], button[class*="checkout"], .btn-checkout, button:last-of-type');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', checkoutOrder);
-    }
+    // البحث عن زر إتمام الطلب بناءً على النصوص الشائعة
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(btn => {
+        if (btn.textContent.includes('إتمام') || btn.textContent.includes('طلب') || btn.textContent.includes('السلة')) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                checkoutOrder();
+            });
+        }
+    });
 });
