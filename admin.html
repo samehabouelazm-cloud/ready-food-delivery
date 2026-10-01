@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الشاملة - إدارة المتجر والأقسام</title>
+    <title>لوحة التحكم الشاملة - إدارة المتجر</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
@@ -23,55 +23,53 @@
         .btn-add:hover { background: #16a34a; }
         
         .preview-box { margin-top: 25px; background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
-        .preview-box h3 { color: #f59e0b; margin-bottom: 15px; }
-        
         .product-list-item { background: #1e293b; padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; flex-wrap: wrap; gap: 10px; }
         .product-info-flex { display: flex; align-items: center; gap: 12px; }
         .product-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #475569; }
         
         .actions-btns { display: flex; gap: 8px; }
         .delete-btn { background: #ef4444; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .delete-btn:hover { background: #dc2626; }
-        
         .edit-btn { background: #3b82f6; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
-        .edit-btn:hover { background: #2563eb; }
-
         .link-store { display: block; text-align: center; margin-top: 20px; color: #f59e0b; text-decoration: none; font-weight: bold; font-size: 15px; }
-        .link-store:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚙️ لوحة التحكم الشاملة - الأقسام والمنتجات</h1>
+    <h1>⚙️ لوحة التحكم - إدارة المتجر والتوصيل</h1>
     
+    <!-- قسم إعدادات التوصيل -->
+    <div class="form-section">
+        <h3>🛵 إعدادات سعر التوصيل</h3>
+        <div class="form-group">
+            <label>قيمة التوصيل بالجنيه (تطبق على كل الطلبات):</label>
+            <input type="number" id="deliveryFeeInput" placeholder="مثال: 20">
+        </div>
+        <button class="btn-add" style="background: #3b82f6;" onclick="saveDeliveryFee()">حفظ سعر التوصيل 💾</button>
+    </div>
+
+    <!-- قسم إضافة المنتجات -->
     <div class="form-section">
         <h3 id="formTitle">➕ إضافة صنف أو قسم جديد</h3>
-        
         <input type="hidden" id="editIndex" value="-1">
 
         <div class="form-group">
-            <label>اسم القسم (مثال: المشويات، السوبر ماركت):</label>
+            <label>اسم القسم (مثال: السوبر ماركت، الخضروات):</label>
             <input type="text" id="catName" placeholder="أدخل اسم القسم">
         </div>
 
         <div class="form-group">
-            <label>صورة القسم (اختر من الكمبيوتر):</label>
-            <input type="file" id="catImgFile" accept="image/*">
-        </div>
-
-        <div class="form-group">
-            <label>اسم الصنف / المنتج (مثال: سمك بلطي مشوي):</label>
+            <label>اسم الصنف / المنتج:</label>
             <input type="text" id="prodName" placeholder="أدخل اسم الصنف">
         </div>
 
         <div class="form-group">
-            <label>السعر بالجنيه (مثال: 120):</label>
+            <label>السعر بالجنيه:</label>
             <input type="number" id="prodPrice" placeholder="أدخل السعر">
         </div>
 
         <div class="form-group">
-            <label>صورة المنتج (اختر من الكمبيوتر):</label>
+            <label>صورة المنتج (من الكمبيوتر):</label>
             <input type="file" id="prodImgFile" accept="image/*">
         </div>
 
@@ -81,7 +79,7 @@
     <a href="index.html" class="link-store">🔗 الانتقال إلى صفحة عرض المتجر (للعملاء)</a>
 
     <div class="preview-box">
-        <h3>📦 المنتجات والأقسام المسجلة (إدارة وحذف وتعديل):</h3>
+        <h3 style="color: #f59e0b; margin-bottom: 15px;">📦 المنتجات المسجلة:</h3>
         <div id="adminProductsList"></div>
     </div>
 </div>
@@ -95,13 +93,27 @@
         localStorage.setItem('storeProducts', JSON.stringify(products));
     }
 
+    function saveDeliveryFee() {
+        const fee = document.getElementById('deliveryFeeInput').value.trim();
+        if (fee === '') {
+            alert('من فضلك أدخل قيمة التوصيل!');
+            return;
+        }
+        localStorage.setItem('storeDeliveryFee', fee);
+        alert('تم حفظ سعر التوصيل بنجاح وسيتم تطبيقه في صفحة العملاء!');
+    }
+
     function renderAdminProducts() {
         const products = getProducts();
         const container = document.getElementById('adminProductsList');
         container.innerHTML = '';
 
+        // استرجاع قيمة التوصيل الحالية في الخانة
+        const currentFee = localStorage.getItem('storeDeliveryFee') || '0';
+        document.getElementById('deliveryFeeInput').value = currentFee;
+
         if (products.length === 0) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد منتجات مسجلة حتى الآن.</p>';
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد منتجات مسجلة.</p>';
             return;
         }
 
@@ -130,10 +142,9 @@
         const price = document.getElementById('prodPrice').value.trim();
         const editIndex = parseInt(document.getElementById('editIndex').value);
         const prodFile = document.getElementById('prodImgFile');
-        const catFile = document.getElementById('catImgFile');
 
         if (!category || !name || !price) {
-            alert('من فضلك أكمل حقول (اسم القسم، اسم الصنف، السعر)!');
+            alert('من فضلك أكمل حقول القسم، اسم الصنف، والسعر!');
             return;
         }
 
@@ -144,7 +155,6 @@
             existingImage = products[editIndex].image;
         }
 
-        // معالجة رفع صور المنتج والقسم من الكمبيوتر
         if (prodFile.files && prodFile.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -158,21 +168,18 @@
 
     function processSave(category, name, price, image, editIndex, products) {
         let productData = { category, name, price, image };
-
         if (editIndex > -1) {
             products[editIndex] = productData;
             document.getElementById('editIndex').value = '-1';
             document.getElementById('formTitle').innerText = '➕ إضافة صنف أو قسم جديد';
             document.getElementById('saveBtn').innerText = 'إضافة الصنف وقسمه للمنيو 🚀';
-            alert('تم تعديل المنتج بنجاح!');
         } else {
             products.push(productData);
-            alert('تمت إضافة المنتج بنجاح وسيعرض للعملاء فوراً!');
         }
-
         saveProducts(products);
         clearForm();
         renderAdminProducts();
+        alert('تم الحفظ بنجاح!');
     }
 
     function clearForm() {
@@ -180,25 +187,22 @@
         document.getElementById('prodName').value = '';
         document.getElementById('prodPrice').value = '';
         document.getElementById('prodImgFile').value = '';
-        document.getElementById('catImgFile').value = '';
     }
 
     function editProduct(index) {
         let products = getProducts();
         let p = products[index];
-
         document.getElementById('catName').value = p.category;
         document.getElementById('prodName').value = p.name;
         document.getElementById('prodPrice').value = p.price;
         document.getElementById('editIndex').value = index;
-
         document.getElementById('formTitle').innerText = '✏️ تعديل الصنف الحالي';
         document.getElementById('saveBtn').innerText = 'حفظ التعديلات 🔄';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function deleteProduct(index) {
-        if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+        if (confirm('هل أنت متأكد من الحذف؟')) {
             let products = getProducts();
             products.splice(index, 1);
             saveProducts(products);

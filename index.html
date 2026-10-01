@@ -34,10 +34,10 @@
 
         .cart-box { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; margin-top: 15px; }
         .cart-box h3 { color: #f59e0b; margin-bottom: 8px; font-size: 16px; }
-        .cart-summary { background: #0f172a; padding: 8px; border-radius: 6px; margin-bottom: 10px; color: #38bdf8; font-weight: bold; font-size: 13px; }
+        .cart-summary { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 10px; color: #38bdf8; font-weight: bold; font-size: 13px; line-height: 1.6; }
         
-        .cart-box input { width: 100%; padding: 8px; margin: 4px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
-        #checkoutBtn { background: #22c55e; color: #fff; padding: 10px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 14px; margin-top: 8px; }
+        .cart-box input, .cart-box select { width: 100%; padding: 9px; margin: 5px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
+        #checkoutBtn { background: #22c55e; color: #fff; padding: 11px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 14px; margin-top: 10px; }
         #checkoutBtn:hover { background: #16a34a; }
     </style>
 </head>
@@ -49,17 +49,24 @@
         <p>اطلب بسهولة واصلك لحد باب البيت</p>
     </div>
 
-    <a href="admin.html" class="admin-link">⚙️ الانتقال إلى لوحة التحكم لإضافة وتعديل المنتجات</a>
+    <a href="admin.html" class="admin-link">⚙️ الانتقال إلى لوحة التحكم لإدارة المنتجات والتوصيل</a>
 
     <div id="dynamicMenu"></div>
 
     <div class="cart-box">
-        <h3>🛒 سلة المشتريات</h3>
+        <h3>🛒 سلة المشتريات والطلب</h3>
         <div class="cart-summary" id="cartSummary">السلة فارغة حالياً.. اختر منتجك المفضل!</div>
         
         <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
         <input type="text" id="customerPhone" placeholder="رقم الجوال (مثال: 010xxxxxxxx) *">
         <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل *">
+
+        <label style="color: #cbd5e1; font-size: 13px; margin-top: 8px; display: block;">طريقة الدفع المطلوبة:</label>
+        <select id="paymentMethod">
+            <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
+            <option value="انستا باي (InstaPay)">📱 انستا باي (InstaPay)</option>
+            <option value="فودافون كاش (Vodafone Cash)">💳 فودافون كاش (Vodafone Cash)</option>
+        </select>
 
         <button id="checkoutBtn" onclick="checkoutOrder()">إتمام وطلب السلة عبر الواتساب 🚀</button>
     </div>
@@ -75,6 +82,7 @@
 
         if (products.length === 0) {
             menuContainer.innerHTML = '<div class="section" style="text-align: center; color: #94a3b8; font-size: 13px;">لا توجد منتجات معروضة حالياً. استخدم لوحة التحكم لإضافة المنتجات.</div>';
+            updateCartDisplay();
             return;
         }
 
@@ -89,7 +97,6 @@
 
         for (let cat in categories) {
             let items = categories[cat];
-            
             let sectionHtml = `
                 <div class="section">
                     <div class="section-header">
@@ -106,7 +113,7 @@
                             <h3>${p.name}</h3>
                             <div class="price">${p.price} ج.م</div>
                         </div>
-                        <button onclick="addToCart('${p.name}', '${p.price}')">إضافة للسلة 🛒</button>
+                        <button onclick="addToCart('${p.name}', ${p.price})">إضافة للسلة 🛒</button>
                     </div>
                 `;
             });
@@ -114,18 +121,36 @@
             sectionHtml += `</div></div>`;
             menuContainer.innerHTML += sectionHtml;
         }
+        updateCartDisplay();
     }
 
     function addToCart(name, price) {
         cartItem = { name, price };
-        document.getElementById('cartSummary').innerHTML = `📦 <b>${name}</b> - ${price} ج.م`;
+        updateCartDisplay();
         alert(`تمت إضافة "${name}" إلى السلة بنجاح!`);
+    }
+
+    function updateCartDisplay() {
+        const summaryDiv = document.getElementById('cartSummary');
+        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 0;
+
+        if (!cartItem) {
+            summaryDiv.innerHTML = `السلة فارغة حالياً.. اختر منتجك المفضل!<br>🛵 <b>قيمة التوصيل:</b> ${deliveryFee} ج.م`;
+            return;
+        }
+
+        let total = parseFloat(cartItem.price) + deliveryFee;
+        summaryDiv.innerHTML = `📦 <b>المنتج:</b> ${cartItem.name} (${cartItem.price} ج.م)<br>
+                                🛵 <b>قيمة التوصيل:</b> ${deliveryFee} ج.م<br>
+                                💰 <b>الإجمالي الكلي:</b> <span style="color: #34d399;">${total} ج.م</span>`;
     }
 
     function checkoutOrder() {
         const name = document.getElementById('customerName').value.trim();
         const phone = document.getElementById('customerPhone').value.trim();
         const address = document.getElementById('customerAddress').value.trim();
+        const payment = document.getElementById('paymentMethod').value;
+        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 0;
 
         if (!name || !phone || !address) {
             alert('من فضلك ادخل (الاسم، الجوال، العنوان) لإتمام الطلب!');
@@ -137,12 +162,22 @@
             return;
         }
 
-        let msg = `🛒 طلب جديد:\n👤 الاسم: ${name}\n📱 الجوال: ${phone}\n📍 العنوان: ${address}\n📦 المنتج: ${cartItem.name} (${cartItem.price} ج.م)`;
+        let total = parseFloat(cartItem.price) + deliveryFee;
+
+        let msg = `🛒 طلب جديد متكامل:\n` +
+                  `👤 الاسم: ${name}\n` +
+                  `📱 الجوال: ${phone}\n` +
+                  `📍 العنوان: ${address}\n` +
+                  `💳 طريقة الدفع: ${payment}\n` +
+                  `-------------------\n` +
+                  `📦 المنتج: ${cartItem.name} (${cartItem.price} ج.م)\n` +
+                  `🛵 التوصيل: ${deliveryFee} ج.م\n` +
+                  `💰 الإجمالي: ${total} ج.م`;
+
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     window.onload = loadStoreProducts;
 </script>
-
 </body>
 </html>
