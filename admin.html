@@ -3,203 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة منصة جاهز</title>
+    <title>لوحة التحكم - إدارة المتجر</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        h1, h2 { color: #f59e0b; text-align: center; }
-        .section { background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-        button { cursor: pointer; font-weight: bold; border: none; border-radius: 6px; padding: 12px 20px; background: #22c55e; color: #fff; width: 100%; transition: 0.3s; }
-        button:hover { opacity: 0.9; }
-        .sound-badge { background: #334155; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 20px; font-size: 14px; border: 1px solid #475569; }
-        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; }
-        .menu-item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
-        .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
-        .btn-danger { background: #ef4444; width: auto; padding: 6px 12px; font-size: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1 { color: #f59e0b; text-align: center; margin-bottom: 20px; font-size: 22px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #cbd5e1; font-size: 14px; }
+        input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
+        button { background: #22c55e; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #16a34a; }
+        .preview { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 8px; }
+        .preview h3 { color: #38bdf8; margin-bottom: 10px; }
+        ul { list-style: none; }
+        li { background: #1e293b; padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { background: #ef4444; padding: 4px 8px; font-size: 12px; width: auto; margin: 0; }
+        .link-store { display: block; text-align: center; margin-top: 15px; color: #f59e0b; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🛠️ لوحة إدارة منصة جاهز</h1>
 
-        <!-- شريط تفعيل الصوت للإدارة -->
-        <div id="adminSoundBadge" class="sound-badge">
-            <span style="color: #fbbf24;">⚠️ التنبيهات الصوتية للطلبات الجديدة متوقفة حالياً</span><br><br>
-            <button type="button" style="background: #3b82f6; width: auto; padding: 10px 20px;" onclick="enableAdminSound()">🔊 اضغط هنا لتفعيل تنبيهات الصوت الدائمة</button>
-        </div>
-
-        <!-- إدارة الأقسام والمنتجات مع صور الكمبيوتر -->
-        <div class="section">
-            <h2>🍽️️ إدارة الأقسام والمنتجات</h2>
-            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة القسم (اختر من الكمبيوتر):</label>
-            <input type="file" id="categoryImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
-            
-            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
-            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة المنتج (اختر من الكمبيوتر):</label>
-            <input type="file" id="itemImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
-            
-            <button type="button" onclick="addMenuItemWithImages()">إضافة الصنف وقسمه للمنيو 🚀</button>
-            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- إدارة الكباتن -->
-        <div class="section">
-            <h2>🚴 إدارة فريق الكابتن السحابي</h2>
-            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
-            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
-            <button type="button" onclick="addDriver()">إضافة كابتن</button>
-            <div id="driversListContainer" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- طلبات العملاء -->
-        <div class="section">
-            <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
-            <div id="adminOrdersContainer">جاري تحميل الطلبات...</div>
-        </div>
+<div class="container">
+    <h1>⚙️ لوحة تحكم المتجر</h1>
+    
+    <div class="form-group">
+        <label>اسم القسم (مثل: المشويات، الأجبان):</label>
+        <input type="text" id="catName" placeholder="أدخل اسم القسم">
     </div>
 
-    <!-- استدعاء ملف الـ JavaScript الخارجي -->
-    <script type="module" src="admin.js"></script>
-</body>
-</html>
-        <html dir="rtl">
-        <head>
-            <title>فاتورة شراء رقم #${order.id}</title>
-            <style>
-                body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; color: #333; }
-                .invoice-box { max-width: 450px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-                h2 { text-align: center; color: #f59e0b; }
-                table { width: 100%; margin-top: 15px; border-collapse: collapse; }
-                table td { padding: 10px; border-bottom: 1px solid #eee; text-align: right; }
-                table tr.total td { font-weight: bold; border-top: 2px solid #333; font-size: 16px; color: #0f172a; }
-            </style>
-        </head>
-        <body>
-            <div class="invoice-box">
-                <h2>منصة جاهز - فاتورة المشتريات</h2>
-                <p><strong>رقم الطلب:</strong> #${order.id}</p>
-                <p><strong>اسم العميل:</strong> ${order.customerName || 'غير متوفر'}</p>
-                <p><strong>رقم الجوال:</strong> ${order.customerPhone || 'غير متوفر'}</p>
-                <p><strong>العنوان:</strong> ${order.customerAddress || 'غير متوفر'}</p>
-                <p><strong>الكابتن المسند:</strong> ${order.driver || 'لم يُحدد بعد'}</p>
-                <hr>
-                <table>
-                    <tr>
-                        <td>قيمة المشتريات (الأصناف)</td>
-                        <td>${itemsTotal.toFixed(2)} جنيه</td>
-                    </tr>
-                    <tr>
-                        <td>قيمة التوصيل المضافة</td>
-                        <td>${deliveryFee.toFixed(2)} جنيه</td>
-                    </tr>
-                    <tr class="total">
-                        <td>الإجمالي النهائي المطلوب</td>
-                        <td>${finalTotal.toFixed(2)} جنيه</td>
-                    </tr>
-                </table>
-                <br>
-                <p style="text-align: center; font-size: 12px; color: #666;">شكراً لاستخدامكم منصة جاهز 🚀</p>
-            </div>
-            <script>
-            </script>
-        </body>
-        </html>
-                <div class="order-card-admin">
-                    <h3 style="color: #f59e0b; margin-top: 0;">📦 طلب رقم #${order.id}</h3>
-                    <p><strong>اسم العميل:</strong> ${order.customerName}</p>
-                    <p><strong>رقم الجوال:</strong> ${order.customerPhone}</p>
-                    <p><strong>العنوان:</strong> ${order.customerAddress}</p>
-                    <p><strong>الأصناف:</strong> ${itemsText}</p>
-                    <p><strong>إجمالي المشتريات:</strong> ${order.total} جنيه</p>
-                    
-                    <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0;">
-                        <label style="font-size: 13px; color: #fbbf24;">إسناد للكابتن:</label>
-                        <select id="driver_select_${order.id}">${driversOptions}</select>
-                        
-                        <label style="font-size: 13px; color: #fbbf24;">قيمة التوصيل اليدوية (جنيه):</label>
-                        <input type="number" id="delivery_fee_${order.id}" value="${currentDeliveryFee}" placeholder="أدخل قيمة التوصيل">
-                        
-                        <button type="button" style="background: #3b82f6; padding: 8px; margin-top: 5px;" onclick="updateOrderDriverAndDelivery('${order.id}')">💾 حفظ تعيين الكابتن والتوصيل</button>
-                    </div>
+    <div class="form-group">
+        <label>اسم المنتج (مثل: سمك بلطي مشوي):</label>
+        <input type="text" id="prodName" placeholder="أدخل اسم المنتج">
+    </div>
 
-                    <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب: ${calculatedTotal.toFixed(2)} جنيه</p>
-                    <p><strong>الحالة:</strong> ${order.status}</p>
+    <div class="form-group">
+        <label>السعر بالجنيه:</label>
+        <input type="number" id="prodPrice" placeholder="أدخل السعر (مثل: 100)">
+    </div>
 
-                    <button type="button" style="background: #8b5cf6; margin-top: 8px; padding: 10px;" onclick="printOrderInvoice('${order.id}')">🖨️ طباعة فاتورة المشتريات والتوصيل</button>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
-                    <span>🚴 ${d.name} (${d.phone})</span>
-                    <button class="btn-danger" onclick="deleteDriver('${key}')">حذف</button>
-                </div>
-            `;
-        <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة منصة جاهز</title>
-    <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #fff; padding: 20px; direction: rtl; }
-        .container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        h1, h2 { color: #f59e0b; text-align: center; }
-        .section { background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #fff; box-sizing: border-box; }
-        button { cursor: pointer; font-weight: bold; border: none; border-radius: 6px; padding: 12px 20px; background: #22c55e; color: #fff; width: 100%; transition: 0.3s; }
-        button:hover { opacity: 0.9; }
-        .sound-badge { background: #334155; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 20px; font-size: 14px; border: 1px solid #475569; }
-        .order-card-admin { background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b; }
-        .menu-item-card { background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
-        .item-img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #475569; }
-        .btn-danger { background: #ef4444; width: auto; padding: 6px 12px; font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🛠️ لوحة إدارة منصة جاهز</h1>
+    <div class="form-group">
+        <label>رابط صورة المنتج (رابط مباشر للصورة):</label>
+        <input type="text" id="prodImg" placeholder="https://example.com/image.jpg">
+    </div>
 
-        <!-- شريط تفعيل الصوت للإدارة -->
-        <div id="adminSoundBadge" class="sound-badge">
-            <span style="color: #fbbf24;">⚠️ التنبيهات الصوتية للطلبات الجديدة متوقفة حالياً</span><br><br>
-            <button type="button" style="background: #3b82f6; width: auto; padding: 10px 20px;" onclick="enableAdminSound()">🔊 اضغط هنا لتفعيل تنبيهات الصوت الدائمة</button>
-        </div>
+    <button onclick="addProduct()">إضافة المنتج للمتجر 🚀</button>
 
-        <!-- إدارة الأقسام والمنتجات -->
-        <div class="section">
-            <h2>🍽 إدارة الأقسام والمنتجات</h2>
-            <input type="text" id="itemCategory" placeholder="اسم القسم (مثلاً: قسم المشويات)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة القسم (اختر من الكمبيوتر):</label>
-            <input type="file" id="categoryImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
-            
-            <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: سمك بلطي مشوي)">
-            <input type="number" id="itemPrice" placeholder="السعر بالجنيه (مثلاً: 120)">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px;">صورة المنتج (اختر من الكمبيوتر):</label>
-            <input type="file" id="itemImageFile" accept="image/*" style="padding: 6px; margin-bottom: 12px;">
-            
-            <button type="button" onclick="addMenuItemWithImages()">إضافة الصنف وقسمه للمنيو 🚀</button>
-            <div id="adminMenuContainer" style="margin-top: 15px;"></div>
-        </div>
+    <a href="index.html" class="link-store">🔗 عرض متجر العملاء</a>
 
-        <!-- إدارة الكباتن -->
-        <div class="section">
-            <h2>🚴 إدارة فريق الكابتن السحابي</h2>
-            <input type="text" id="driverNameInput" placeholder="اسم الكابتن الجديد">
-            <input type="text" id="driverPhoneInput" placeholder="رقم الهاتف">
-            <button type="button" onclick="addDriver()">إضافة كابتن</button>
-            <div id="driversListContainer" style="margin-top: 15px;"></div>
-        </div>
-
-        <!-- طلبات العملاء -->
-<div class="section">
-    <h2>📦 طلبات العملاء وتتبع الخرائط (🔴 تحديث حي)</h2>
-    <div id="orders-container">جاري تحميل الطلبات...</div>
+    <div class="preview">
+        <h3>📦 المنتجات المضافة حالياً:</h3>
+        <ul id="productsList"></ul>
+    </div>
 </div>
-    <!-- استدعاء ملف الجافاسكريبت الخارجي فقط -->
-    <script type="module" src="admin.js"></script>
+
+<script>
+    function getProducts() {
+        return JSON.parse(localStorage.getItem('storeProducts')) || [];
+    }
+
+    function saveProducts(products) {
+        localStorage.setItem('storeProducts', JSON.stringify(products));
+    }
+
+    function renderAdminList() {
+        const products = getProducts();
+        const list = document.getElementById('productsList');
+        list.innerHTML = '';
+        
+        if (products.length === 0) {
+            list.innerHTML = '<li style="color:#94a3b8; text-align:center;">لا توجد منتجات مضافة بعد.</li>';
+            return;
+        }
+
+        products.forEach((p, index) => {
+            list.innerHTML += `
+                <li>
+                    <span><b>[${p.category}]</b> ${p.name} - ${p.price} ج.م</span>
+                    <button class="delete-btn" onclick="deleteProduct(${index})">حذف</button>
+                </li>
+            `;
+        });
+    }
+
+    function addProduct() {
+        const category = document.getElementById('catName').value.trim();
+        const name = document.getElementById('prodName').value.trim();
+        const price = document.getElementById('prodPrice').value.trim();
+        const image = document.getElementById('prodImg').value.trim() || 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500';
+
+        if (!category || !name || !price) {
+            alert('من فضلك املأ (الاسم، القسم، والسعر) على الأقل!');
+            return;
+        }
+
+        let products = getProducts();
+        products.push({ category, name, price, image });
+        saveProducts(products);
+
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodImg').value = '';
+        
+        renderAdminList();
+        alert('تمت إضافة المنتج بنجاح وسيعرض فوراً للعملاء!');
+    }
+
+    function deleteProduct(index) {
+        let products = getProducts();
+        products.splice(index, 1);
+        saveProducts(products);
+        renderAdminList();
+    }
+
+    window.onload = renderAdminList;
+</script>
+
+</body>
 </html>
