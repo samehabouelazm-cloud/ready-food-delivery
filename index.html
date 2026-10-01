@@ -22,7 +22,6 @@
         .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 6px; }
         .section-header h2 { color: #f59e0b; font-size: 16px; }
         
-        /* شبكة المنتجات لتظهر بشكل صغير ومضغوط ومنظم بالطول والعرض بجانب بعضها */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
         .product-card { background: #334155; border-radius: 8px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #475569; }
         .product-img { width: 100%; height: 95px; object-fit: cover; background: #475569; }
@@ -81,10 +80,11 @@
 
         let categories = {};
         products.forEach(p => {
-            if (!categories[p.category]) {
-                categories[p.category] = [];
+            let catName = p.category || 'أقسام عامة';
+            if (!categories[catName]) {
+                categories[catName] = [];
             }
-            categories[p.category].push(p);
+            categories[catName].push(p);
         });
 
         for (let cat in categories) {
@@ -106,7 +106,7 @@
                             <h3>${p.name}</h3>
                             <div class="price">${p.price} ج.م</div>
                         </div>
-                        <button onclick="addToCart('${p.name}', ${p.price})">إضافة للسلة 🛒</button>
+                        <button onclick="addToCart('${p.name}', '${p.price}')">إضافة للسلة 🛒</button>
                     </div>
                 `;
             });
@@ -123,7 +123,7 @@
     }
 
     function checkoutOrder() {
-        const name = document.getElementById('customerName'].value.trim();
+        const name = document.getElementById('customerName').value.trim();
         const phone = document.getElementById('customerPhone').value.trim();
         const address = document.getElementById('customerAddress').value.trim();
 
