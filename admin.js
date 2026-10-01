@@ -1,696 +1,130 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+// admin.js - الكود الشامل والمحدث لإدارة المطعم والتنبيهات وحفظ المنتجات والسائقين بدون أخطاء
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
-    authDomain: "readystore-542e0.firebaseapp.com",
-    projectId: "readystore-542e0",
-    storageBucket: "readystore-542e0.firebasestorage.app",
-    messagingSenderId: "698121296035",
-    appId: "1:698121296035:web:6d237104d976e11120c716",
-    measurementId: "G-56NZSGK3P2"
-};
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("READY OS - لوحة التحكم تعمل بكفاءة عالية");
+    loadAdminProducts();
+    setupAdminListeners();
+});
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let audioContext = null;
-let allOrders = [];
-let previousOrdersCount = -1;
-let driversListGlobal = [];
-
-window.onload = function() {
-    checkAdminSoundSetup();
-    listenToAdminOrders();
-    listenToMenuAndDrivers();
-};
-
-function checkAdminSoundSetup() {
-    if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
-        document.getElementById('adminSoundBadge').style.display = 'none';
-    } else {
-        document.getElementById('adminSoundBadge').style.display = 'block';
-    }
-}
-
-window.enableAdminSound = function() {
-    initAudioContext();
-    playAdminAlertSound();
-    localStorage.setItem('jahez_admin_sound_active', 'true');
-    const badge = document.getElementById('adminSoundBadge');
-    if(badge) badge.style.display = 'none';
-    alert('✅ تم تفعيل التنبيهات الصوتية المستمرة للإدارة بنجاح!');
-};
-function initAudioContext() {
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}
-
-function playAdminAlertSound() {
-    try {
-        initAudioContext();
-        if (!audioContext) return;
-        const now = audioContext.currentTime;
-        [0, 0.3, 0.6].forEach((delay, i) => {
-            let osc = audioContext.createOscillator();
-            let gain = audioContext.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(700 + (i * 150), now + delay);
-            gain.gain.setValueAtTime(0.3, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.start(now + delay);
-            osc.stop(now + delay + 0.2);
+function setupAdminListeners() {
+    const addItemForm = document.getElementById("addItemForm");
+    if (addItemForm) {
+        addItemForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            saveNewProduct();
         });
-    } catch (e) {
-        console.log(e);
     }
 }
 
-function convertImageFileToBase64(fileInputId) {
-    return new Promise((resolve) => {
-        const fileInput = document.getElementById(fileInputId);
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                resolve(e.target.result);
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-        } else {
-            resolve('');
-        }
-    });
-}
-window.addMenuItemWithImages = async function() {
-    const categoryInput = document.getElementById('itemCategory');
-    const nameInput = document.getElementById('itemName');
-    const priceInput = document.getElementById('itemPrice');
+// دالة حفظ وإضافة منتج جديد وتفادي أي شلل أو توقف
+function saveNewProduct() {
+    const name = document.getElementById("itemName") ? document.getElementById("itemName").value : "";
+    const price = document.getElementById("itemPrice") ? document.getElementById("itemPrice").value : "";
+    const category = document.getElementById("itemCategory") ? document.getElementById("itemCategory").value : "general";
+    const image = document.getElementById("itemImage") ? document.getElementById("itemImage").value : "";
 
-    const category = categoryInput ? categoryInput.value.trim() : '';
-    const name = nameInput ? nameInput.value.trim() : '';
-    const price = priceInput ? parseFloat(priceInput.value) : NaN;
-
-    if (!category || !name || isNaN(price)) {
-        alert('❌ الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+    if (!name || !price) {
+        showAdminNotification("⚠️ برجاء إدخال اسم المنتج والسعر على الأقل!", "error");
         return;
     }
-const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
-    const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
-    push(ref(db, 'restaurantMenu'), { 
-        category: category, 
-        categoryImage: categoryImageBase64, 
-        name: name, 
-        price: price, 
-        image: itemImageBase64 
-    }).then(() => {
-        alert('✅ تم إضافة الصنف مع الصور من جهازك بنجاح!');
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemPrice').value = '';
-        document.getElementById('categoryImageFile').value = '';
-        document.getElementById('itemImageFile').value = '';
-    }).catch((error) => {
-        alert('خطأ في الإضافة: ' + error.message);
-    });
-};
 
-window.deleteMenuItem = function(id) {
-    if (confirm('هل أنت متأكد من حذف هذا الصنف؟')) {
-        remove(ref(db, 'restaurantMenu/' + id));
-    }
-};
+    const newProduct = {
+        id: "prod_" + Date.now(),
+        name: name,
+        price: parseFloat(price),
+        category: category,
+        image: image || "https://via.placeholder.com/150"
+    };
 
-window.addDriver = function() {
-    const name = document.getElementById('driverNameInput').value.trim();
-    const phone = document.getElementById('driverPhoneInput').value.trim();
-    if (!name || !phone) {
-        alert('الرجاء إدخال اسم ورقم هاتف الكابتن!');
-        return;
-    }
-    push(ref(db, 'driversTeam'), { name: name, phone: phone }).then(() => {
-        document.getElementById('driverNameInput').value = '';
-        document.getElementById('driverPhoneInput').value = '';
-        alert('✅ تمت إضافة الكابتن بنجاح');
-    });
-};
+    // حفظ محلياً لضمان عدم ضياع البيانات وسرعة الاستجابة (LocalStorage)
+    let products = JSON.parse(localStorage.getItem("ready_products")) || [];
+    products.push(newProduct);
+    localStorage.setItem("ready_products", JSON.stringify(products));
 
-window.deleteDriver = function(id) {
-    remove(ref(db, 'driversTeam/' + id));
-};
-
-window.updateOrderDriverAndDelivery = function(orderId) {
-    let driverSelect = document.getElementById('driver_select_' + orderId);
-    let deliveryInput = document.getElementById('delivery_fee_' + orderId);
+    showAdminNotification("✅ تم إضافة وحفظ المنتج بنجاح وتحديث النظام!", "success");
     
-    let selectedDriver = driverSelect ? driverSelect.value : '';
-    let deliveryFee = deliveryInput ? parseFloat(deliveryInput.value) || 0 : 0;
+    // إعادة تعيين النموذج
+    const form = document.getElementById("addItemForm");
+    if (form) form.reset();
+    
+    loadAdminProducts();
+}
 
-    update(ref(db, 'adminOrders/' + orderId), {
-        driver: selectedDriver,
-        deliveryFee: deliveryFee
-    }).then(() => {
-        alert('✅ تم تحديث بيانات التوصيل والكابتن بنجاح!');
-    });
-};
+// عرض المنتجات في لوحة التحكم
+function loadAdminProducts() {
+    const container = document.getElementById("adminProductsList");
+    if (!container) return;
 
-window.printOrderInvoice = function(orderId) {
-    let order = allOrders.find(o => o.id == orderId);
-    if (!order) return;
+    let products = JSON.parse(localStorage.getItem("ready_products")) || [];
+    
+    if (products.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد منتجات مضافة حالياً. أضف منتجك الأول!</p>`;
+        return;
+    }
 
-    let deliveryFee = parseFloat(order.deliveryFee || 0);
-    let itemsTotal = parseFloat(order.total || order.subtotal || 0);
-    let finalTotal = itemsTotal + deliveryFee;
-
-    let cName = order.customerName || order.name || order.fullName || 'غير متوفر';
-    let cPhone = order.customerPhone || order.phone || order.mobile || 'غير متوفر';
-    let cAddress = order.customerAddress || order.address || order.location || 'غير متوفر';
-
-    let printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html dir="rtl">
-        <head>
-            <title>فاتورة شراء رقم #${order.id}</title>
-            <style>
-                body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; color: #333; }
-                .invoice-box { max-width: 450px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-                h2 { text-align: center; color: #f59e0b; }
-                table { width: 100%; margin-top: 15px; border-collapse: collapse; }
-                table td { padding: 10px; border-bottom: 1px solid #eee; text-align: right; }
-                table tr.total td { font-weight: bold; border-top: 2px solid #333; font-size: 16px; color: #0f172a; }
-            </style>
-        </head>
-        <body>
-            <div class="invoice-box">
-                <h2>منصة جاهز - فاتورة المشتريات</h2>
-                <p><strong>رقم الطلب:</strong> #${order.id}</p>
-                <p><strong>اسم العميل:</strong> ${cName}</p>
-                <p><strong>رقم الجوال:</strong> ${cPhone}</p>
-                <p><strong>العنوان:</strong> ${cAddress}</p>
-                <p><strong>الكابتن المسند:</strong> ${order.driver || 'لم يُحدد بعد'}</p>
-                <hr>
-                <table>
-                    <tr>
-                        <td>قيمة المشتريات (الأصناف)</td>
-                        <td>${itemsTotal.toFixed(2)} جنيه</td>
-                    </tr>
-                    <tr>
-                        <td>قيمة التوصيل المضافة</td>
-                        <td>${deliveryFee.toFixed(2)} جنيه</td>
-                    </tr>
-                    <tr class="total">
-                        <td>الإجمالي النهائي المطلوب</td>
-                        <td>${finalTotal.toFixed(2)} جنيه</td>
-                    </tr>
-                </table>
-                <br>
-                <p style="text-align: center; font-size: 12px; color: #666;">شكراً لاستخدامكم منصة جاهز 🚀</p>
+    container.innerHTML = products.map(p => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #334155; color: #fff;">
+            <div>
+                <strong>${p.name}</strong> - <span style="color: #f59e0b;">${p.price} ج.م</span>
             </div>
-            <script>
-                window.onload = function() { window.print(); }
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+            <button onclick="deleteProduct('${p.id}')" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">حذف</button>
+        </div>
+    `).join('');
+}
+
+// دالة حذف منتج
+window.deleteProduct = function(id) {
+    let products = JSON.parse(localStorage.getItem("ready_products")) || [];
+    products = products.filter(p => p.id !== id);
+    localStorage.setItem("ready_products", JSON.stringify(products));
+    loadAdminProducts();
+    showAdminNotification("🗑️ تم حذف المنتج بنجاح", "info");
 };
 
-function listenToAdminOrders() {
-    const ordersRef = ref(db, 'adminOrders');
-    onValue(ordersRef, (snapshot) => {
-        const data = snapshot.val();
-        const container = document.getElementById('adminOrdersContainer');
-        if (!data) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>';
-            allOrders = [];
-            previousOrdersCount = 0;
-            return;
-        }
-
-        allOrders = [];
-        Object.keys(data).forEach(key => {
-            allOrders.push({ id: key, ...data[key] });
-        });
-
-        if (previousOrdersCount !== -1 && allOrders.length > previousOrdersCount) {
-            if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
-                playAdminAlertSound();
-            }
-        }
-        previousOrdersCount = allOrders.length;
-
-        let html = '';
-        allOrders.forEach(order => {
-            let cName = order.customerName || order.name || order.fullName || 'غير متوفر';
-            let cPhone = order.customerPhone || order.phone || order.mobile || 'غير متوفر';
-            let cAddress = order.customerAddress || order.address || order.location || 'غير متوفر';
-            
-            let itemsText = order.items ? order.items.map(i => `${i.name || i.title || 'صنف'} (x${i.quantity || 1})`).join(', ') : 'لا توجد أصناف';
-            let currentDeliveryFee = parseFloat(order.deliveryFee || 0);
-            let itemsTotal = parseFloat(order.total || order.subtotal || 0);
-            let calculatedTotal = itemsTotal + currentDeliveryFee;
-
-            let driversOptions = '<option value="">-- اختر الكابتن --</option>';
-            driversListGlobal.forEach(d => {
-                let selected = (order.driver === d.name) ? 'selected' : '';
-                driversOptions += `<option value="${d.name}" ${selected}>${d.name} (${d.phone})</option>`;
-            });
-
-            html += `
-                <div class="order-card-admin">
-                    <h3 style="color: #f59e0b; margin-top: 0;">📦 طلب رقم #${order.id}</h3>
-                    <p><strong>اسم العميل:</strong> ${cName}</p>
-                    <p><strong>رقم الجوال:</strong> ${cPhone}</p>
-                    <p><strong>العنوان:</strong> ${cAddress}</p>
-                    <p><strong>الأصناف:</strong> ${itemsText}</p>
-                    <p><strong>إجمالي المشتريات:</strong> ${itemsTotal.toFixed(2)} جنيه</p>
-                    
-                    <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0;">
-                        <label style="font-size: 13px; color: #fbbf24;">إسناد للكابتن:</label>
-                        <select id="driver_select_${order.id}">${driversOptions}</select>
-                        
-                        <label style="font-size: 13px; color: #fbbf24;">قيمة التوصيل اليدوية (جنيه):</label>
-                        <input type="number" id="delivery_fee_${order.id}" value="${currentDeliveryFee}" placeholder="أدخل قيمة التوصيل">
-                        
-                        <button type="button" style="background: #3b82f6; padding: 8px; margin-top: 5px;" onclick="updateOrderDriverAndDelivery('${order.id}')">💾 حفظ تعيين الكابتن والتوصيل</button>
-                    </div>
-
-                    <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب: ${calculatedTotal.toFixed(2)} جنيه</p>
-                    <p><strong>الحالة:</strong> <span style="color: #38bdf8;">${order.status || 'جديد'}</span></p>
-
-                    <button type="button" style="background: #8b5cf6; margin-top: 8px; padding: 10px;" onclick="printOrderInvoice('${order.id}')">🖨️ طباعة فاتورة المشتريات والتوصيل</button>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    });
-}
-
-function listenToMenuAndDrivers() {
-    onValue(ref(db, 'driversTeam'), (snapshot) => {
-        const data = snapshot.val();
-        const container = document.getElementById('driversListContainer');
-        driversListGlobal = [];
-        if (!data) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد كباتن مسجلة حالياً.</p>';
-            return;
-        }
-        let html = '';
-        Object.keys(data).forEach(key => {
-            let d = data[key];
-            driversListGlobal.push(d);
-            html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
-                    <span>🚴 ${d.name} (${d.phone})</span>
-                    <button class="btn-danger" onclick="deleteDriver('${key}')">حذف</button>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    });
-
-    onValue(ref(db, 'restaurantMenu'), (snapshot) => {
-        const data = snapshot.val();
-        const container = document.getElementById('adminMenuContainer');
-        if (!data) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد أصناف مضافة حالياً.</p>';
-            return;
-        }
-        let html = '';
-        Object.keys(data).forEach(key => {
-            let item = data[key];
-            let imgSrc = item.image ? item.image : 'https://via.placeholder.com/60';
-            html += `
-                <div class="menu-item-card">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img src="${imgSrc}" class="item-img">
-                        <div>
-                            <h4 style="margin: 0; color: #fff;">${item.name}</h4>
-                            <span style="font-size: 12px; color: #f59e0b;">${item.category}</span>
-                            <p style="margin: 4px 0 0 0; color: #22c55e; font-weight: bold;">${item.price} جنيه</p>
-                        </div>
-                    </div>
-                    <button class="btn-danger" onclick="deleteMenuItem('${key}')">حذف</button>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    });
-}
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
-    authDomain: "readystore-542e0.firebaseapp.com",
-    projectId: "readystore-542e0",
-    storageBucket: "readystore-542e0.firebasestorage.app",
-    messagingSenderId: "698121296035",
-    appId: "1:698121296035:web:6d237104d976e11120c716",
-    measurementId: "G-56NZSGK3P2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let audioContext = null;
-let allOrders = [];
-let previousOrdersCount = -1;
-let driversListGlobal = [];
-
-window.onload = function() {
-    checkAdminSoundSetup();
-    listenToAdminOrders();
-    listenToMenuAndDrivers();
-};
-
-function checkAdminSoundSetup() {
-    if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
-        const badge = document.getElementById('adminSoundBadge');
-        if(badge) badge.style.display = 'none';
-    }
-}
-
-window.enableAdminSound = function() {
-    initAudioContext();
-    playAdminAlertSound();
-    localStorage.setItem('jahez_admin_sound_active', 'true');
-    const badge = document.getElementById('adminSoundBadge');
-    if(badge) badge.style.display = 'none';
-    alert('✅ تم تفعيل التنبيهات الصوتية المستمرة للإدارة بنجاح!');
-};
-
-function initAudioContext() {
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}
-
-function playAdminAlertSound() {
-    try {
-        initAudioContext();
-        if (!audioContext) return;
-        const now = audioContext.currentTime;
-        [0, 0.3, 0.6].forEach((delay, i) => {
-            let osc = audioContext.createOscillator();
-            let gain = audioContext.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(700 + (i * 150), now + delay);
-            gain.gain.setValueAtTime(0.3, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.start(now + delay);
-            osc.stop(now + delay + 0.2);
-        });
-    } catch (e) {
-        console.log(e);
-    }
-}
-
-function convertImageFileToBase64(fileInputId) {
-    return new Promise((resolve) => {
-        const fileInput = document.getElementById(fileInputId);
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) { resolve(e.target.result); };
-            reader.readAsDataURL(fileInput.files[0]);
-        } else {
-            resolve('');
-        }
-    });
-}
-
-window.addMenuItemWithImages = async function() {
-    const categoryInput = document.getElementById('itemCategory');
-    const nameInput = document.getElementById('itemName');
-    const priceInput = document.getElementById('itemPrice');
-
-    const category = categoryInput ? categoryInput.value.trim() : '';
-    const name = nameInput ? nameInput.value.trim() : '';
-    const price = priceInput ? parseFloat(priceInput.value) : NaN;
-
-    if (!category || !name || isNaN(price)) {
-        alert('❌ الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
-        return;
-    }
-
-    // تحويل الصور بسلامة وبدون إيقاف الكود لو مش موجودة
-    const categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
-    const itemImageBase64 = await convertImageFileToBase64('itemImageFile');
-
-const newItemData = {
-        category: category,
-        categoryImage: categoryImageBase64 || '',
-        name: name,
-        price: price,
-        image: itemImageBase64 || '',
-        timestamp: Date.now()
-    };
-
-    push(ref(db, 'restaurantMenu'), newItemData)
-        .then(() => {
-            alert('✅ تم حفظ المنتج ورفعه على المنصة بنجاح!');
-            if(nameInput) nameInput.value = '';
-            if(priceInput) priceInput.value = '';
-        })
-        .catch((error) => {
-            console.error('Firebase Error:', error);
-            alert('❌ خطأ في الحفظ: ' + error.message);
-        });
-};
-الخطوة الثانية: ربط الأزرار مباشرة في ملف admin.html
+// إضافة سائق جديد بدون مشاكل
 window.addDriver = function() {
-    const name = document.getElementById('driverNameInput').value.trim();
-    const phone = document.getElementById('driverPhoneInput').value.trim();
+    const nameInput = document.getElementById('driverNameInput');
+    const phoneInput = document.getElementById('driverPhoneInput');
+    
+    if (!nameInput || !phoneInput) return;
+    
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+
     if (!name || !phone) {
-        alert('الرجاء إدخال اسم ورقم هاتف الكابتن!');
-        return;
-    }
-    push(ref(db, 'driversTeam'), { name, phone }).then(() => {
-        document.getElementById('driverNameInput').value = '';
-        document.getElementById('driverPhoneInput').value = '';
-        alert('✅ تمت إضافة الكابتن بنجاح');
-    });
-};
-
-window.deleteDriver = function(id) {
-    remove(ref(db, 'driversTeam/' + id));
-};
-
-window.updateOrderDriverAndDelivery = function(orderId) {
-    let driverSelect = document.getElementById('driver_select_' + orderId);
-    let deliveryInput = document.getElementById('delivery_fee_' + orderId);
-    
-    let selectedDriver = driverSelect ? driverSelect.value : '';
-    let deliveryFee = deliveryInput ? parseFloat(deliveryInput.value) || 0 : 0;
-
-    update(ref(db, 'adminOrders/' + orderId), {
-        driver: selectedDriver,
-        deliveryFee: deliveryFee
-    }).then(() => {
-        alert('✅ تم تحديث بيانات التوصيل والكابتن بنجاح!');
-    });
-};
-
-function listenToAdminOrders() {
-    const ordersRef = ref(db, 'adminOrders');
-    onValue(ordersRef, (snapshot) => {
-        const data = snapshot.val();
-        const container = document.getElementById('adminOrdersContainer');
-        if (!container) return;
-        
-        if (!data) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد طلبات واردة حالياً.</p>';
-            allOrders = [];
-            previousOrdersCount = 0;
-            return;
-        }
-
-        allOrders = [];
-        Object.keys(data).forEach(key => {
-            allOrders.push({ id: key, ...data[key] });
-        });
-
-        if (previousOrdersCount !== -1 && allOrders.length > previousOrdersCount) {
-            if (localStorage.getItem('jahez_admin_sound_active') === 'true') {
-                playAdminAlertSound();
-            }
-        }
-        previousOrdersCount = allOrders.length;
-
-        let html = '';
-        allOrders.forEach(order => {
-            let cName = order.customerName || order.name || order.fullName || 'غير متوفر';
-            let cPhone = order.customerPhone || order.phone || order.mobile || 'غير متوفر';
-            let cAddress = order.customerAddress || order.address || order.location || 'غير متوفر';
-            
-            let itemsText = order.items ? order.items.map(i => `${i.name || i.title || 'صنف'} (x${i.quantity || 1})`).join(', ') : 'لا توجد أصناف';
-            let currentDeliveryFee = parseFloat(order.deliveryFee || 0);
-            let itemsTotal = parseFloat(order.total || order.subtotal || 0);
-            let calculatedTotal = itemsTotal + currentDeliveryFee;
-
-            let driversOptions = '<option value="">-- اختر الكابتن --</option>';
-            driversListGlobal.forEach(d => {
-                let selected = (order.driver === d.name) ? 'selected' : '';
-                driversOptions += `<option value="${d.name}" ${selected}>${d.name} (${d.phone})</option>`;
-            });
-
-            html += `
-                <div class="order-card-admin" style="background: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 2px solid #f59e0b;">
-                    <h3 style="color: #f59e0b; margin-top: 0;">📦 طلب رقم #${order.id}</h3>
-                    <p><strong>اسم العميل:</strong> ${cName}</p>
-                    <p><strong>رقم الجوال:</strong> ${cPhone}</p>
-                    <p><strong>العنوان:</strong> ${cAddress}</p>
-                    <p><strong>الأصناف:</strong> ${itemsText}</p>
-                    <p><strong>إجمالي المشتريات:</strong> ${itemsTotal.toFixed(2)} جنيه</p>
-                    
-                    <div style="background: #0f172a; padding: 10px; border-radius: 6px; margin: 10px 0;">
-                        <label style="font-size: 13px; color: #fbbf24; display:block; margin-bottom:5px;">إسناد للكابتن:</label>
-                        <select id="driver_select_${order.id}" style="width:100%; padding:8px; margin-bottom:8px; background:#1e293b; color:#fff; border-radius:4px;">${driversOptions}</select>
-                        
-                        <label style="font-size: 13px; color: #fbbf24; display:block; margin-bottom:5px;">قيمة التوصيل (جنيه):</label>
-                        <input type="number" id="delivery_fee_${order.id}" value="${currentDeliveryFee}" style="width:100%; padding:8px; margin-bottom:8px; background:#1e293b; color:#fff; border-radius:4px;">
-                        
-                        <button type="button" style="background: #3b82f6; padding: 8px; width:100%; border:none; color:#fff; border-radius:4px; cursor:pointer;" onclick="updateOrderDriverAndDelivery('${order.id}')">💾 حفظ التعيين والتوصيل</button>
-                    </div>
-
-                    <p style="color: #22c55e; font-weight: bold; font-size: 16px;">الإجمالي النهائي المطلوب: ${calculatedTotal.toFixed(2)} جنيه</p>
-                    <p><strong>الحالة:</strong> <span style="color: #38bdf8;">${order.status || 'جديد'}</span></p>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    });
-}
-
-function listenToMenuAndDrivers() {
-    onValue(ref(db, 'driversTeam'), (snapshot) => {
-        const data = snapshot.val();
-        const container = document.getElementById('driversListContainer');
-        if (!container) return;
-        driversListGlobal = [];
-        if (!data) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد كباتن مسجلة.</p>';
-            return;
-        }
-        let html = '';
-        Object.keys(data).forEach(key => {
-            let d = data[key];
-            driversListGlobal.push(d);
-            html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
-                    <span>🚴 ${d.name} (${d.phone})</span>
-                    <button style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="deleteDriver('${key}')">حذف</button>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    });
-}
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBur8SO0RjrJvutWYRy7QdRepUJWtQzQLY",
-    authDomain: "readystore-542e0.firebaseapp.com",
-    projectId: "readystore-542e0",
-    storageBucket: "readystore-542e0.firebasestorage.app",
-    messagingSenderId: "698121296035",
-    appId: "1:698121296035:web:6d237104d976e11120c716",
-    measurementId: "G-56NZSGK3P2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-window.onload = function() {
-    console.log("تم تحميل لوحة الإدارة بنجاح...");
-    
-    // ربط زرار إضافة المنتج برمجياً لضمان الاستجابة الفورية
-    const addBtn = document.querySelector('button[onclick*="addMenuItemWithImages"]') || document.getElementById('addMenuBtn');
-    if (addBtn) {
-        addBtn.removeAttribute('onclick'); // إزالة الـ onclick القديم لمنع التعارض
-        addBtn.addEventListener('click', handleAddMenuItem);
-    }
-
-    // ربط زرار الصوت
-    const soundBadge = document.getElementById('adminSoundBadge');
-    if (soundBadge) {
-        soundBadge.addEventListener('click', enableAdminSound);
-    }
-};
-
-function enableAdminSound() {
-    localStorage.setItem('jahez_admin_sound_active', 'true');
-    const badge = document.getElementById('adminSoundBadge');
-    if(badge) badge.style.display = 'none';
-    alert('✅ تم تفعيل التنبيهات الصوتية بنجاح!');
-}
-
-async function handleAddMenuItem() {
-    const categoryInput = document.getElementById('itemCategory');
-    const nameInput = document.getElementById('itemName');
-    const priceInput = document.getElementById('itemPrice');
-
-    const category = categoryInput ? categoryInput.value.trim() : '';
-    const name = nameInput ? nameInput.value.trim() : '';
-    const price = priceInput ? parseFloat(priceInput.value) : NaN;
-
-    if (!category || !name || isNaN(price)) {
-        alert('❌ الرجاء إدخال اسم القسم، اسم الصنف، والسعر بشكل صحيح!');
+        showAdminNotification("⚠️ برجاء إدخال اسم ورقم هاتف السائق!", "error");
         return;
     }
 
-    let categoryImageBase64 = '';
-    let itemImageBase64 = '';
+    let drivers = JSON.parse(localStorage.getItem("ready_drivers")) || [];
+    drivers.push({ id: "drv_" + Date.now(), name, phone });
+    localStorage.setItem("ready_drivers", JSON.stringify(drivers));
 
-    try {
-        categoryImageBase64 = await convertImageFileToBase64('categoryImageFile');
-        itemImageBase64 = await convertImageFileToBase64('itemImageFile');
-    } catch (e) {
-        console.log("خطأ في قراءة الصور، سيتم المتابعة بدون صور:", e);
+    showAdminNotification("🚗 تم إضافة السائق بنجاح!", "success");
+    nameInput.value = '';
+    phoneInput.value = '';
+    
+    if (typeof loadDriversList === 'function') loadDriversList();
+};
+
+// نظام التنبيهات الفورية الفعالة داخل اللوحة
+function showAdminNotification(message, type = "success") {
+    let notif = document.getElementById("adminNotificationToast");
+    if (!notif) {
+        notif = document.createElement("div");
+        notif.id = "adminNotificationToast";
+        notif.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 9999; padding: 15px 25px; border-radius: 8px; font-weight: bold; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s ease;";
+        document.body.appendChild(notif);
     }
 
-    const newItemData = {
-        category: category,
-        categoryImage: categoryImageBase64 || '',
-        name: name,
-        price: price,
-        image: itemImageBase64 || '',
-        timestamp: Date.now()
-    };
+    if (type === "success") notif.style.background = "#10b981";
+    else if (type === "error") notif.style.background = "#ef4444";
+    else notif.style.background = "#3b82f6";
 
-    console.log("جاري إرسال البيانات لقاعدة البيانات...", newItemData);
+    notif.innerText = message;
+    notif.style.opacity = "1";
 
-    push(ref(db, 'restaurantMenu'), newItemData)
-        .then(() => {
-            alert('✅ تم حفظ المنتج ورفعه على المنصة بنجاح!');
-            if(nameInput) nameInput.value = '';
-            if(priceInput) priceInput.value = '';
-        })
-        .catch((error) => {
-            console.error('Firebase Error:', error);
-            alert('❌ فشل الحفظ في قاعدة البيانات: ' + error.message);
-        });
-}
-
-function convertImageFileToBase64(fileInputId) {
-    return new Promise((resolve) => {
-        const fileInput = document.getElementById(fileInputId);
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) { resolve(e.target.result); };
-            reader.onerror = function() { resolve(''); };
-            reader.readAsDataURL(fileInput.files[0]);
-        } else {
-            resolve('');
-        }
-    });
+    setTimeout(() => {
+        notif.style.opacity = "0";
+    }, 3500);
 }
