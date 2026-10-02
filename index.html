@@ -3,451 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY • جاهز - متجر التوصيل السريع وكباتن الإرسال 🚀🛺</title>
+    <title>متجر READY - تسوق أونلاين</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .store-container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        body { background: #0f172a; color: #f8fafc; padding: 15px; }
+        .container { max-width: 1100px; margin: 0 auto; }
         
-        .app-brand-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0284c7, #0f172a); padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #38bdf8; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); }
-        .brand-logo { font-size: 20px; font-weight: bold; color: #fff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-        .brand-logo span { color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 10px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.3); }
-        .admin-quick-link { display: flex; gap: 10px; }
-        .admin-quick-link a { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, 0.3); transition: 0.2s; }
-        .admin-quick-link a.captain-link { color: #38bdf8; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); }
+        header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
+        h1 { color: #38bdf8; font-size: 22px; }
+        .nav-btns { display: flex; gap: 10px; }
+        .btn { background: #0ea5e9; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; font-size: 13px; transition: 0.2s; }
+        .btn:hover { background: #0284c7; }
+        .btn-track { background: #f59e0b; }
+        .btn-track:hover { background: #d97706; }
 
-        .slider-container { position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; border: 1px solid #475569; background: #0f172a; }
-        .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; opacity: 0; transition: opacity 1s ease-in-out, transform 1s ease-in-out; background-size: cover; background-position: center; transform: scale(1.05); }
-        .slide.active { opacity: 1; transform: scale(1); }
-        .slide::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 1; }
-        .slide > * { position: relative; z-index: 2; }
-        .slide h2 { color: #38bdf8; font-size: 21px; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        .slide p { color: #e2e8f0; font-size: 13px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .search-box { margin-bottom: 20px; }
+        .search-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
 
-        .section { margin-bottom: 25px; }
-        .section-header { border-bottom: 2px solid #38bdf8; padding-bottom: 6px; margin-bottom: 12px; }
-        .section-header h2 { font-size: 18px; color: #38bdf8; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
-        
-        .product-card { background: #0f172a; border-radius: 12px; overflow: hidden; border: 1px solid #334155; text-align: center; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        .product-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; }
         .product-card:hover { transform: translateY(-3px); border-color: #38bdf8; }
-        .product-img { width: 100%; height: 120px; object-fit: cover; }
-        .product-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .product-info h3 { font-size: 14px; color: #fff; }
-        .price { color: #34d399; font-weight: bold; font-size: 15px; }
-        .add-btn { background: #38bdf8; color: #0f172a; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .add-btn:hover { background: #7dd3fc; }
+        .product-card img { width: 100%; height: 140px; object-fit: cover; }
+        .product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-title { font-size: 15px; font-weight: bold; margin-bottom: 5px; }
+        .product-cat { font-size: 11px; color: #94a3b8; margin-bottom: 8px; }
+        .product-price { font-size: 14px; color: #34d399; font-weight: bold; margin-bottom: 12px; }
+        .add-to-cart { background: #22c55e; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: auto; }
+        .add-to-cart:hover { background: #16a34a; }
 
-        .cart-box { background: #0f172a; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #334155; }
-        .cart-box h3 { font-size: 16px; margin-bottom: 10px; color: #38bdf8; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 13px; }
-        .qty-controls { display: flex; gap: 8px; align-items: center; }
-        .qty-btn { background: #334155; color: #fff; border: none; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .qty-btn:hover { background: #0ea5e9; }
+        /* سلة المشتريات والطلب */
+        .cart-section { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
+        th, td { border: 1px solid #334155; padding: 8px; text-align: center; }
+        th { background: #334155; color: #38bdf8; }
+        .checkout-form input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
+        .btn-order { background: #10b981; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .btn-order:hover { background: #059669; }
 
-        .form-group { display: flex; flex-direction: column; gap: 12px; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
-        .gps-btn { background: #0ea5e9; color: #fff; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #locationStatus { font-size: 12px; color: #38bdf8; }
-        #paymentDetailsBox { background: rgba(56, 189, 248, 0.08); border: 1px dashed #38bdf8; padding: 12px; border-radius: 8px; font-size: 13px; color: #38bdf8; display: none; }
-        .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
-        .checkout-btn:hover { background: #16a34a; }
-
-        .captain-join-section { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #38bdf8; border-radius: 12px; padding: 20px; margin-top: 30px; }
-        .captain-join-section h3 { color: #38bdf8; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .captain-join-section p { color: #94a3b8; font-size: 13px; margin-bottom: 15px; }
-        .captain-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .captain-form input, .captain-form select { margin-bottom: 0; }
-        .full-width { grid-column: span 2; }
-        .captain-submit-btn { background: #0ea5e9; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        .captain-submit-btn:hover { background: #0284c7; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #printableInvoice, #printableInvoice * { visibility: visible; }
-            #printableInvoice { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; color: #000 !important; padding: 20px; }
-        }
-        .invoice-card { background: #fff; color: #1e293b; padding: 20px; border-radius: 10px; display: none; margin-top: 20px; }
+        /* نظام التتبع الحي للعميل */
+        .tracking-modal { display: none; background: #1e293b; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+        .tracking-step { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px; color: #94a3b8; }
+        .tracking-step.active { color: #34d399; font-weight: bold; }
+        .alert-box { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; padding: 12px; border-radius: 8px; color: #fcd34d; font-weight: bold; text-align: center; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="store-container">
-    
-    <div class="app-brand-header">
-        <div class="brand-logo">
-            ⚡ READY <span>جاهز</span>
+<div class="container">
+    <header>
+        <h1>🛒 متجر READY</h1>
+        <div class="nav-btns">
+            <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي الحي</button>
+            <a href="admin.html" class="btn" style="background: #475569;">⚙️ لوحة الإدارة</a>
         </div>
-        <div class="admin-quick-link">
-            <a href="#captainSection" class="captain-link">🛺 انضم ككابتن</a>
-            <a href="admin.html">⚙️ لوحة الإدارة</a>
-        </div>
-    </div>
+    </header>
 
-    <div class="slider-container" id="slider">
-        <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1526367460886-3cddc340da4f?w=800&auto=format&fit=crop&q=80');">
-            <h2>🚀 أسرع خدمة توصيل لحد باب بيتك</h2>
-            <p>اطلب احتياجاتك وسيقوم الكابتن بتوصيلها في أسرع وقت!</p>
-        </div>
-        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1556742049-0a67d553c2a5?w=800&auto=format&fit=crop&q=80');">
-            <h2>💳 طرق دفع مرنة (فودافون كاش وإنستا باي)</h2>
-            <p>ادفع بسهولة وأمان عبر وسائل الدفع الإلكتروني المتاحة لدينا.</p>
-        </div>
-        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80');">
-            <h2>🔥 عروض طازجة وأقسام متنوعة يومياً</h2>
-            <p>تسوق أقوى المنتجات بأفضل الأسعار وبجودة مضمونة 100%.</p>
+    <!-- شاشة تتبع الطلب الخاصة بالعميل -->
+    <div id="trackingSection" class="tracking-modal">
+        <h2 style="color: #f59e0b; margin-bottom: 15px;">📦 تتبع حالة طلبك النشط لحظة بشيء</h2>
+        <div id="trackingContent">
+            <p style="color: #94a3b8;">لا توجد طلبات نشطة حالياً للتتبع.</p>
         </div>
     </div>
 
-    <div id="dynamicMenu"></div>
-
-    <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-
-    <div class="cart-box">
-        <h3>🛒 سلة المشتريات (الأصناف والكميات)</h3>
-        <div id="cartItemsList" style="margin-bottom: 10px; color: #cbd5e1;">السلة فارغة حالياً.. اختر منتجاتك المفضلة!</div>
-        <div id="cartTotalSummary" style="font-size: 14px; border-top: 1px solid #334155; padding-top: 8px;"></div>
+    <!-- بحث المنتجات -->
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضلة هنا..." oninput="filterProducts()">
     </div>
 
-    <div class="form-group">
-        <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
-        <input type="text" id="customerPhone" placeholder="رقم الجوال *">
-        <input type="text" id="customerAddress" placeholder="العنوان التفصيلي *">
-        
-        <button type="button" class="gps-btn" onclick="getLocation()">📍 تحديد الموقع التلقائي (GPS)</button>
-        <div id="locationStatus"></div>
-
-        <select id="paymentMethod" onchange="togglePaymentInfo()">
-            <option value="كاش عند الاستلام">كاش عند الاستلام</option>
-            <option value="فودافون كاش">فودافون كاش</option>
-            <option value="انستا باي">انستا باي (InstaPay)</option>
-        </select>
-
-        <div id="paymentDetailsBox"></div>
-
-        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب وإرسال التنبيه للإدارة والمندوب فوراً 🚀</button>
+    <!-- قائمة المنتجات -->
+    <div id="productsGrid" class="products-grid">
+        <!-- يتم تعبئتها ديناميكياً من اللوحة -->
     </div>
 
-    <div class="captain-join-section" id="captainSection">
-        <h3>🛺 انضم إلى فريق كباتن "جاهز"</h3>
-        <p>اكسب دخلك الإضافي وانضم لشبكة الكباتن والمناديب الأسرع توصيلاً!</p>
-        <div class="captain-form">
-            <input type="text" id="captainName" placeholder="اسم الكابتن الثلاثي *">
-            <input type="text" id="captainPhone" placeholder="رقم الموبايل / واتساب *">
-            <select id="captainVehicle" class="full-width">
-                <option value="توكتوك">توكتوك 🛺 (سريع وشقي الشوارع)</option>
-                <option value="موتوسيكل">موتوسيكل 🛵</option>
-                <option value="سكوتر">سكوتر 🛵</option>
-                <option value="دراجة هوائية (عجل)">دراجة هوائية (عجل) 🚲</option>
-                <option value="سيارة">سيارة 🚗</option>
+    <!-- سلة الشراء -->
+    <div class="cart-section">
+        <h2>🛍️ سلة المشتريات الخاصة بك</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>المنتج</th>
+                        <th>السعر</th>
+                        <th>الكمية</th>
+                        <th>الإجمالي الفرعي</th>
+                        <th>حذف</th>
+                    </tr>
+                </thead>
+                <tbody id="cartTableBody">
+                    <tr><td colspan="5" style="color: #94a3b8;">السلة فارغة حالياً.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="cartSummary" style="font-size: 15px; font-weight: bold; margin-bottom: 15px; text-align: left;">
+            إجمالي المنتجات: 0 ج.م | أجر التوصيل: <span id="deliveryFeeDisplay">20</span> ج.م | الإجمالي النهائي: <span id="grandTotalDisplay" style="color: #34d399;">0</span> ج.م
+        </div>
+
+        <!-- نموذج إتمام الطلب -->
+        <div class="checkout-form">
+            <h3 style="color: #38bdf8; margin-bottom: 10px; font-size: 15px;">📝 بيانات التوصيل والاستلام</h3>
+            <input type="text" id="custName" placeholder="اسمك الكريم *">
+            <input type="text" id="custPhone" placeholder="رقم الهاتف (للتواصل عند وصول الكابتن) *">
+            <input type="text" id="custAddress" placeholder="عنوانك بالتفصيل (الشارع، رقم العمارة، الطابق) *">
+            <select id="paymentMethod" style="width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
+                <option value="الدفع نقداً عند الاستلام">💵 الدفع نقداً عند الاستلام</option>
+                <option value="تحفظ إلكتروني / انستاباي">💳 تحويل إلكتروني / انستاباي</option>
             </select>
-            <div class="full-width">
-                <button type="button" class="captain-submit-btn" onclick="submitCaptainApplication()">إرسال طلب الانضمام للإدارة فوراً 🚀</button>
-            </div>
+            <button onclick="submitOrder()" class="btn-order">إرسال الطلب الآن 🚀</button>
         </div>
-    </div>
-
-    <div id="printableInvoice" class="invoice-card">
-        <h2 style="text-align: center; margin-bottom: 5px;">⚡ READY • جاهز ⚡</h2>
-        <h4 style="text-align: center; margin-bottom: 15px; color: #64748b;">فاتورة طلب وإسناد لكابتن التوصيل 🧾</h4>
-        <div id="invoiceContent"></div>
     </div>
 </div>
 
 <script>
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.slide');
-    function nextSlide() {
-        slides[currentSlide].classList.remove('active');
-        currentSlide = (currentSlide + 1) % slides.length;
-        slides[currentSlide].classList.add('active');
-    }
-    setInterval(nextSlide, 4000);
-
     let cart = [];
-    let customerCoords = null;
 
     function loadStoreProducts() {
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        
-        // الأقسام والأصناف المشهورة الافتراضية
+        let grid = document.getElementById('productsGrid');
+        grid.innerHTML = '';
+
         if (products.length === 0) {
-            products = [
-                // سوبر ماركت
-                { name: 'بيض بلدي - 30 بيضة', price: 130, category: '🥚 السوبر ماركت والبيض', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&auto=format&fit=crop&q=60' },
-                { name: 'لبن طازج - 1 لتر', price: 35, category: '🥚 السوبر ماركت والبيض', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300&auto=format&fit=crop&q=60' },
-                { name: 'جبنة فريكش - 500جم', price: 45, category: '🥚 السوبر ماركت والبيض', image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&auto=format&fit=crop&q=60' },
-                
-                // وجبات سريعة
-                { name: 'وجبة برجر مشوي دبل', price: 120, category: '🍔 الوجبات السريعة', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=60' },
-                { name: 'ساندوتش شاورما دجاج كبير', price: 75, category: '🍔 الوجبات السريعة', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=300&auto=format&fit=crop&q=60' },
-                { name: 'بيتزا كوين بالجبنة والمشروم', price: 140, category: '🍔 الوجبات السريعة', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&auto=format&fit=crop&q=60' },
-
-                // مشويات ولحوم
-                { name: 'كيلو كفتة ضاني مشوية', price: 280, category: '🥩 المشويات واللحوم', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=300&auto=format&fit=crop&q=60' },
-                { name: 'فرخة مشوية عالفحم', price: 220, category: '🥩 المشويات واللحوم', image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=300&auto=format&fit=crop&q=60' },
-
-                // مخبوزات وحلويات
-                { name: 'تورتة شوكولاتة طازجة', price: 250, category: '🍰 المخبوزات والحلويات', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&auto=format&fit=crop&q=60' },
-                { name: 'علبة كحك وبسكويت عيد', price: 180, category: '🍰 المخبوزات والحلويات', image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300&auto=format&fit=crop&q=60' }
-            ];
-            localStorage.setItem('storeProducts', JSON.stringify(products));
-        }
-
-        const menuContainer = document.getElementById('dynamicMenu');
-        if (!menuContainer) return;
-        menuContainer.innerHTML = '';
-
-        let categories = {};
-        products.forEach((p, index) => {
-            let catName = p.category || 'أقسام عامة';
-            if (!categories[catName]) categories[catName] = [];
-            categories[catName].push({ ...p, originalIndex: index });
-        });
-
-        for (let cat in categories) {
-            let items = categories[cat];
-            let sectionHtml = `<div class="section"><div class="section-header"><h2>📂 ${cat}</h2></div><div class="products-grid">`;
-            
-            items.forEach(p => {
-                sectionHtml += `
-                    <div class="product-card">
-                        <img src="${p.image || 'https://via.placeholder.com/300'}" alt="${p.name}" class="product-img">
-                        <div class="product-info">
-                            <h3>${p.name}</h3>
-                            <div class="price">${p.price} ج.م</div>
-                            <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="add-btn">إضافة للسلة 🛒</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            sectionHtml += `</div></div>`;
-            menuContainer.innerHTML += sectionHtml;
-        }
-        updateCartDisplay();
-    }
-
-    function addToCart(name, price) {
-        let found = cart.find(item => item.name === name);
-        if (found) {
-            found.qty += 1;
-        } else {
-            cart.push({ name, price, qty: 1 });
-        }
-        updateCartDisplay();
-    }
-
-    function changeQty(name, delta) {
-        let found = cart.find(item => item.name === name);
-        if (found) {
-            found.qty += delta;
-            if (found.qty <= 0) {
-                cart = cart.filter(item => item.name !== name);
-            }
-        }
-        updateCartDisplay();
-    }
-
-    function updateCartDisplay() {
-        const listDiv = document.getElementById('cartItemsList');
-        const summaryDiv = document.getElementById('cartTotalSummary');
-        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
-
-        if (cart.length === 0) {
-            listDiv.innerHTML = 'السلة فارغة حالياً.. اختر منتجاتك المفضلة!';
-            summaryDiv.innerHTML = `🛵 <b>أجرة الكابتن للتوصيل:</b> ${deliveryFee} ج.م`;
+            grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">عذراً، لا توجد منتجات مسجلة حالياً. قم بإضافتها من لوحة الإدارة.</p>`;
             return;
         }
 
-        let itemsHtml = '';
-        let subtotal = 0;
-
-        cart.forEach(item => {
-            let itemTotal = item.price * item.qty;
-            subtotal += itemTotal;
-            itemsHtml += `
-                <div class="cart-item-row">
-                    <div><b>${item.name}</b> (${item.price} ج.م)</div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty('${item.name.replace(/'/g, "\\'")}', -1)">-</button>
-                        <span><b>${item.qty}</b></span>
-                        <button class="qty-btn" onclick="changeQty('${item.name.replace(/'/g, "\\'")}', 1)">+</button>
-                        <span style="color: #34d399; width: 60px; text-align: left;">${itemTotal} ج.م</span>
+        products.forEach((p, index) => {
+            grid.innerHTML += `
+                <div class="product-card" data-name="${p.name}">
+                    <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}">
+                    <div class="product-info">
+                        <span class="product-cat">${p.category || 'عام'}</span>
+                        <div class="product-title">${p.name}</div>
+                        <div class="product-price">${p.price} ج.م</div>
+                        <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
                     </div>
                 </div>
             `;
         });
 
-        let grandTotal = subtotal + deliveryFee;
-        listDiv.innerHTML = itemsHtml;
-        summaryDiv.innerHTML = `
-            📦 إجمالي الأصناف: <b>${subtotal} ج.م</b><br>
-            🛵 أجر كابتن التوصيل: <b>${deliveryFee} ج.م</b><br>
-            💰 <b>الإجمالي النهائي: <span style="color: #34d399;">${grandTotal} ج.م</span></b>
-        `;
+        let fee = localStorage.getItem('storeDeliveryFee') || 20;
+        document.getElementById('deliveryFeeDisplay').innerText = fee;
+        updateCartUI();
     }
 
-    function getLocation() {
-        const statusDiv = document.getElementById('locationStatus');
-        const addressInput = document.getElementById('customerAddress');
-
-        if (!navigator.geolocation) {
-            statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
-            return;
-        }
-
-        statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة لكابتن التوصيل (GPS)...';
-        
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
-                addressInput.value = `📍 موقع GPS الحالي (جاهز لإرساله للمندوب)`;
-                statusDiv.innerHTML = '✅ تم تحديد الموقع بدقة وربطه بكابتن التوصيل!';
-            },
-            (error) => {
-                statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل صلاحية الـ GPS.';
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
+    function filterProducts() {
+        let query = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.querySelectorAll('.product-card');
+        cards.forEach(card => {
+            let name = card.getAttribute('data-name').toLowerCase();
+            card.style.display = name.includes(query) ? 'flex' : 'none';
+        });
     }
 
-    function togglePaymentInfo() {
-        const method = document.getElementById('paymentMethod').value;
-        const box = document.getElementById('paymentDetailsBox');
-        const vodafoneNumber = localStorage.getItem('vodafoneCashNum') || '01034101822';
-        const instapayAccount = localStorage.getItem('instapayAcc') || 'sameh@instapay';
-
-        if (method === 'فودافون كاش') {
-            box.style.display = 'block';
-            box.innerHTML = `📱 يرجى التحويل على رقم فودافون كاش: <b style="color:#fff; font-size:15px;">${vodafoneNumber}</b> وتسليم الإيصال للكابتن.`;
-        } else if (method === 'انستا باي') {
-            box.style.display = 'block';
-            box.innerHTML = `💳 يرجى التحويل على إنستا باي: <b style="color:#fff; font-size:15px;">${instapayAccount}</b>`;
+    function addToCart(index) {
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+        let product = products[index];
+        let existing = cart.find(i => i.name === product.name);
+        if (existing) {
+            existing.qty += 1;
         } else {
-            box.style.display = 'none';
-            box.innerHTML = '';
+            cart.push({ name: product.name, price: product.price, qty: 1 });
         }
+        updateCartUI();
     }
 
-    function submitCaptainApplication() {
-        const cName = document.getElementById('captainName').value.trim();
-        const cPhone = document.getElementById('captainPhone').value.trim();
-        const cVehicle = document.getElementById('captainVehicle').value;
-
-        if (!cName || !cPhone) {
-            alert('من فضلك ادخل اسم الكابتن ورقم الجوال للانضمام!');
-            return;
-        }
-
-        let msg = `🛺 [طلب انضمام كابتن توصيل جديد - READY]\n` +
-                  `-------------------\n` +
-                  `👤 اسم الكابتن: ${cName}\n` +
-                  `📱 رقم الجوال: ${cPhone}\n` +
-                  `🚗 وسيلة التوصيل: ${cVehicle}\n` +
-                  `-------------------\n` +
-                  `أرغب في الانضمام لفريق الكباتن لتوصيل الطلبات.`;
-
-        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    function checkoutOrder() {
-        const name = document.getElementById('customerName').value.trim();
-        const phone = document.getElementById('customerPhone').value.trim();
-        let address = document.getElementById('customerAddress').value.trim();
-        const payment = document.getElementById('paymentMethod').value;
-        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
-
-        if (!name || !phone || !address) {
-            alert('من فضلك ادخل الاسم، الجوال، والعنوان أو موقع الـ GPS!');
-            return;
-        }
+    function updateCartUI() {
+        let tbody = document.getElementById('cartTableBody');
+        tbody.innerHTML = '';
+        let subtotal = 0;
 
         if (cart.length === 0) {
-            alert('السلة فارغة، اختر منتجاتك أولاً!');
+            tbody.innerHTML = `<tr><td colspan="5" style="color: #94a3b8;">السلة فارغة حالياً.</td></tr>`;
+            document.getElementById('grandTotalDisplay').innerText = '0';
             return;
         }
 
-        let subtotal = 0;
-        let itemsListText = "";
-        let invoiceHtmlRows = "";
-
-        cart.forEach(item => {
+        cart.forEach((item, idx) => {
             let itemTotal = item.price * item.qty;
             subtotal += itemTotal;
-            itemsListText += `• ${item.name} (×${item.qty}) = ${itemTotal} ج.م\n`;
-            invoiceHtmlRows += `<tr><td style="border:1px solid #ddd; padding:8px;">${item.name}</td><td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.qty}</td><td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.price} ج.م</td><td style="border:1px solid #ddd; padding:8px; text-align:center;">${itemTotal} ج.م</td></tr>`;
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${item.name}</b></td>
+                    <td>${item.price} ج.م</td>
+                    <td><input type="number" value="${item.qty}" min="1" style="width: 50px; text-align: center; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="updateQty(${idx}, this.value)"></td>
+                    <td>${itemTotal} ج.م</td>
+                    <td><button onclick="removeFromCart(${idx})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">حذف</button></td>
+                </tr>
+            `;
         });
 
-        let total = subtotal + deliveryFee;
-        let locationText = address;
-        if (customerCoords) locationText += `\nرابط خريطة العميل: ${customerCoords}`;
+        let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+        let grandTotal = subtotal + (subtotal > 0 ? fee : 0);
+        document.getElementById('grandTotalDisplay').innerText = grandTotal;
+    }
 
-        let allOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
-        let newOrderObj = {
-            id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-            date: new Date().toLocaleString('ar-EG'),
+    function updateQty(idx, qty) {
+        let q = parseInt(qty);
+        if (q > 0) cart[idx].qty = q;
+        updateCartUI();
+    }
+
+    function removeFromCart(idx) {
+        cart.splice(idx, 1);
+        updateCartUI();
+    }
+
+    function submitOrder() {
+        if (cart.length === 0) {
+            alert('السلة فارغة! أضف منتجات أولاً قبل إتمام الطلب.');
+            return;
+        }
+
+        let name = document.getElementById('custName').value.trim();
+        let phone = document.getElementById('custPhone').value.trim();
+        let address = document.getElementById('custAddress').value.trim();
+        let paymentMethod = document.getElementById('paymentMethod').value;
+
+        if (!name || !phone || !address) {
+            alert('من فضلك أدخل الاسم ورقم الهاتف وعنوان الاستلام بالتفصيل!');
+            return;
+        }
+
+        let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+        let grandTotal = subtotal + fee;
+
+        let newOrder = {
+            id: Math.floor(1000 + Math.random() * 9000),
+            date: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
             customerName: name,
             customerPhone: phone,
-            customerAddress: locationText,
-            paymentMethod: payment,
+            customerAddress: address,
             items: [...cart],
-            subtotal: subtotal,
-            deliveryFee: deliveryFee,
-            total: total,
-            status: 'قيد المراجعة وإسناد المندوب'
+            total: grandTotal,
+            paymentMethod: paymentMethod,
+            trackingStatus: 'تم استلام الطلب وبدء التحضير'
         };
-        allOrders.unshift(newOrderObj);
-        localStorage.setItem('storeOrders', JSON.stringify(allOrders));
 
-        let msg = "🚨 [تنبيه طلب جديد مؤكد - READY]\n" +
-                  "-------------------\n" +
-                  "👤 العميل: " + name + "\n" +
-                  "📱 الجوال: " + phone + "\n" +
-                  "📍 العنوان / GPS: " + locationText + "\n" +
-                  "💳 الدفع: " + payment + "\n" +
-                  "-------------------\n" +
-                  "📦 الأصناف المطلوبة:\n" + itemsListText +
-                  "-------------------\n" +
-                  "🏷 مجموع الأصناف: " + subtotal + " ج.م\n" +
-                  "🛵 أجر التوصيل للكابتن: " + deliveryFee + " ج.م\n" +
-                  "💰 الإجمالي النهائي: " + total + " ج.م\n" +
-                  "-------------------\n" +
-                  "⚡ تم إرسال التنبيه وحفظ الطلب في لوحة الإدارة بنجاح!";
-
-        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
-
-        document.getElementById('invoiceContent').innerHTML = `
-            <p><b>رقم الطلب:</b> ${newOrderObj.id}</p>
-            <p><b>اسم العميل:</b> ${name}</p>
-            <p><b>رقم الجوال:</b> ${phone}</p>
-            <p><b>العنوان:</b> ${address}</p>
-            <p><b>طريقة الدفع:</b> ${payment}</p>
-            <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;">
-                <thead>
-                    <tr style="background:#f1f5f9;">
-                        <th style="border:1px solid #ddd; padding:8px;">المنتج</th>
-                        <th style="border:1px solid #ddd; padding:8px;">الكمية</th>
-                        <th style="border:1px solid #ddd; padding:8px;">السعر</th>
-                        <th style="border:1px solid #ddd; padding:8px;">الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody>${invoiceHtmlRows}</tbody>
-            </table>
-            <p style="margin-top:10px;"><b>مجموع الأصناف:</b> ${subtotal} ج.م</p>
-            <p><b>أجر التوصيل للكابتن:</b> ${deliveryFee} ج.م</p>
-            <p style="font-size:16px; color:#16a34a;"><b>الإجمالي النهائي: ${total} ج.م</b></p>
-        `;
-
-        setTimeout(() => {
-            window.print();
-        }, 1000);
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        orders.unshift(newOrder); // وضع الطلب الجديد في الأعلى
+        localStorage.setItem('storeOrders', JSON.stringify(orders));
+        localStorage.setItem('lastActiveOrderPhone', phone);
 
         cart = [];
-        updateCartDisplay();
+        updateCartUI();
+        alert('🎉 تم إرسال طلبك بنجاح! يمكنك متابعة حالة التتبع الحي من زر "تتبع طلبي الحي" أعلى الصفحة.');
+        toggleTrackingSection();
     }
+
+    function toggleTrackingSection() {
+        let section = document.getElementById('trackingSection');
+        if (section.style.display === 'block') {
+            section.style.display = 'none';
+        } else {
+            section.style.display = 'block';
+            renderLiveTracking();
+        }
+    }
+
+    function renderLiveTracking() {
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let lastPhone = localStorage.getItem('lastActiveOrderPhone');
+        let content = document.getElementById('trackingContent');
+
+        // البحث عن آخر طلب يخص هذا العميل أو أحدث طلب عام
+        let myOrder = orders.find(o => o.customerPhone === lastPhone) || orders[0];
+
+        if (!myOrder) {
+            content.innerHTML = `<p style="color: #94a3b8;">لا توجد طلبات نشطة للعرض حالياً.</p>`;
+            return;
+        }
+
+        let status = myOrder.trackingStatus || 'تم استلام الطلب وبدء التحضير';
+
+        let steps = [
+            "تم استلام الطلب وبدء التحضير",
+            "الطلب قرب يجهز",
+            "الطلب جاهز للتسليم",
+            "استلمه المندوب",
+            "المندوب أو الكابتن في الطريق إليك",
+            "الكابتن اقترب من مكان التسليم (استعد للاستلام)",
+            "تم تسليم الطلب بنجاح"
+        ];
+
+        let stepsHtml = '';
+        let isNear = status.includes('اقترب من مكان التسليم');
+
+        steps.forEach((s, idx) => {
+            let isActive = status === s;
+            stepsHtml += `<div class="tracking-step ${isActive ? 'active' : ''}">
+                <span>${isActive ? '📍 🟢' : '⚪'}</span> ${idx + 1}. ${s}
+            </div>`;
+        });
+
+        content.innerHTML = `
+            <div style="margin-bottom: 12px; font-size: 13px; color: #38bdf8;">
+                <b>رقم الطلب: #${myOrder.id}</b> | الحالة الحالية: <span style="color:#34d399">${status}</span>
+            </div>
+            ${stepsHtml}
+            <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
+                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلام طلبك!
+            </div>
+        `;
+    }
+
+    // تحديث التتبع تلقائياً كل 3 ثواني للعميل
+    setInterval(() => {
+        let section = document.getElementById('trackingSection');
+        if (section && section.style.display === 'block') {
+            renderLiveTracking();
+        }
+    }, 3000);
 
     window.onload = loadStoreProducts;
 </script>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة والتحكم - READY ⚙️️</title>
+    <title>لوحة الإدارة والتحكم - READY ⚙</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .admin-container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .admin-container { max-width: 1000px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; }
         
         h1, h2 { color: #38bdf8; margin-bottom: 15px; }
         .nav-links { margin-bottom: 25px; }
@@ -20,7 +20,6 @@
         .btn-main { background: #22c55e; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn-main:hover { background: #16a34a; }
 
-        /* تصميم زر رفع الصورة من الكمبيوتر */
         .file-upload-box { border: 2px dashed #38bdf8; background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
         .file-upload-box:hover { background: rgba(56, 189, 248, 0.12); }
         .file-upload-box input { display: none; }
@@ -34,12 +33,14 @@
         th { background: #334155; color: #38bdf8; }
         .del-btn { background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .del-btn:hover { background: #dc2626; }
+        
+        .status-select { padding: 6px; border-radius: 6px; background: #334155; color: #fff; border: 1px solid #475569; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <h1>⚙️ لوحة إدارة متجر READY</h1>
+    <h1>⚙️ لوحة إدارة متجر READY ونظام التتبع</h1>
     <div class="nav-links">
         <a href="index.html">🛒 الانتقال لصفحة المتجر الرئيسية</a>
     </div>
@@ -61,12 +62,9 @@
             <input type="number" id="pPrice" placeholder="السعر بالجنيه *">
             <input type="text" id="pCategory" placeholder="اسم القسم (مثال: 🍔 الوجبات السريعة)">
             
-            <!-- رفع الصورة من الكمبيوتر -->
             <div class="full">
                 <div class="file-upload-box" onclick="document.getElementById('pImageFile').click()">
-                    <div class="file-upload-label">
-                        📁 اضغط هنا لاختيار صورة المنتج من الكمبيوتر أو الموبايل
-                    </div>
+                    <div class="file-upload-label">📁 اضغط هنا لاختيار صورة المنتج من الكمبيوتر أو الموبايل</div>
                     <input type="file" id="pImageFile" accept="image/*" onchange="previewImage(event)">
                 </div>
                 <div id="imagePreviewContainer">
@@ -81,7 +79,7 @@
         </div>
     </div>
 
-    <!-- إدارة المنتجات الحالية (حذف أو تعديل) -->
+    <!-- إدارة المنتجات -->
     <div class="card-box">
         <h2>📦 إدارة المنتجات والأصناف الحالية</h2>
         <div style="overflow-x: auto;">
@@ -100,18 +98,18 @@
         </div>
     </div>
 
-    <!-- سجل الطلبات الواردة -->
+    <!-- سجل الطلبات ونظام تتبع المراحل -->
     <div class="card-box">
-        <h2>📋 سجل طلبات العملاء الواردة</h2>
+        <h2>📋 سجل طلبات العملاء وتحديث مراحل التتبع الحية</h2>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
                     <tr>
                         <th>رقم الطلب</th>
-                        <th>التاريخ</th>
-                        <th>العميل</th>
-                        <th>التفاصيل والإجمالي</th>
-                        <th>الحالة</th>
+                        <th>العميل ورقم الهاتف</th>
+                        <th>تفاصيل الأصناف</th>
+                        <th>تحديث حالة التتبع للعميل</th>
+                        <th>إجراءات سريعة</th>
                     </tr>
                 </thead>
                 <tbody id="adminOrdersTable">
@@ -169,15 +167,29 @@
         if (orders.length === 0) {
             oTable.innerHTML = `<tr><td colspan="5" style="color: #94a3b8;">لا توجد طلبات جديدة حالياً.</td></tr>`;
         } else {
-            orders.forEach(o => {
+            orders.forEach((o, index) => {
                 let itemsStr = o.items.map(i => `${i.name} (×${i.qty})`).join(', ');
+                let currentStatus = o.trackingStatus || 'تم استلام الطلب وبدء التحضير';
+                
                 oTable.innerHTML += `
                     <tr>
-                        <td><b>${o.id}</b></td>
-                        <td style="font-size:11px;">${o.date}</td>
-                        <td>${o.customerName}<br><span style="font-size:11px; color:#38bdf8;">${o.customerPhone}</span></td>
+                        <td><b>#${o.id}</b><br><span style="font-size:11px; color:#94a3b8;">${o.date}</span></td>
+                        <td><b>${o.customerName}</b><br><span style="font-size:12px; color:#38bdf8;">${o.customerPhone}</span><br><span style="font-size:11px; color:#cbd5e1;">📍 ${o.customerAddress}</span></td>
                         <td style="text-align: right; font-size: 12px;">الأصناف: ${itemsStr}<br><b>الإجمالي: ${o.total} ج.م (${o.paymentMethod})</b></td>
-                        <td><span style="color: #34d399; font-weight: bold;">${o.status}</span></td>
+                        <td>
+                            <select class="status-select" onchange="updateOrderStatus(${index}, this.value)">
+                                <option value="تم استلام الطلب وبدء التحضير" ${currentStatus==='تم استلام الطلب وبدء التحضير'?'selected':''}>1️⃣ الطلب بيتحضر</option>
+                                <option value="الطلب قرب يجهز" ${currentStatus==='الطلب قرب يجهز'?'selected':''}>2️⃣ الطلب قرب يجهز</option>
+                                <option value="الطلب جاهز للتسليم" ${currentStatus==='الطلب جاهز للتسليم'?'selected':''}>3️⃣ الطلب جاهز</option>
+                                <option value="استلمه المندوب" ${currentStatus==='استلمه المندوب'?'selected':''}>4️⃣ استلمه المندوب</option>
+                                <option value="المندوب أو الكابتن في الطريق إليك" ${currentStatus==='المندوب أو الكابتن في الطريق إليك'?'selected':''}>5️⃣ الكابتن في الطريق</option>
+                                <option value="الكابتن اقترب من مكان التسليم (استعد للاستلام)" ${currentStatus==='الكابتن اقترب من مكان التسليم (استعد للاستلام)'?'selected':''}>6️⃣ قرب من البيت 🚨</option>
+                                <option value="تم تسليم الطلب بنجاح" ${currentStatus==='تم تسليم الطلب بنجاح'?'selected':''}>✅ تم التسليم</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button onclick="deleteOrder(${index})" class="del-btn" style="padding: 8px;">حذف الطلب</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -216,11 +228,30 @@
         alert('🎉 تم إضافة المنتج بصورته الجديدة وأصبح ظاهراً للعملاء فوراً!');
     }
 
+    function updateOrderStatus(index, newStatus) {
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        if(orders[index]) {
+            orders[index].trackingStatus = newStatus;
+            localStorage.setItem('storeOrders', JSON.stringify(orders));
+            alert('🔄 تم تحديث حالة التتبع بنجاح وستظهر للعميل فوراً!');
+            loadAdminData();
+        }
+    }
+
     function deleteProduct(index) {
         if (confirm('هل أنت متأكد من حذف هذا المنتج من المتجر؟')) {
             let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
             products.splice(index, 1);
             localStorage.setItem('storeProducts', JSON.stringify(products));
+            loadAdminData();
+        }
+    }
+
+    function deleteOrder(index) {
+        if (confirm('هل تريد حذف هذا الطلب من السجل؟')) {
+            let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+            orders.splice(index, 1);
+            localStorage.setItem('storeOrders', JSON.stringify(orders));
             loadAdminData();
         }
     }
