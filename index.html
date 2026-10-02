@@ -107,7 +107,6 @@
             <button type="button" class="btn-location" onclick="getMyLocation()">📍 حدد موقعي الحالي على الخريطة (GPS)</button>
             <div id="locationStatus" style="font-size: 12px; color: #34d399; margin-bottom: 10px;"></div>
 
-### اختيار طريقة الدفع
             <select id="paymentMethod">
                 <option value="الدفع نقداً عند الاستلام">💵 الدفع نقداً عند الاستلام</option>
                 <option value="فودافون كاش">🔴 فودافون كاش</option>
@@ -123,20 +122,23 @@
     let currentProducts = [];
     let customerCoords = null;
 
-    // روابط صور ثابتة ومضمونة 100% لكل منتج
+    // المنتجات الأصلية المطابقة للصورة تماماً مع إصدار جديد لإجبار التحديث
+    const CURRENT_VERSION = "v3_exact";
     const originalDefaultProducts = [
-        { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?w=400" },
-        { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400" },
+        { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
+        { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
         { name: "بيض بلدي - 30 بيضة", price: 130, category: "السوبر ماركت", image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" }
     ];
 
     function loadStoreProducts() {
+        let savedVersion = localStorage.getItem('storeProductsVersion');
         let products = JSON.parse(localStorage.getItem('storeProducts'));
         
-        // فرض المنتجات الأصلية الصحيحة إذا لم تكن موجودة أو حدث تضارب قديم
-        if (!products || products.length === 0 || !products.some(p => p.name.includes('طماطم'))) {
+        // إذا كان الإصدار مختلفاً أو لا توجد منتجات، نفرض المنتجات الأصلية الصحيحة بالقوة ونحدث الإصدار
+        if (savedVersion !== CURRENT_VERSION || !products || products.length === 0) {
             products = originalDefaultProducts;
             localStorage.setItem('storeProducts', JSON.stringify(originalDefaultProducts));
+            localStorage.setItem('storeProductsVersion', CURRENT_VERSION);
         }
 
         currentProducts = products;
@@ -341,7 +343,7 @@
             "الطلب جاهز للتسليم",
             "استلمه المندوب",
             "المندوب أو الكابتن في الطريق إليك",
-            "الكابتن اقترب من مكان التسليم (استعد للاستلاستلام)",
+            "الكابتن اقترب من مكان التسليم (استعد للاستلام)",
             "تم تسليم الطلب بنجاح"
         ];
 
@@ -361,7 +363,7 @@
             </div>
             ${stepsHtml}
             <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
-                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلام طلبك!
+                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلاستلام طلبك!
             </div>
         `;
     }
