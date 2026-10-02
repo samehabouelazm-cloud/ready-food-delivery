@@ -16,8 +16,11 @@
         .btn:hover { background: #0284c7; }
         .btn-track { background: #f59e0b; }
         .btn-track:hover { background: #d97706; }
-        .btn-admin { background: #8b5cf6; }
+        .btn-admin { background: #8b5cf6; position: relative; }
         .btn-admin:hover { background: #7c3aed; }
+        
+        /* شارة الإشعارات للإدارة */
+        .badge-count { position: absolute; top: -5px; right: -5px; background: #ef4444; color: #fff; border-radius: 50%; padding: 2px 6px; font-size: 10px; display: none; }
 
         .search-box { margin-bottom: 20px; }
         .search-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
@@ -58,7 +61,7 @@
         <h1>🛒 جاهز - READY - في بلطيم</h1>
         <div class="nav-btns">
             <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            <button class="btn btn-admin" onclick="toggleAdminSection()">⚙️ لوحة الإدارة</button>
+            <button class="btn btn-admin" onclick="toggleAdminSection()">⚙️ لوحة الإدارة <span id="adminBadge" class="badge-count">0</span></button>
         </div>
     </header>
 
@@ -70,9 +73,12 @@
         </div>
     </div>
 
-    <!-- لوحة تحكم الإدارة (تغيير مراحل التتبع وسجل الطلبات) -->
+    <!-- لوحة تحكم الإدارة -->
     <div id="adminSection" class="admin-section">
-        <h2 style="color: #8b5cf6; margin-bottom: 15px;">⚙️ لوحة تحكم الإدارة - سجل الطلبات وتحديث التتبع</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #8b5cf6;">⚙️ لوحة تحكم الإدارة - سجل الطلبات وتحديث التتبع الحي</h2>
+            <button class="btn" style="background:#ef4444; padding:5px 10px; font-size:11px;" onclick="clearAllOrders()">🗑️ مسح السجل</button>
+        </div>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -94,7 +100,7 @@
 
     <!-- رسالة نجاح الإرسال -->
     <div id="successBanner" class="success-banner">
-        🎉 تم إرسال طلبك بنجاح للإدارة عبر الواتساب وتحديث السجل!
+        🎉 تم إرسال طلبك بنجاح للإدارة عبر الواتساب وتنبيه الإدارة صوتياً!
     </div>
 
     <!-- بحث المنتجات -->
@@ -154,7 +160,7 @@
     let currentProducts = [];
     let customerCoords = null;
 
-    const CURRENT_VERSION = "v6_exact";
+    const CURRENT_VERSION = "v7_sound_alert";
     const originalDefaultProducts = [
         { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
         { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
@@ -171,6 +177,27 @@
         "استعد وافتح الباب - الكابتن وصل",
         "تم تسليم الطلب بنجاح"
     ];
+
+    // دالة لتوليد صوت تنبيه (Beep) للإدارة عند وصول طلب جديد بدون الحاجة لملفات صوت خارجية
+    function playNotificationSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // تردد عالي للنغمة
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.4); // مدة النغمة 0.4 ثانية
+        } catch (e) {
+            console.log('Audio context not supported or blocked');
+        }
+    }
 
     function loadStoreProducts() {
         let savedVersion = localStorage.getItem('storeProductsVersion');
@@ -203,6 +230,7 @@
         let fee = localStorage.getItem('storeDeliveryFee') || 20;
         document.getElementById('deliveryFeeDisplay').innerText = fee;
         updateCartUI();
+        updateAdminBadge();
     }
 
     function filterProducts() {
@@ -325,14 +353,18 @@
             items: [...cart],
             total: grandTotal,
             paymentMethod: paymentMethod,
-            trackingStatus: trackingStepsList[0]
+            trackingStatus: trackingStepsList[0],
+            isNew: true
         };
 
-        // حفظ الطلب في سجل الإدارة والعميل
+        // حفظ الطلب في السجل
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         orders.unshift(newOrder);
         localStorage.setItem('storeOrders', JSON.stringify(orders));
         localStorage.setItem('lastActiveOrderPhone', phone);
+
+        // تشغيل صوت التنبيه فوراً للإدارة
+        playNotificationSound();
 
         let itemsText = cart.map(i => `- ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
         let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
@@ -346,7 +378,7 @@
             `💰 *الإجمالي النهائي:* ${grandTotal} ج.م (شامل التوصيل)\n` +
             `💳 *طريقة الدفع:* ${paymentMethod}`;
 
-        // تفريغ السلة وحقول البيانات بالكامل بعد الإرسال
+        // تفريغ السلة وحقول البيانات بالكامل
         cart = [];
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
@@ -354,6 +386,7 @@
         document.getElementById('locationStatus').innerText = '';
         customerCoords = null;
         updateCartUI();
+        updateAdminBadge();
 
         // إظهار رسالة النجاح في الصفحة
         let successBanner = document.getElementById('successBanner');
@@ -390,6 +423,23 @@
         } else {
             section.style.display = 'block';
             renderAdminOrders();
+            // إزالة علامة التنبيه عند فتح الإدارة
+            let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+            orders.forEach(o => o.isNew = false);
+            localStorage.setItem('storeOrders', JSON.stringify(orders));
+            updateAdminBadge();
+        }
+    }
+
+    function updateAdminBadge() {
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let newCount = orders.filter(o => o.isNew).length;
+        let badge = document.getElementById('adminBadge');
+        if (newCount > 0) {
+            badge.innerText = newCount;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
         }
     }
 
@@ -421,7 +471,7 @@
             </div>
             ${stepsHtml}
             <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
-                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد وافتح الباب!
+                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعدا وافتح الباب!
             </div>
         `;
     }
@@ -446,7 +496,7 @@
             });
 
             tbody.innerHTML += `
-                <tr>
+                <tr style="${order.isNew ? 'background: rgba(139, 92, 246, 0.15);' : ''}">
                     <td><b>#${order.id}</b><br><small style="color:#94a3b8">${order.date}</small></td>
                     <td><b>${order.customerName}</b><br><span style="color:#38bdf8">${order.customerPhone}</span></td>
                     <td>${order.customerAddress}<br><b style="color:#34d399">${order.total} ج.م</b> (${order.paymentMethod})</td>
@@ -471,11 +521,23 @@
         }
     }
 
-    // تحديث تلقائي للحالة في صفحة العميل كل 3 ثواني
+    function clearAllOrders() {
+        if (confirm('هل أنت متأكد من مسح جميع سجل الطلبات؟')) {
+            localStorage.removeItem('storeOrders');
+            renderAdminOrders();
+            updateAdminBadge();
+        }
+    }
+
+    // تحديث تلقائي دوري كل 3 ثواني لتحديث شاشة التفقد والتتبع ولوحة الإدارة
     setInterval(() => {
-        let section = document.getElementById('trackingSection');
-        if (section && section.style.display === 'block') {
+        let trackSec = document.getElementById('trackingSection');
+        if (trackSec && trackSec.style.display === 'block') {
             renderLiveTracking();
+        }
+        let adminSec = document.getElementById('adminSection');
+        if (adminSec && adminSec.style.display === 'block') {
+            renderAdminOrders();
         }
     }, 3000);
 
