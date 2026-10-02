@@ -122,18 +122,20 @@
     let currentProducts = [];
     let customerCoords = null;
 
-    const defaultProducts = [
-        { name: "وجبة كشري جاهز سوبر", price: 45, category: "وجبات رئيسية", image: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=400" },
-        { name: "سندوتش شاورما دجاج مميز", price: 60, category: "سندوتشات وسريع", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400" },
-        { name: "عصير مانجو طبيعي فريش", price: 25, category: "مشروبات ومثلجات", image: "https://images.unsplash.com/photo-1546173159-315724a31696?w=400" }
+    // المنتجات الأصلية الصحيحة المطابقة للصورة تماماً
+    const originalDefaultProducts = [
+        { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
+        { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
+        { name: "بيض بلطي - 30 بيضة", price: 130, category: "السوبر ماركت", image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" }
     ];
 
     function loadStoreProducts() {
         let products = JSON.parse(localStorage.getItem('storeProducts'));
         
-        if (!products || products.length === 0) {
-            products = defaultProducts;
-            localStorage.setItem('storeProducts', JSON.stringify(defaultProducts));
+        // إذا لم تكن موجودة أو كانت القديمة الخاطئة، يتم ضبط المنتجات الأصلية تلقائياً
+        if (!products || products.length === 0 || products[0].name.includes('كشري')) {
+            products = originalDefaultProducts;
+            localStorage.setItem('storeProducts', JSON.stringify(originalDefaultProducts));
         }
 
         currentProducts = products;
@@ -268,8 +270,9 @@
         let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
         let grandTotal = subtotal + fee;
 
+        let orderId = Math.floor(1000 + Math.random() * 9000);
         let newOrder = {
-            id: Math.floor(1000 + Math.random() * 9000),
+            id: orderId,
             date: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
             customerName: name,
             customerPhone: phone,
@@ -281,14 +284,35 @@
             trackingStatus: 'تم استلام الطلب وبدء التحضير'
         };
 
+        // حفظ الطلب في لوحة الإدارة (localStorage)
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         orders.unshift(newOrder);
         localStorage.setItem('storeOrders', JSON.stringify(orders));
         localStorage.setItem('lastActiveOrderPhone', phone);
 
+        // تجهيز نص رسالة الواتساب للإدارة
+        let adminPhone = localStorage.getItem('storeAdminPhone') || '201000000000'; // ضع رقم الواتساب الافتراضي هنا أو سحبه من الإعدادات
+        let itemsText = cart.map(i => `- ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
+        let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
+
+        let whatsappMessage = `🚨 *طلب جديد رقم #${orderId}* 🚀\n\n` +
+            `👤 *الاسم:* ${name}\n` +
+            `📞 *الهاتف:* ${phone}\n` +
+            `📍 *العنوان:* ${address}\n` +
+            `🗺️ *رابط الخريطة:* ${mapLink}\n\n` +
+            `🛒 *المنتجات المطلوبة:*\n${itemsText}\n\n` +
+            `💰 *الإجمالي النهائي:* ${grandTotal} ج.م (شامل التوصيل)\n` +
+            `💳 *طريقة الدفع:* ${paymentMethod}`;
+
+        // تفريغ السلة وتحديث الواجهة
         cart = [];
         updateCartUI();
-        alert('🎉 تم إرسال طلبك بنجاح! يمكنك متابعة حالة التتبع الحي من زر "تتبع طلبي الحي" أعلى الصفحة.');
+
+        // فتح واتساب الإدارة تلقائياً بالطلب المرصود
+        let whatsappUrl = `https://wa.me/${adminPhone}?text=` + encodeURIComponent(whatsappMessage);
+        window.open(whatsappUrl, '_blank');
+
+        alert('🎉 تم إرسال طلبك بنجاح وتحويله للواتساب للإدارة! يمكنك متابعة حالة التتبع الحي.');
         toggleTrackingSection();
     }
 
