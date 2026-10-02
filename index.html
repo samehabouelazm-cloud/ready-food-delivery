@@ -42,9 +42,10 @@
         .btn-order:hover { background: #059669; }
 
         .tracking-modal { display: none; background: #1e293b; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
-        .tracking-step { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 14px; color: #94a3b8; }
-        .tracking-step.active { color: #34d399; font-weight: bold; }
+        .tracking-step { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: #94a3b8; }
+        .tracking-step.active { color: #34d399; font-weight: bold; transform: scale(1.02); transition: 0.2s; }
         .alert-box { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; padding: 12px; border-radius: 8px; color: #fcd34d; font-weight: bold; text-align: center; margin-top: 15px; display: none; }
+        .success-banner { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; padding: 15px; border-radius: 8px; color: #34d399; font-weight: bold; text-align: center; margin-bottom: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -63,6 +64,11 @@
         <div id="trackingContent">
             <p style="color: #94a3b8;">لا توجد طلبات نشطة حالياً للتتبع.</p>
         </div>
+    </div>
+
+    <!-- رسالة نجاح الإرسال -->
+    <div id="successBanner" class="success-banner">
+        🎉 تم إرسال طلبك بنجاح للإدارة! تم تفريغ السلة وتجهيز طلبك لتتبع حالته لحظة بلحظة.
     </div>
 
     <!-- بحث المنتجات -->
@@ -122,7 +128,7 @@
     let currentProducts = [];
     let customerCoords = null;
 
-    const CURRENT_VERSION = "v4_exact";
+    const CURRENT_VERSION = "v5_exact";
     const originalDefaultProducts = [
         { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
         { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
@@ -282,17 +288,13 @@
             items: [...cart],
             total: grandTotal,
             paymentMethod: paymentMethod,
-            trackingStatus: 'تم استلام الطلب وبدء التحضير'
+            trackingStatus: 'تم استلام الطلب من الإدارة وجاري التحضير'
         };
 
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         orders.unshift(newOrder);
         localStorage.setItem('storeOrders', JSON.stringify(orders));
         localStorage.setItem('lastActiveOrderPhone', phone);
-
-        // جلب رقم الواتساب المسجل في إعدادات الإدارة وتنظيفه تماماً من أي رموز أو مسافات
-        let rawAdminPhone = localStorage.getItem('storeAdminPhone') || '201000000000';
-        let adminPhone = rawAdminPhone.replace(/\D/g, ''); // الاحتفاظ بالأرقام فقط
 
         let itemsText = cart.map(i => `- ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
         let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
@@ -301,16 +303,30 @@
             `👤 *الاسم:* ${name}\n` +
             `📞 *الهاتف:* ${phone}\n` +
             `📍 *العنوان:* ${address}\n` +
-            `🗺️ *رابط الخريطة:* ${mapLink}\n\n` +
+            `🗺️️ *رابط الخريطة:* ${mapLink}\n\n` +
             `🛒 *المنتجات المطلوبة:*\n${itemsText}\n\n` +
             `💰 *الإجمالي النهائي:* ${grandTotal} ج.م (شامل التوصيل)\n` +
             `💳 *طريقة الدفع:* ${paymentMethod}`;
 
+        // تفريغ السلة وحقول البيانات بالكامل بعد الإرسال
         cart = [];
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('custAddress').value = '';
+        document.getElementById('locationStatus').innerText = '';
+        customerCoords = null;
         updateCartUI();
 
-        // استخدام رابط API المباشر لتوجيه الشات على رقم الإدارة المسجل فوراً دون خيارات
-let whatsappUrl = `https://api.whatsapp.com/send?phone=201034101822&text=` + encodeURIComponent(whatsappMessage);        window.location.href = whatsappUrl; 
+        // إظهار رسالة النجاح في الصفحة
+        let successBanner = document.getElementById('successBanner');
+        successBanner.style.display = 'block';
+        setTimeout(() => { successBanner.style.display = 'none'; }, 8000);
+
+        // توجيه الواتساب المباشر للإدارة
+        let adminPhone = '201034101822'; // رقم الواتساب المباشر للإدارة
+        let whatsappUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=` + encodeURIComponent(whatsappMessage);
+        
+        window.location.href = whatsappUrl;
     }
 
     function toggleTrackingSection() {
@@ -334,19 +350,22 @@ let whatsappUrl = `https://api.whatsapp.com/send?phone=201034101822&text=` + enc
             return;
         }
 
-        let status = myOrder.trackingStatus || 'تم استلام الطلب وبدء التحضير';
+        let status = myOrder.trackingStatus || 'تم استلام الطلب من الإدارة وجاري التحضير';
+        
+        // الخطوات التفصيلية الكاملة لتتبع الطلب
         let steps = [
-            "تم استلام الطلب وبدء التحضير",
-            "الطلب قرب يجهز",
-            "الطلب جاهز للتسليم",
-            "استلمه المندوب",
-            "المندوب أو الكابتن في الطريق إليك",
-            "الكابتن اقترب من مكان التسليم (استعد للاستلام)",
+            "تم استلام الطلب من الإدارة وجاري التحضير",
+            "الطلب بيتحضر أو بيجهز",
+            "الطلب استلمه المندوب",
+            "المندوب اتحرك بالطلب",
+            "المندوب في الطريق إليك",
+            "المندوب على بعد أمتار من موقعك",
+            "استعد وافتح الباب - الكابتن وصل",
             "تم تسليم الطلب بنجاح"
         ];
 
         let stepsHtml = '';
-        let isNear = status.includes('اقترب من مكان التسليم');
+        let isNear = status.includes('على بعد أمتار') || status.includes('استعد وافتح الباب');
 
         steps.forEach((s, idx) => {
             let isActive = status === s;
@@ -361,11 +380,12 @@ let whatsappUrl = `https://api.whatsapp.com/send?phone=201034101822&text=` + enc
             </div>
             ${stepsHtml}
             <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
-                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلام طلبك!
+                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد وافتح الباب!
             </div>
         `;
     }
 
+    // تحديث تلقائي دوري لعرض حالة التتبع الحية
     setInterval(() => {
         let section = document.getElementById('trackingSection');
         if (section && section.style.display === 'block') {
