@@ -35,7 +35,9 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
         th, td { border: 1px solid #334155; padding: 8px; text-align: center; }
         th { background: #334155; color: #38bdf8; }
-        .checkout-form input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
+        .checkout-form input, .checkout-form select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
+        .btn-location { background: #3b82f6; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-location:hover { background: #2563eb; }
         .btn-order { background: #10b981; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
         .btn-order:hover { background: #059669; }
 
@@ -100,8 +102,12 @@
             <h3 style="color: #38bdf8; margin-bottom: 10px; font-size: 15px;">📝 بيانات التوصيل والاستلام</h3>
             <input type="text" id="custName" placeholder="اسمك الكريم *">
             <input type="text" id="custPhone" placeholder="رقم الهاتف (للتواصل عند وصول الكابتن) *">
+            
             <input type="text" id="custAddress" placeholder="عنوانك بالتفصيل (الشارع، رقم العمارة، الطابق) *">
-            <select id="paymentMethod" style="width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
+            <button type="button" class="btn-location" onclick="getMyLocation()">📍 حدد موقعي الحالي على الخريطة (GPS)</button>
+            <div id="locationStatus" style="font-size: 12px; color: #34d399; margin-bottom: 10px;"></div>
+
+            <select id="paymentMethod">
                 <option value="الدفع نقداً عند الاستلام">💵 الدفع نقداً عند الاستلام</option>
                 <option value="فودافون كاش">🔴 فودافون كاش</option>
                 <option value="تحويل إلكتروني / انستاباي">💳 تحويل إلكتروني / انستاباي</option>
@@ -114,6 +120,7 @@
 <script>
     let cart = [];
     let currentProducts = [];
+    let customerCoords = null;
 
     const defaultProducts = [
         { name: "وجبة كشري جاهز سوبر", price: 45, category: "وجبات رئيسية", image: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=400" },
@@ -159,6 +166,34 @@
             let name = card.getAttribute('data-name').toLowerCase();
             card.style.display = name.includes(query) ? 'flex' : 'none';
         });
+    }
+
+    function getMyLocation() {
+        let statusDiv = document.getElementById('locationStatus');
+        if (!navigator.geolocation) {
+            statusDiv.style.color = '#ef4444';
+            statusDiv.innerText = 'متصفحك لا يدعم تحديد الموقع الجغرافي.';
+            return;
+        }
+
+        statusDiv.style.color = '#f59e0b';
+        statusDiv.innerText = '⏳ جاري تحديد موقعك بدقة على الخريطة...';
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                customerCoords = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                statusDiv.style.color = '#34d399';
+                statusDiv.innerHTML = `✅ تم تحديث موقعك بنجاح! (<a href="https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}" target="_blank" style="color:#38bdf8; text-decoration:underline;">عرض على الخريطة</a>)`;
+            },
+            (error) => {
+                statusDiv.style.color = '#ef4444';
+                statusDiv.innerText = '⚠️ تعذر تحديد الموقع. يرجى السماح بالوصول للموقع من المتصفح.';
+            },
+            { enableHighAccuracy: true }
+        );
     }
 
     function addToCart(index) {
@@ -239,6 +274,7 @@
             customerName: name,
             customerPhone: phone,
             customerAddress: address,
+            coords: customerCoords,
             items: [...cart],
             total: grandTotal,
             paymentMethod: paymentMethod,
