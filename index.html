@@ -122,8 +122,7 @@
     let currentProducts = [];
     let customerCoords = null;
 
-    // المنتجات الأصلية المطابقة للصورة تماماً مع إصدار جديد لإجبار التحديث
-    const CURRENT_VERSION = "v3_exact";
+    const CURRENT_VERSION = "v4_exact";
     const originalDefaultProducts = [
         { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
         { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
@@ -134,7 +133,6 @@
         let savedVersion = localStorage.getItem('storeProductsVersion');
         let products = JSON.parse(localStorage.getItem('storeProducts'));
         
-        // إذا كان الإصدار مختلفاً أو لا توجد منتجات، نفرض المنتجات الأصلية الصحيحة بالقوة ونحدث الإصدار
         if (savedVersion !== CURRENT_VERSION || !products || products.length === 0) {
             products = originalDefaultProducts;
             localStorage.setItem('storeProducts', JSON.stringify(originalDefaultProducts));
@@ -292,7 +290,10 @@
         localStorage.setItem('storeOrders', JSON.stringify(orders));
         localStorage.setItem('lastActiveOrderPhone', phone);
 
-        let adminPhone = localStorage.getItem('storeAdminPhone') || '201000000000';
+        // جلب رقم الواتساب المسجل في إعدادات الإدارة وتنظيفه تماماً من أي رموز أو مسافات
+        let rawAdminPhone = localStorage.getItem('storeAdminPhone') || '201000000000';
+        let adminPhone = rawAdminPhone.replace(/\D/g, ''); // الاحتفاظ بالأرقام فقط
+
         let itemsText = cart.map(i => `- ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
         let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
 
@@ -308,11 +309,9 @@
         cart = [];
         updateCartUI();
 
-        let whatsappUrl = `https://wa.me/${adminPhone}?text=` + encodeURIComponent(whatsappMessage);
-        window.open(whatsappUrl, '_blank');
-
-        alert('🎉 تم إرسال طلبك بنجاح وتحويله للواتساب للإدارة! يمكنك متابعة حالة التتبع الحي.');
-        toggleTrackingSection();
+        // استخدام رابط API المباشر لتوجيه الشات على رقم الإدارة المسجل فوراً دون خيارات
+        let whatsappUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=` + encodeURIComponent(whatsappMessage);
+        window.location.href = whatsappUrl; 
     }
 
     function toggleTrackingSection() {
@@ -363,7 +362,7 @@
             </div>
             ${stepsHtml}
             <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
-                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلاستلام طلبك!
+                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلام طلبك!
             </div>
         `;
     }
