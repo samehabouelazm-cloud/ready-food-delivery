@@ -91,7 +91,6 @@
     let customerCoords = null;
 
     function loadStoreProducts() {
-        // سحب المنتجات من الـ localStorage أو عرض عينة افتراضية احترافية لو اللوكل فاضي
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
         
         if (products.length === 0) {
@@ -224,7 +223,28 @@
                   "-------------------\n" +
                   "💰 الإجمالي النهائي: " + total + " ج.م";
 
+        // 1. فتح الواتساب لإرسال الطلب
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
+
+        // 2. إظهار رسالة إتمام الطلب ومعالجته فوراً داخل خانة السلة
+        const cartSummary = document.getElementById('cartSummary');
+        if (cartSummary) {
+            cartSummary.innerHTML = `
+                <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; padding: 15px; border-radius: 8px; text-align: center; color: #4ade80;">
+                    <h3 style="margin-bottom: 5px; color: #4ade80;">🎉 تم إرسال طلبك بنجاح!</h3>
+                    <p style="font-size: 13px; color: #cbd5e1;">جاري معالجة الطلب والتواصل معك عبر الواتساب قريباً جداً.</p>
+                </div>
+            `;
+        }
+
+        // 3. تصفير السلة والحقول
+        cartItem = null;
+        customerCoords = null;
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerPhone').value = '';
+        document.getElementById('customerAddress').value = '';
+        const statusDiv = document.getElementById('locationStatus');
+        if(statusDiv) statusDiv.innerHTML = '';
     }
 
     window.onload = loadStoreProducts;
