@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY • جاهز - متجر التوصيل السريع وكباتن الإرسال 🚀🛵</title>
+    <title>READY • جاهز - متجر التوصيل السريع وكباتن الإرسال 🚀🛺</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
@@ -58,7 +58,7 @@
         .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
         .checkout-btn:hover { background: #16a34a; }
 
-        /* قسم انضمام كباتن التوصيل الجديد (ركن الكباتن) */
+        /* قسم انضمام كباتن التوصيل */
         .captain-join-section { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #38bdf8; border-radius: 12px; padding: 20px; margin-top: 30px; }
         .captain-join-section h3 { color: #38bdf8; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .captain-join-section p { color: #94a3b8; font-size: 13px; margin-bottom: 15px; }
@@ -87,7 +87,7 @@
             ⚡ READY <span>جاهز</span>
         </div>
         <div class="admin-quick-link">
-            <a href="#captainSection" class="captain-link">🛵 انضم ككابتن</a>
+            <a href="#captainSection" class="captain-link">🛺 انضم ككابتن</a>
             <a href="admin.html">⚙️ الإدارة</a>
         </div>
     </div>
@@ -120,7 +120,7 @@
         <div id="cartTotalSummary" style="font-size: 14px; border-top: 1px solid #334155; padding-top: 8px;"></div>
     </div>
 
-    <!-- نموذج بيانات العطل والعميل -->
+    <!-- نموذج بيانات العميل -->
     <div class="form-group">
         <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
         <input type="text" id="customerPhone" placeholder="رقم الجوال *">
@@ -140,14 +140,15 @@
         <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب عبر الواتساب مع المندوب 🚀</button>
     </div>
 
-    <!-- قسم انضمام كباتن التوصيل الجديد -->
+    <!-- قسم انضمام كباتن التوصيل (محدث بـ توكتوك) -->
     <div class="captain-join-section" id="captainSection">
-        <h3>🛵 انضم إلى فريق كباتن "جاهز"</h3>
+        <h3>🛺 انضم إلى فريق كباتن "جاهز"</h3>
         <p>اكسب دخلك الإضافي وانضم لشبكة الكباتن والمناديب الأسرع توصيلاً!</p>
         <div class="captain-form">
             <input type="text" id="captainName" placeholder="اسم الكابتن الثلاثي *">
             <input type="text" id="captainPhone" placeholder="رقم الموبايل / واتساب *">
             <select id="captainVehicle" class="full-width">
+                <option value="توكتوك">توكتوك 🛺 (سريع وشقي الشوارع)</option>
                 <option value="موتوسيكل">موتوسيكل 🛵</option>
                 <option value="سكوتر">سكوتر 🛵</option>
                 <option value="دراجة هوائية (عجل)">دراجة هوائية (عجل) 🚲</option>
@@ -340,7 +341,7 @@
             return;
         }
 
-        let msg = `🛵 [طلب انضمام كابتن توصيل جديد - READY]\n` +
+        let msg = `🛺 [طلب انضمام كابتن توصيل جديد - READY]\n` +
                   `-------------------\n` +
                   `👤 اسم الكابتن: ${cName}\n` +
                   `📱 رقم الجوال: ${cPhone}\n` +
