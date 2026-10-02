@@ -3,203 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الشاملة - إدارة المتجر ⚙️</title>
+    <title>متجر التوصيل السريع الاحترافي 🚀</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .admin-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .store-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
         
-        h1 { color: #38bdf8; text-align: center; margin-bottom: 20px; font-size: 22px; }
-        .nav-back { display: inline-block; margin-bottom: 20px; color: #38bdf8; text-decoration: none; font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px; }
-        
-        .form-section { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; }
-        .form-section h3 { color: #38bdf8; font-size: 16px; margin-bottom: 12px; }
-        
-        input, select { width: 100%; padding: 11px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
-        
-        .file-upload-box { background: #1e293b; border: 2px dashed #475569; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; cursor: pointer; }
-        .file-upload-box input { display: none; }
-        .file-upload-label { color: #38bdf8; font-size: 13px; font-weight: bold; cursor: pointer; }
+        /* البانر الإعلاني المتحرك (Slider) */
+        .slider-container { position: relative; width: 100%; height: 160px; border-radius: 14px; overflow: hidden; margin-bottom: 25px; border: 1px solid #38bdf8; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2); }
+        .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; background: linear-gradient(135deg, #0284c7, #0f172a); opacity: 0; transition: opacity 1s ease-in-out; }
+        .slide.active { opacity: 1; }
+        .slide h1 { color: #38bdf8; font-size: 24px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .slide p { color: #cbd5e1; font-size: 14px; margin-bottom: 12px; }
+        .admin-link { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(244, 63, 94, 0.3); }
 
-        .btn-save { background: #22c55e; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .btn-save:hover { background: #16a34a; }
-
-        .product-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #334155; }
-        .product-info-admin { display: flex; align-items: center; gap: 12px; }
-        .product-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
+        /* الأقسام والمنتجات */
+        .section { margin-bottom: 25px; }
+        .section-header { border-bottom: 2px solid #38bdf8; padding-bottom: 6px; margin-bottom: 12px; }
+        .section-header h2 { font-size: 18px; color: #38bdf8; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
         
-        .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background: #0ea5e9; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-delete { background: #f43f5e; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .product-card { background: #0f172a; border-radius: 12px; overflow: hidden; border: 1px solid #334155; text-align: center; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+        .product-card:hover { transform: translateY(-3px); border-color: #38bdf8; }
+        .product-img { width: 100%; height: 120px; object-fit: cover; }
+        .product-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .product-info h3 { font-size: 14px; color: #fff; }
+        .price { color: #34d399; font-weight: bold; font-size: 15px; }
+        
+        .add-btn { background: #38bdf8; color: #0f172a; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .add-btn:hover { background: #7dd3fc; }
+
+        /* السلة متعددة الأصناف */
+        .cart-box { background: #0f172a; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #334155; }
+        .cart-box h3 { font-size: 16px; margin-bottom: 10px; color: #38bdf8; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 13px; }
+        .qty-controls { display: flex; gap: 8px; align-items: center; }
+        .qty-btn { background: #334155; color: #fff; border: none; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .qty-btn:hover { background: #0ea5e9; }
+
+        /* نموذج الطلب والدفع */
+        .form-group { display: flex; flex-direction: column; gap: 12px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
+        
+        .gps-btn { background: #0ea5e9; color: #fff; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #locationStatus { font-size: 12px; color: #38bdf8; }
+        
+        #paymentDetailsBox { background: rgba(56, 189, 248, 0.08); border: 1px dashed #38bdf8; padding: 12px; border-radius: 8px; font-size: 13px; color: #38bdf8; display: none; }
+
+        .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
+        .checkout-btn:hover { background: #16a34a; }
+
+        /* تنسيق فاتورة الطباعة الاحترافية */
+        @media print {
+            body * { visibility: hidden; }
+            #printableInvoice, #printableInvoice * { visibility: visible; }
+            #printableInvoice { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; color: #000 !important; padding: 20px; }
+        }
+        .invoice-card { background: #fff; color: #1e293b; padding: 20px; border-radius: 10px; display: none; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <a href="index.html" class="nav-back">⬅️ العودة لصفحة المتجر الرئيسي</a>
-    <h1>لوحة التحكم والتحكم الكامل ⚙️️</h1>
-
-    <!-- إعداد أرقام الدفع ومصاريف التوصيل -->
-    <div class="form-section">
-        <h3>💳 إعدادات الدفع والتوصيل</h3>
-        <label style="font-size: 12px; color: #94a3b8;">رقم فودافون كاش:</label>
-        <input type="text" id="vodafoneInput" placeholder="010xxxxxxxx">
-        
-        <label style="font-size: 12px; color: #94a3b8;">حساب إنستا باي:</label>
-        <input type="text" id="instapayInput" placeholder="username@instapay">
-
-        <label style="font-size: 12px; color: #94a3b8;">قيمة التوصيل للمندوب (ج.م):</label>
-        <input type="number" id="deliveryFeeInput" placeholder="20">
-
-        <button onclick="saveSettings()" class="btn-save">حفظ الإعدادات العامة</button>
-    </div>
-
-    <!-- إضافة / تعديل منتج مع رفع صورة من الكمبيوتر -->
-    <div class="form-section">
-        <h3 id="formTitle">➕ إضافة منتج جديد</h3>
-        <input type="hidden" id="editIndex" value="-1">
-        <input type="text" id="pName" placeholder="اسم المنتج (مثال: وجبة برجر مشوي)">
-        <input type="number" id="pPrice" placeholder="السعر (ج.م)">
-        <input type="text" id="pCategory" placeholder="اسم القسم (مثال: الوجبات السريعة)">
-        
-        <div class="file-upload-box">
-            <label class="file-upload-label" for="pImageFile">📷 اختر صورة المنتج من الكمبيوتر (اضغط هنا)</label>
-            <input type="file" id="pImageFile" accept="image/*" onchange="convertImage(this)">
+<div class="store-container">
+    <!-- البانر المتحرك الإعلاني الجذاب (Slider) -->
+    <div class="slider-container" id="slider">
+        <div class="slide active">
+            <h1>متجر التوصيل السريع 🚀</h1>
+            <p>أطلب كل احتياجاتك الطازجة واليومية بضغطة زر واحدة!</p>
+            <a href="admin.html" class="admin-link">⚙️ لوحة التحكم</a>
         </div>
-        <input type="hidden" id="pImageBase64">
-        <div id="imagePreviewText" style="font-size: 12px; color: #34d399; margin-bottom: 10px; text-align: center;"></div>
-
-        <button onclick="saveProduct()" class="btn-save" id="saveBtnText">حفظ المنتج وإضافته للمتجر</button>
+        <div class="slide">
+            <h1>🔥 عروض اليوم الكبرى</h1>
+            <p>توصيل سريع لحد باب البيت - جودة مضمونة 100%</p>
+            <a href="admin.html" class="admin-link">⚙️ لوحة التحكم</a>
+        </div>
+        <div class="slide">
+            <h1>💳 ادفع براحتك</h1>
+            <p>كاش، فودافون كاش، أو إنستا باي بكل سهولة وأمان</p>
+            <a href="admin.html" class="admin-link">⚙️ لوحة التحكم</a>
+        </div>
     </div>
 
-    <!-- المنتجات المسجلة -->
-    <div class="form-section">
-        <h3>📦 المنتجات المسجلة حالياً</h3>
-        <div id="adminProductsList"></div>
+    <!-- الأقسام والمنتجات -->
+    <div id="dynamicMenu"></div>
+
+    <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+
+    <!-- السلة متعددة الأصناف -->
+    <div class="cart-box">
+        <h3>🛒 سلة المشتريات (أكثر من صنف وعدد)</h3>
+        <div id="cartItemsList" style="margin-bottom: 10px; color: #cbd5e1;">السلة فارغة حالياً.. اختر منتجاتك المفضلة!</div>
+        <div id="cartTotalSummary" style="font-size: 14px; border-top: 1px solid #334155; padding-top: 8px;"></div>
+    </div>
+
+    <!-- نموذج بيانات العميل -->
+    <div class="form-group">
+        <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
+        <input type="text" id="customerPhone" placeholder="رقم الجوال *">
+        <input type="text" id="customerAddress" placeholder="العنوان التفصيلي *">
+        
+        <button type="button" class="gps-btn" onclick="getLocation()">📍 تحديد الموقع التلقائي (GPS)</button>
+        <div id="locationStatus"></div>
+
+        <select id="paymentMethod" onchange="togglePaymentInfo()">
+            <option value="كاش عند الاستلام">كاش عند الاستلام</option>
+            <option value="فودافون كاش">فودافون كاش</option>
+            <option value="انستا باي">انستا باي (InstaPay)</option>
+        </select>
+
+        <div id="paymentDetailsBox"></div>
+
+        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب عبر الواتساب 🚀</button>
+    </div>
+
+    <!-- الفاتورة القابلة للطباعة -->
+    <div id="printableInvoice" class="invoice-card">
+        <h2 style="text-align: center; margin-bottom: 10px;">فاتورة متجر التوصيل السريع 🧾</h2>
+        <div id="invoiceContent"></div>
     </div>
 </div>
 
 <script>
-    let uploadedImageBase64 = '';
+    // تشغيل البانر المتحرك (Slider)
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    function nextSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }
+    setInterval(nextSlide, 3500);
 
-    function convertImage(input) {
-        if (input.files && input.files[0]) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedImageBase64 = e.target.result;
-                document.getElementById('pImageBase64').value = uploadedImageBase64;
-                document.getElementById('imagePreviewText').innerText = '✅ تم رفع الصورة بنجاح وجاهزة للحفظ!';
-            }
-            reader.readAsDataURL(input.files[0]);
+    let cart = []; // سلة متعددة الأصناف
+    let customerCoords = null;
+
+    function loadStoreProducts() {
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+        
+        if (products.length === 0) {
+            products = [
+                { name: 'بيض بلدي - 30 بيضة', price: 130, category: 'السوبر ماركت', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&auto=format&fit=crop&q=60' },
+                { name: 'وجبة برجر مشوي سريعة', price: 120, category: 'الوجبات السريعة', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=60' }
+            ];
         }
+
+        const menuContainer = document.getElementById('dynamicMenu');
+        if (!menuContainer) return;
+        menuContainer.innerHTML = '';
+
+        let categories = {};
+        products.forEach(p => {
+            let catName = p.category || 'أقسام عامة';
+            if (!categories[catName]) categories[catName] = [];
+            categories[catName].push(p);
+        });
+
+        for (let cat in categories) {
+            let items = categories[cat];
+            let sectionHtml = `<div class="section"><div class="section-header"><h2>📂 ${cat}</h2></div><div class="products-grid">`;
+            
+            items.forEach(p => {
+                sectionHtml += `
+                    <div class="product-card">
+                        <img src="${p.image || 'https://via.placeholder.com/300'}" alt="${p.name}" class="product-img">
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <div class="price">${p.price} ج.م</div>
+                            <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="add-btn">إضافة للسلة 🛒</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            sectionHtml += `</div></div>`;
+            menuContainer.innerHTML += sectionHtml;
+        }
+        updateCartDisplay();
     }
 
-    function loadAdminData() {
-        document.getElementById('vodafoneInput').value = localStorage.getItem('vodafoneCashNum') || '01034101822';
-        document.getElementById('instapayInput').value = localStorage.getItem('instapayAcc') || 'sameh@instapay';
-        document.getElementById('deliveryFeeInput').value = localStorage.getItem('storeDeliveryFee') || '20';
+    function addToCart(name, price) {
+        let found = cart.find(item => item.name === name);
+        if (found) {
+            found.qty += 1;
+        } else {
+            cart.push({ name, price, qty: 1 });
+        }
+        updateCartDisplay();
+    }
 
-        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        const listContainer = document.getElementById('adminProductsList');
-        listContainer.innerHTML = '';
+    function changeQty(name, delta) {
+        let found = cart.find(item => item.name === name);
+        if (found) {
+            found.qty += delta;
+            if (found.qty <= 0) {
+                cart = cart.filter(item => item.name !== name);
+            }
+        }
+        updateCartDisplay();
+    }
 
-        if (products.length === 0) {
-            listContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px; text-align: center;">لا توجد منتجات مسجلة حالياً.</p>';
+    function updateCartDisplay() {
+        const listDiv = document.getElementById('cartItemsList');
+        const summaryDiv = document.getElementById('cartTotalSummary');
+        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+
+        if (cart.length === 0) {
+            listDiv.innerHTML = 'السلة فارغة حالياً.. اختر منتجاتك المفضلة!';
+            summaryDiv.innerHTML = `🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م`;
             return;
         }
 
-        products.forEach((p, index) => {
-            listContainer.innerHTML += `
-                <div class="product-item">
-                    <div class="product-info-admin">
-                        <img src="${p.image || 'https://via.placeholder.com/50'}" class="product-thumb">
-                        <div>
-                            <div style="font-weight: bold; font-size: 14px;">${p.name}</div>
-                            <div style="font-size: 12px; color: #34d399;">${p.price} ج.م | <span style="color:#38bdf8">${p.category || 'عام'}</span></div>
-                        </div>
-                    </div>
-                    <div class="action-btns">
-                        <button onclick="editProduct(${index})" class="btn-edit">تعديل</button>
-                        <button onclick="deleteProduct(${index})" class="btn-delete">حذف</button>
+        let itemsHtml = '';
+        let subtotal = 0;
+
+        cart.forEach(item => {
+            let itemTotal = item.price * item.qty;
+            subtotal += itemTotal;
+            itemsHtml += `
+                <div class="cart-item-row">
+                    <div><b>${item.name}</b> (${item.price} ج.م)</div>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="changeQty('${item.name.replace(/'/g, "\\'")}', -1)">-</button>
+                        <span><b>${item.qty}</b></span>
+                        <button class="qty-btn" onclick="changeQty('${item.name.replace(/'/g, "\\'")}', 1)">+</button>
+                        <span style="color: #34d399; width: 60px; text-align: left;">${itemTotal} ج.م</span>
                     </div>
                 </div>
             `;
         });
+
+        let grandTotal = subtotal + deliveryFee;
+        listDiv.innerHTML = itemsHtml;
+        summaryDiv.innerHTML = `
+            📦 إجمالي الأصناف: <b>${subtotal} ج.م</b><br>
+            🛵 خدمة التوصيل: <b>${deliveryFee} ج.م</b><br>
+            💰 <b>الإجمالي النهائي: <span style="color: #34d399;">${grandTotal} ج.م</span></b>
+        `;
     }
 
-    function saveSettings() {
-        localStorage.setItem('vodafoneCashNum', document.getElementById('vodafoneInput').value.trim());
-        localStorage.setItem('instapayAcc', document.getElementById('instapayInput').value.trim());
-        localStorage.setItem('storeDeliveryFee', document.getElementById('deliveryFeeInput').value.trim());
-        alert('✅ تم حفظ إعدادات الدفع والتوصيل بنجاح!');
-    }
+    function getLocation() {
+        const statusDiv = document.getElementById('locationStatus');
+        const addressInput = document.getElementById('customerAddress');
 
-    function saveProduct() {
-        let name = document.getElementById('pName').value.trim();
-        let price = parseFloat(document.getElementById('pPrice').value);
-        let category = document.getElementById('pCategory').value.trim() || 'أقسام عامة';
-        let image = document.getElementById('pImageBase64').value.trim();
-        let editIndex = parseInt(document.getElementById('editIndex').value);
-
-        if (!name || isNaN(price)) {
-            alert('من فضلك ادخل اسم المنتج وسعره بشكل صحيح!');
+        if (!navigator.geolocation) {
+            statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
             return;
         }
 
-        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-
-        if (editIndex === -1) {
-            if (!image) image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=60';
-            products.push({ name, price, category, image });
-        } else {
-            if (!image) {
-                image = products[editIndex].image; // الاحتفاظ بالصورة القديمة لو متمش رفع جديدة
-            }
-            products[editIndex] = { name, price, category, image };
-            document.getElementById('editIndex').value = -1;
-            document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
-            document.getElementById('saveBtnText').innerText = 'حفظ المنتج وإضافته للمتجر';
-        }
-
-        localStorage.setItem('storeProducts', JSON.stringify(products));
+        statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة عبر الـ GPS...';
         
-        document.getElementById('pName').value = '';
-        document.getElementById('pPrice').value = '';
-        document.getElementById('pCategory').value = '';
-        document.getElementById('pImageBase64').value = '';
-        document.getElementById('imagePreviewText').innerText = '';
-        uploadedImageBase64 = '';
-
-        loadAdminData();
-        alert('✅ تم الحفظ وتحديث المتجر بنجاح!');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
+                addressInput.value = `📍 موقع GPS الحالي (تم التحديد تلقائياً)`;
+                statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
+            },
+            (error) => {
+                statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل صلاحية الـ GPS.';
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
     }
 
-    function editProduct(index) {
-        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        let p = products[index];
+    function togglePaymentInfo() {
+        const method = document.getElementById('paymentMethod').value;
+        const box = document.getElementById('paymentDetailsBox');
+        const vodafoneNumber = localStorage.getItem('vodafoneCashNum') || '01034101822';
+        const instapayAccount = localStorage.getItem('instapayAcc') || 'sameh@instapay';
 
-        document.getElementById('pName').value = p.name;
-        document.getElementById('pPrice').value = p.price;
-        document.getElementById('pCategory').value = p.category;
-        document.getElementById('pImageBase64').value = p.image;
-        document.getElementById('editIndex').value = index;
-        document.getElementById('imagePreviewText').innerText = '📷 الصورة الحالية للمنتج محملة وجاهزة';
-
-        document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
-        document.getElementById('saveBtnText').innerText = 'تحديث بيانات المنتج';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function deleteProduct(index) {
-        if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-            let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-            products.splice(index, 1);
-            localStorage.setItem('storeProducts', JSON.stringify(products));
-            loadAdminData();
+        if (method === 'فودافون كاش') {
+            box.style.display = 'block';
+            box.innerHTML = `📱 يرجى التحويل على رقم فودافون كاش: <b style="color:#fff; font-size:15px;">${vodafoneNumber}</b> وإرفاق الإيصال.`;
+        } else if (method === 'انستا باي') {
+            box.style.display = 'block';
+            box.innerHTML = `💳 يرجى التحويل على إنستا باي: <b style="color:#fff; font-size:15px;">${instapayAccount}</b>`;
+        } else {
+            box.style.display = 'none';
+            box.innerHTML = '';
         }
     }
 
-    window.onload = loadAdminData;
+    function checkoutOrder() {
+        const name = document.getElementById('customerName').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+        let address = document.getElementById('customerAddress').value.trim();
+        const payment = document.getElementById('paymentMethod').value;
+        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+
+        if (!name || !phone || !address) {
+            alert('من فضلك ادخل الاسم، الجوال، والعنوان أو موقع الـ GPS!');
+            return;
+        }
+
+        if (cart.length === 0) {
+            alert('السلة فارغة، اختر منتجاتك أولاً!');
+            return;
+        }
+
+        let subtotal = 0;
+        let itemsListText = "";
+        let invoiceHtmlRows = "";
+
+        cart.forEach(item => {
+            let itemTotal = item.price * item.qty;
+            subtotal += itemTotal;
+            itemsListText += `• ${item.name} (×${item.qty}) = ${itemTotal} ج.م\n`;
+            invoiceHtmlRows += `<tr><td style="border:1px solid #ddd; padding:8px;">${item.name}</td><td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.qty}</td><td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.price} ج.م</td><td style="border:1px solid #ddd; padding:8px; text-align:center;">${itemTotal} ج.م</td></tr>`;
+        });
+
+        let total = subtotal + deliveryFee;
+        let locationText = address;
+        if (customerCoords) locationText += `\nرابط الخريطة: ${customerCoords}`;
+
+        let msg = "🧾 فاتورة طلب جديدة\n" +
+                  "-------------------\n" +
+                  "👤 العميل: " + name + "\n" +
+                  "📱 الجوال: " + phone + "\n" +
+                  "📍 العنوان: " + locationText + "\n" +
+                  "💳 الدفع: " + payment + "\n" +
+                  "-------------------\n" +
+                  "📦 الأصناف المطلوبة:\n" + itemsListText +
+                  "-------------------\n" +
+                  "🏷 مجموع الأصناف: " + subtotal + " ج.م\n" +
+                  "🛵 التوصيل: " + deliveryFee + " ج.م\n" +
+                  "💰 الإجمالي النهائي: " + total + " ج.م";
+
+        // تجهيز الفاتورة للطباعة
+        document.getElementById('invoiceContent').innerHTML = `
+            <p><b>اسم العميل:</b> ${name}</p>
+            <p><b>رقم الجوال:</b> ${phone}</p>
+            <p><b>العنوان:</b> ${address}</p>
+            <p><b>طريقة الدفع:</b> ${payment}</p>
+            <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;">
+                <thead>
+                    <tr style="background:#f1f5f9;">
+                        <th style="border:1px solid #ddd; padding:8px;">المنتج</th>
+                        <th style="border:1px solid #ddd; padding:8px;">الكمية</th>
+                        <th style="border:1px solid #ddd; padding:8px;">السعر</th>
+                        <th style="border:1px solid #ddd; padding:8px;">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>${invoiceHtmlRows}</tbody>
+            </table>
+            <p style="margin-top:10px;"><b>مجموع الأصناف:</b> ${subtotal} ج.م</p>
+            <p><b>التوصيل:</b> ${deliveryFee} ج.م</p>
+            <p style="font-size:16px; color:#16a34a;"><b>الإجمالي النهائي: ${total} ج.م</b></p>
+        `;
+
+        // فتح الواتساب
+        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
+
+        // طباعة الفاتورة تلقائياً أو عرض رسالة النجاح
+        setTimeout(() => {
+            window.print();
+        }, 1000);
+
+        // تصفير السلة
+        cart = [];
+        updateCartDisplay();
+    }
+
+    window.onload = loadStoreProducts;
 </script>
 </body>
 </html>
