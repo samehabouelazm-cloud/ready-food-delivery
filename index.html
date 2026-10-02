@@ -115,32 +115,25 @@
     let cart = [];
     let currentProducts = [];
 
-    async function loadStoreProducts() {
+    // المنتجات الافتراضية الأساسية لضمان ظهورها دائماً لأي زائر
+    const defaultProducts = [
+        { name: "وجبة كشري جاهز سوبر", price: 45, category: "وجبات رئيسية", image: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=400" },
+        { name: "سندوتش شاورما دجاج مميز", price: 60, category: "سندوتشات وسريع", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400" },
+        { name: "عصير مانجو طبيعي فريش", price: 25, category: "مشروبات ومثلجات", image: "https://images.unsplash.com/photo-1546173159-315724a31696?w=400" }
+    ];
+
+    function loadStoreProducts() {
         let products = JSON.parse(localStorage.getItem('storeProducts'));
         
-        // لو الـ LocalStorage فاضية، نجلب المنتجات تلقائياً من ملف data.json
+        // لو الـ LocalStorage فارغة تماماً، نعتمد فوراً على المنتجات الافتراضية المضمونة
         if (!products || products.length === 0) {
-            try {
-                let response = await fetch('data.json');
-                if (response.ok) {
-                    let data = await response.json();
-                    // نفترض أن data.json قد يكون مصفوفة منتجات مباشرة أو يحتوي على مفتاح products
-                    products = Array.isArray(data) ? data : (data.products || []);
-                    localStorage.setItem('storeProducts', JSON.stringify(products));
-                }
-            } catch (error) {
-                console.error("خطأ في جلب بيانات ملف data.json:", error);
-            }
+            products = defaultProducts;
+            localStorage.setItem('storeProducts', JSON.stringify(defaultProducts));
         }
 
-        currentProducts = products || [];
+        currentProducts = products;
         let grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
-
-        if (currentProducts.length === 0) {
-            grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">عذراً، لا توجد منتجات مسجلة حالياً.</p>`;
-            return;
-        }
 
         currentProducts.forEach((p, index) => {
             grid.innerHTML += `
@@ -313,7 +306,7 @@
             </div>
             ${stepsHtml}
             <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
-                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلام طلبك!
+                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد لاستلاستلام طلبك!
             </div>
         `;
     }
