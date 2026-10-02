@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>READY • جاهز - متجر التوصيل السريع 🚀</title>
+    <title>READY • جاهز - متجر التوصيل السريع وكباتن الإرسال 🚀🛵</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
@@ -13,18 +13,16 @@
         .app-brand-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0284c7, #0f172a); padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #38bdf8; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); }
         .brand-logo { font-size: 20px; font-weight: bold; color: #fff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         .brand-logo span { color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 10px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.3); }
-        .admin-quick-link { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, 0.3); transition: 0.2s; }
-        .admin-quick-link:hover { background: rgba(244, 63, 94, 0.3); }
+        .admin-quick-link { display: flex; gap: 10px; }
+        .admin-quick-link a { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, 0.3); transition: 0.2s; }
+        .admin-quick-link a.captain-link { color: #38bdf8; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); }
 
-        /* البانر الإعلاني بالصور المتحركة (Slider with Background Images) */
+        /* البانر الإعلاني بالصور المتحركة */
         .slider-container { position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; border: 1px solid #475569; background: #0f172a; }
         .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; opacity: 0; transition: opacity 1s ease-in-out, transform 1s ease-in-out; background-size: cover; background-position: center; transform: scale(1.05); }
         .slide.active { opacity: 1; transform: scale(1); }
-        
-        /* طبقة عتمة خفيفة فوق الصور عشان النصوص تظهر بوضوح تام */
         .slide::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 1; }
         .slide > * { position: relative; z-index: 2; }
-
         .slide h2 { color: #38bdf8; font-size: 21px; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         .slide p { color: #e2e8f0; font-size: 13px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
@@ -40,11 +38,10 @@
         .product-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .product-info h3 { font-size: 14px; color: #fff; }
         .price { color: #34d399; font-weight: bold; font-size: 15px; }
-        
         .add-btn { background: #38bdf8; color: #0f172a; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .add-btn:hover { background: #7dd3fc; }
 
-        /* السلة متعددة الأصناف */
+        /* السلة */
         .cart-box { background: #0f172a; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #334155; }
         .cart-box h3 { font-size: 16px; margin-bottom: 10px; color: #38bdf8; }
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 13px; }
@@ -52,19 +49,26 @@
         .qty-btn { background: #334155; color: #fff; border: none; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .qty-btn:hover { background: #0ea5e9; }
 
-        /* نموذج الطلب والدفع */
+        /* نموذج الطلب */
         .form-group { display: flex; flex-direction: column; gap: 12px; }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
-        
         .gps-btn { background: #0ea5e9; color: #fff; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         #locationStatus { font-size: 12px; color: #38bdf8; }
-        
         #paymentDetailsBox { background: rgba(56, 189, 248, 0.08); border: 1px dashed #38bdf8; padding: 12px; border-radius: 8px; font-size: 13px; color: #38bdf8; display: none; }
-
         .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
         .checkout-btn:hover { background: #16a34a; }
 
-        /* تنسيق فاتورة الطباعة */
+        /* قسم انضمام كباتن التوصيل الجديد (ركن الكباتن) */
+        .captain-join-section { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #38bdf8; border-radius: 12px; padding: 20px; margin-top: 30px; }
+        .captain-join-section h3 { color: #38bdf8; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .captain-join-section p { color: #94a3b8; font-size: 13px; margin-bottom: 15px; }
+        .captain-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .captain-form input, .captain-form select { margin-bottom: 0; }
+        .full-width { grid-column: span 2; }
+        .captain-submit-btn { background: #0ea5e9; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .captain-submit-btn:hover { background: #0284c7; }
+
+        /* الطباعة */
         @media print {
             body * { visibility: hidden; }
             #printableInvoice, #printableInvoice * { visibility: visible; }
@@ -77,19 +81,22 @@
 
 <div class="store-container">
     
-    <!-- شريط اسم التطبيق الثابت والبارز -->
+    <!-- شريط اسم التطبيق وربط الكباتن والإدارة -->
     <div class="app-brand-header">
         <div class="brand-logo">
             ⚡ READY <span>جاهز</span>
         </div>
-        <a href="admin.html" class="admin-quick-link">⚙️ لوحة التحكم</a>
+        <div class="admin-quick-link">
+            <a href="#captainSection" class="captain-link">🛵 انضم ككابتن</a>
+            <a href="admin.html">⚙️ الإدارة</a>
+        </div>
     </div>
 
-    <!-- البانر المتحرك بالصور الخلفية المعبرة لكل عرض -->
+    <!-- البانر المتحرك -->
     <div class="slider-container" id="slider">
         <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1526367460886-3cddc340da4f?w=800&auto=format&fit=crop&q=80');">
             <h2>🚀 أسرع خدمة توصيل لحد باب بيتك</h2>
-            <p>اطلب احتياجاتك وسيقوم المندوب بتوصيلها في أسرع وقت ممكن!</p>
+            <p>اطلب احتياجاتك وسيقوم الكابتن بتوصيلها في أسرع وقت!</p>
         </div>
         <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1556742049-0a67d553c2a5?w=800&auto=format&fit=crop&q=80');">
             <h2>💳 طرق دفع مرنة (فودافون كاش وإنستا باي)</h2>
@@ -106,14 +113,14 @@
 
     <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
 
-    <!-- السلة متعددة الأصناف -->
+    <!-- السلة -->
     <div class="cart-box">
         <h3>🛒 سلة المشتريات (الأصناف والكميات)</h3>
         <div id="cartItemsList" style="margin-bottom: 10px; color: #cbd5e1;">السلة فارغة حالياً.. اختر منتجاتك المفضلة!</div>
         <div id="cartTotalSummary" style="font-size: 14px; border-top: 1px solid #334155; padding-top: 8px;"></div>
     </div>
 
-    <!-- نموذج بيانات العميل -->
+    <!-- نموذج بيانات العطل والعميل -->
     <div class="form-group">
         <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
         <input type="text" id="customerPhone" placeholder="رقم الجوال *">
@@ -130,19 +137,38 @@
 
         <div id="paymentDetailsBox"></div>
 
-        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب عبر الواتساب 🚀</button>
+        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب عبر الواتساب مع المندوب 🚀</button>
+    </div>
+
+    <!-- قسم انضمام كباتن التوصيل الجديد -->
+    <div class="captain-join-section" id="captainSection">
+        <h3>🛵 انضم إلى فريق كباتن "جاهز"</h3>
+        <p>اكسب دخلك الإضافي وانضم لشبكة الكباتن والمناديب الأسرع توصيلاً!</p>
+        <div class="captain-form">
+            <input type="text" id="captainName" placeholder="اسم الكابتن الثلاثي *">
+            <input type="text" id="captainPhone" placeholder="رقم الموبايل / واتساب *">
+            <select id="captainVehicle" class="full-width">
+                <option value="موتوسيكل">موتوسيكل 🛵</option>
+                <option value="سكوتر">سكوتر 🛵</option>
+                <option value="دراجة هوائية (عجل)">دراجة هوائية (عجل) 🚲</option>
+                <option value="سيارة">سيارة 🚗</option>
+            </select>
+            <div class="full-width">
+                <button type="button" class="captain-submit-btn" onclick="submitCaptainApplication()">إرسال طلب الانضمام للإدارة فوراً 🚀</button>
+            </div>
+        </div>
     </div>
 
     <!-- الفاتورة القابلة للطباعة -->
     <div id="printableInvoice" class="invoice-card">
         <h2 style="text-align: center; margin-bottom: 5px;">⚡ READY • جاهز ⚡</h2>
-        <h4 style="text-align: center; margin-bottom: 15px; color: #64748b;">فاتورة طلب عميل 🧾</h4>
+        <h4 style="text-align: center; margin-bottom: 15px; color: #64748b;">فاتورة طلب وإسناد لكابتن التوصيل 🧾</h4>
         <div id="invoiceContent"></div>
     </div>
 </div>
 
 <script>
-    // تشغيل البانر المتحرك (Slider)
+    // تشغيل البانر المتحرك
     let currentSlide = 0;
     const slides = document.querySelectorAll('.slide');
     function nextSlide() {
@@ -227,7 +253,7 @@
 
         if (cart.length === 0) {
             listDiv.innerHTML = 'السلة فارغة حالياً.. اختر منتجاتك المفضلة!';
-            summaryDiv.innerHTML = `🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م`;
+            summaryDiv.innerHTML = `🛵 <b>أجرة الكابتن للتوصيل:</b> ${deliveryFee} ج.م`;
             return;
         }
 
@@ -254,7 +280,7 @@
         listDiv.innerHTML = itemsHtml;
         summaryDiv.innerHTML = `
             📦 إجمالي الأصناف: <b>${subtotal} ج.م</b><br>
-            🛵 خدمة التوصيل: <b>${deliveryFee} ج.م</b><br>
+            🛵 أجر كابتن التوصيل: <b>${deliveryFee} ج.م</b><br>
             💰 <b>الإجمالي النهائي: <span style="color: #34d399;">${grandTotal} ج.م</span></b>
         `;
     }
@@ -268,15 +294,15 @@
             return;
         }
 
-        statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة عبر الـ GPS...';
+        statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة لكابتن التوصيل (GPS)...';
         
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
                 customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
-                addressInput.value = `📍 موقع GPS الحالي (تم التحديد تلقائياً)`;
-                statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
+                addressInput.value = `📍 موقع GPS الحالي (جاهز لإرساله للمندوب)`;
+                statusDiv.innerHTML = '✅ تم تحديد الموقع بدقة وربطه بكابتن التوصيل!';
             },
             (error) => {
                 statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل صلاحية الـ GPS.';
@@ -293,7 +319,7 @@
 
         if (method === 'فودافون كاش') {
             box.style.display = 'block';
-            box.innerHTML = `📱 يرجى التحويل على رقم فودافون كاش: <b style="color:#fff; font-size:15px;">${vodafoneNumber}</b> وإرفاق الإيصال.`;
+            box.innerHTML = `📱 يرجى التحويل على رقم فودافون كاش: <b style="color:#fff; font-size:15px;">${vodafoneNumber}</b> وتسليم الإيصال للكابتن.`;
         } else if (method === 'انستا باي') {
             box.style.display = 'block';
             box.innerHTML = `💳 يرجى التحويل على إنستا باي: <b style="color:#fff; font-size:15px;">${instapayAccount}</b>`;
@@ -301,6 +327,28 @@
             box.style.display = 'none';
             box.innerHTML = '';
         }
+    }
+
+    // إرسال طلب انضمام كابتن جديد عبر الواتساب للإدارة
+    function submitCaptainApplication() {
+        const cName = document.getElementById('captainName').value.trim();
+        const cPhone = document.getElementById('captainPhone').value.trim();
+        const cVehicle = document.getElementById('captainVehicle').value;
+
+        if (!cName || !cPhone) {
+            alert('من فضلك ادخل اسم الكابتن ورقم الجوال للانضمام!');
+            return;
+        }
+
+        let msg = `🛵 [طلب انضمام كابتن توصيل جديد - READY]\n` +
+                  `-------------------\n` +
+                  `👤 اسم الكابتن: ${cName}\n` +
+                  `📱 رقم الجوال: ${cPhone}\n` +
+                  `🚗 وسيلة التوصيل: ${cVehicle}\n` +
+                  `-------------------\n` +
+                  `أرغب في الانضمام لفريق الكباتن والمناديب لتوصيل الطلبات.`;
+
+        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function checkoutOrder() {
@@ -333,9 +381,9 @@
 
         let total = subtotal + deliveryFee;
         let locationText = address;
-        if (customerCoords) locationText += `\nرابط الخريطة: ${customerCoords}`;
+        if (customerCoords) locationText += `\nرابط خريطة العميل للكابتن: ${customerCoords}`;
 
-        let msg = "⚡ [READY • جاهز] فاتورة طلب جديدة\n" +
+        let msg = "⚡ [READY • جاهز] طلب جديد مسند لكابتن التوصيل\n" +
                   "-------------------\n" +
                   "👤 العميل: " + name + "\n" +
                   "📱 الجوال: " + phone + "\n" +
@@ -345,8 +393,8 @@
                   "📦 الأصناف المطلوبة:\n" + itemsListText +
                   "-------------------\n" +
                   "🏷 مجموع الأصناف: " + subtotal + " ج.م\n" +
-                  "🛵 التوصيل: " + deliveryFee + " ج.م\n" +
-                  "💰 الإجمالي النهائي: " + total + " ج.م";
+                  "🛵 أجر التوصيل للكابتن: " + deliveryFee + " ج.م\n" +
+                  "💰 الإجمالي المطلوب تحصيله: " + total + " ج.م";
 
         document.getElementById('invoiceContent').innerHTML = `
             <p><b>اسم العميل:</b> ${name}</p>
@@ -365,7 +413,7 @@
                 <tbody>${invoiceHtmlRows}</tbody>
             </table>
             <p style="margin-top:10px;"><b>مجموع الأصناف:</b> ${subtotal} ج.م</p>
-            <p><b>التوصيل:</b> ${deliveryFee} ج.م</p>
+            <p><b>أجر التوصيل للكابتن:</b> ${deliveryFee} ج.م</p>
             <p style="font-size:16px; color:#16a34a;"><b>الإجمالي النهائي: ${total} ج.م</b></p>
         `;
 
