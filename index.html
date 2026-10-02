@@ -4,46 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر التوصيل السريع 🚀</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        body { background: #0f172a; color: #fff; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .hero { text-align: center; margin-bottom: 20px; }
+        .hero h1 { color: #38bdf8; margin-bottom: 5px; }
+        .product-card { background: #0f172a; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; border: 1px solid #334155; }
+        .product-card h3 { font-size: 16px; margin: 8px 0; color: #fff; }
+        .price { color: #34d399; font-weight: bold; margin-bottom: 8px; }
+        button { background: #38bdf8; color: #0f172a; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; margin-bottom: 10px; }
+        .cart-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #cbd5e1; }
+    </style>
 </head>
-<body style="background: #0f172a; color: #fff; font-family: Tahoma, sans-serif; padding: 20px;">
+<body>
 
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="color: #38bdf8;">متجر التوصيل السريع 🚀</h1>
+<div class="container">
+    <div class="hero">
+        <h1>🚀 متجر التوصيل السريع</h1>
         <p style="color: #94a3b8;">اطلب بسهولة واصلك لحد باب البيت</p>
-        <a href="admin.html" style="color: #f43f5e; text-decoration: none; font-size: 14px;">⚙️ الانتقال لوحة التحكم</a>
     </div>
 
-    <div style="max-width: 600px; margin: 0 auto; background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+    <h3>📦 المنتجات المتاحة:</h3>
+    <div id="dynamicMenu" style="margin: 15px 0;"></div>
+
+    <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+
+    <h3>🛒 السلة وفاتورة الطلب</h3>
+    <div class="cart-summary" id="cartSummary">السلة فارغة حالياً.. اختر منتجك المفضل!</div>
+
+    <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
+    <input type="text" id="customerPhone" placeholder="رقم الجوال *">
+    <input type="text" id="customerAddress" placeholder="العنوان التفصيلي *">
+    
+    <button type="button" onclick="getLocation()" style="background: #0ea5e9; color: #fff; margin-bottom: 10px;">📍 تحديد الموقع (GPS)</button>
+    <div id="locationStatus" style="font-size: 12px; color: #38bdf8; margin-bottom: 10px;"></div>
+
+    <select id="paymentMethod">
+        <option value="كاش عند الاستلام">كاش عند الاستلام</option>
+        <option value="انستا باي">انستا باي (InstaPay)</option>
+        <option value="فودافون كاش">فودافون كاش</option>
+    </select>
+
+    <button type="button" onclick="checkoutOrder()" style="background: #22c55e; color: #fff; padding: 12px; font-size: 16px; margin-top: 5px;">إتمام الطلب عبر الواتساب 🚀</button>
+</div>
+
+<script>
+    let cartItem = null;
+    let customerCoords = null;
+
+    // منتجات افتراضية للتأكد من العرض الفوري
+    const defaultProducts = [
+        { name: 'وجبة برجر مميزة 🍔', price: 120, category: 'الوجبات السريعة' },
+        { name: 'عبوة عصير طبيعي 🥤', price: 30, category: 'المشروبات' }
+    ];
+
+    function loadStoreProducts() {
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || defaultProducts;
+        const menuContainer = document.getElementById('dynamicMenu');
+        if (!menuContainer) return;
+        menuContainer.innerHTML = '';
+
+        products.forEach((p, index) => {
+            menuContainer.innerHTML += `
+                <div class="product-card">
+                    <h3>${p.name}</h3>
+                    <div class="price">${p.price} ج.م</div>
+                    <button onclick="addToCart('${p.name}', ${p.price})">إضافة للسلة 🛒</button>
+                </div>
+            `;
+        });
+        updateCartDisplay();
+    }
+
+    function addToCart(name, price) {
+        cartItem = { name, price };
+        updateCartDisplay();
+        alert(`تمت إضافة "${name}" إلى السلة بنجاح!`);
+    }
+
+    function getLocation() {
+        const statusDiv = document.getElementById('locationStatus');
+        const addressInput = document.getElementById('customerAddress');
+
+        if (!navigator.geolocation) {
+            statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
+            return;
+        }
+
+        statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة...';
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
+                addressInput.value = `موقع GPS الواقعي (تم تحديده تلقائياً)`;
+                statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
+            },
+            (error) => {
+                statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل الـ GPS.';
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+
+    function updateCartDisplay() {
+        const summaryDiv = document.getElementById('cartSummary');
+        if (!summaryDiv) return;
+        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+
+        if (!cartItem) {
+            summaryDiv.innerHTML = `السلة فارغة حالياً.. اختر منتجاً مفضلاً!<br>🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م`;
+            return;
+        }
+
+        let total = parseFloat(cartItem.price) + deliveryFee;
+        summaryDiv.innerHTML = `📦 <b>المنتج:</b> ${cartItem.name} <br>` +
+                                `🏷 <b>سعر الشراء للسلعة:</b> ${cartItem.price} ج.م<br>` +
+                                `🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م<br>` +
+                                `💰 <b>إجمالي الفاتورة للعميل:</b> <span style="color: #34d399;">${total} ج.م</span>`;
+    }
+
+    function checkoutOrder() {
+        const name = document.getElementById('customerName').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+        let address = document.getElementById('customerAddress').value.trim();
+        const payment = document.getElementById('paymentMethod').value;
+        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+
+        if (!name || !phone || !address) {
+            alert('من فضلك ادخل الاسم، الجوال، والعنوان أو الموقع!');
+            return;
+        }
+
+        if (!cartItem) {
+            alert('السلة فارغة، اختر منتجاً أولاً!');
+            return;
+        }
+
+        let itemPrice = parseFloat(cartItem.price);
+        let total = itemPrice + deliveryFee;
+        let locationText = address;
         
-        <!-- حاصنة عرض المنتجات -->
-        <div id="dynamicMenu"></div>
+        if (customerCoords) {
+            locationText += `\nرابط الخريطة: ${customerCoords}`;
+        }
 
-        <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+        let msg = "🧾 فاتورة طلب جديدة متكاملة\n" +
+                  "-------------------\n" +
+                  "👤 بيانات العميل:\n" +
+                  "• الاسم: " + name + "\n" +
+                  "• الجوال: " + phone + "\n" +
+                  "• العنوان: " + locationText + "\n" +
+                  "• الدفع: " + payment + "\n" +
+                  "-------------------\n" +
+                  "📦 تفاصيل الأسعار:\n" +
+                  "• سعر السلعة: " + itemPrice + " ج.م\n" +
+                  "• التوصيل: " + deliveryFee + " ج.م\n" +
+                  "-------------------\n" +
+                  "💰 الإجمالي النهائي: " + total + " ج.م";
 
-        <h3>🛒 السلة وفاتورة الطلب</h3>
-        <div id="cartSummary" style="background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #cbd5e1;">
-            السلة فارغة حالياً.. اختر منتجك المفضل!
-        </div>
+        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
+    }
 
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <input type="text" id="customerName" placeholder="اسم العميل الكريم" style="padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
-            <input type="text" id="customerPhone" placeholder="رقم الجوال" style="padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
-            <input type="text" id="customerAddress" placeholder="العنوان التفصيلي" style="padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
-            
-            <button type="button" onclick="getLocation()" style="background: #0ea5e9; color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">📍 تحديد الموقع (GPS)</button>
-            <div id="locationStatus" style="font-size: 12px; color: #38bdf8;"></div>
-
-            <select id="paymentMethod" style="padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
-                <option value="كاش عند الاستلام">كاش عند الاستلام</option>
-                <option value="تحويل إلكتروني">تحويل إلكتروني</option>
-            </select>
-
-            <button type="button" onclick="checkoutOrder()" style="background: #22c55e; color: #fff; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">إتمام الطلب عبر الواتساب 🚀</button>
-        </div>
-    </div>
-
-    <!-- ربط ملف الجافاسكريبت -->
-    <script src="script.js"></script>
+    window.onload = loadStoreProducts;
+</script>
 </body>
 </html>
