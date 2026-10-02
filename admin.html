@@ -3,195 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الشاملة - إدارة المتجر ⚙️</title>
+    <title>لوحة الإدارة والتحكم - READY ⚙️</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .admin-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .admin-container { max-width: 900px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; }
         
-        h1 { color: #38bdf8; text-align: center; margin-bottom: 20px; font-size: 22px; }
-        .nav-back { display: inline-block; margin-bottom: 20px; color: #38bdf8; text-decoration: none; font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px; }
+        h1, h2 { color: #38bdf8; margin-bottom: 15px; }
+        .nav-links { margin-bottom: 25px; }
+        .nav-links a { color: #fff; background: #0ea5e9; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; }
         
-        .form-section { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; }
-        .form-section h3 { color: #38bdf8; font-size: 16px; margin-bottom: 12px; }
-        
-        input, select { width: 100%; padding: 11px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
-        
-        .file-upload-box { background: #1e293b; border: 2px dashed #475569; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; cursor: pointer; }
-        .file-upload-box input { display: none; }
-        .file-upload-label { color: #38bdf8; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .card-box { background: #0f172a; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #334155; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
+        .full { grid-column: span 2; }
+        .btn-main { background: #22c55e; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-main:hover { background: #16a34a; }
 
-        .btn-save { background: #22c55e; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .btn-save:hover { background: #16a34a; }
-
-        .product-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #334155; }
-        .product-info-admin { display: flex; align-items: center; gap: 12px; }
-        .product-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
-        
-        .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background: #0ea5e9; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-delete { background: #f43f5e; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { border: 1px solid #334155; padding: 10px; text-align: center; }
+        th { background: #334155; color: #38bdf8; }
+        .del-btn { background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .del-btn:hover { background: #dc2626; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <a href="index.html" class="nav-back">⬅️ العودة لصفحة المتجر الرئيسي</a>
-    <h1>لوحة التحكم والتحكم الكامل ⚙️️</h1>
-
-    <!-- إعداد أرقام الدفع ومصاريف التوصيل -->
-    <div class="form-section">
-        <h3>💳 إعدادات الدفع والتوصيل</h3>
-        <label style="font-size: 12px; color: #94a3b8;">رقم فودافون كاش:</label>
-        <input type="text" id="vodafoneInput" placeholder="010xxxxxxxx">
-        
-        <label style="font-size: 12px; color: #94a3b8;">حساب إنستا باي:</label>
-        <input type="text" id="instapayInput" placeholder="username@instapay">
-
-        <label style="font-size: 12px; color: #94a3b8;">قيمة التوصيل للمندوب (ج.م):</label>
-        <input type="number" id="deliveryFeeInput" placeholder="20">
-
-        <button onclick="saveSettings()" class="btn-save">حفظ الإعدادات العامة</button>
+    <h1>⚙️ لوحة إدارة متجر READY</h1>
+    <div class="nav-links">
+        <a href="index.html">🛒 الانتقال لصفحة المتجر الرئيسية</a>
     </div>
 
-    <!-- إضافة / تعديل منتج مع رفع صورة من الكمبيوتر -->
-    <div class="form-section">
-        <h3 id="formTitle">➕ إضافة منتج جديد</h3>
-        <input type="hidden" id="editIndex" value="-1">
-        <input type="text" id="pName" placeholder="اسم المنتج (مثال: وجبة برجر مشوي)">
-        <input type="number" id="pPrice" placeholder="السعر (ج.م)">
-        <input type="text" id="pCategory" placeholder="اسم القسم (مثال: الوجبات السريعة)">
-        
-        <div class="file-upload-box">
-            <label class="file-upload-label" for="pImageFile">📷 اختر صورة المنتج من الكمبيوتر (اضغط هنا)</label>
-            <input type="file" id="pImageFile" accept="image/*" onchange="convertImage(this)">
+    <!-- إعدادات التوصيل -->
+    <div class="card-box">
+        <h2>🛵 إعدادات أجر الكابتن للتوصيل</h2>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="deliveryFeeInput" placeholder="أجر التوصيل بالجنيه (مثال: 20)">
+            <button onclick="saveDeliveryFee()" class="btn-main" style="width: 150px;">حفظ الأجر</button>
         </div>
-        <input type="hidden" id="pImageBase64">
-        <div id="imagePreviewText" style="font-size: 12px; color: #34d399; margin-bottom: 10px; text-align: center;"></div>
-
-        <button onclick="saveProduct()" class="btn-save" id="saveBtnText">حفظ المنتج وإضافته للمتجر</button>
     </div>
 
-    <!-- المنتجات المسجلة -->
-    <div class="form-section">
-        <h3>📦 المنتجات المسجلة حالياً</h3>
-        <div id="adminProductsList"></div>
+    <!-- إضافة منتج جديد -->
+    <div class="card-box">
+        <h2>➕ إضافة قسم أو منتج جديد للمتجر</h2>
+        <div class="form-grid">
+            <input type="text" id="pName" placeholder="اسم المنتج (مثال: كشري مصري مميز) *" class="full">
+            <input type="number" id="pPrice" placeholder="السعر بالجنيه *">
+            <input type="text" id="pCategory" placeholder="اسم القسم (مثال: 🍔 الوجبات السريعة)">
+            <input type="text" id="pImage" placeholder="رابط صورة المنتج (URL)" class="full">
+            <div class="full">
+                <button onclick="addNewProduct()" class="btn-main">إضافة المنتج وعرضه فوراً للعملاء 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- إدارة المنتجات الحالية (حذف أو تعديل) -->
+    <div class="card-box">
+        <h2>📦 إدارة المنتجات والأصناف الحالية</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>اسم المنتج</th>
+                        <th>القسم</th>
+                        <th>السعر</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="adminProductsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- سجل الطلبات الواردة -->
+    <div class="card-box">
+        <h2>📋 سجل طلبات العملاء الواردة</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>التاريخ</th>
+                        <th>العميل</th>
+                        <th>التفاصيل والإجمالي</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody id="adminOrdersTable">
+                    <tr><td colspan="5" style="color: #94a3b8;">لا توجد طلبات جديدة حالياً.</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    let uploadedImageBase64 = '';
-
-    function convertImage(input) {
-        if (input.files && input.files[0]) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                uploadedImageBase64 = e.target.result;
-                document.getElementById('pImageBase64').value = uploadedImageBase64;
-                document.getElementById('imagePreviewText').innerText = '✅ تم رفع الصورة بنجاح وجاهزة للحفظ!';
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
     function loadAdminData() {
-        document.getElementById('vodafoneInput').value = localStorage.getItem('vodafoneCashNum') || '01034101822';
-        document.getElementById('instapayInput').value = localStorage.getItem('instapayAcc') || 'sameh@instapay';
-        document.getElementById('deliveryFeeInput').value = localStorage.getItem('storeDeliveryFee') || '20';
+        // أجر التوصيل
+        let fee = localStorage.getItem('storeDeliveryFee') || 20;
+        document.getElementById('deliveryFeeInput').value = fee;
 
+        // عرض المنتجات في جدول الإدارة
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        const listContainer = document.getElementById('adminProductsList');
-        listContainer.innerHTML = '';
+        let pTable = document.getElementById('adminProductsTable');
+        pTable.innerHTML = '';
 
         if (products.length === 0) {
-            listContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px; text-align: center;">لا توجد منتجات مسجلة حالياً.</p>';
-            return;
+            pTable.innerHTML = `<tr><td colspan="5">لا توجد منتجات مسجلة حالياً.</td></tr>`;
+        } else {
+            products.forEach((p, index) => {
+                pTable.innerHTML += `
+                    <tr>
+                        <td><img src="${p.image || 'https://via.placeholder.com/50'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
+                        <td><b>${p.name}</b></td>
+                        <td>${p.category || 'عامة'}</td>
+                        <td style="color: #34d399;">${p.price} ج.م</td>
+                        <td><button class="del-btn" onclick="deleteProduct(${index})">حذف ❌</button></td>
+                    </tr>
+                `;
+            });
         }
 
-        products.forEach((p, index) => {
-            listContainer.innerHTML += `
-                <div class="product-item">
-                    <div class="product-info-admin">
-                        <img src="${p.image || 'https://via.placeholder.com/50'}" class="product-thumb">
-                        <div>
-                            <div style="font-weight: bold; font-size: 14px;">${p.name}</div>
-                            <div style="font-size: 12px; color: #34d399;">${p.price} ج.م | <span style="color:#38bdf8">${p.category || 'عام'}</span></div>
-                        </div>
-                    </div>
-                    <div class="action-btns">
-                        <button onclick="editProduct(${index})" class="btn-edit">تعديل</button>
-                        <button onclick="deleteProduct(${index})" class="btn-delete">حذف</button>
-                    </div>
-                </div>
-            `;
-        });
+        // عرض الطلبات الواردة
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let oTable = document.getElementById('adminOrdersTable');
+        oTable.innerHTML = '';
+
+        if (orders.length === 0) {
+            oTable.innerHTML = `<tr><td colspan="5" style="color: #94a3b8;">لا توجد طلبات جديدة حالياً.</td></tr>`;
+        } else {
+            orders.forEach(o => {
+                let itemsStr = o.items.map(i => `${i.name} (×${i.qty})`).join(', ');
+                oTable.innerHTML += `
+                    <tr>
+                        <td><b>${o.id}</b></td>
+                        <td style="font-size:11px;">${o.date}</td>
+                        <td>${o.customerName}<br><span style="font-size:11px; color:#38bdf8;">${o.customerPhone}</span></td>
+                        <td style="text-align: right; font-size: 12px;">الأصناف: ${itemsStr}<br><b>الإجمالي: ${o.total} ج.م (${o.paymentMethod})</b></td>
+                        <td><span style="color: #34d399; font-weight: bold;">${o.status}</span></td>
+                    </tr>
+                `;
+            });
+        }
     }
 
-    function saveSettings() {
-        localStorage.setItem('vodafoneCashNum', document.getElementById('vodafoneInput').value.trim());
-        localStorage.setItem('instapayAcc', document.getElementById('instapayInput').value.trim());
-        localStorage.setItem('storeDeliveryFee', document.getElementById('deliveryFeeInput').value.trim());
-        alert('✅ تم حفظ إعدادات الدفع والتوصيل بنجاح!');
+    function saveDeliveryFee() {
+        let fee = document.getElementById('deliveryFeeInput').value;
+        localStorage.setItem('storeDeliveryFee', fee);
+        alert('✅ تم حفظ أجر التوصيل للكباتن بنجاح!');
     }
 
-    function saveProduct() {
+    function addNewProduct() {
         let name = document.getElementById('pName').value.trim();
         let price = parseFloat(document.getElementById('pPrice').value);
-        let category = document.getElementById('pCategory').value.trim() || 'أقسام عامة';
-        let image = document.getElementById('pImageBase64').value.trim();
-        let editIndex = parseInt(document.getElementById('editIndex').value);
+        let category = document.getElementById('pCategory').value.trim() || '📂 أقسام عامة';
+        let image = document.getElementById('pImage').value.trim();
 
         if (!name || isNaN(price)) {
-            alert('من فضلك ادخل اسم المنتج وسعره بشكل صحيح!');
+            alert('من فضلك ادخل اسم المنتج وسعره الأساسي على الأقل!');
             return;
         }
 
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-
-        if (editIndex === -1) {
-            if (!image) image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=60';
-            products.push({ name, price, category, image });
-        } else {
-            if (!image) {
-                image = products[editIndex].image; // الاحتفاظ بالصورة القديمة لو متمش رفع جديدة
-            }
-            products[editIndex] = { name, price, category, image };
-            document.getElementById('editIndex').value = -1;
-            document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
-            document.getElementById('saveBtnText').innerText = 'حفظ المنتج وإضافته للمتجر';
-        }
-
+        products.push({ name, price, category, image });
         localStorage.setItem('storeProducts', JSON.stringify(products));
-        
+
         document.getElementById('pName').value = '';
         document.getElementById('pPrice').value = '';
         document.getElementById('pCategory').value = '';
-        document.getElementById('pImageBase64').value = '';
-        document.getElementById('imagePreviewText').innerText = '';
-        uploadedImageBase64 = '';
+        document.getElementById('pImage').value = '';
 
         loadAdminData();
-        alert('✅ تم الحفظ وتحديث المتجر بنجاح!');
-    }
-
-    function editProduct(index) {
-        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        let p = products[index];
-
-        document.getElementById('pName').value = p.name;
-        document.getElementById('pPrice').value = p.price;
-        document.getElementById('pCategory').value = p.category;
-        document.getElementById('pImageBase64').value = p.image;
-        document.getElementById('editIndex').value = index;
-        document.getElementById('imagePreviewText').innerText = '📷 الصورة الحالية للمنتج محملة وجاهزة';
-
-        document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
-        document.getElementById('saveBtnText').innerText = 'تحديث بيانات المنتج';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        alert('🎉 تم إضافة المنتج بنجاح وأصبح ظاهراً للعملاء في المتجر فوراً!');
     }
 
     function deleteProduct(index) {
-        if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+        if (confirm('هل أنت متأكد من حذف هذا المنتج من المتجر؟')) {
             let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
             products.splice(index, 1);
             localStorage.setItem('storeProducts', JSON.stringify(products));

@@ -7,9 +7,8 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .store-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        .store-container { max-width: 800px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
         
-        /* شريط اسم التطبيق الثابت والبارز */
         .app-brand-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0284c7, #0f172a); padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #38bdf8; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); }
         .brand-logo { font-size: 20px; font-weight: bold; color: #fff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         .brand-logo span { color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 10px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.3); }
@@ -17,7 +16,6 @@
         .admin-quick-link a { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, 0.3); transition: 0.2s; }
         .admin-quick-link a.captain-link { color: #38bdf8; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); }
 
-        /* البانر الإعلاني بالصور المتحركة */
         .slider-container { position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; border: 1px solid #475569; background: #0f172a; }
         .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; opacity: 0; transition: opacity 1s ease-in-out, transform 1s ease-in-out; background-size: cover; background-position: center; transform: scale(1.05); }
         .slide.active { opacity: 1; transform: scale(1); }
@@ -26,11 +24,10 @@
         .slide h2 { color: #38bdf8; font-size: 21px; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         .slide p { color: #e2e8f0; font-size: 13px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
-        /* الأقسام والمنتجات */
         .section { margin-bottom: 25px; }
         .section-header { border-bottom: 2px solid #38bdf8; padding-bottom: 6px; margin-bottom: 12px; }
         .section-header h2 { font-size: 18px; color: #38bdf8; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
         
         .product-card { background: #0f172a; border-radius: 12px; overflow: hidden; border: 1px solid #334155; text-align: center; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
         .product-card:hover { transform: translateY(-3px); border-color: #38bdf8; }
@@ -41,7 +38,6 @@
         .add-btn { background: #38bdf8; color: #0f172a; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .add-btn:hover { background: #7dd3fc; }
 
-        /* السلة */
         .cart-box { background: #0f172a; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #334155; }
         .cart-box h3 { font-size: 16px; margin-bottom: 10px; color: #38bdf8; }
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 13px; }
@@ -49,7 +45,6 @@
         .qty-btn { background: #334155; color: #fff; border: none; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .qty-btn:hover { background: #0ea5e9; }
 
-        /* نموذج الطلب */
         .form-group { display: flex; flex-direction: column; gap: 12px; }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
         .gps-btn { background: #0ea5e9; color: #fff; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: bold; }
@@ -58,7 +53,6 @@
         .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
         .checkout-btn:hover { background: #16a34a; }
 
-        /* قسم انضمام كباتن التوصيل */
         .captain-join-section { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #38bdf8; border-radius: 12px; padding: 20px; margin-top: 30px; }
         .captain-join-section h3 { color: #38bdf8; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .captain-join-section p { color: #94a3b8; font-size: 13px; margin-bottom: 15px; }
@@ -68,7 +62,6 @@
         .captain-submit-btn { background: #0ea5e9; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
         .captain-submit-btn:hover { background: #0284c7; }
 
-        /* الطباعة والفاتورة */
         @media print {
             body * { visibility: hidden; }
             #printableInvoice, #printableInvoice * { visibility: visible; }
@@ -81,7 +74,6 @@
 
 <div class="store-container">
     
-    <!-- شريط اسم التطبيق وربط الكباتن والإدارة -->
     <div class="app-brand-header">
         <div class="brand-logo">
             ⚡ READY <span>جاهز</span>
@@ -92,7 +84,6 @@
         </div>
     </div>
 
-    <!-- البانر المتحرك -->
     <div class="slider-container" id="slider">
         <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1526367460886-3cddc340da4f?w=800&auto=format&fit=crop&q=80');">
             <h2>🚀 أسرع خدمة توصيل لحد باب بيتك</h2>
@@ -108,19 +99,16 @@
         </div>
     </div>
 
-    <!-- الأقسام والمنتجات -->
     <div id="dynamicMenu"></div>
 
     <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
 
-    <!-- السلة -->
     <div class="cart-box">
         <h3>🛒 سلة المشتريات (الأصناف والكميات)</h3>
         <div id="cartItemsList" style="margin-bottom: 10px; color: #cbd5e1;">السلة فارغة حالياً.. اختر منتجاتك المفضلة!</div>
         <div id="cartTotalSummary" style="font-size: 14px; border-top: 1px solid #334155; padding-top: 8px;"></div>
     </div>
 
-    <!-- نموذج بيانات العميل -->
     <div class="form-group">
         <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
         <input type="text" id="customerPhone" placeholder="رقم الجوال *">
@@ -140,7 +128,6 @@
         <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب وإرسال التنبيه للإدارة والمندوب فوراً 🚀</button>
     </div>
 
-    <!-- قسم انضمام كباتن التوصيل -->
     <div class="captain-join-section" id="captainSection">
         <h3>🛺 انضم إلى فريق كباتن "جاهز"</h3>
         <p>اكسب دخلك الإضافي وانضم لشبكة الكباتن والمناديب الأسرع توصيلاً!</p>
@@ -160,7 +147,6 @@
         </div>
     </div>
 
-    <!-- الفاتورة القابلة للطباعة -->
     <div id="printableInvoice" class="invoice-card">
         <h2 style="text-align: center; margin-bottom: 5px;">⚡ READY • جاهز ⚡</h2>
         <h4 style="text-align: center; margin-bottom: 15px; color: #64748b;">فاتورة طلب وإسناد لكابتن التوصيل 🧾</h4>
@@ -169,7 +155,6 @@
 </div>
 
 <script>
-    // تشغيل البانر المتحرك
     let currentSlide = 0;
     const slides = document.querySelectorAll('.slide');
     function nextSlide() {
@@ -185,11 +170,28 @@
     function loadStoreProducts() {
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
         
+        // الأقسام والأصناف المشهورة الافتراضية
         if (products.length === 0) {
             products = [
-                { name: 'بيض بلدي - 30 بيضة', price: 130, category: 'السوبر ماركت', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&auto=format&fit=crop&q=60' },
-                { name: 'وجبة برجر مشوي سريعة', price: 120, category: 'الوجبات السريعة', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=60' }
+                // سوبر ماركت
+                { name: 'بيض بلدي - 30 بيضة', price: 130, category: '🥚 السوبر ماركت والبيض', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&auto=format&fit=crop&q=60' },
+                { name: 'لبن طازج - 1 لتر', price: 35, category: '🥚 السوبر ماركت والبيض', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300&auto=format&fit=crop&q=60' },
+                { name: 'جبنة فريكش - 500جم', price: 45, category: '🥚 السوبر ماركت والبيض', image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&auto=format&fit=crop&q=60' },
+                
+                // وجبات سريعة
+                { name: 'وجبة برجر مشوي دبل', price: 120, category: '🍔 الوجبات السريعة', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=60' },
+                { name: 'ساندوتش شاورما دجاج كبير', price: 75, category: '🍔 الوجبات السريعة', image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=300&auto=format&fit=crop&q=60' },
+                { name: 'بيتزا كوين بالجبنة والمشروم', price: 140, category: '🍔 الوجبات السريعة', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&auto=format&fit=crop&q=60' },
+
+                // مشويات ولحوم
+                { name: 'كيلو كفتة ضاني مشوية', price: 280, category: '🥩 المشويات واللحوم', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=300&auto=format&fit=crop&q=60' },
+                { name: 'فرخة مشوية عالفحم', price: 220, category: '🥩 المشويات واللحوم', image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=300&auto=format&fit=crop&q=60' },
+
+                // مخبوزات وحلويات
+                { name: 'تورتة شوكولاتة طازجة', price: 250, category: '🍰 المخبوزات والحلويات', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&auto=format&fit=crop&q=60' },
+                { name: 'علبة كحك وبسكويت عيد', price: 180, category: '🍰 المخبوزات والحلويات', image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300&auto=format&fit=crop&q=60' }
             ];
+            localStorage.setItem('storeProducts', JSON.stringify(products));
         }
 
         const menuContainer = document.getElementById('dynamicMenu');
@@ -197,10 +199,10 @@
         menuContainer.innerHTML = '';
 
         let categories = {};
-        products.forEach(p => {
+        products.forEach((p, index) => {
             let catName = p.category || 'أقسام عامة';
             if (!categories[catName]) categories[catName] = [];
-            categories[catName].push(p);
+            categories[catName].push({ ...p, originalIndex: index });
         });
 
         for (let cat in categories) {
@@ -383,7 +385,6 @@
         let locationText = address;
         if (customerCoords) locationText += `\nرابط خريطة العميل: ${customerCoords}`;
 
-        // 1. الحفظ التلقائي في سجل الطلبات للإدارة (LocalStorage)
         let allOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         let newOrderObj = {
             id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
@@ -401,7 +402,6 @@
         allOrders.unshift(newOrderObj);
         localStorage.setItem('storeOrders', JSON.stringify(allOrders));
 
-        // 2. التنبيه اللحظي والدائم (فتح رسالة الواتساب للإدارة والمندوب فوراً)
         let msg = "🚨 [تنبيه طلب جديد مؤكد - READY]\n" +
                   "-------------------\n" +
                   "👤 العميل: " + name + "\n" +
@@ -419,7 +419,6 @@
 
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
 
-        // 3. طباعة الفاتورة تلقائياً لتسليمها مع الطلب
         document.getElementById('invoiceContent').innerHTML = `
             <p><b>رقم الطلب:</b> ${newOrderObj.id}</p>
             <p><b>اسم العميل:</b> ${name}</p>
@@ -446,7 +445,6 @@
             window.print();
         }, 1000);
 
-        // تصفير السلة
         cart = [];
         updateCartDisplay();
     }
