@@ -15,8 +15,7 @@ function loadStoreProducts() {
 
     let categories = {};
     products.forEach(p => {
-        let catName = p.category || 'أقسام عامة';
-        if (!categories[catName]) categories[catName] = [];
+let catName = p.category || 'General';        if (!categories[catName]) categories[catName] = [];
         categories[catName].push(p);
     });
 
