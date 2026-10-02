@@ -3,276 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر التوصيل السريع 🚀</title>
+    <title>لوحة التحكم الشاملة - إدارة المتجر ⚙️</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .store-container { max-width: 680px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        .admin-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
         
-        /* البانر الإعلاني والتصميم الجرافيكي العالي */
-        .banner { text-align: center; margin-bottom: 25px; padding: 25px; background: linear-gradient(135deg, #0284c7, #0f172a); border-radius: 14px; border: 1px solid #38bdf8; box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.2); }
-        .banner h1 { color: #38bdf8; font-size: 26px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-        .banner p { color: #94a3b8; font-size: 14px; margin-bottom: 15px; }
-        .admin-link { color: #f43f5e; text-decoration: none; font-size: 13px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 7px 14px; border-radius: 20px; border: 1px solid rgba(244, 63, 94, 0.3); display: inline-block; transition: 0.2s; }
-        .admin-link:hover { background: rgba(244, 63, 94, 0.3); }
+        h1 { color: #38bdf8; text-align: center; margin-bottom: 20px; font-size: 22px; }
+        .nav-back { display: inline-block; margin-bottom: 20px; color: #38bdf8; text-decoration: none; font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px; }
+        
+        .form-section { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; }
+        .form-section h3 { color: #38bdf8; font-size: 16px; margin-bottom: 12px; }
+        
+        input, select { width: 100%; padding: 11px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
+        
+        .file-upload-box { background: #1e293b; border: 2px dashed #475569; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; cursor: pointer; }
+        .file-upload-box input { display: none; }
+        .file-upload-label { color: #38bdf8; font-size: 13px; font-weight: bold; cursor: pointer; }
 
-        /* الأقسام والمنتجات */
-        .section { margin-bottom: 25px; }
-        .section-header { border-bottom: 2px solid #38bdf8; padding-bottom: 6px; margin-bottom: 12px; }
-        .section-header h2 { font-size: 18px; color: #38bdf8; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
-        
-        .product-card { background: #0f172a; border-radius: 12px; overflow: hidden; border: 1px solid #334155; text-align: center; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
-        .product-card:hover { transform: translateY(-3px); border-color: #38bdf8; }
-        .product-img { width: 100%; height: 120px; object-fit: cover; }
-        .product-info { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .product-info h3 { font-size: 14px; color: #fff; }
-        .price { color: #34d399; font-weight: bold; font-size: 15px; }
-        
-        .add-btn { background: #38bdf8; color: #0f172a; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .add-btn:hover { background: #7dd3fc; }
+        .btn-save { background: #22c55e; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .btn-save:hover { background: #16a34a; }
 
-        /* السلة وفاتورة الطلب */
-        .cart-box { background: #0f172a; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #334155; }
-        .cart-box h3 { font-size: 16px; margin-bottom: 10px; color: #38bdf8; }
-        #cartSummary { font-size: 14px; color: #cbd5e1; line-height: 1.7; }
-
-        /* نموذج الطلب والدفع */
-        .form-group { display: flex; flex-direction: column; gap: 12px; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #334155; }
+        .product-info-admin { display: flex; align-items: center; gap: 12px; }
+        .product-thumb { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
         
-        .gps-btn { background: #0ea5e9; color: #fff; border: none; padding: 11px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #locationStatus { font-size: 12px; color: #38bdf8; }
-        
-        /* صندوق تفاصيل الدفع الإلكتروني */
-        #paymentDetailsBox { background: rgba(56, 189, 248, 0.08); border: 1px dashed #38bdf8; padding: 12px; border-radius: 8px; font-size: 13px; color: #38bdf8; display: none; }
-
-        .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
-        .checkout-btn:hover { background: #16a34a; }
+        .action-btns { display: flex; gap: 6px; }
+        .btn-edit { background: #0ea5e9; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-delete { background: #f43f5e; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="store-container">
-    <!-- البانر الإعلاني والتصميم الجرافيكي -->
-    <div class="banner">
-        <h1>متجر التوصيل السريع 🚀</h1>
-        <p>اطلب بسهولة واصلك لحد باب البيت بأسرع وقت وبأعلى جودة</p>
-        <a href="admin.html" class="admin-link">⚙️️ الانتقال لوحة التحكم لإدارة المنتجات والأسعار</a>
-    </div>
+<div class="admin-container">
+    <a href="index.html" class="nav-back">⬅️ العودة لصفحة المتجر الرئيسي</a>
+    <h1>لوحة التحكم والتحكم الكامل ⚙️️</h1>
 
-    <!-- الأقسام والمنتجات القادمة من الإدارة ديناميكياً -->
-    <div id="dynamicMenu"></div>
-
-    <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-
-    <!-- السلة وفاتورة الطلب -->
-    <div class="cart-box">
-        <h3>🛒 السلة وفاتورة الطلب</h3>
-        <div id="cartSummary">السلة فارغة حالياً.. اختر منتجاً مفضلاً من المتجر!</div>
-    </div>
-
-    <!-- نموذج بيانات العميل -->
-    <div class="form-group">
-        <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
-        <input type="text" id="customerPhone" placeholder="رقم الجوال *">
-        <input type="text" id="customerAddress" placeholder="العنوان التفصيلي *">
+    <!-- إعداد أرقام الدفع ومصاريف التوصيل -->
+    <div class="form-section">
+        <h3>💳 إعدادات الدفع والتوصيل</h3>
+        <label style="font-size: 12px; color: #94a3b8;">رقم فودافون كاش:</label>
+        <input type="text" id="vodafoneInput" placeholder="010xxxxxxxx">
         
-        <button type="button" class="gps-btn" onclick="getLocation()">📍 تحديد الموقع التلقائي (GPS)</button>
-        <div id="locationStatus"></div>
+        <label style="font-size: 12px; color: #94a3b8;">حساب إنستا باي:</label>
+        <input type="text" id="instapayInput" placeholder="username@instapay">
 
-        <!-- طرق الدفع مع تفعيل فودافون كاش وانستا باي والأرقام -->
-        <select id="paymentMethod" onchange="togglePaymentInfo()">
-            <option value="كاش عند الاستلام">كاش عند الاستلام</option>
-            <option value="فودافون كاش">فودافون كاش</option>
-            <option value="انستا باي">انستا باي (InstaPay)</option>
-        </select>
+        <label style="font-size: 12px; color: #94a3b8;">قيمة التوصيل للمندوب (ج.م):</label>
+        <input type="number" id="deliveryFeeInput" placeholder="20">
 
-        <div id="paymentDetailsBox"></div>
+        <button onclick="saveSettings()" class="btn-save">حفظ الإعدادات العامة</button>
+    </div>
 
-        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب عبر الواتساب 🚀</button>
+    <!-- إضافة / تعديل منتج مع رفع صورة من الكمبيوتر -->
+    <div class="form-section">
+        <h3 id="formTitle">➕ إضافة منتج جديد</h3>
+        <input type="hidden" id="editIndex" value="-1">
+        <input type="text" id="pName" placeholder="اسم المنتج (مثال: وجبة برجر مشوي)">
+        <input type="number" id="pPrice" placeholder="السعر (ج.م)">
+        <input type="text" id="pCategory" placeholder="اسم القسم (مثال: الوجبات السريعة)">
+        
+        <div class="file-upload-box">
+            <label class="file-upload-label" for="pImageFile">📷 اختر صورة المنتج من الكمبيوتر (اضغط هنا)</label>
+            <input type="file" id="pImageFile" accept="image/*" onchange="convertImage(this)">
+        </div>
+        <input type="hidden" id="pImageBase64">
+        <div id="imagePreviewText" style="font-size: 12px; color: #34d399; margin-bottom: 10px; text-align: center;"></div>
+
+        <button onclick="saveProduct()" class="btn-save" id="saveBtnText">حفظ المنتج وإضافته للمتجر</button>
+    </div>
+
+    <!-- المنتجات المسجلة -->
+    <div class="form-section">
+        <h3>📦 المنتجات المسجلة حالياً</h3>
+        <div id="adminProductsList"></div>
     </div>
 </div>
 
 <script>
-    let cartItem = null;
-    let customerCoords = null;
+    let uploadedImageBase64 = '';
 
-    function loadStoreProducts() {
+    function convertImage(input) {
+        if (input.files && input.files[0]) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result;
+                document.getElementById('pImageBase64').value = uploadedImageBase64;
+                document.getElementById('imagePreviewText').innerText = '✅ تم رفع الصورة بنجاح وجاهزة للحفظ!';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function loadAdminData() {
+        document.getElementById('vodafoneInput').value = localStorage.getItem('vodafoneCashNum') || '01034101822';
+        document.getElementById('instapayInput').value = localStorage.getItem('instapayAcc') || 'sameh@instapay';
+        document.getElementById('deliveryFeeInput').value = localStorage.getItem('storeDeliveryFee') || '20';
+
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        
-        // منتجات افتراضية لو اللوكل فاضي
+        const listContainer = document.getElementById('adminProductsList');
+        listContainer.innerHTML = '';
+
         if (products.length === 0) {
-            products = [
-                { name: 'بيض بلدي - 30 بيضة', price: 130, category: 'السوبر ماركت', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=300&auto=format&fit=crop&q=60' },
-                { name: 'كيلو سمك بلطي مشوي', price: 100, category: 'المشويات', image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=300&auto=format&fit=crop&q=60' }
-            ];
+            listContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px; text-align: center;">لا توجد منتجات مسجلة حالياً.</p>';
+            return;
         }
 
-        const menuContainer = document.getElementById('dynamicMenu');
-        if (!menuContainer) return;
-        menuContainer.innerHTML = '';
-
-        let categories = {};
-        products.forEach(p => {
-            let catName = p.category || 'أقسام عامة';
-            if (!categories[catName]) categories[catName] = [];
-            categories[catName].push(p);
-        });
-
-        for (let cat in categories) {
-            let items = categories[cat];
-            let sectionHtml = `<div class="section"><div class="section-header"><h2>📂 ${cat}</h2></div><div class="products-grid">`;
-            
-            items.forEach(p => {
-                sectionHtml += `
-                    <div class="product-card">
-                        <img src="${p.image || 'https://via.placeholder.com/300'}" alt="${p.name}" class="product-img">
-                        <div class="product-info">
-                            <h3>${p.name}</h3>
-                            <div class="price">${p.price} ج.م</div>
-                            <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="add-btn">إضافة للسلة 🛒</button>
+        products.forEach((p, index) => {
+            listContainer.innerHTML += `
+                <div class="product-item">
+                    <div class="product-info-admin">
+                        <img src="${p.image || 'https://via.placeholder.com/50'}" class="product-thumb">
+                        <div>
+                            <div style="font-weight: bold; font-size: 14px;">${p.name}</div>
+                            <div style="font-size: 12px; color: #34d399;">${p.price} ج.م | <span style="color:#38bdf8">${p.category || 'عام'}</span></div>
                         </div>
                     </div>
-                `;
-            });
-            
-            sectionHtml += `</div></div>`;
-            menuContainer.innerHTML += sectionHtml;
-        }
-        updateCartDisplay();
-    }
-
-    function addToCart(name, price) {
-        cartItem = { name, price };
-        updateCartDisplay();
-        alert(`تمت إضافة "${name}" إلى السلة بنجاح!`);
-    }
-
-    function getLocation() {
-        const statusDiv = document.getElementById('locationStatus');
-        const addressInput = document.getElementById('customerAddress');
-
-        if (!navigator.geolocation) {
-            statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
-            return;
-        }
-
-        statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة عبر الـ GPS...';
-        
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
-                addressInput.value = `📍 موقع GPS الحالي (تم التحديد تلقائياً)`;
-                statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
-            },
-            (error) => {
-                statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل صلاحية الـ GPS.';
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-    }
-
-    function togglePaymentInfo() {
-        const method = document.getElementById('paymentMethod').value;
-        const box = document.getElementById('paymentDetailsBox');
-        
-        // سحب أرقام الدفع المسجلة من لوحة التحكم أو أرقام افتراضية
-        const vodafoneNumber = localStorage.getItem('vodafoneCashNum') || '01034101822';
-        const instapayAccount = localStorage.getItem('instapayAcc') || 'sameh@instapay';
-
-        if (method === 'فودافون كاش') {
-            box.style.display = 'block';
-            box.innerHTML = `📱 يرجى تحويل المبلغ المطلوبة على رقم فودافون كاش التالي: <b style="color:#fff; font-size:15px;">${vodafoneNumber}</b> وإرفاق الإيصال للمندوب.`;
-        } else if (method === 'انستا باي') {
-            box.style.display = 'block';
-            box.innerHTML = `💳 يرجى التحويل على حساب إنستا باي التالي: <b style="color:#fff; font-size:15px;">${instapayAccount}</b>`;
-        } else {
-            box.style.display = 'none';
-            box.innerHTML = '';
-        }
-    }
-
-    function updateCartDisplay() {
-        const summaryDiv = document.getElementById('cartSummary');
-        if (!summaryDiv) return;
-        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
-
-        if (!cartItem) {
-            summaryDiv.innerHTML = `السلة فارغة حالياً.. اختر منتجاً مفضلاً من القائمة أدناه!<br>🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م`;
-            return;
-        }
-
-        let total = parseFloat(cartItem.price) + deliveryFee;
-        summaryDiv.innerHTML = `📦 <b>المنتج المختار:</b> ${cartItem.name} <br>` +
-                                `🏷 <b>سعر السلعة:</b> ${cartItem.price} ج.م<br>` +
-                                `🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م<br>` +
-                                `💰 <b>الإجمالي النهائي:</b> <span style="color: #34d399; font-weight: bold;">${total} ج.م</span>`;
-    }
-
-    function checkoutOrder() {
-        const name = document.getElementById('customerName').value.trim();
-        const phone = document.getElementById('customerPhone').value.trim();
-        let address = document.getElementById('customerAddress').value.trim();
-        const payment = document.getElementById('paymentMethod').value;
-        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
-
-        if (!name || !phone || !address) {
-            alert('من فضلك ادخل الاسم، الجوال، والعنوان أو موقع الـ GPS!');
-            return;
-        }
-
-        if (!cartItem) {
-            alert('السلة فارغة، اختر منتجاً أولاً من المتجر!');
-            return;
-        }
-
-        let itemPrice = parseFloat(cartItem.price);
-        let total = itemPrice + deliveryFee;
-        let locationText = address;
-        
-        if (customerCoords) {
-            locationText += `\nرابط الخريطة: ${customerCoords}`;
-        }
-
-        let msg = "🧾 فاتورة طلب جديدة متكاملة\n" +
-                  "-------------------\n" +
-                  "👤 بيانات العميل:\n" +
-                  "• الاسم: " + name + "\n" +
-                  "• الجوال: " + phone + "\n" +
-                  "• العنوان: " + locationText + "\n" +
-                  "• طريقة الدفع: " + payment + "\n" +
-                  "-------------------\n" +
-                  "📦 تفاصيل الأسعار:\n" +
-                  "• سعر السلعة: " + itemPrice + " ج.م\n" +
-                  "• التوصيل: " + deliveryFee + " ج.م\n" +
-                  "-------------------\n" +
-                  "💰 الإجمالي النهائي: " + total + " ج.م";
-
-        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
-
-        const cartSummary = document.getElementById('cartSummary');
-        if (cartSummary) {
-            cartSummary.innerHTML = `
-                <div style="background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; padding: 15px; border-radius: 8px; text-align: center; color: #4ade80;">
-                    <h3 style="margin-bottom: 5px; color: #4ade80;">🎉 تم إرسال طلبك بنجاح!</h3>
-                    <p style="font-size: 13px; color: #cbd5e1;">جاري معالجة الطلب والتواصل معك عبر الواتساب قريباً جداً.</p>
+                    <div class="action-btns">
+                        <button onclick="editProduct(${index})" class="btn-edit">تعديل</button>
+                        <button onclick="deleteProduct(${index})" class="btn-delete">حذف</button>
+                    </div>
                 </div>
             `;
-        }
-
-        cartItem = null;
-        customerCoords = null;
-        document.getElementById('customerName').value = '';
-        document.getElementById('customerPhone').value = '';
-        document.getElementById('customerAddress').value = '';
-        document.getElementById('locationStatus').innerHTML = '';
-        document.getElementById('paymentDetailsBox').style.display = 'none';
+        });
     }
 
-    window.onload = loadStoreProducts;
+    function saveSettings() {
+        localStorage.setItem('vodafoneCashNum', document.getElementById('vodafoneInput').value.trim());
+        localStorage.setItem('instapayAcc', document.getElementById('instapayInput').value.trim());
+        localStorage.setItem('storeDeliveryFee', document.getElementById('deliveryFeeInput').value.trim());
+        alert('✅ تم حفظ إعدادات الدفع والتوصيل بنجاح!');
+    }
+
+    function saveProduct() {
+        let name = document.getElementById('pName').value.trim();
+        let price = parseFloat(document.getElementById('pPrice').value);
+        let category = document.getElementById('pCategory').value.trim() || 'أقسام عامة';
+        let image = document.getElementById('pImageBase64').value.trim();
+        let editIndex = parseInt(document.getElementById('editIndex').value);
+
+        if (!name || isNaN(price)) {
+            alert('من فضلك ادخل اسم المنتج وسعره بشكل صحيح!');
+            return;
+        }
+
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+
+        if (editIndex === -1) {
+            if (!image) image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=60';
+            products.push({ name, price, category, image });
+        } else {
+            if (!image) {
+                image = products[editIndex].image; // الاحتفاظ بالصورة القديمة لو متمش رفع جديدة
+            }
+            products[editIndex] = { name, price, category, image };
+            document.getElementById('editIndex').value = -1;
+            document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
+            document.getElementById('saveBtnText').innerText = 'حفظ المنتج وإضافته للمتجر';
+        }
+
+        localStorage.setItem('storeProducts', JSON.stringify(products));
+        
+        document.getElementById('pName').value = '';
+        document.getElementById('pPrice').value = '';
+        document.getElementById('pCategory').value = '';
+        document.getElementById('pImageBase64').value = '';
+        document.getElementById('imagePreviewText').innerText = '';
+        uploadedImageBase64 = '';
+
+        loadAdminData();
+        alert('✅ تم الحفظ وتحديث المتجر بنجاح!');
+    }
+
+    function editProduct(index) {
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+        let p = products[index];
+
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pCategory').value = p.category;
+        document.getElementById('pImageBase64').value = p.image;
+        document.getElementById('editIndex').value = index;
+        document.getElementById('imagePreviewText').innerText = '📷 الصورة الحالية للمنتج محملة وجاهزة';
+
+        document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
+        document.getElementById('saveBtnText').innerText = 'تحديث بيانات المنتج';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteProduct(index) {
+        if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+            let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+            products.splice(index, 1);
+            localStorage.setItem('storeProducts', JSON.stringify(products));
+            loadAdminData();
+        }
+    }
+
+    window.onload = loadAdminData;
 </script>
 </body>
 </html>

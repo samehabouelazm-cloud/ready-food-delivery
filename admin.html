@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
-        .admin-container { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .admin-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
         
         h1 { color: #38bdf8; text-align: center; margin-bottom: 20px; font-size: 22px; }
         .nav-back { display: inline-block; margin-bottom: 20px; color: #38bdf8; text-decoration: none; font-weight: bold; background: rgba(56, 189, 248, 0.1); padding: 6px 12px; border-radius: 8px; }
@@ -17,6 +17,10 @@
         
         input, select { width: 100%; padding: 11px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
         
+        .file-upload-box { background: #1e293b; border: 2px dashed #475569; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; cursor: pointer; }
+        .file-upload-box input { display: none; }
+        .file-upload-label { color: #38bdf8; font-size: 13px; font-weight: bold; cursor: pointer; }
+
         .btn-save { background: #22c55e; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-save:hover { background: #16a34a; }
 
@@ -33,8 +37,9 @@
 
 <div class="admin-container">
     <a href="index.html" class="nav-back">⬅️ العودة لصفحة المتجر الرئيسي</a>
-    <h1>لوحة التحكم والتحكم الكامل ⚙️</h1>
+    <h1>لوحة التحكم والتحكم الكامل ⚙️️</h1>
 
+    <!-- إعداد أرقام الدفع ومصاريف التوصيل -->
     <div class="form-section">
         <h3>💳 إعدادات الدفع والتوصيل</h3>
         <label style="font-size: 12px; color: #94a3b8;">رقم فودافون كاش:</label>
@@ -49,16 +54,25 @@
         <button onclick="saveSettings()" class="btn-save">حفظ الإعدادات العامة</button>
     </div>
 
+    <!-- إضافة / تعديل منتج مع رفع صورة من الكمبيوتر -->
     <div class="form-section">
         <h3 id="formTitle">➕ إضافة منتج جديد</h3>
         <input type="hidden" id="editIndex" value="-1">
-        <input type="text" id="pName" placeholder="اسم المنتج (مثال: كيلو طماطم)">
+        <input type="text" id="pName" placeholder="اسم المنتج (مثال: وجبة برجر مشوي)">
         <input type="number" id="pPrice" placeholder="السعر (ج.م)">
-        <input type="text" id="pCategory" placeholder="اسم القسم (مثال: السوق، المشويات)">
-        <input type="text" id="pImage" placeholder="رابط صورة المنتج (URL)">
+        <input type="text" id="pCategory" placeholder="اسم القسم (مثال: الوجبات السريعة)">
+        
+        <div class="file-upload-box">
+            <label class="file-upload-label" for="pImageFile">📷 اختر صورة المنتج من الكمبيوتر (اضغط هنا)</label>
+            <input type="file" id="pImageFile" accept="image/*" onchange="convertImage(this)">
+        </div>
+        <input type="hidden" id="pImageBase64">
+        <div id="imagePreviewText" style="font-size: 12px; color: #34d399; margin-bottom: 10px; text-align: center;"></div>
+
         <button onclick="saveProduct()" class="btn-save" id="saveBtnText">حفظ المنتج وإضافته للمتجر</button>
     </div>
 
+    <!-- المنتجات المسجلة -->
     <div class="form-section">
         <h3>📦 المنتجات المسجلة حالياً</h3>
         <div id="adminProductsList"></div>
@@ -66,6 +80,20 @@
 </div>
 
 <script>
+    let uploadedImageBase64 = '';
+
+    function convertImage(input) {
+        if (input.files && input.files[0]) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result;
+                document.getElementById('pImageBase64').value = uploadedImageBase64;
+                document.getElementById('imagePreviewText').innerText = '✅ تم رفع الصورة بنجاح وجاهزة للحفظ!';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     function loadAdminData() {
         document.getElementById('vodafoneInput').value = localStorage.getItem('vodafoneCashNum') || '01034101822';
         document.getElementById('instapayInput').value = localStorage.getItem('instapayAcc') || 'sameh@instapay';
@@ -110,7 +138,7 @@
         let name = document.getElementById('pName').value.trim();
         let price = parseFloat(document.getElementById('pPrice').value);
         let category = document.getElementById('pCategory').value.trim() || 'أقسام عامة';
-        let image = document.getElementById('pImage').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=60';
+        let image = document.getElementById('pImageBase64').value.trim();
         let editIndex = parseInt(document.getElementById('editIndex').value);
 
         if (!name || isNaN(price)) {
@@ -121,8 +149,12 @@
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
 
         if (editIndex === -1) {
+            if (!image) image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&auto=format&fit=crop&q=60';
             products.push({ name, price, category, image });
         } else {
+            if (!image) {
+                image = products[editIndex].image; // الاحتفاظ بالصورة القديمة لو متمش رفع جديدة
+            }
             products[editIndex] = { name, price, category, image };
             document.getElementById('editIndex').value = -1;
             document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
@@ -134,7 +166,9 @@
         document.getElementById('pName').value = '';
         document.getElementById('pPrice').value = '';
         document.getElementById('pCategory').value = '';
-        document.getElementById('pImage').value = '';
+        document.getElementById('pImageBase64').value = '';
+        document.getElementById('imagePreviewText').innerText = '';
+        uploadedImageBase64 = '';
 
         loadAdminData();
         alert('✅ تم الحفظ وتحديث المتجر بنجاح!');
@@ -147,8 +181,9 @@
         document.getElementById('pName').value = p.name;
         document.getElementById('pPrice').value = p.price;
         document.getElementById('pCategory').value = p.category;
-        document.getElementById('pImage').value = p.image;
+        document.getElementById('pImageBase64').value = p.image;
         document.getElementById('editIndex').value = index;
+        document.getElementById('imagePreviewText').innerText = '📷 الصورة الحالية للمنتج محملة وجاهزة';
 
         document.getElementById('formTitle').innerText = '✏️ تعديل المنتج';
         document.getElementById('saveBtnText').innerText = 'تحديث بيانات المنتج';
