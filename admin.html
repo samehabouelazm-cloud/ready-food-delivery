@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة والتحكم - READY ⚙️</title>
+    <title>لوحة الإدارة والتحكم - READY ⚙️️</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
@@ -17,8 +17,17 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: #fff; font-size: 14px; }
         .full { grid-column: span 2; }
-        .btn-main { background: #22c55e; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-main { background: #22c55e; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn-main:hover { background: #16a34a; }
+
+        /* تصميم زر رفع الصورة من الكمبيوتر */
+        .file-upload-box { border: 2px dashed #38bdf8; background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .file-upload-box:hover { background: rgba(56, 189, 248, 0.12); }
+        .file-upload-box input { display: none; }
+        .file-upload-label { color: #38bdf8; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        #imagePreviewContainer { margin-top: 10px; text-align: center; display: none; }
+        #imagePreviewContainer img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #38bdf8; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th, td { border: 1px solid #334155; padding: 10px; text-align: center; }
@@ -51,7 +60,21 @@
             <input type="text" id="pName" placeholder="اسم المنتج (مثال: كشري مصري مميز) *" class="full">
             <input type="number" id="pPrice" placeholder="السعر بالجنيه *">
             <input type="text" id="pCategory" placeholder="اسم القسم (مثال: 🍔 الوجبات السريعة)">
-            <input type="text" id="pImage" placeholder="رابط صورة المنتج (URL)" class="full">
+            
+            <!-- رفع الصورة من الكمبيوتر -->
+            <div class="full">
+                <div class="file-upload-box" onclick="document.getElementById('pImageFile').click()">
+                    <div class="file-upload-label">
+                        📁 اضغط هنا لاختيار صورة المنتج من الكمبيوتر أو الموبايل
+                    </div>
+                    <input type="file" id="pImageFile" accept="image/*" onchange="previewImage(event)">
+                </div>
+                <div id="imagePreviewContainer">
+                    <p style="font-size: 12px; color: #34d399; margin-bottom: 5px;">معاينة الصورة المحددة:</p>
+                    <img id="previewImg" src="" alt="Preview">
+                </div>
+            </div>
+
             <div class="full">
                 <button onclick="addNewProduct()" class="btn-main">إضافة المنتج وعرضه فوراً للعملاء 🚀</button>
             </div>
@@ -100,12 +123,25 @@
 </div>
 
 <script>
+    let uploadedImageBase64 = '';
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImageBase64 = e.target.result;
+                document.getElementById('previewImg').src = uploadedImageBase64;
+                document.getElementById('imagePreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     function loadAdminData() {
-        // أجر التوصيل
         let fee = localStorage.getItem('storeDeliveryFee') || 20;
         document.getElementById('deliveryFeeInput').value = fee;
 
-        // عرض المنتجات في جدول الإدارة
         let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
         let pTable = document.getElementById('adminProductsTable');
         pTable.innerHTML = '';
@@ -126,7 +162,6 @@
             });
         }
 
-        // عرض الطلبات الواردة
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         let oTable = document.getElementById('adminOrdersTable');
         oTable.innerHTML = '';
@@ -159,7 +194,7 @@
         let name = document.getElementById('pName').value.trim();
         let price = parseFloat(document.getElementById('pPrice').value);
         let category = document.getElementById('pCategory').value.trim() || '📂 أقسام عامة';
-        let image = document.getElementById('pImage').value.trim();
+        let image = uploadedImageBase64 || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&auto=format&fit=crop&q=60';
 
         if (!name || isNaN(price)) {
             alert('من فضلك ادخل اسم المنتج وسعره الأساسي على الأقل!');
@@ -173,10 +208,12 @@
         document.getElementById('pName').value = '';
         document.getElementById('pPrice').value = '';
         document.getElementById('pCategory').value = '';
-        document.getElementById('pImage').value = '';
+        document.getElementById('pImageFile').value = '';
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+        uploadedImageBase64 = '';
 
         loadAdminData();
-        alert('🎉 تم إضافة المنتج بنجاح وأصبح ظاهراً للعملاء في المتجر فوراً!');
+        alert('🎉 تم إضافة المنتج بصورته الجديدة وأصبح ظاهراً للعملاء فوراً!');
     }
 
     function deleteProduct(index) {
