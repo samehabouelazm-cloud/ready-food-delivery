@@ -3,181 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق التوصيل - متجرنا</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; padding: 15px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        
-        .hero-banner {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: #fff; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px;
-        }
-        .hero-banner h1 { font-size: 22px; margin-bottom: 5px; }
-        
-        .admin-link { display: block; text-align: center; margin-bottom: 15px; color: #38bdf8; text-decoration: none; font-size: 14px; font-weight: bold; }
-        .admin-link:hover { text-decoration: underline; }
-
-        .section { background: #1e293b; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #334155; }
-        .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 6px; }
-        .section-header h2 { color: #f59e0b; font-size: 16px; }
-        
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .product-card { background: #334155; border-radius: 8px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #475569; }
-        .product-img { width: 100%; height: 95px; object-fit: cover; background: #475569; }
-        .product-info { padding: 8px; }
-        .product-info h3 { font-size: 13px; margin-bottom: 4px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .product-info .price { color: #34d399; font-weight: bold; font-size: 12px; margin-bottom: 6px; }
-        
-        .product-card button { background: #f59e0b; color: #fff; border: none; padding: 6px; width: 100%; cursor: pointer; font-weight: bold; font-size: 12px; transition: background 0.2s; }
-        .product-card button:hover { background: #d97706; }
-
-        .cart-box { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; margin-top: 15px; }
-        .cart-box h3 { color: #f59e0b; margin-bottom: 8px; font-size: 16px; }
-        .cart-summary { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 10px; color: #38bdf8; font-weight: bold; font-size: 13px; line-height: 1.6; }
-        
-        .cart-box input, .cart-box select { width: 100%; padding: 9px; margin: 5px 0; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
-        #checkoutBtn { background: #22c55e; color: #fff; padding: 11px; font-weight: bold; border: none; border-radius: 8px; width: 100%; cursor: pointer; font-size: 14px; margin-top: 10px; }
-        #checkoutBtn:hover { background: #16a34a; }
-    </style>
+    <title>تطبيق التوصيل</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="container">
     <div class="hero-banner">
         <h1>🚀 متجر التوصيل السريع</h1>
         <p>اطلب بسهولة واصلك لحد باب البيت</p>
     </div>
-
-    <a href="admin.html" class="admin-link">⚙️ الانتقال إلى لوحة التحكم لإدارة المنتجات والتوصيل</a>
-
+    <a href="admin.html" class="admin-link">⚙ الانتقال لوحة التحكم</a>
     <div id="dynamicMenu"></div>
-
     <div class="cart-box">
-        <h3>🛒 سلة المشتريات والطلب</h3>
-        <div class="cart-summary" id="cartSummary">السلة فارغة حالياً.. اختر منتجك المفضل!</div>
-        
-        <input type="text" id="customerName" placeholder="اسم العميل الكريم *">
-        <input type="text" id="customerPhone" placeholder="رقم الجوال (مثال: 010xxxxxxxx) *">
-        <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل *">
-
-        <label style="color: #cbd5e1; font-size: 13px; margin-top: 8px; display: block;">طريقة الدفع المطلوبة:</label>
-        <select id="paymentMethod">
-            <option value="كاش عند الاستلام">💵 كاش عند الاستلام</option>
-            <option value="انستا باي (InstaPay)">📱 انستا باي (InstaPay)</option>
-            <option value="فودافون كاش (Vodafone Cash)">💳 فودافون كاش (Vodafone Cash)</option>
+        <h3>🛒 السلة وفاتورة الطلب</h3>
+        <div class="cart-summary" id="cartSummary">السلة فارغة حالياً</div>
+        <input type="text" id="customerName" placeholder="الاسم الكريم *">
+        <input type="text" id="customerPhone" placeholder="رقم الجوال *">
+        <input type="text" id="customerAddress" placeholder="العنوان بالتفصيل">
+        <button type="button" onclick="getLocation()" style="background:#38bdf8;color:#0f172a;border:none;padding:8px;border-radius:6px;width:100%;font-weight:bold;margin:5px 0;cursor:pointer;">📍 تحديد الموقع (GPS)</button>
+        <div id="locationStatus" style="font-size:11px;color:#34d399;"></div>
+        <select id="paymentMethod" style="width:100%;padding:8px;background:#0f172a;color:#fff;border-radius:6px;margin:5px 0;">
+            <option value="كاش">كاش عند الاستلام</option>
+            <option value="انستا باي">انستا باي</option>
+            <option value="فودافون كاش">فودافون كاش</option>
         </select>
-
-        <button id="checkoutBtn" onclick="checkoutOrder()">إتمام وطلب السلة عبر الواتساب 🚀</button>
+        <button id="checkoutBtn" onclick="checkoutOrder()" style="background:#22c55e;color:#fff;border:none;padding:10px;width:100%;border-radius:6px;font-weight:bold;cursor:pointer;margin-top:8px;">إتمام الطلب عبر الواتساب 🚀</button>
     </div>
 </div>
-
-<script>
-    let cartItem = null;
-
-    function loadStoreProducts() {
-        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-        const menuContainer = document.getElementById('dynamicMenu');
-        menuContainer.innerHTML = '';
-
-        if (products.length === 0) {
-            menuContainer.innerHTML = '<div class="section" style="text-align: center; color: #94a3b8; font-size: 13px;">لا توجد منتجات معروضة حالياً. استخدم لوحة التحكم لإضافة المنتجات.</div>';
-            updateCartDisplay();
-            return;
-        }
-
-        let categories = {};
-        products.forEach(p => {
-            let catName = p.category || 'أقسام عامة';
-            if (!categories[catName]) {
-                categories[catName] = [];
-            }
-            categories[catName].push(p);
-        });
-
-        for (let cat in categories) {
-            let items = categories[cat];
-            let sectionHtml = `
-                <div class="section">
-                    <div class="section-header">
-                        <h2>📂 ${cat}</h2>
-                    </div>
-                    <div class="products-grid">
-            `;
-
-            items.forEach(p => {
-                sectionHtml += `
-                    <div class="product-card">
-                        <img src="${p.image}" alt="${p.name}" class="product-img">
-                        <div class="product-info">
-                            <h3>${p.name}</h3>
-                            <div class="price">${p.price} ج.م</div>
-                        </div>
-                        <button onclick="addToCart('${p.name}', ${p.price})">إضافة للسلة 🛒</button>
-                    </div>
-                `;
-            });
-
-            sectionHtml += `</div></div>`;
-            menuContainer.innerHTML += sectionHtml;
-        }
-        updateCartDisplay();
-    }
-
-    function addToCart(name, price) {
-        cartItem = { name, price };
-        updateCartDisplay();
-        alert(`تمت إضافة "${name}" إلى السلة بنجاح!`);
-    }
-
-    function updateCartDisplay() {
-        const summaryDiv = document.getElementById('cartSummary');
-        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 0;
-
-        if (!cartItem) {
-            summaryDiv.innerHTML = `السلة فارغة حالياً.. اختر منتجك المفضل!<br>🛵 <b>قيمة التوصيل:</b> ${deliveryFee} ج.م`;
-            return;
-        }
-
-        let total = parseFloat(cartItem.price) + deliveryFee;
-        summaryDiv.innerHTML = `📦 <b>المنتج:</b> ${cartItem.name} (${cartItem.price} ج.م)<br>
-                                🛵 <b>قيمة التوصيل:</b> ${deliveryFee} ج.م<br>
-                                💰 <b>الإجمالي الكلي:</b> <span style="color: #34d399;">${total} ج.م</span>`;
-    }
-
-    function checkoutOrder() {
-        const name = document.getElementById('customerName').value.trim();
-        const phone = document.getElementById('customerPhone').value.trim();
-        const address = document.getElementById('customerAddress').value.trim();
-        const payment = document.getElementById('paymentMethod').value;
-        const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 0;
-
-        if (!name || !phone || !address) {
-            alert('من فضلك ادخل (الاسم، الجوال، العنوان) لإتمام الطلب!');
-            return;
-        }
-
-        if (!cartItem) {
-            alert('السلة فارغة، اختر منتجاً أولاً!');
-            return;
-        }
-
-        let total = parseFloat(cartItem.price) + deliveryFee;
-
-        let msg = `🛒 طلب جديد متكامل:\n` +
-                  `👤 الاسم: ${name}\n` +
-                  `📱 الجوال: ${phone}\n` +
-                  `📍 العنوان: ${address}\n` +
-                  `💳 طريقة الدفع: ${payment}\n` +
-                  `-------------------\n` +
-                  `📦 المنتج: ${cartItem.name} (${cartItem.price} ج.م)\n` +
-                  `🛵 التوصيل: ${deliveryFee} ج.م\n` +
-                  `💰 الإجمالي: ${total} ج.م`;
-
-        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    window.onload = loadStoreProducts;
-</script>
+<script src="script.js"></script>
 </body>
 </html>
