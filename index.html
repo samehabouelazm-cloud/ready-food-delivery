@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر التوصيل السريع الاحترافي 🚀</title>
+    <title>READY • جاهز - متجر التوصيل السريع 🚀</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
         .store-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
         
+        /* شريط اسم التطبيق الثابت والبارز (READY • جاهز) */
+        .app-brand-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0284c7, #0f172a); padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #38bdf8; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); }
+        .brand-logo { font-size: 20px; font-weight: bold; color: #fff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        .brand-logo span { color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 10px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .admin-quick-link { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, 0.3); transition: 0.2s; }
+        .admin-quick-link:hover { background: rgba(244, 63, 94, 0.3); }
+
         /* البانر الإعلاني المتحرك (Slider) */
-        .slider-container { position: relative; width: 100%; height: 160px; border-radius: 14px; overflow: hidden; margin-bottom: 25px; border: 1px solid #38bdf8; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2); }
-        .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; background: linear-gradient(135deg, #0284c7, #0f172a); opacity: 0; transition: opacity 1s ease-in-out; }
+        .slider-container { position: relative; width: 100%; height: 140px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; border: 1px solid #475569; background: #0f172a; }
+        .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 15px; opacity: 0; transition: opacity 1s ease-in-out; }
         .slide.active { opacity: 1; }
-        .slide h1 { color: #38bdf8; font-size: 24px; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-        .slide p { color: #cbd5e1; font-size: 14px; margin-bottom: 12px; }
-        .admin-link { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .slide h2 { color: #38bdf8; font-size: 20px; margin-bottom: 6px; }
+        .slide p { color: #cbd5e1; font-size: 13px; }
 
         /* الأقسام والمنتجات */
         .section { margin-bottom: 25px; }
@@ -65,22 +71,28 @@
 <body>
 
 <div class="store-container">
+    
+    <!-- شريط اسم التطبيق الثابت والبارز -->
+    <div class="app-brand-header">
+        <div class="brand-logo">
+            ⚡ READY <span>جاهز</span>
+        </div>
+        <a href="admin.html" class="admin-quick-link">⚙️ لوحة التحكم</a>
+    </div>
+
     <!-- البانر المتحرك الإعلاني الجذاب (Slider) -->
     <div class="slider-container" id="slider">
         <div class="slide active">
-            <h1>متجر التوصيل السريع 🚀</h1>
-            <p>أطلب كل احتياجاتك الطازجة واليومية بضغطة زر واحدة!</p>
-            <a href="admin.html" class="admin-link">⚙️ لوحة التحكم</a>
+            <h2>🚀 أطلب احتياجاتك بضغطة زر</h2>
+            <p>أسرع خدمة توصيل لحد باب بيتك بجودة عالية!</p>
         </div>
         <div class="slide">
-            <h1>🔥 عروض اليوم الكبرى</h1>
-            <p>توصيل سريع لحد باب البيت - جودة مضمونة 100%</p>
-            <a href="admin.html" class="admin-link">⚙️ لوحة التحكم</a>
+            <h2>🔥 عروض طازجة يومياً</h2>
+            <p>أقوى المنتجات والأقسام المتاحة بأفضل الأسعار.</p>
         </div>
         <div class="slide">
-            <h1>💳 ادفع براحتك</h1>
-            <p>كاش، فودافون كاش، أو إنستا باي بكل سهولة وأمان</p>
-            <a href="admin.html" class="admin-link">⚙️ لوحة التحكم</a>
+            <h2>💳 طرق دفع مرنة وآمنة</h2>
+            <p>ادفع كاش، فودافون كاش، أو إنستا باي بكل سهولة.</p>
         </div>
     </div>
 
@@ -91,7 +103,7 @@
 
     <!-- السلة متعددة الأصناف -->
     <div class="cart-box">
-        <h3>🛒 سلة المشتريات (أكثر من صنف وعدد)</h3>
+        <h3>🛒 سلة المشتريات (الأصناف والكميات)</h3>
         <div id="cartItemsList" style="margin-bottom: 10px; color: #cbd5e1;">السلة فارغة حالياً.. اختر منتجاتك المفضلة!</div>
         <div id="cartTotalSummary" style="font-size: 14px; border-top: 1px solid #334155; padding-top: 8px;"></div>
     </div>
@@ -118,7 +130,8 @@
 
     <!-- الفاتورة القابلة للطباعة -->
     <div id="printableInvoice" class="invoice-card">
-        <h2 style="text-align: center; margin-bottom: 10px;">فاتورة متجر التوصيل السريع 🧾</h2>
+        <h2 style="text-align: center; margin-bottom: 5px;">⚡ READY • جاهز ⚡</h2>
+        <h4 style="text-align: center; margin-bottom: 15px; color: #64748b;">فاتورة طلب عميل 🧾</h4>
         <div id="invoiceContent"></div>
     </div>
 </div>
@@ -134,7 +147,7 @@
     }
     setInterval(nextSlide, 3500);
 
-    let cart = []; // سلة متعددة الأصناف
+    let cart = [];
     let customerCoords = null;
 
     function loadStoreProducts() {
@@ -317,7 +330,7 @@
         let locationText = address;
         if (customerCoords) locationText += `\nرابط الخريطة: ${customerCoords}`;
 
-        let msg = "🧾 فاتورة طلب جديدة\n" +
+        let msg = "⚡ [READY • جاهز] فاتورة طلب جديدة\n" +
                   "-------------------\n" +
                   "👤 العميل: " + name + "\n" +
                   "📱 الجوال: " + phone + "\n" +
@@ -355,12 +368,13 @@
         // فتح الواتساب
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
 
-        // طباعة الفاتورة تلقائياً أو عرض رسالة النجاح
+        // طباعة الفاتورة تلقائياً
         setTimeout(() => {
             window.print();
         }, 1000);
 
         // تصفير السلة
+        cart = includesCartReset = [];
         cart = [];
         updateCartDisplay();
     }
