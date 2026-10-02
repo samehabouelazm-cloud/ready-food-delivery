@@ -4,11 +4,12 @@ let customerCoords = null;
 function loadStoreProducts() {
     let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
     
-    // لو لوحة التحكم مفيش فيها منتجات متسجلة لسه، نعرض منتجات افتراضية عشان التصميم يفضل شغال واحترافي
+    // لو مفيش منتجات متسجلة، بنعرض منتجات تجريبية عشان الأقسام والـ CSS يظهروا باحترافية
     if (products.length === 0) {
         products = [
             { name: 'بيض بلدي - 30 بيضة', price: 130, category: 'المنتجات الطازجة', image: 'https://via.placeholder.com/300' },
-            { name: 'كيلو سمك بلطي مشوي', price: 100, category: 'المأكولات البحرية', image: 'https://via.placeholder.com/300' }
+            { name: 'كيلو سمك بلطي مشوي', price: 100, category: 'المأكولات البحرية', image: 'https://via.placeholder.com/300' },
+            { name: 'وجبة برجر سريعة', price: 120, category: 'الوجبات السريعة', image: 'https://via.placeholder.com/300' }
         ];
     }
 
@@ -49,8 +50,6 @@ function loadStoreProducts() {
 function addToCart(name, price) {
     cartItem = { name, price };
     updateCartDisplay();
-    // تأثير مرئي بسيط أو تنبيه احترافي
-    console.log(`Added: ${name} - ${price}`);
 }
 
 function getLocation() {
@@ -62,7 +61,7 @@ function getLocation() {
         return;
     }
 
-    if (statusDiv) statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة عبر الـ GPS...';
+    if (statusDiv) statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة...';
     
     navigator.geolocation.getCurrentPosition(
         (position) => {
