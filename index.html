@@ -9,19 +9,24 @@
         body { background: #0f172a; color: #f8fafc; padding: 20px; }
         .store-container { max-width: 750px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid #334155; }
         
-        /* شريط اسم التطبيق الثابت والبارز (READY • جاهز) */
+        /* شريط اسم التطبيق الثابت والبارز */
         .app-brand-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0284c7, #0f172a); padding: 12px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #38bdf8; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2); }
         .brand-logo { font-size: 20px; font-weight: bold; color: #fff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
         .brand-logo span { color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 3px 10px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.3); }
         .admin-quick-link { color: #f43f5e; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(244, 63, 94, 0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 63, 94, 0.3); transition: 0.2s; }
         .admin-quick-link:hover { background: rgba(244, 63, 94, 0.3); }
 
-        /* البانر الإعلاني المتحرك (Slider) */
-        .slider-container { position: relative; width: 100%; height: 140px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; border: 1px solid #475569; background: #0f172a; }
-        .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 15px; opacity: 0; transition: opacity 1s ease-in-out; }
-        .slide.active { opacity: 1; }
-        .slide h2 { color: #38bdf8; font-size: 20px; margin-bottom: 6px; }
-        .slide p { color: #cbd5e1; font-size: 13px; }
+        /* البانر الإعلاني بالصور المتحركة (Slider with Background Images) */
+        .slider-container { position: relative; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; border: 1px solid #475569; background: #0f172a; }
+        .slide { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; opacity: 0; transition: opacity 1s ease-in-out, transform 1s ease-in-out; background-size: cover; background-position: center; transform: scale(1.05); }
+        .slide.active { opacity: 1; transform: scale(1); }
+        
+        /* طبقة عتمة خفيفة فوق الصور عشان النصوص تظهر بوضوح تام */
+        .slide::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 1; }
+        .slide > * { position: relative; z-index: 2; }
+
+        .slide h2 { color: #38bdf8; font-size: 21px; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .slide p { color: #e2e8f0; font-size: 13px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
         /* الأقسام والمنتجات */
         .section { margin-bottom: 25px; }
@@ -59,7 +64,7 @@
         .checkout-btn { background: #22c55e; color: #fff; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-align: center; margin-top: 5px; transition: 0.2s; }
         .checkout-btn:hover { background: #16a34a; }
 
-        /* تنسيق فاتورة الطباعة الاحترافية */
+        /* تنسيق فاتورة الطباعة */
         @media print {
             body * { visibility: hidden; }
             #printableInvoice, #printableInvoice * { visibility: visible; }
@@ -80,19 +85,19 @@
         <a href="admin.html" class="admin-quick-link">⚙️ لوحة التحكم</a>
     </div>
 
-    <!-- البانر المتحرك الإعلاني الجذاب (Slider) -->
+    <!-- البانر المتحرك بالصور الخلفية المعبرة لكل عرض -->
     <div class="slider-container" id="slider">
-        <div class="slide active">
-            <h2>🚀 أطلب احتياجاتك بضغطة زر</h2>
-            <p>أسرع خدمة توصيل لحد باب بيتك بجودة عالية!</p>
+        <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1526367460886-3cddc340da4f?w=800&auto=format&fit=crop&q=80');">
+            <h2>🚀 أسرع خدمة توصيل لحد باب بيتك</h2>
+            <p>اطلب احتياجاتك وسيقوم المندوب بتوصيلها في أسرع وقت ممكن!</p>
         </div>
-        <div class="slide">
-            <h2>🔥 عروض طازجة يومياً</h2>
-            <p>أقوى المنتجات والأقسام المتاحة بأفضل الأسعار.</p>
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1556742049-0a67d553c2a5?w=800&auto=format&fit=crop&q=80');">
+            <h2>💳 طرق دفع مرنة (فودافون كاش وإنستا باي)</h2>
+            <p>ادفع بسهولة وأمان عبر وسائل الدفع الإلكتروني المتاحة لدينا.</p>
         </div>
-        <div class="slide">
-            <h2>💳 طرق دفع مرنة وآمنة</h2>
-            <p>ادفع كاش، فودافون كاش، أو إنستا باي بكل سهولة.</p>
+        <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80');">
+            <h2>🔥 عروض طازجة وأقسام متنوعة يومياً</h2>
+            <p>تسوق أقوى المنتجات بأفضل الأسعار وبجودة مضمونة 100%.</p>
         </div>
     </div>
 
@@ -145,7 +150,7 @@
         currentSlide = (currentSlide + 1) % slides.length;
         slides[currentSlide].classList.add('active');
     }
-    setInterval(nextSlide, 3500);
+    setInterval(nextSlide, 4000);
 
     let cart = [];
     let customerCoords = null;
@@ -343,7 +348,6 @@
                   "🛵 التوصيل: " + deliveryFee + " ج.م\n" +
                   "💰 الإجمالي النهائي: " + total + " ج.م";
 
-        // تجهيز الفاتورة للطباعة
         document.getElementById('invoiceContent').innerHTML = `
             <p><b>اسم العميل:</b> ${name}</p>
             <p><b>رقم الجوال:</b> ${phone}</p>
@@ -365,16 +369,12 @@
             <p style="font-size:16px; color:#16a34a;"><b>الإجمالي النهائي: ${total} ج.م</b></p>
         `;
 
-        // فتح الواتساب
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
 
-        // طباعة الفاتورة تلقائياً
         setTimeout(() => {
             window.print();
         }, 1000);
 
-        // تصفير السلة
-        cart = includesCartReset = [];
         cart = [];
         updateCartDisplay();
     }
