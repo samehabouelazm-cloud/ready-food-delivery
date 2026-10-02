@@ -68,7 +68,7 @@
         .captain-submit-btn { background: #0ea5e9; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
         .captain-submit-btn:hover { background: #0284c7; }
 
-        /* الطباعة */
+        /* الطباعة والفاتورة */
         @media print {
             body * { visibility: hidden; }
             #printableInvoice, #printableInvoice * { visibility: visible; }
@@ -88,7 +88,7 @@
         </div>
         <div class="admin-quick-link">
             <a href="#captainSection" class="captain-link">🛺 انضم ككابتن</a>
-            <a href="admin.html">⚙️ الإدارة</a>
+            <a href="admin.html">⚙️ لوحة الإدارة</a>
         </div>
     </div>
 
@@ -137,10 +137,10 @@
 
         <div id="paymentDetailsBox"></div>
 
-        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب عبر الواتساب مع المندوب 🚀</button>
+        <button type="button" class="checkout-btn" onclick="checkoutOrder()">إتمام الطلب وإرسال التنبيه للإدارة والمندوب فوراً 🚀</button>
     </div>
 
-    <!-- قسم انضمام كباتن التوصيل (محدث بـ توكتوك) -->
+    <!-- قسم انضمام كباتن التوصيل -->
     <div class="captain-join-section" id="captainSection">
         <h3>🛺 انضم إلى فريق كباتن "جاهز"</h3>
         <p>اكسب دخلك الإضافي وانضم لشبكة الكباتن والمناديب الأسرع توصيلاً!</p>
@@ -330,7 +330,6 @@
         }
     }
 
-    // إرسال طلب انضمام كابتن جديد عبر الواتساب للإدارة
     function submitCaptainApplication() {
         const cName = document.getElementById('captainName').value.trim();
         const cPhone = document.getElementById('captainPhone').value.trim();
@@ -347,7 +346,7 @@
                   `📱 رقم الجوال: ${cPhone}\n` +
                   `🚗 وسيلة التوصيل: ${cVehicle}\n` +
                   `-------------------\n` +
-                  `أرغب في الانضمام لفريق الكباتن والمناديب لتوصيل الطلبات.`;
+                  `أرغب في الانضمام لفريق الكباتن لتوصيل الطلبات.`;
 
         window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
     }
@@ -382,22 +381,47 @@
 
         let total = subtotal + deliveryFee;
         let locationText = address;
-        if (customerCoords) locationText += `\nرابط خريطة العميل للكابتن: ${customerCoords}`;
+        if (customerCoords) locationText += `\nرابط خريطة العميل: ${customerCoords}`;
 
-        let msg = "⚡ [READY • جاهز] طلب جديد مسند لكابتن التوصيل\n" +
+        // 1. الحفظ التلقائي في سجل الطلبات للإدارة (LocalStorage)
+        let allOrders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let newOrderObj = {
+            id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+            date: new Date().toLocaleString('ar-EG'),
+            customerName: name,
+            customerPhone: phone,
+            customerAddress: locationText,
+            paymentMethod: payment,
+            items: [...cart],
+            subtotal: subtotal,
+            deliveryFee: deliveryFee,
+            total: total,
+            status: 'قيد المراجعة وإسناد المندوب'
+        };
+        allOrders.unshift(newOrderObj);
+        localStorage.setItem('storeOrders', JSON.stringify(allOrders));
+
+        // 2. التنبيه اللحظي والدائم (فتح رسالة الواتساب للإدارة والمندوب فوراً)
+        let msg = "🚨 [تنبيه طلب جديد مؤكد - READY]\n" +
                   "-------------------\n" +
                   "👤 العميل: " + name + "\n" +
                   "📱 الجوال: " + phone + "\n" +
-                  "📍 العنوان: " + locationText + "\n" +
+                  "📍 العنوان / GPS: " + locationText + "\n" +
                   "💳 الدفع: " + payment + "\n" +
                   "-------------------\n" +
                   "📦 الأصناف المطلوبة:\n" + itemsListText +
                   "-------------------\n" +
                   "🏷 مجموع الأصناف: " + subtotal + " ج.م\n" +
                   "🛵 أجر التوصيل للكابتن: " + deliveryFee + " ج.م\n" +
-                  "💰 الإجمالي المطلوب تحصيله: " + total + " ج.م";
+                  "💰 الإجمالي النهائي: " + total + " ج.م\n" +
+                  "-------------------\n" +
+                  "⚡ تم إرسال التنبيه وحفظ الطلب في لوحة الإدارة بنجاح!";
 
+        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
+
+        // 3. طباعة الفاتورة تلقائياً لتسليمها مع الطلب
         document.getElementById('invoiceContent').innerHTML = `
+            <p><b>رقم الطلب:</b> ${newOrderObj.id}</p>
             <p><b>اسم العميل:</b> ${name}</p>
             <p><b>رقم الجوال:</b> ${phone}</p>
             <p><b>العنوان:</b> ${address}</p>
@@ -418,12 +442,11 @@
             <p style="font-size:16px; color:#16a34a;"><b>الإجمالي النهائي: ${total} ج.م</b></p>
         `;
 
-        window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
-
         setTimeout(() => {
             window.print();
         }, 1000);
 
+        // تصفير السلة
         cart = [];
         updateCartDisplay();
     }
