@@ -2,11 +2,15 @@ let cartItem = null;
 let customerCoords = null;
 
 function loadStoreProducts() {
-    // جلب المنتجات أو وضع منتج تجريبي افتراضي لو الـ localStorage فاضي
-    let products = JSON.parse(localStorage.getItem('storeProducts')) || [
-        { name: 'وجبة سريعة تجريبية 🍔', price: 150, category: 'الوجبات', image: 'https://via.placeholder.com/150' },
-        { name: 'مشروب بارد 🥤', price: 25, category: 'المشروبات', image: 'https://via.placeholder.com/150' }
-    ];
+    let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+    
+    // لو لوحة التحكم مفيش فيها منتجات متسجلة لسه، نعرض منتجات افتراضية عشان التصميم يفضل شغال واحترافي
+    if (products.length === 0) {
+        products = [
+            { name: 'بيض بلدي - 30 بيضة', price: 130, category: 'المنتجات الطازجة', image: 'https://via.placeholder.com/300' },
+            { name: 'كيلو سمك بلطي مشوي', price: 100, category: 'المأكولات البحرية', image: 'https://via.placeholder.com/300' }
+        ];
+    }
 
     const menuContainer = document.getElementById('dynamicMenu');
     if (!menuContainer) return;
@@ -22,14 +26,20 @@ function loadStoreProducts() {
     for (let cat in categories) {
         let items = categories[cat];
         let sectionHtml = `<div class="section"><div class="section-header"><h2>📂 ${cat}</h2></div><div class="products-grid">`;
+        
         items.forEach(p => {
-            sectionHtml += `<div class="product-card" style="background:#1e293b;padding:12px;border-radius:8px;text-align:center;color:#fff;margin:5px;">
-                <img src="${p.image}" alt="${p.name}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;">
-                <h3 style="font-size:15px;margin:8px 0;">${p.name}</h3>
-                <div style="color:#34d399;font-weight:bold;margin-bottom:8px;">${p.price} ج.م</div>
-                <button onclick="addToCart('${p.name}', ${p.price})" style="background:#38bdf8;color:#0f172a;border:none;padding:6px 12px;border-radius:6px;font-weight:bold;cursor:pointer;width:100%;">إضافة للسلة 🛒</button>
-            </div>`;
+            sectionHtml += `
+                <div class="product-card">
+                    <img src="${p.image || 'https://via.placeholder.com/300'}" alt="${p.name}" class="product-img">
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <div class="price">${p.price} ج.م</div>
+                        <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="add-btn">إضافة للسلة 🛒</button>
+                    </div>
+                </div>
+            `;
         });
+        
         sectionHtml += `</div></div>`;
         menuContainer.innerHTML += sectionHtml;
     }
@@ -39,7 +49,8 @@ function loadStoreProducts() {
 function addToCart(name, price) {
     cartItem = { name, price };
     updateCartDisplay();
-    alert(`تمت إضافة "${name}" إلى السلة بنجاح!`);
+    // تأثير مرئي بسيط أو تنبيه احترافي
+    console.log(`Added: ${name} - ${price}`);
 }
 
 function getLocation() {
@@ -47,21 +58,22 @@ function getLocation() {
     const addressInput = document.getElementById('customerAddress');
 
     if (!navigator.geolocation) {
-        statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
+        if (statusDiv) statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
         return;
     }
 
-    statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة...';
+    if (statusDiv) statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة عبر الـ GPS...';
+    
     navigator.geolocation.getCurrentPosition(
         (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
-            addressInput.value = `موقع GPS الواقعي (تم تحديده تلقائياً)`;
-            statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
+            if (addressInput) addressInput.value = `📍 موقع GPS الحالي (تم التحديد تلقائياً)`;
+            if (statusDiv) statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
         },
         (error) => {
-            statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل الـ GPS.';
+            if (statusDiv) statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل صلاحية الـ GPS.';
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
@@ -78,10 +90,10 @@ function updateCartDisplay() {
     }
 
     let total = parseFloat(cartItem.price) + deliveryFee;
-    summaryDiv.innerHTML = `📦 <b>المنتج:</b> ${cartItem.name} <br>` +
-                            `🏷️️ <b>سعر الشراء للسلعة:</b> ${cartItem.price} ج.م<br>` +
+    summaryDiv.innerHTML = `📦 <b>المنتج المختيار:</b> ${cartItem.name} <br>` +
+                            `🏷 <b>سعر السلعة:</b> ${cartItem.price} ج.م<br>` +
                             `🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م<br>` +
-                            `💰 <b>إجمالي الفاتورة للعميل:</b> <span style="color: #34d399;">${total} ج.م</span>`;
+                            `💰 <b>الإجمالي النهائي:</b> <span style="color: #34d399; font-weight: bold;">${total} ج.م</span>`;
 }
 
 function checkoutOrder() {
@@ -92,12 +104,12 @@ function checkoutOrder() {
     const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
 
     if (!name || !phone || !address) {
-        alert('من فضلك ادخل الاسم، الجوال، والعنوان أو الموقع!');
+        alert('من فضلك ادخل الاسم، الجوال، والعنوان أو موقع الـ GPS!');
         return;
     }
 
     if (!cartItem) {
-        alert('السلة فارغة، اختر منتجاً أولاً!');
+        alert('السلة فارغة، اختر منتجاً أولاً من المتجر!');
         return;
     }
 
@@ -126,5 +138,4 @@ function checkoutOrder() {
     window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// تشغيل تحميل المنتجات فور فتح الصفحة
 window.onload = loadStoreProducts;
