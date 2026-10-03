@@ -623,3 +623,52 @@
 <script src="script.js"></script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جاهز - READY - في بلطيم</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>جاهز - READY - في بلطيم</h1>
+            <div class="nav-btns">
+                <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
+            </div>
+        </header>
+
+        <!-- شاشة تتبع الطلب -->
+        <div id="trackingSection" class="tracking-modal" style="display:none;">
+            <h2 style="color: #f59e0b; margin-bottom: 15px;">🔍 تتبع حالة طلبك لحظة بلحظة</h2>
+            <div id="trackingContent">
+                <p style="color: #94a3b8;">لا توجد طلبات نشطة حالياً للتتبع.</p>
+            </div>
+        </div>
+
+        <!-- شريط البحث -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضلة هنا..." oninput="filterProducts()">
+        </div>
+
+        <!-- شبكة عرض المنتجات للعملاء -->
+        <div id="productsGrid" class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
+            <!-- يتم تعبئة المنتجات تلقائياً من script.js -->
+        </div>
+
+        <!-- سلة المشتريات -->
+        <div class="cart-section" style="margin-top: 30px; background: #1e293b; padding: 20px; border-radius: 12px;">
+            <h2>🛒 سلة المشتريات الخاصة بك</h2>
+            <div id="cartItems">
+                <p style="color: #94a3b8;">السلة فارغة حالياً.</p>
+            </div>
+            <div id="cartTotal" style="margin-top: 15px; font-weight: bold; font-size: 18px;"></div>
+            <button onclick="checkoutOrder()" class="btn btn-primary" style="margin-top: 15px; width: 100%;">إتمام الطلب عبر الواتساب</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
