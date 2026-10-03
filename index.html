@@ -41,6 +41,11 @@
         .btn-location { background: #3b82f6; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 5px; }
         .btn-order { background: #10b981; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
         
+        /* لوحة التحكم السرية */
+        #adminPanel { display: none; background: #1e293b; border: 2px dashed #6366f1; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+        .admin-form input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
+        .btn-add { background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        
         .tracking-modal { display: none; background: #1e293b; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
         .tracking-step { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: #94a3b8; }
         .tracking-step.active { color: #34d399; font-weight: bold; }
@@ -54,9 +59,61 @@
         <h1>🛒 جاهز - READY - في بلطيم</h1>
         <div class="nav-btns">
             <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            <a href="admin.html" class="btn btn-admin">⚙️ لوحة الإدارة</a>
+            <button class="btn btn-admin" onclick="openAdminPanel()">⚙️ الإدارة</button>
         </div>
     </header>
+
+    <!-- لوحة التحكم المحمية بكلمة سر داخلية -->
+    <div id="adminPanel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #6366f1; font-size: 18px;">🔒 لوحة التحكم والإدارة السرية</h2>
+            <button onclick="closeAdminPanel()" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">إغلاق الإدارة ❌</button>
+        </div>
+        
+        <div class="admin-form">
+            <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 10px;">📦 إضافة منتج جديد لمتجر العملاء</h3>
+            <input type="text" id="newProdName" placeholder="اسم المنتج">
+            <input type="text" id="newProdCat" placeholder="القسم (خضروات، فواكه..)">
+            <input type="number" id="newProdPrice" placeholder="السعر بالجنيه">
+            <input type="text" id="newProdImg" placeholder="رابط صورة المنتج (URL)">
+            <button class="btn-add" onclick="addNewProduct()">+ نشر المنتج فوراً للعملاء</button>
+        </div>
+
+        <h3 style="color: #38bdf8; font-size: 14px; margin: 20px 0 10px 0;">📋 المنتجات المعروضة حالياً</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>الاسم</th>
+                        <th>القسم</th>
+                        <th>السعر</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="adminProductsTable"></tbody>
+            </table>
+        </div>
+
+        <h3 style="color: #38bdf8; font-size: 14px; margin: 20px 0 10px 0;">📥 طلبات العملاء الواردة</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>العميل</th>
+                        <th>الهاتف</th>
+                        <th>العنوان</th>
+                        <th>المنتجات</th>
+                        <th>الإجمالي</th>
+                        <th>الحالة</th>
+                        <th>تحكم</th>
+                    </tr>
+                </thead>
+                <tbody id="adminOrdersTable"></tbody>
+            </table>
+        </div>
+    </div>
 
     <div id="trackingSection" class="tracking-modal">
         <h2 style="color: #f59e0b; margin-bottom: 15px; font-size: 16px;">📦 تتبع حالة طلبك لحظة بلحظة</h2>
@@ -144,10 +201,10 @@
             }
         } 
         
-        // لو مفيش منتجات خالص، هنحط منتج واحد مبدئي عشان ما تظهرش فارغة
         if (!currentProducts || currentProducts.length === 0) {
             currentProducts = [
-                { name: "منتج تجريبي - جاهز في بلطيم", category: "قسم عام", price: 10, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400" }
+                { name: "بيض بلدي - 30 بيضة", category: "سوبر ماركت جاهز", price: 130, image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" },
+                { name: "طماطم طازجة - كيلو", category: "خضار وفواكه", price: 15, image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" }
             ];
             localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
         }
@@ -169,6 +226,108 @@
             `;
         });
         updateCartUI();
+    }
+
+    function openAdminPanel() {
+        let pass = prompt("الرجاء إدخال كلمة مرور لوحة التحكم:");
+        if (pass === "1234") { // تقدر تغير الباسورد من هنا لو حابب
+            document.getElementById('adminPanel').style.display = 'block';
+            loadAdminData();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (pass !== null) {
+            alert("كلمة المرور غير صحيحة!");
+        }
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('adminPanel').style.display = 'none';
+    }
+
+    function addNewProduct() {
+        let name = document.getElementById('newProdName').value.trim();
+        let cat = document.getElementById('newProdCat').value.trim();
+        let price = parseFloat(document.getElementById('newProdPrice').value);
+        let image = document.getElementById('newProdImg').value.trim();
+
+        if (!name || isNaN(price)) {
+            alert('أدخل اسم المنتج والسعر الصحيح على الأقل!');
+            return;
+        }
+
+        currentProducts.push({ name, category: cat || "عام", price, image });
+        localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
+
+        document.getElementById('newProdName').value = '';
+        document.getElementById('newProdCat').value = '';
+        document.getElementById('newProdPrice').value = '';
+        document.getElementById('newProdImg').value = '';
+
+        loadStoreProducts();
+        loadAdminData();
+        alert('تم إضافة ونشر المنتج بنجاح! 🚀');
+    }
+
+    function deleteProduct(index) {
+        if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+            currentProducts.splice(index, 1);
+            localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
+            loadStoreProducts();
+            loadAdminData();
+        }
+    }
+
+    function loadAdminData() {
+        let pTable = document.getElementById('adminProductsTable');
+        pTable.innerHTML = '';
+        currentProducts.forEach((p, idx) => {
+            pTable.innerHTML += `
+                <tr>
+                    <td><img src="${p.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;" onerror="this.style.display='none'"></td>
+                    <td><b>${p.name}</b></td>
+                    <td>${p.category}</td>
+                    <td>${p.price} ج.م</td>
+                    <td><button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
+                </tr>
+            `;
+        });
+
+        let ordersTable = document.getElementById('adminOrdersTable');
+        ordersTable.innerHTML = '';
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        
+        if (orders.length === 0) {
+            ordersTable.innerHTML = `<tr><td colspan="8" style="color: #94a3b8;">لا توجد طلبات واردة حالياً.</td></tr>`;
+            return;
+        }
+
+        orders.forEach((ord, idx) => {
+            let itemsSummary = ord.items.map(i => `${i.name} (×${i.qty})`).join(', ');
+            ordersTable.innerHTML += `
+                <tr>
+                    <td>#${ord.id}</td>
+                    <td>${ord.customerName}</td>
+                    <td>${ord.customerPhone}</td>
+                    <td>${ord.customerAddress}</td>
+                    <td style="font-size:11px;">${itemsSummary}</td>
+                    <td><b>${ord.total} ج.م</b></td>
+                    <td style="color:#34d399; font-size:11px;">${ord.trackingStatus}</td>
+                    <td><button onclick="advanceOrderStatus(${idx})" style="background:#3b82f6; color:#fff; border:none; padding:5px; border-radius:4px; cursor:pointer; font-size:11px;">تحديث الحالة ⏭</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function advanceOrderStatus(idx) {
+        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+        let ord = orders[idx];
+        let currentIdx = trackingStepsList.indexOf(ord.trackingStatus);
+        if (currentIdx < trackingStepsList.length - 1) {
+            ord.trackingStatus = trackingStepsList[currentIdx + 1];
+            localStorage.setItem('storeOrders', JSON.stringify(orders));
+            loadAdminData();
+        } else {
+            alert('الطلب في المرحلة الأخيرة بالفعل!');
+        }
     }
 
     function filterProducts() {
@@ -217,7 +376,7 @@
                     <td>${item.price} ج.م</td>
                     <td><input type="number" value="${item.qty}" min="1" style="width: 45px; text-align: center; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="updateQty(${idx}, this.value)"></td>
                     <td>${itemTotal} ج.م</td>
-                    <td><button onclick="removeFromCart(${idx})" class="btn-delete" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">حذف</button></td>
+                    <td><button onclick="removeFromCart(${idx})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">حذف</button></td>
                 </tr>
             `;
         });
