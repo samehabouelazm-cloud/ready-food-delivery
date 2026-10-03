@@ -303,3 +303,109 @@ setInterval(() => {
 }, 3000);
 
 window.onload = loadStoreProducts;
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomerProducts();
+});
+
+function loadCustomerProducts() {
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    
+    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
+    
+    if (products.length === 0) {
+        grid.innerHTML = '<p style="color: #94a3b8; grid-column: 1/-1; text-align: center;">لا توجد منتجات مضافة حالياً من لوحة الإدارة.</p>';
+        return;
+    }
+
+    grid.innerHTML = products.map(p => `
+        <div class="product-card" style="background:#1e293b; border-radius:10px; overflow:hidden; padding:15px; text-align:center;">
+            <img src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}" style="width:100%; height:140px; object-fit:cover; border-radius:8px; margin-bottom:10px;">
+            <h3 style="color:#fff; font-size:16px; margin-bottom:8px;">${p.name}</h3>
+            <p style="color:#38bdf8; font-weight:bold; margin-bottom:12px;">${p.price} ج.م</p>
+            <button onclick="addToCart(${p.id})" style="background:#0ea5e9; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; width:100%;">إضافة للسلة 🛒</button>
+        </div>
+    `).join('');
+}
+
+let cart = [];
+
+function addToCart(productId) {
+    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
+    let product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    let existing = cart.find(item => item.id === productId);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ ...product, qty: 1 });
+    }
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const cartContainer = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    
+    if (cart.length === 0) {
+        cartContainer.innerHTML = '<p style="color: #94a3b8;">السلة فارغة حالياً.</p>';
+        cartTotal.innerHTML = '';
+        return;
+    }
+
+    let total = 0;
+    cartContainer.innerHTML = cart.map(item => {
+        total += item.price * item.qty;
+        return `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #334155; padding-bottom:5px;">
+            <span>${item.name} (x${item.qty})</span>
+            <span>${item.price * item.qty} ج.م</span>
+        </div>`;
+    }).join('');
+
+    cartTotal.innerHTML = `الإجمالي الكلي: ${total} ج.م`;
+}
+
+function checkoutOrder() {
+    if (cart.length === 0) {
+        alert('السلة فارغة!');
+        return;
+    }
+
+    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
+    let newOrder = {
+        id: Date.now(),
+        items: cart,
+        total: cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
+        time: new Date().toLocaleTimeString()
+    };
+    
+    orders.push(newOrder);
+    localStorage.setItem('ready_orders', JSON.stringify(orders));
+
+    alert('تم إرسال طلبك بنجاح للمتجر!');
+    cart = [];
+    updateCartUI();
+}
+
+function toggleTrackingSection() {
+    const section = document.getElementById('trackingSection');
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+}
+
+function filterProducts() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
+    const grid = document.getElementById('productsGrid');
+    
+    let filtered = products.filter(p => p.name.toLowerCase().includes(query));
+    
+    grid.innerHTML = filtered.map(p => `
+        <div class="product-card" style="background:#1e293b; border-radius:10px; overflow:hidden; padding:15px; text-align:center;">
+            <img src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}" style="width:100%; height:140px; object-fit:cover; border-radius:8px; margin-bottom:10px;">
+            <h3 style="color:#fff; font-size:16px; margin-bottom:8px;">${p.name}</h3>
+            <p style="color:#38bdf8; font-weight:bold; margin-bottom:12px;">${p.price} ج.م</p>
+            <button onclick="addToCart(${p.id})" style="background:#0ea5e9; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; width:100%;">إضافة للسلة 🛒</button>
+        </div>
+    `).join('');
+}
