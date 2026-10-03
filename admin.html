@@ -33,7 +33,6 @@
         th { background: #334155; color: #38bdf8; }
         .del-btn { background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .del-btn:hover { background: #dc2626; }
-        
         .status-select { padding: 6px; border-radius: 6px; background: #334155; color: #fff; border: 1px solid #475569; font-weight: bold; }
     </style>
 </head>
@@ -57,26 +56,31 @@
     <!-- إضافة منتج جديد -->
     <div class="card-box">
         <h2>➕ إضافة قسم أو منتج جديد للمتجر</h2>
-        <div class="form-grid">
-            <input type="text" id="pName" placeholder="اسم المنتج (مثال: كشري مصري مميز) *" class="full">
-            <input type="number" id="pPrice" placeholder="السعر بالجنيه *">
-            <input type="text" id="pCategory" placeholder="اسم القسم (مثال: 🍔 الوجبات السريعة)">
-            
-            <div class="full">
-                <div class="file-upload-box" onclick="document.getElementById('pImageFile').click()">
-                    <div class="file-upload-label">📁 اضغط هنا لاختيار صورة المنتج من الكمبيوتر أو الموبايل</div>
-                    <input type="file" id="pImageFile" accept="image/*" onchange="previewImage(event)">
+        
+        <form id="addProductForm" onsubmit="event.preventDefault(); addNewProduct();">
+            <div class="form-grid">
+                <input type="text" id="pName" placeholder="اسم المنتج (مثال: كشري مصري مميز)" class="full" required>
+                <input type="number" id="pPrice" placeholder="السعر بالجنيه *" required>
+                <input type="text" id="pCategory" placeholder="اسم القسم (مثال: 🍔 الوجبات السريعة)">
+                
+                <div class="full">
+                    <div class="file-upload-box" onclick="document.getElementById('pImageFile').click()">
+                        <div class="file-upload-label">📁 انقر هنا لاختيار صورة المنتج من الكمبيوتر أو الموبايل</div>
+                        <input type="file" id="pImageFile" accept="image/*" onchange="previewImage(event)">
+                    </div>
+                    <div id="imagePreviewContainer">
+                        <p style="font-size: 12px; color: #34d399; margin-bottom: 5px;">معاينة الصورة المحددة:</p>
+                        <img id="previewImg" src="" alt="Preview">
+                    </div>
                 </div>
-                <div id="imagePreviewContainer">
-                    <p style="font-size: 12px; color: #34d399; margin-bottom: 5px;">معاينة الصورة المحددة:</p>
-                    <img id="previewImg" src="" alt="Preview">
+                
+                <div class="full" style="margin-top: 15px;">
+                    <button type="submit" class="btn-main" style="background: #10b981; font-size: 16px;">
+                        حفظ وإضافة المنتج للمتجر 🚀
+                    </button>
                 </div>
             </div>
-
-            <div class="full">
-                <button onclick="addNewProduct()" class="btn-main">إضافة المنتج وعرضه فوراً للعملاء 🚀</button>
-            </div>
-        </div>
+        </form>
     </div>
 
     <!-- إدارة المنتجات -->
@@ -98,7 +102,7 @@
         </div>
     </div>
 
-    <!-- سجل الطلبات ونظام تتبع المراحل -->
+    <!-- سجل الطلبات -->
     <div class="card-box">
         <h2>📋 سجل طلبات العملاء وتحديث مراحل التتبع الحية</h2>
         <div style="overflow-x: auto;">
@@ -217,10 +221,7 @@
         products.push({ name, price, category, image });
         localStorage.setItem('storeProducts', JSON.stringify(products));
 
-        document.getElementById('pName').value = '';
-        document.getElementById('pPrice').value = '';
-        document.getElementById('pCategory').value = '';
-        document.getElementById('pImageFile').value = '';
+        document.getElementById('addProductForm').reset();
         document.getElementById('imagePreviewContainer').style.display = 'none';
         uploadedImageBase64 = '';
 
@@ -258,51 +259,5 @@
 
     window.onload = loadAdminData;
 </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والطلبات - جاهز بلطيم</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <h1>⚙️ لوحة تحكم الإدارة - طلبات متجر جاهز</h1>
-        <div class="nav-btns">
-            <a href="index.html" class="btn">🏠 العودة للمتجر الرئيسي</a>
-        </div>
-    </header>
-
-    <div class="admin-section" style="display: block;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="color: #8b5cf6;">📋 سجل الطلبات وتحديث حالات التتبع</h2>
-            <button class="btn" style="background:#ef4444; padding:5px 10px; font-size:11px;" onclick="clearAllOrders()">🗑️ مسح السجل</button>
-        </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>رقم الطلب</th>
-                        <th>العميل والهاتف</th>
-                        <th>العنوان والمبلغ</th>
-                        <th>المنتجات</th>
-                        <th>الحالة الحالية</th>
-                        <th>تحديث حالة التتبع</th>
-                    </tr>
-                </thead>
-                <tbody id="adminOrdersTableBody">
-                    <tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات مسجلة حتى الآن.</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script src="admin.js"></script>
 </body>
 </html>
