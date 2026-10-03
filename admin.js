@@ -6,6 +6,7 @@ function addNewProduct(event) {
     
     const nameInput = document.getElementById('productName') || document.getElementById('itemName');
     const priceInput = document.getElementById('productPrice') || document.getElementById('itemPrice');
+    const catInput = document.getElementById('itemCategory') || document.getElementById('productCategory');
     const imageInput = document.getElementById('productImage') || document.getElementById('itemImage');
 
     if (!nameInput || !priceInput) {
@@ -17,6 +18,7 @@ function addNewProduct(event) {
         id: "p_" + Date.now(),
         name: nameInput.value.trim(),
         price: parseFloat(priceInput.value) || 0,
+        category: catInput ? catInput.value : "general",
         image: imageInput ? imageInput.value.trim() : 'https://via.placeholder.com/150'
     };
 
@@ -50,7 +52,7 @@ function loadAdminProducts() {
     container.innerHTML = products.map(p => `
         <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #334155; color: #fff;">
             <div>
-                <strong>${p.name}</strong> - <span style="color: #34d399;">${p.price} جنيه</span>
+                <strong>${p.name}</strong> - <span style="color: #f59e0b;">${p.price} ج.م</span>
             </div>
             <button onclick="deleteAdminProduct('${p.id}')" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">حذف</button>
         </div>
@@ -140,7 +142,7 @@ function playBeepSound() {
         oscillator.start();
         oscillator.stop(audioCtx.currentTime + 0.2);
     } catch (e) {
-        console.log("Audio Context blocked or not supported");
+        console.log("Audio Context not supported or blocked by browser policy");
     }
 }
 
@@ -188,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminProducts();
 });
 
-// مراقبة الطلبات الجديدة كل ثانية وتنبيه الإدارة صوتياً وتحديث الشاشة فوراً
+// مراقبة الطلبات الجديدة وتنبيه الإدارة تلقائياً
 setInterval(() => {
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
     if (typeof window.lastOrderCount === 'undefined') {
