@@ -260,3 +260,49 @@
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم والطلبات - جاهز بلطيم</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⚙️ لوحة تحكم الإدارة - طلبات متجر جاهز</h1>
+        <div class="nav-btns">
+            <a href="index.html" class="btn">🏠 العودة للمتجر الرئيسي</a>
+        </div>
+    </header>
+
+    <div class="admin-section" style="display: block;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #8b5cf6;">📋 سجل الطلبات وتحديث حالات التتبع</h2>
+            <button class="btn" style="background:#ef4444; padding:5px 10px; font-size:11px;" onclick="clearAllOrders()">🗑️ مسح السجل</button>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الطلب</th>
+                        <th>العميل والهاتف</th>
+                        <th>العنوان والمبلغ</th>
+                        <th>المنتجات</th>
+                        <th>الحالة الحالية</th>
+                        <th>تحديث حالة التتبع</th>
+                    </tr>
+                </thead>
+                <tbody id="adminOrdersTableBody">
+                    <tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات مسجلة حتى الآن.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

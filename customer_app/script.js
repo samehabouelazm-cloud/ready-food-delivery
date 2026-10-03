@@ -1,140 +1,305 @@
-let cartItem = null;
+let cart = [];
+let currentProducts = [];
 let customerCoords = null;
 
-function loadStoreProducts() {
-    let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
-    
-    // لو مفيش منتجات متسجلة، بنعرض منتجات تجريبية عشان الأقسام والـ CSS يظهروا باحترافية
-    if (products.length === 0) {
-        products = [
-            { name: 'بيض بلدي - 30 بيضة', price: 130, category: 'المنتجات الطازجة', image: 'https://via.placeholder.com/300' },
-            { name: 'كيلو سمك بلطي مشوي', price: 100, category: 'المأكولات البحرية', image: 'https://via.placeholder.com/300' },
-            { name: 'وجبة برجر سريعة', price: 120, category: 'الوجبات السريعة', image: 'https://via.placeholder.com/300' }
-        ];
+const originalDefaultProducts = [
+    { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
+    { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
+    { name: "بيض بلدي - 30 بيضة", price: 130, category: "السوبر ماركت", image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" }
+];
+
+const trackingStepsList = [
+    "تم استلام الطلب من الإدارة وجاري التحضير",
+    "الطلب بيتحضر أو بيجهز",
+    "الطلب استلمه المندوب",
+    "المندوب اتحرك بالطلب",
+    "المندوب في الطريق إليك",
+    "المندوب على بعد أمتار من موقعك",
+    "استعد وافتح الباب - الكابتن وصل",
+    "تم تسليم الطلب بنجاح"
+];
+
+function playNotificationSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.4);
+    } catch (e) {
+        console.log('Audio context blocked');
     }
+}
 
-    const menuContainer = document.getElementById('dynamicMenu');
-    if (!menuContainer) return;
-    menuContainer.innerHTML = '';
+function loadStoreProducts() {
+    let savedProducts = localStorage.getItem('storeProducts');
+    let products = savedProducts ? JSON.parse(savedProducts) : originalDefaultProducts;
 
-    let categories = {};
-    products.forEach(p => {
-        let catName = p.category || 'أقسام عامة';
-        if (!categories[catName]) categories[catName] = [];
-        categories[catName].push(p);
+    currentProducts = products;
+    let grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    currentProducts.forEach((p, index) => {
+        grid.innerHTML += `
+            <div class="product-card" data-name="${p.name}">
+                <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
+                <div class="product-info">
+                    <span class="product-cat">${p.category || 'عام'}</span>
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">${p.price} ج.م</div>
+                    <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
+                </div>
+            </div>
+        `;
     });
 
-    for (let cat in categories) {
-        let items = categories[cat];
-        let sectionHtml = `<div class="section"><div class="section-header"><h2>📂 ${cat}</h2></div><div class="products-grid">`;
-        
-        items.forEach(p => {
-            sectionHtml += `
-                <div class="product-card">
-                    <img src="${p.image || 'https://via.placeholder.com/300'}" alt="${p.name}" class="product-img">
-                    <div class="product-info">
-                        <h3>${p.name}</h3>
-                        <div class="price">${p.price} ج.م</div>
-                        <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="add-btn">إضافة للسلة 🛒</button>
-                    </div>
-                </div>
-            `;
-        });
-        
-        sectionHtml += `</div></div>`;
-        menuContainer.innerHTML += sectionHtml;
-    }
-    updateCartDisplay();
+    let fee = localStorage.getItem('storeDeliveryFee') || 20;
+    let feeDisplay = document.getElementById('deliveryFeeDisplay');
+    if(feeDisplay) feeDisplay.innerText = fee;
+    
+    updateCartUI();
+    updateAdminBadge();
 }
 
-function addToCart(name, price) {
-    cartItem = { name, price };
-    updateCartDisplay();
+function filterProducts() {
+    let query = document.getElementById('searchInput').value.toLowerCase();
+    let cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => {
+        let name = card.getAttribute('data-name').toLowerCase();
+        card.style.display = name.includes(query) ? 'flex' : 'none';
+    });
 }
 
-function getLocation() {
-    const statusDiv = document.getElementById('locationStatus');
-    const addressInput = document.getElementById('customerAddress');
-
+function getMyLocation() {
+    let statusDiv = document.getElementById('locationStatus');
     if (!navigator.geolocation) {
-        if (statusDiv) statusDiv.innerHTML = '⚠️ المتصفح لا يدعم تحديد الموقع.';
+        statusDiv.style.color = '#ef4444';
+        statusDiv.innerText = 'متصفحك لا يدعم تحديد الموقع.';
         return;
     }
 
-    if (statusDiv) statusDiv.innerHTML = '⏳ جاري تحديد موقعك الحالي بدقة...';
-    
+    statusDiv.style.color = '#f59e0b';
+    statusDiv.innerText = '⏳ جاري تحديد موقعك بدقة...';
+
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            customerCoords = `https://maps.google.com/?q=${lat},${lng}`;
-            if (addressInput) addressInput.value = `📍 موقع GPS الحالي (تم التحديد تلقائياً)`;
-            if (statusDiv) statusDiv.innerHTML = '✅ تم تحديد الموقع الواقعي بنجاح!';
+            customerCoords = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            statusDiv.style.color = '#34d399';
+            statusDiv.innerHTML = `✅ تم تحديث موقعك! (<a href="https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}" target="_blank" style="color:#38bdf8;">عرض الخريطة</a>)`;
         },
         (error) => {
-            if (statusDiv) statusDiv.innerHTML = '❌ تعذر تحديد الموقع. تأكد من تفعيل صلاحية الـ GPS.';
+            statusDiv.style.color = '#ef4444';
+            statusDiv.innerText = '⚠️ تعذر تحديد الموقع. اسمح بالوصول من المتصفح.';
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true }
     );
 }
 
-function updateCartDisplay() {
-    const summaryDiv = document.getElementById('cartSummary');
-    if (!summaryDiv) return;
-    const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+function addToCart(index) {
+    let product = currentProducts[index];
+    let existing = cart.find(i => i.name === product.name);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ name: product.name, price: product.price, qty: 1 });
+    }
+    updateCartUI();
+}
 
-    if (!cartItem) {
-        summaryDiv.innerHTML = `السلة فارغة حالياً.. اختر منتجاً مفضلاً!<br>🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م`;
+function updateCartUI() {
+    let tbody = document.getElementById('cartTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    let subtotal = 0;
+
+    if (cart.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color: #94a3b8;">السلة فارغة حالياً.</td></tr>`;
+        let gt = document.getElementById('grandTotalDisplay');
+        if(gt) gt.innerText = '0';
         return;
     }
 
-    let total = parseFloat(cartItem.price) + deliveryFee;
-    summaryDiv.innerHTML = `📦 <b>المنتج المختيار:</b> ${cartItem.name} <br>` +
-                            `🏷 <b>سعر السلعة:</b> ${cartItem.price} ج.م<br>` +
-                            `🛵 <b>قيمة التوصيل للمندوب:</b> ${deliveryFee} ج.م<br>` +
-                            `💰 <b>الإجمالي النهائي:</b> <span style="color: #34d399; font-weight: bold;">${total} ج.م</span>`;
+    cart.forEach((item, idx) => {
+        let itemTotal = item.price * item.qty;
+        subtotal += itemTotal;
+        tbody.innerHTML += `
+            <tr>
+                <td><b>${item.name}</b></td>
+                <td>${item.price} ج.م</td>
+                <td><input type="number" value="${item.qty}" min="1" style="width: 50px; text-align: center; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="updateQty(${idx}, this.value)"></td>
+                <td>${itemTotal} ج.م</td>
+                <td><button onclick="removeFromCart(${idx})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">حذف</button></td>
+            </tr>
+        `;
+    });
+
+    let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+    let grandTotal = subtotal + (subtotal > 0 ? fee : 0);
+    let gt = document.getElementById('grandTotalDisplay');
+    if(gt) gt.innerText = grandTotal;
 }
 
-function checkoutOrder() {
-    const name = document.getElementById('customerName').value.trim();
-    const phone = document.getElementById('customerPhone').value.trim();
-    let address = document.getElementById('customerAddress').value.trim();
-    const payment = document.getElementById('paymentMethod').value;
-    const deliveryFee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+function updateQty(idx, qty) {
+    let q = parseInt(qty);
+    if (q > 0) cart[idx].qty = q;
+    updateCartUI();
+}
+
+function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    updateCartUI();
+}
+
+function submitOrder() {
+    if (cart.length === 0) {
+        alert('السلة فارغة! أضف منتجات أولاً.');
+        return;
+    }
+
+    let name = document.getElementById('custName').value.trim();
+    let phone = document.getElementById('custPhone').value.trim();
+    let address = document.getElementById('custAddress').value.trim();
+    let paymentMethod = document.getElementById('paymentMethod').value;
 
     if (!name || !phone || !address) {
-        alert('من فضلك ادخل الاسم، الجوال، والعنوان أو موقع الـ GPS!');
+        alert('من فضلك أدخل الاسم ورقم الهاتف وعنوان الاستلام بالتفصيل!');
         return;
     }
 
-    if (!cartItem) {
-        alert('السلة فارغة، اختر منتجاً أولاً من المتجر!');
-        return;
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+    let grandTotal = subtotal + fee;
+
+    let orderId = Math.floor(1000 + Math.random() * 9000);
+    let newOrder = {
+        id: orderId,
+        date: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+        customerName: name,
+        customerPhone: phone,
+        customerAddress: address,
+        coords: customerCoords,
+        items: [...cart],
+        total: grandTotal,
+        paymentMethod: paymentMethod,
+        trackingStatus: trackingStepsList[0],
+        isNew: true
+    };
+
+    let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    orders.unshift(newOrder);
+    localStorage.setItem('storeOrders', JSON.stringify(orders));
+    localStorage.setItem('lastActiveOrderPhone', phone);
+
+    playNotificationSound();
+
+    let itemsText = cart.map(i => `• ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
+    let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
+
+    let whatsappMessage = `🚨 *طلب جديد رقم #${orderId}* 🚀\n\n` +
+        `👤 *الاسم:* ${name}\n` +
+        `📞 *الهاتف:* ${phone}\n` +
+        `📍 *العنوان:* ${address}\n` +
+        `🗺 *رابط الخريطة:* ${mapLink}\n\n` +
+        `🛒 *المنتجات المطلوبة:*\n${itemsText}\n\n` +
+        `💰 *الإجمالي:* ${grandTotal} ج.م\n` +
+        `💳 *الدفع:* ${paymentMethod}`;
+
+    cart = [];
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+    document.getElementById('custAddress').value = '';
+    let locStatus = document.getElementById('locationStatus');
+    if(locStatus) locStatus.innerText = '';
+    customerCoords = null;
+    updateCartUI();
+    updateAdminBadge();
+
+    let successBanner = document.getElementById('successBanner');
+    if(successBanner) {
+        successBanner.style.display = 'block';
+        setTimeout(() => { successBanner.style.display = 'none'; }, 8000);
     }
 
-    let itemPrice = parseFloat(cartItem.price);
-    let total = itemPrice + deliveryFee;
-    let locationText = address;
-    
-    if (customerCoords) {
-        locationText += `\nرابط الخريطة: ${customerCoords}`;
-    }
-
-    let msg = "🧾 فاتورة طلب جديدة متكاملة\n" +
-              "-------------------\n" +
-              "👤 بيانات العميل:\n" +
-              "• الاسم: " + name + "\n" +
-              "• الجوال: " + phone + "\n" +
-              "• العنوان: " + locationText + "\n" +
-              "• الدفع: " + payment + "\n" +
-              "-------------------\n" +
-              "📦 تفاصيل الأسعار:\n" +
-              "• سعر السلعة: " + itemPrice + " ج.م\n" +
-              "• التوصيل: " + deliveryFee + " ج.م\n" +
-              "-------------------\n" +
-              "💰 الإجمالي النهائي: " + total + " ج.م";
-
-    window.open(`https://wa.me/201034101822?text=${encodeURIComponent(msg)}`, '_blank');
+    let adminPhone = '201034101822';
+    let whatsappUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=` + encodeURIComponent(whatsappMessage);
+    window.location.href = whatsappUrl;
 }
+
+function toggleTrackingSection() {
+    let section = document.getElementById('trackingSection');
+    if (!section) return;
+    section.style.display = (section.style.display === 'block') ? 'none' : 'block';
+    if (section.style.display === 'block') {
+        renderLiveTracking();
+    }
+}
+
+function updateAdminBadge() {
+    let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    let newCount = orders.filter(o => o.isNew).length;
+    let badge = document.getElementById('adminBadge');
+    if (badge) {
+        if (newCount > 0) {
+            badge.innerText = newCount;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function renderLiveTracking() {
+    let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+    let lastPhone = localStorage.getItem('lastActiveOrderPhone');
+    let content = document.getElementById('trackingContent');
+    if (!content) return;
+    
+    let myOrder = orders.find(o => o.customerPhone === lastPhone) || orders[0];
+
+    if (!myOrder) {
+        content.innerHTML = `<p style="color: #94a3b8;">لا توجد طلبات نشطة للعرض حالياً.</p>`;
+        return;
+    }
+
+    let status = myOrder.trackingStatus || trackingStepsList[0];
+    let stepsHtml = '';
+    let isNear = status.includes('على بعد أمتار') || status.includes('استعد وافتح الباب');
+
+    trackingStepsList.forEach((s, idx) => {
+        let isActive = status === s;
+        stepsHtml += `<div class="tracking-step ${isActive ? 'active' : ''}">
+            <span>${isActive ? '📍 🟢' : '⚪'}</span> ${idx + 1}. ${s}
+        </div>`;
+    });
+
+    content.innerHTML = `
+        <div style="margin-bottom: 12px; font-size: 13px; color: #38bdf8;">
+            <b>رقم الطلب: #${myOrder.id}</b> | الحالة: <span style="color:#34d399">${status}</span>
+        </div>
+        ${stepsHtml}
+        <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
+            🚨 تنبيه: الكابتن أصبح قريباً جداً، يرجى الاستعداد وافتح الباب!
+        </div>
+    `;
+}
+
+setInterval(() => {
+    let trackSec = document.getElementById('trackingSection');
+    if (trackSec && trackSec.style.display === 'block') {
+        renderLiveTracking();
+    }
+}, 3000);
 
 window.onload = loadStoreProducts;
