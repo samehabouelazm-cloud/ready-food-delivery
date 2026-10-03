@@ -1,9 +1,9 @@
 // ==========================================
-// 1. نظام إدارة وإضافة المنتجات (مع دعم الصور Base64)
+// إدارة وإضافة المنتجات بدقة تالية
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // ربط نموذج إضافة المنتج بالـ ID الصحيح الموجود في الـ HTML
     const addProductForm = document.getElementById('addProductForm');
+    
     if (addProductForm) {
         addProductForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nameInput = document.getElementById('pName') || document.getElementById('productName');
             const priceInput = document.getElementById('pPrice') || document.getElementById('productPrice');
             const catInput = document.getElementById('pCategory') || document.getElementById('itemCategory');
-            const imageFileinput = document.getElementById('pImageFile') || document.getElementById('productImageFile');
+            const imageFileInput = document.getElementById('pImageFile') || document.getElementById('productImageFile');
 
             if (!nameInput || !priceInput || !nameInput.value.trim() || !priceInput.value.trim()) {
                 alert('يرجى التأكد من حقول ادخال السعر والاسم في لوحة التحكم.');
@@ -21,18 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = nameInput.value.trim();
             const price = parseFloat(priceInput.value) || 0;
             const category = catInput ? catInput.value.trim() : 'عام';
-
-            const imageFile = imageFileinput && imageFileinput.files ? imageFileinput.files[0] : null;
+            const imageFile = imageFileInput && imageFileInput.files ? imageFileInput.files[0] : null;
 
             if (imageFile) {
                 const reader = new FileReader();
                 reader.onload = function(uploadEvent) {
                     const base64Image = uploadEvent.target.result;
-                    saveNewProductToStorage(name, price, category, base64Image);
+                    saveProductAndRefresh(name, price, category, base64Image);
                 };
                 reader.readAsDataURL(imageFile);
             } else {
-                saveNewProductToStorage(name, price, category, 'https://via.placeholder.com/150');
+                saveProductAndRefresh(name, price, category, 'https://via.placeholder.com/150');
             }
         });
     }
@@ -41,8 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminOrders();
 });
 
-function saveNewProductToStorage(name, price, category, image) {
+function saveProductAndRefresh(name, price, category, image) {
     let products = JSON.parse(localStorage.getItem('ready_products')) || [];
+    
     const newProduct = {
         id: "p_" + Date.now(),
         name: name,
@@ -54,32 +54,30 @@ function saveNewProductToStorage(name, price, category, image) {
     products.push(newProduct);
     localStorage.setItem('ready_products', JSON.stringify(products));
 
-    showNotificationWithSound("✅ تم حفظ وإضافة المنتج بنجاح!", "success");
-    
-    // إعادة تعيين الحقول
+    // تفريغ الحقول بعد الحفظ
     const nameInput = document.getElementById('pName') || document.getElementById('productName');
     const priceInput = document.getElementById('pPrice') || document.getElementById('productPrice');
     const catInput = document.getElementById('pCategory') || document.getElementById('itemCategory');
-    const imageFileinput = document.getElementById('pImageFile') || document.getElementById('productImageFile');
+    const imageFileInput = document.getElementById('pImageFile') || document.getElementById('productImageFile');
 
     if (nameInput) nameInput.value = "";
     if (priceInput) priceInput.value = "";
     if (catInput) catInput.value = "";
-    if (imageFileinput) imageFileinput.value = "";
+    if (imageFileInput) imageFileInput.value = "";
 
+    alert('✅ تم حفظ وإضافة المنتج بنجاح!');
     loadAdminProducts();
 }
 
-// حذف منتج
+// دالة حذف منتج
 window.deleteAdminProduct = function(id) {
     let products = JSON.parse(localStorage.getItem("ready_products")) || [];
     products = products.filter(p => p.id !== id);
     localStorage.setItem("ready_products", JSON.stringify(products));
     loadAdminProducts();
-    showNotificationWithSound("🗑️ تم حذف المنتج بنجاح", "info");
 };
 
-// تحميل وعرض المنتجات في لوحة التحكم
+// عرض المنتجات في لوحة التحكم
 function loadAdminProducts() {
     const container = document.getElementById("adminProductsList") || document.getElementById("productsList");
     if (!container) return;
@@ -105,137 +103,25 @@ function loadAdminProducts() {
     `).join('');
 }
 
-
 // ==========================================
-// 2. نظام إدارة السائقين
-// ==========================================
-window.addDriver = function() {
-    const nameInput = document.getElementById('driverNameInput');
-    const phoneInput = document.getElementById('driverPhoneInput');
-    
-    if (!nameInput || !phoneInput) return;
-    
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-
-    if (!name || !phone) {
-        showNotificationWithSound("⚠️ برجاء إدخال اسم ورقم السائق!", "error");
-        return;
-    }
-
-    let drivers = JSON.parse(localStorage.getItem("ready_drivers")) || [];
-    drivers.push({ id: "drv_" + Date.now(), name, phone });
-    localStorage.setItem("ready_drivers", JSON.stringify(drivers));
-
-    showNotificationWithSound("🚗 تم حفظ وإضافة السائق بنجاح!", "success");
-    nameInput.value = '';
-    phoneInput.value = '';
-};
-
-
-// ==========================================
-// 3. نظام التنبيهات والأصوات (Web Audio API)
-// ==========================================
-window.enableAudioAlerts = function() {
-    localStorage.setItem('audio_allowed', 'true');
-    playBeepSound();
-    alert("✅ تم تفعيل التنبيهات الصوتية بنجاح!");
-};
-
-function showNotificationWithSound(message, type = "success") {
-    playBeepSound();
-
-    let notif = document.getElementById("adminNotificationToast");
-    if (!notif) {
-        notif = document.createElement("div");
-        notif.id = "adminNotificationToast";
-        notif.style.cssText = "position: fixed; bottom: 20px; left: 20px; z-index: 9999; padding: 15px 25px; border-radius: 8px; font-weight: bold; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s ease; font-family: Tahoma, sans-serif;";
-        document.body.appendChild(notif);
-    }
-
-    if (type === "success") notif.style.background = "#10b981";
-    else if (type === "error") notif.style.background = "#ef4444";
-    else notif.style.background = "#3b82f6";
-
-    notif.innerText = message;
-    notif.style.opacity = "1";
-
-    setTimeout(() => {
-        notif.style.opacity = "0";
-    }, 4000);
-}
-
-function playBeepSound() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.2);
-    } catch (e) {
-        console.log("Audio Context not supported or blocked by browser policy");
-    }
-}
-
-
-// ==========================================
-// 4. نظام جلب وعرض طلبات العملاء والتحديث الحي
+// جلب الطلبات ومراقبتها
 // ==========================================
 function loadAdminOrders() {
     const ordersContainer = document.getElementById('orders-container') || document.querySelector('.orders-container');
     if (!ordersContainer) return;
 
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-    
     if (orders.length === 0) {
-        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 20px; font-size: 16px;">لا توجد طلبات جديدة حالياً</p>';
+        ordersContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding: 20px;">لا توجد طلبات جديدة حالياً</p>';
         return;
     }
 
-    ordersContainer.innerHTML = '';
-
-    orders.forEach((order, index) => {
-        let detailsText = 'طلب جديد';
-        if (order.items && Array.isArray(order.items)) {
-            detailsText = order.items.map(i => `${i.name} (${i.quantity || 1})`).join(', ');
-        } else if (order.details) {
-            detailsText = typeof order.details === 'object' ? JSON.stringify(order.details) : order.details;
-        }
-
-        let card = document.createElement('div');
-        card.style.cssText = "background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);";
-        card.innerHTML = `
-            <h4 style="color: #38bdf8; margin: 0 0 10px 0; font-size: 18px;">📦 طلب رقم #${order.id || (index + 1)}</h4>
+    ordersContainer.innerHTML = orders.map((order, index) => `
+        <div style="background: #1e293b; padding: 15px; border-radius: 8px; color: #fff; border: 1px solid #334155; margin-bottom: 12px;">
+            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📦 طلب رقم #${order.id || (index + 1)}</h4>
             <p><strong>👤 العميل:</strong> ${order.customerName || order.name || 'غير متوفر'}</p>
             <p><strong>📞 الهاتف:</strong> ${order.phone || 'غير متوفر'}</p>
-            <p><strong>🛒 التفاصيل:</strong> ${detailsText}</p>
             <p><strong>💰 الإجمالي:</strong> ${order.total || 0} جنيه</p>
-            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">التاريخ: ${order.createdAt || 'الآن'}</p>
-        `;
-        ordersContainer.appendChild(card);
-    });
+        </div>
+    `).join('');
 }
-
-// مراقبة الطلبات الجديدة وتنبيه الإدارة تلقائياً كل ثانية
-setInterval(() => {
-    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-    if (typeof window.lastOrderCount === 'undefined') {
-        window.lastOrderCount = orders.length;
-    }
-    if (orders.length !== window.lastOrderCount) {
-        if (orders.length > window.lastOrderCount) {
-            playBeepSound();
-            showNotificationWithSound("🚨 وصل طلب جديد للمتجر!", "success");
-        }
-        window.lastOrderCount = orders.length;
-        loadAdminOrders();
-    }
-}, 1000);
