@@ -311,8 +311,10 @@ function loadCustomerProducts() {
     const grid = document.getElementById('productsGrid');
     if (!grid) return;
     
-    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
-    
+let products = JSON.parse(localStorage.getItem('storeProducts')) || [
+    { name: "كشري مصري مميز", price: 35, category: "🍔 الوجبات السريعة", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&auto=format&fit=crop&q=60" },
+    { name: "ساندوتش فلافل ساخن", price: 10, category: "🥪 الساندوتشات", image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&auto=format&fit=crop&q=60" }
+];    
     if (products.length === 0) {
         grid.innerHTML = '<p style="color: #94a3b8; grid-column: 1/-1; text-align: center;">لا توجد منتجات مضافة حالياً من لوحة الإدارة.</p>';
         return;
