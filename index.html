@@ -144,12 +144,10 @@
             }
         } 
         
-        // لو الـ localStorage فاضي، نحط منتجات افتراضية عشان الصفحة متظهرش فارغة أبداً لأي زائر جديد
+        // لو مفيش منتجات خالص، هنحط منتج واحد مبدئي عشان ما تظهرش فارغة
         if (!currentProducts || currentProducts.length === 0) {
             currentProducts = [
-                { name: "بيض بلدي - 30 بيضة", category: "سوبر ماركت جاهز", price: 130, image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" },
-                { name: "طماطم طازجة - كيلو", category: "خضار وفواكه", price: 15, image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
-                { name: "بطاطس تحمير - كيلو", category: "خضار وفواكه", price: 20, image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400" }
+                { name: "منتج تجريبي - جاهز في بلطيم", category: "قسم عام", price: 10, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400" }
             ];
             localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
         }
@@ -241,7 +239,7 @@
         if (cart.length === 0) { alert('السلة فارغة!'); return; }
         let name = document.getElementById('custName').value.trim();
         let phone = document.getElementById('custPhone').value.trim();
-    let address = document.getElementById('custAddress').value.trim();
+        let address = document.getElementById('custAddress').value.trim();
         let paymentMethod = document.getElementById('paymentMethod').value;
 
         if (!name || !phone || !address) { alert('أدخل الاسم ورقم الهاتف والعنوان!'); return; }
