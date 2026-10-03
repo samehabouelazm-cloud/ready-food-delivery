@@ -19,7 +19,6 @@
         .btn-admin { background: #8b5cf6; position: relative; }
         .btn-admin:hover { background: #7c3aed; }
         
-        /* شارة الإشعارات للإدارة */
         .badge-count { position: absolute; top: -5px; right: -5px; background: #ef4444; color: #fff; border-radius: 50%; padding: 2px 6px; font-size: 10px; display: none; }
 
         .search-box { margin-bottom: 20px; }
@@ -72,31 +71,6 @@
         </div>
     </div>
 
-    <!-- لوحة تحكم الإدارة -->
-    <div id="adminSection" class="admin-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="color: #8b5cf6;">⚙️ لوحة تحكم الإدارة - سجل الطلبات وتحديث التتبع الحي</h2>
-            <button class="btn" style="background:#ef4444; padding:5px 10px; font-size:11px;" onclick="clearAllOrders()">🗑️ مسح السجل</button>
-        </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>رقم الطلب</th>
-                        <th>العميل ورقم الهاتف</th>
-                        <th>العنوان والمبلغ</th>
-                        <th>المنتجات</th>
-                        <th>الحالة الحالية</th>
-                        <th>تحديث مرحلة التتبع</th>
-                    </tr>
-                </thead>
-                <tbody id="adminOrdersTableBody">
-                    <tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات مسجلة حتى الآن.</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- رسالة نجاح الإرسال -->
     <div id="successBanner" class="success-banner">
         🎉 تم إرسال طلبك بنجاح للإدارة عبر الواتساب وتنبيه الإدارة صوتياً!
@@ -139,7 +113,6 @@
             <h3 style="color: #38bdf8; margin-bottom: 10px; font-size: 15px;">📝 بيانات التوصيل والاستلام</h3>
             <input type="text" id="custName" placeholder="اسمك الكريم *">
             <input type="text" id="custPhone" placeholder="رقم الهاتف (للتواصل عند وصول الكابتن) *">
-            
             <input type="text" id="custAddress" placeholder="عنوانك بالتفصيل (الشارع، رقم العمارة، الطابق) *">
             <button type="button" class="btn-location" onclick="getMyLocation()">📍 حدد موقعي الحالي على الخريطة (GPS)</button>
             <div id="locationStatus" style="font-size: 12px; color: #34d399; margin-bottom: 10px;"></div>
@@ -159,8 +132,7 @@
     let currentProducts = [];
     let customerCoords = null;
 
-    const originalDefaultProducts = [
-    ];
+    const originalDefaultProducts = [];
 
     const trackingStepsList = [
         "تم استلام الطلب من الإدارة وجاري التحضير",
@@ -173,7 +145,6 @@
         "تم تسليم الطلب بنجاح"
     ];
 
-    // دالة لتوليد صوت تنبيه (Beep) للإدارة عند وصول طلب جديد
     function playNotificationSound() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -219,7 +190,6 @@
         let fee = localStorage.getItem('storeDeliveryFee') || 20;
         document.getElementById('deliveryFeeDisplay').innerText = fee;
         updateCartUI();
-        updateAdminBadge();
     }
 
     function filterProducts() {
@@ -346,16 +316,14 @@
             isNew: true
         };
 
-        // حفظ الطلب في السجل
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         orders.unshift(newOrder);
         localStorage.setItem('storeOrders', JSON.stringify(orders));
         localStorage.setItem('lastActiveOrderPhone', phone);
 
-        // تشغيل صوت التنبيه فوراً للإدارة
         playNotificationSound();
 
-        let itemsText = cart.map(i => `• ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
+        let itemsText = cart.map(i => `${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
         let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
 
         let whatsappMessage = `🚨 *طلب جديد رقم #${orderId}* 🚀\n\n` +
@@ -367,7 +335,6 @@
             `💰 *الإجمالي النهائي:* ${grandTotal} ج.م (شامل التوصيل)\n` +
             `💳 *طريقة الدفع:* ${paymentMethod}`;
 
-        // تفريغ السلة وحقول البيانات بالكامل
         cart = [];
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
@@ -375,59 +342,23 @@
         document.getElementById('locationStatus').innerText = '';
         customerCoords = null;
         updateCartUI();
-        updateAdminBadge();
 
-        // إظهار رسالة النجاح في الصفحة
         let successBanner = document.getElementById('successBanner');
         successBanner.style.display = 'block';
         setTimeout(() => { successBanner.style.display = 'none'; }, 8000);
 
-        // توجيه الواتساب المباشر للإدارة
         let adminPhone = '201034101822';
         let whatsappUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=` + encodeURIComponent(whatsappMessage);
-        
         window.location.href = whatsappUrl;
     }
 
     function toggleTrackingSection() {
         let section = document.getElementById('trackingSection');
-        let adminSec = document.getElementById('adminSection');
-        adminSec.style.display = 'none';
-        
         if (section.style.display === 'block') {
             section.style.display = 'none';
         } else {
             section.style.display = 'block';
             renderLiveTracking();
-        }
-    }
-
-    function toggleAdminSection() {
-        let section = document.getElementById('adminSection');
-        let trackSec = document.getElementById('trackingSection');
-        trackSec.style.display = 'none';
-
-        if (section.style.display === 'block') {
-            section.style.display = 'none';
-        } else {
-            section.style.display = 'block';
-            renderAdminOrders();
-            let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
-            orders.forEach(o => o.isNew = false);
-            localStorage.setItem('storeOrders', JSON.stringify(orders));
-            updateAdminBadge();
-        }
-    }
-
-    function updateAdminBadge() {
-        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
-        let newCount = orders.filter(o => o.isNew).length;
-        let badge = document.getElementById('adminBadge');
-        if (newCount > 0) {
-            badge.innerText = newCount;
-            badge.style.display = 'inline-block';
-        } else {
-            badge.style.display = 'none';
         }
     }
 
@@ -464,187 +395,14 @@
         `;
     }
 
-    function renderAdminOrders() {
-        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
-        let tbody = document.getElementById('adminOrdersTableBody');
-        tbody.innerHTML = '';
-
-        if (orders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات مسجلة حتى الآن.</td></tr>`;
-            return;
-        }
-
-        orders.forEach((order, index) => {
-            let itemsSummary = order.items.map(i => `${i.name} (×${i.qty})`).join(', ');
-            let selectOptions = '';
-            
-            trackingStepsList.forEach(step => {
-                let selected = order.trackingStatus === step ? 'selected' : '';
-                selectOptions += `<option value="${step}" ${selected}>${step}</option>`;
-            });
-
-            tbody.innerHTML += `
-                <tr style="${order.isNew ? 'background: rgba(139, 92, 246, 0.15);' : ''}">
-                    <td><b>#${order.id}</b><br><small style="color:#94a3b8">${order.date}</small></td>
-                    <td><b>${order.customerName}</b><br><span style="color:#38bdf8">${order.customerPhone}</span></td>
-                    <td>${order.customerAddress}<br><b style="color:#34d399">${order.total} ج.م</b> (${order.paymentMethod})</td>
-                    <td style="font-size: 11px; text-align: right;">${itemsSummary}</td>
-                    <td><b style="color: #f59e0b; font-size: 12px;">${order.trackingStatus}</b></td>
-                    <td>
-                        <select style="background: #0f172a; color: #fff; border: 1px solid #475569; padding: 6px; border-radius: 4px; font-size: 12px;" onchange="updateOrderStatus(${index}, this.value)">
-                            ${selectOptions}
-                        </select>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    function updateOrderStatus(orderIndex, newStatus) {
-        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
-        if (orders[orderIndex]) {
-            orders[orderIndex].trackingStatus = newStatus;
-            localStorage.setItem('storeOrders', JSON.stringify(orders));
-            renderAdminOrders();
-        }
-    }
-
-    function clearAllOrders() {
-        if (confirm('هل أنت متأكد من مسح جميع سجل الطلبات؟')) {
-            localStorage.removeItem('storeOrders');
-            renderAdminOrders();
-            updateAdminBadge();
-        }
-    }
-
-    // تحديث تلقائي دوري كل 3 ثواني
     setInterval(() => {
         let trackSec = document.getElementById('trackingSection');
         if (trackSec && trackSec.style.display === 'block') {
             renderLiveTracking();
         }
-        let adminSec = document.getElementById('adminSection');
-        if (adminSec && adminSec.style.display === 'block') {
-            renderAdminOrders();
-        }
     }, 3000);
 
     window.onload = loadStoreProducts;
 </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - READY - في بلطيم</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <h1>🛒 جاهز - READY - في بلطيم</h1>
-        <div class="nav-btns">
-            <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            <a href="admin.html" class="btn btn-admin">⚙️ لوحة الإدارة <span id="adminBadge" class="badge-count">0</span></a>
-        </div>
-    </header>
-
-    <!-- شاشة تتبع الطلب للعميل -->
-    <div id="trackingSection" class="tracking-modal">
-        <h2 style="color: #f59e0b; margin-bottom: 15px;">📦 تتبع حالة طلبك لحظة بلحظة</h2>
-        <div id="trackingContent">
-            <p style="color: #94a3b8;">لا توجد طلبات نشطة حالياً للتتبع.</p>
-        </div>
-    </div>
-
-    <!-- رسالة نجاح الإرسال -->
-    <div id="successBanner" class="success-banner">
-        🎉 تم إرسال طلبك بنجاح للإدارة عبر الواتساب وتنبيه الإدارة!
-    </div>
-
-    <!-- بحث المنتجات -->
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضلة هنا..." oninput="filterProducts()">
-    </div>
-
-    <!-- قائمة المنتجات -->
-    <div id="productsGrid" class="products-grid">
-        <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري تحميل المنتجات...</p>
-    </div>
-
-    <!-- سلة الشراء -->
-    <div class="cart-section" id="cartSectionContainer">
-        <h2>🛍️ سلة المشتريات الخاصة بك</h2>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>المنتج</th>
-                        <th>السعر</th>
-                        <th>الكمية</th>
-                        <th>الإجمالي الفرعي</th>
-                        <th>حذف</th>
-                    </tr>
-                </thead>
-                <tbody id="cartTableBody">
-                    <tr><td colspan="5" style="color: #94a3b8;">السلة فارغة حالياً.</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="cartSummary" style="font-size: 15px; font-weight: bold; margin-bottom: 15px; text-align: left;">
-            إجمالي المنتجات: 0 ج.م | أجر التوصيل: <span id="deliveryFeeDisplay">20</span> ج.م | الإجمالي النهائي: <span id="grandTotalDisplay" style="color: #34d399;">0</span> ج.م
-        </div>
-
-
-
-<script src="script.js"></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <div class="container">
-        <header>
-            <h1>جاهز - READY - في بلطيم</h1>
-            <div class="nav-btns">
-                <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            </div>
-        </header>
-
-        <!-- شاشة تتبع الطلب -->
-        <div id="trackingSection" class="tracking-modal" style="display:none;">
-            <h2 style="color: #f59e0b; margin-bottom: 15px;">🔍 تتبع حالة طلبك لحظة بلحظة</h2>
-            <div id="trackingContent">
-                <p style="color: #94a3b8;">لا توجد طلبات نشطة حالياً للتتبع.</p>
-            </div>
-        </div>
-
-        <!-- شريط البحث -->
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضلة هنا..." oninput="filterProducts()">
-        </div>
-
-        <!-- شبكة عرض المنتجات للعملاء -->
-        <div id="productsGrid" class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
-            <!-- يتم تعبئة المنتجات تلقائياً من script.js -->
-        </div>
-
-        <!-- سلة المشتريات -->
-        <div class="cart-section" style="margin-top: 30px; background: #1e293b; padding: 20px; border-radius: 12px;">
-            <h2>🛒 سلة المشتريات الخاصة بك</h2>
-            <div id="cartItems">
-                <p style="color: #94a3b8;">السلة فارغة حالياً.</p>
-            </div>
-            <div id="cartTotal" style="margin-top: 15px; font-weight: bold; font-size: 18px;"></div>
-            <button onclick="checkoutOrder()" class="btn btn-primary" style="margin-top: 15px; width: 100%;">إتمام الطلب عبر الواتساب</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
