@@ -1,62 +1,73 @@
 // ==========================================
-// 1. نظام إدارة وإضافة المنتجات
+// 1. نظام إدارة وإضافة المنتجات (مع دعم الصور Base64)
 // ==========================================
-function addNewProduct(event) {
-    if (event) event.preventDefault();
-    
-    const nameInput = document.getElementById('productName') || document.getElementById('itemName');
-    const priceInput = document.getElementById('productPrice') || document.getElementById('itemPrice');
-    const catInput = document.getElementById('itemCategory') || document.getElementById('productCategory');
-    const imageInput = document.getElementById('productImage') || document.getElementById('itemImage');
+document.addEventListener('DOMContentLoaded', () => {
+    // ربط نموذج إضافة المنتج بالـ ID الصحيح الموجود في الـ HTML
+    const addProductForm = document.getElementById('addProductForm');
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nameInput = document.getElementById('pName') || document.getElementById('productName');
+            const priceInput = document.getElementById('pPrice') || document.getElementById('productPrice');
+            const catInput = document.getElementById('pCategory') || document.getElementById('itemCategory');
+            const imageFileinput = document.getElementById('pImageFile') || document.getElementById('productImageFile');
 
-    if (!nameInput || !priceInput) {
-        alert('يرجى التأكد من حقول ادخال السعر والاسم في لوحة التحكم.');
-        return;
+            if (!nameInput || !priceInput || !nameInput.value.trim() || !priceInput.value.trim()) {
+                alert('يرجى التأكد من حقول ادخال السعر والاسم في لوحة التحكم.');
+                return;
+            }
+
+            const name = nameInput.value.trim();
+            const price = parseFloat(priceInput.value) || 0;
+            const category = catInput ? catInput.value.trim() : 'عام';
+
+            const imageFile = imageFileinput && imageFileinput.files ? imageFileinput.files[0] : null;
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(uploadEvent) {
+                    const base64Image = uploadEvent.target.result;
+                    saveNewProductToStorage(name, price, category, base64Image);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                saveNewProductToStorage(name, price, category, 'https://via.placeholder.com/150');
+            }
+        });
     }
 
+    loadAdminProducts();
+    loadAdminOrders();
+});
+
+function saveNewProductToStorage(name, price, category, image) {
+    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
     const newProduct = {
         id: "p_" + Date.now(),
-        name: nameInput.value.trim(),
-        price: parseFloat(priceInput.value) || 0,
-        category: catInput ? catInput.value : "general",
-        image: imageInput ? imageInput.value.trim() : 'https://via.placeholder.com/150'
+        name: name,
+        price: price,
+        category: category,
+        image: image
     };
-
-    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
+    
     products.push(newProduct);
     localStorage.setItem('ready_products', JSON.stringify(products));
 
     showNotificationWithSound("✅ تم حفظ وإضافة المنتج بنجاح!", "success");
     
+    // إعادة تعيين الحقول
+    const nameInput = document.getElementById('pName') || document.getElementById('productName');
+    const priceInput = document.getElementById('pPrice') || document.getElementById('productPrice');
+    const catInput = document.getElementById('pCategory') || document.getElementById('itemCategory');
+    const imageFileinput = document.getElementById('pImageFile') || document.getElementById('productImageFile');
+
     if (nameInput) nameInput.value = "";
     if (priceInput) priceInput.value = "";
-    if (imageInput) imageInput.value = "";
+    if (catInput) catInput.value = "";
+    if (imageFileinput) imageFileinput.value = "";
 
     loadAdminProducts();
-}
-
-window.saveProductFromDOM = addNewProduct;
-
-// تحميل وعرض المنتجات في لوحة التحكم
-function loadAdminProducts() {
-    let container = document.getElementById("adminProductsList") || document.getElementById("productsList");
-    if (!container) return;
-
-    let products = JSON.parse(localStorage.getItem("ready_products")) || [];
-    
-    if (products.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 15px;">لا توجد منتجات مضافة حالياً.</p>`;
-        return;
-    }
-
-    container.innerHTML = products.map(p => `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #334155; color: #fff;">
-            <div>
-                <strong>${p.name}</strong> - <span style="color: #f59e0b;">${p.price} ج.م</span>
-            </div>
-            <button onclick="deleteAdminProduct('${p.id}')" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">حذف</button>
-        </div>
-    `).join('');
 }
 
 // حذف منتج
@@ -67,6 +78,33 @@ window.deleteAdminProduct = function(id) {
     loadAdminProducts();
     showNotificationWithSound("🗑️ تم حذف المنتج بنجاح", "info");
 };
+
+// تحميل وعرض المنتجات في لوحة التحكم
+function loadAdminProducts() {
+    const container = document.getElementById("adminProductsList") || document.getElementById("productsList");
+    if (!container) return;
+
+    let products = JSON.parse(localStorage.getItem("ready_products")) || [];
+    
+    if (products.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 15px;">لا توجد منتجات مسجلة حالياً.</p>`;
+        return;
+    }
+
+    container.innerHTML = products.map(p => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #334155; color: #fff;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="${p.image || 'https://via.placeholder.com/50'}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
+                <div>
+                    <strong>${p.name}</strong><br>
+                    <span style="color: #f59e0b; font-size: 14px;">${p.price} ج.م</span> - <span style="color: #38bdf8; font-size: 12px;">${p.category || 'عام'}</span>
+                </div>
+            </div>
+            <button onclick="deleteAdminProduct('${p.id}')" style="background: #ef4444; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">حذف</button>
+        </div>
+    `).join('');
+}
+
 
 // ==========================================
 // 2. نظام إدارة السائقين
@@ -94,8 +132,9 @@ window.addDriver = function() {
     phoneInput.value = '';
 };
 
+
 // ==========================================
-// 3. نظام التنبيهات والأصوات
+// 3. نظام التنبيهات والأصوات (Web Audio API)
 // ==========================================
 window.enableAudioAlerts = function() {
     localStorage.setItem('audio_allowed', 'true');
@@ -146,6 +185,7 @@ function playBeepSound() {
     }
 }
 
+
 // ==========================================
 // 4. نظام جلب وعرض طلبات العملاء والتحديث الحي
 // ==========================================
@@ -184,13 +224,7 @@ function loadAdminOrders() {
     });
 }
 
-// التشغيل الأولي عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    loadAdminOrders();
-    loadAdminProducts();
-});
-
-// مراقبة الطلبات الجديدة وتنبيه الإدارة تلقائياً
+// مراقبة الطلبات الجديدة وتنبيه الإدارة تلقائياً كل ثانية
 setInterval(() => {
     let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
     if (typeof window.lastOrderCount === 'undefined') {
@@ -205,91 +239,3 @@ setInterval(() => {
         loadAdminOrders();
     }
 }, 1000);
-// إدارة المنتجات وحفظها مع الصورة (Base64)
-document.getElementById('addProductForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('productName').value;
-    const price = document.getElementById('productPrice').value;
-    const imageFile = document.getElementById('productImageFile').files[0];
-
-    if (imageFile) {
-        const reader = new FileReader();
-        reader.onload = function(uploadEvent) {
-            const base64Image = uploadEvent.target.result;
-            saveNewProduct(name, price, base64Image);
-        };
-        reader.readAsDataURL(imageFile);
-    } else {
-        saveNewProduct(name, price, '');
-    }
-});
-
-function saveNewProduct(name, price, image) {
-    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
-    products.push({ id: Date.now(), name, price, image });
-    localStorage.setItem('ready_products', JSON.stringify(products));
-    alert('تم إضافة المنتج بنجاح!');
-    location.reload();
-}
-
-// دالة حذف المنتج
-window.deleteProduct = function(id) {
-    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
-    products = products.filter(p => p.id !== id);
-    localStorage.setItem('ready_products', JSON.stringify(products));
-    loadAdminProducts();
-}
-
-function loadAdminProducts() {
-    const productsList = document.getElementById('adminProductsList');
-    if (!productsList) return;
-    let products = JSON.parse(localStorage.getItem('ready_products')) || [];
-    productsList.innerHTML = products.map(p => `
-        <div class="product-row" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; background:#1e293b; padding:10px; border-radius:8px;">
-            <img src="${p.image || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">
-            <span>${p.name}</span>
-            <span>${p.price} ج.م</span>
-            <button onclick="deleteProduct(${p.id})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button>
-        </div>
-    `).join('');
-}
-
-// نظام مراقبة الطلبات الجديدة والتنبيه الصوتي (Web Audio API) للوحة الإدارة
-function playBeepSound() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.3);
-    } catch (e) {
-        console.log("Audio not supported or restricted");
-    }
-}
-
-setInterval(() => {
-    let orders = JSON.parse(localStorage.getItem('ready_orders')) || [];
-    if (typeof window.lastOrderCount === 'undefined') {
-        window.lastOrderCount = orders.length;
-    }
-    if (orders.length !== window.lastOrderCount) {
-        if (orders.length > window.lastOrderCount) {
-            playBeepSound();
-        }
-        window.lastOrderCount = orders.length;
-        if (typeof loadAdminOrders === 'function') {
-            loadAdminOrders();
-        }
-    }
-}, 1000);
-
-// تشغيل عند التحميل
-document.addEventListener('DOMContentLoaded', () => {
-    loadAdminProducts();
-});
