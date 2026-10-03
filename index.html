@@ -55,6 +55,7 @@
         <h1>🛒 جاهز - READY - في بلطيم</h1>
         <div class="nav-btns">
             <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
+            <a href="admin.html" class="btn" style="background: #6366f1;">⚙️ لوحة الإدارة</a>
         </div>
     </header>
 
@@ -123,31 +124,7 @@
 </div>
 
 <script>
-    // قاعدة بيانات المنتجات مباشرة داخل الملف لمنع أي أخطاء في الجلب (Fetch)
-    let currentProducts = [
-        {
-            "id": "1",
-            "name": "كيلو طماطم طازجة",
-            "category": "خضروات",
-            "price": 15,
-            "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400"
-        },
-        {
-            "id": "2",
-            "name": "كيلو بطاطس للتحمير",
-            "category": "خضروات",
-            "price": 20,
-            "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400"
-        },
-        {
-            "id": "3",
-            "name": "بصل ذهبي طازج",
-            "category": "خضروات",
-            "price": 25,
-            "image": "https://images.unsplash.com/photo-1618512499648-d0d62ef05c74?w=400"
-        }
-    ];
-
+    let currentProducts = [];
     let cart = [];
     let customerCoords = null;
 
@@ -162,38 +139,40 @@
         "تم تسليم الطلب بنجاح"
     ];
 
-    function playNotificationSound() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.4);
-        } catch (e) {
-            console.log('Audio context blocked');
-        }
-    }
-
     function loadStoreProducts() {
+        // جلب المنتجات المحدثة من لوحة الإدارة (LocalStorage) أو استخدام القائمة الافتراضية
+        let savedProducts = localStorage.getItem('storeProducts');
+        if (savedProducts) {
+            try {
+                currentProducts = JSON.parse(savedProducts);
+            } catch (e) {
+                currentProducts = getDefaultProducts();
+            }
+        } else {
+            currentProducts = getDefaultProducts();
+        }
+
         let grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
 
+        if (currentProducts.length === 0) {
+            grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">لا توجد منتجات مضافة حالياً من الإدارة.</p>`;
+            return;
+        }
+
         currentProducts.forEach((p, index) => {
+            let imgSrc = p.image || p.img || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400';
+            let catName = p.category || p.cat || 'عام';
+            let pName = p.name || 'منتج بدون اسم';
+            let pPrice = p.price || 0;
+
             grid.innerHTML += `
-                <div class="product-card" data-name="${p.name}">
-                    <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
+                <div class="product-card" data-name="${pName}">
+                    <img src="${imgSrc}" alt="${pName}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
                     <div class="product-info">
-                        <span class="product-cat">${p.category}</span>
-                        <div class="product-title">${p.name}</div>
-                        <div class="product-price">${p.price} ج.م</div>
+                        <span class="product-cat">${catName}</span>
+                        <div class="product-title">${pName}</div>
+                        <div class="product-price">${pPrice} ج.م</div>
                         <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
                     </div>
                 </div>
@@ -201,6 +180,32 @@
         });
 
         updateCartUI();
+    }
+
+    function getDefaultProducts() {
+        return [
+            {
+                "id": "1",
+                "name": "كيلو طماطم طازجة",
+                "category": "خضروات",
+                "price": 15,
+                "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400"
+            },
+            {
+                "id": "2",
+                "name": "كيلو بطاطس للتحمير",
+                "category": "خضروات",
+                "price": 20,
+                "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400"
+            },
+            {
+                "id": "3",
+                "name": "بصل ذهبي طازج",
+                "category": "خضروات",
+                "price": 25,
+                "image": "https://images.unsplash.com/photo-1618512499648-d0d62ef05c74?w=400"
+            }
+        ];
     }
 
     function filterProducts() {
@@ -242,11 +247,14 @@
 
     function addToCart(index) {
         let product = currentProducts[index];
-        let existing = cart.find(i => i.name === product.name);
+        let pName = product.name;
+        let pPrice = product.price;
+
+        let existing = cart.find(i => i.name === pName);
         if (existing) {
             existing.qty += 1;
         } else {
-            cart.push({ name: product.name, price: product.price, qty: 1 });
+            cart.push({ name: pName, price: pPrice, qty: 1 });
         }
         updateCartUI();
     }
@@ -332,8 +340,6 @@
         localStorage.setItem('storeOrders', JSON.stringify(orders));
         localStorage.setItem('lastActiveOrderPhone', phone);
 
-        playNotificationSound();
-
         let itemsText = cart.map(i => `${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
         let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
 
@@ -386,7 +392,6 @@
 
         let status = myOrder.trackingStatus || trackingStepsList[0];
         let stepsHtml = '';
-        let isNear = status.includes('على بعد أمتار') || status.includes('استعد وافتح الباب');
 
         trackingStepsList.forEach((s, idx) => {
             let isActive = status === s;
@@ -400,20 +405,20 @@
                 <b>رقم الطلب: #${myOrder.id}</b> | الحالة الحالية: <span style="color:#34d399">${status}</span>
             </div>
             ${stepsHtml}
-            <div class="alert-box" id="alertBox" style="display: ${isNear ? 'block' : 'none'};">
-                🚨 تنبيه هام: الكابتن أصبح قريباً جداً من مكان التسليم، يرجى الاستعداد وافتح الباب!
-            </div>
         `;
     }
 
-    setInterval(() => {
-        let trackSec = document.getElementById('trackingSection');
-        if (trackSec && trackSec.style.display === 'block') {
-            renderLiveTracking();
-        }
-    }, 3000);
+    // تحديث المنتجات والطلبات تلقائياً لو حصل تعديل من لوحة الإدارة
+    window.onload = function() {
+        loadStoreProducts();
+    };
 
-    window.onload = loadStoreProducts;
+    // الاستماع لأي تحديث في المنتجات من لوحة الإدارة في نفس المتصفح
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'storeProducts') {
+            loadStoreProducts();
+        }
+    });
 </script>
 </body>
 </html>
