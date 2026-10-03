@@ -58,7 +58,7 @@
         </div>
     </header>
 
-    <!-- شاشة تتبع الطلب للعميل -->
+    <!-- شاشة تتبع الطلب -->
     <div id="trackingSection" class="tracking-modal">
         <h2 style="color: #f59e0b; margin-bottom: 15px;">📦 تتبع حالة طلبك لحظة بلحظة</h2>
         <div id="trackingContent">
@@ -123,11 +123,33 @@
 </div>
 
 <script>
-    let cart = [];
-    let currentProducts = [];
-    let customerCoords = null;
+    // قاعدة بيانات المنتجات مباشرة داخل الملف لمنع أي أخطاء في الجلب (Fetch)
+    let currentProducts = [
+        {
+            "id": "1",
+            "name": "كيلو طماطم طازجة",
+            "category": "خضروات",
+            "price": 15,
+            "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400"
+        },
+        {
+            "id": "2",
+            "name": "كيلو بطاطس للتحمير",
+            "category": "خضروات",
+            "price": 20,
+            "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400"
+        },
+        {
+            "id": "3",
+            "name": "بصل ذهبي طازج",
+            "category": "خضروات",
+            "price": 25,
+            "image": "https://images.unsplash.com/photo-1618512499648-d0d62ef05c74?w=400"
+        }
+    ];
 
-    const originalDefaultProducts = [];
+    let cart = [];
+    let customerCoords = null;
 
     const trackingStepsList = [
         "تم استلام الطلب من الإدارة وجاري التحضير",
@@ -156,32 +178,20 @@
             oscillator.start();
             oscillator.stop(audioCtx.currentTime + 0.4);
         } catch (e) {
-            console.log('Audio context not supported or blocked');
+            console.log('Audio context blocked');
         }
     }
 
-    async function loadStoreProducts() {
-        let products = [];
-        try {
-            let response = await fetch('data.json');
-            let data = await response.json();
-            products = data.products;
-        } catch (error) {
-            console.log('تعذر جلب ملف المنتجات، جارِ استخدام الذاكرة المحلية كبديل');
-            let savedProducts = localStorage.getItem('storeProducts');
-            products = savedProducts ? JSON.parse(savedProducts) : originalDefaultProducts;
-        }
-
-        currentProducts = products;
+    function loadStoreProducts() {
         let grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
 
         currentProducts.forEach((p, index) => {
             grid.innerHTML += `
                 <div class="product-card" data-name="${p.name}">
-                    <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
+                    <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
                     <div class="product-info">
-                        <span class="product-cat">${p.category || 'عام'}</span>
+                        <span class="product-cat">${p.category}</span>
                         <div class="product-title">${p.name}</div>
                         <div class="product-price">${p.price} ج.م</div>
                         <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
@@ -190,8 +200,6 @@
             `;
         });
 
-        let fee = localStorage.getItem('storeDeliveryFee') || 20;
-        document.getElementById('deliveryFeeDisplay').innerText = fee;
         updateCartUI();
     }
 
@@ -226,7 +234,7 @@
             },
             (error) => {
                 statusDiv.style.color = '#ef4444';
-                statusDiv.innerText = '⚠️️ تعذر تحديد الموقع. يرجى السماح بالوصول للموقع من المتصفح.';
+                statusDiv.innerText = '⚠ تعذر تحديد الموقع. يرجى السماح بالوصول للموقع.';
             },
             { enableHighAccuracy: true }
         );
@@ -268,7 +276,7 @@
             `;
         });
 
-        let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+        let fee = 20;
         let grandTotal = subtotal + (subtotal > 0 ? fee : 0);
         document.getElementById('grandTotalDisplay').innerText = grandTotal;
     }
@@ -301,7 +309,7 @@
         }
 
         let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        let fee = parseFloat(localStorage.getItem('storeDeliveryFee')) || 20;
+        let fee = 20;
         let grandTotal = subtotal + fee;
 
         let orderId = Math.floor(1000 + Math.random() * 9000);
