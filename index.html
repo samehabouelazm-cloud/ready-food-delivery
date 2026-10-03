@@ -44,7 +44,6 @@
         .tracking-modal { display: none; background: #1e293b; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
         .tracking-step { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; color: #94a3b8; }
         .tracking-step.active { color: #34d399; font-weight: bold; transform: scale(1.02); transition: 0.2s; }
-        .alert-box { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; padding: 12px; border-radius: 8px; color: #fcd34d; font-weight: bold; text-align: center; margin-top: 15px; display: none; }
         .success-banner { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; padding: 15px; border-radius: 8px; color: #34d399; font-weight: bold; text-align: center; margin-bottom: 20px; display: none; }
     </style>
 </head>
@@ -55,11 +54,9 @@
         <h1>🛒 جاهز - READY - في بلطيم</h1>
         <div class="nav-btns">
             <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            <a href="admin.html" class="btn" style="background: #6366f1;">⚙️ لوحة الإدارة</a>
         </div>
     </header>
 
-    <!-- شاشة تتبع الطلب -->
     <div id="trackingSection" class="tracking-modal">
         <h2 style="color: #f59e0b; margin-bottom: 15px;">📦 تتبع حالة طلبك لحظة بلحظة</h2>
         <div id="trackingContent">
@@ -67,22 +64,18 @@
         </div>
     </div>
 
-    <!-- رسالة نجاح الإرسال -->
     <div id="successBanner" class="success-banner">
-        🎉 تم إرسال طلبك بنجاح للإدارة عبر الواتساب وتنبيه الإدارة صوتياً!
+        🎉 تم إرسال طلبك بنجاح للإدارة عبر الواتساب!
     </div>
 
-    <!-- بحث المنتجات -->
     <div class="search-box">
         <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضلة هنا..." oninput="filterProducts()">
     </div>
 
-    <!-- قائمة المنتجات -->
     <div id="productsGrid" class="products-grid">
         <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري تحميل المنتجات...</p>
     </div>
 
-    <!-- سلة الشراء -->
     <div class="cart-section" id="cartSectionContainer">
         <h2>🛍️ سلة المشتريات الخاصة بك</h2>
         <div style="overflow-x: auto;">
@@ -102,21 +95,21 @@
             </table>
         </div>
         <div id="cartSummary" style="font-size: 15px; font-weight: bold; margin-bottom: 15px; text-align: left;">
-            إجمالي المنتجات: 0 ج.م | أجر التوصيل: <span id="deliveryFeeDisplay">20</span> ج.م | الإجمالي النهائي: <span id="grandTotalDisplay" style="color: #34d399;">0</span> ج.م
+            إجمالي المنتجات: 0 ج.م | أجر التوصيل: 20 ج.م | الإجمالي النهائي: <span id="grandTotalDisplay" style="color: #34d399;">0</span> ج.م
         </div>
 
         <div class="checkout-form">
             <h3 style="color: #38bdf8; margin-bottom: 10px; font-size: 15px;">📝 بيانات التوصيل والاستلام</h3>
             <input type="text" id="custName" placeholder="اسمك الكريم *">
-            <input type="text" id="custPhone" placeholder="رقم الهاتف (للتواصل عند وصول الكابتن) *">
-            <input type="text" id="custAddress" placeholder="عنوانك بالتفصيل (الشارع، رقم العمارة، الطابق) *">
-            <button type="button" class="btn-location" onclick="getMyLocation()">📍 حدد موقعي الحالي على الخريطة (GPS)</button>
+            <input type="text" id="custPhone" placeholder="رقم الهاتف *">
+            <input type="text" id="custAddress" placeholder="عنوانك بالتفصيل *">
+            <button type="button" class="btn-location" onclick="getMyLocation()">📍 تحديد موقعي الحالي (GPS)</button>
             <div id="locationStatus" style="font-size: 12px; color: #34d399; margin-bottom: 10px;"></div>
 
             <select id="paymentMethod">
                 <option value="الدفع نقداً عند الاستلام">💵 الدفع نقداً عند الاستلام</option>
                 <option value="فودافون كاش">🔴 فودافون كاش</option>
-                <option value="تحويل إلكتروني / انستاباي">💳 تحويل إلكتروني / انستاباي</option>
+                <option value="انستاباي">💳 انستاباي</option>
             </select>
             <button onclick="submitOrder()" class="btn-order">إرسال الطلب للإدارة والواتساب 🚀</button>
         </div>
@@ -140,78 +133,43 @@
     ];
 
     function loadStoreProducts() {
-        // جلب المنتجات المحدثة من لوحة الإدارة (LocalStorage) أو استخدام القائمة الافتراضية
         let savedProducts = localStorage.getItem('storeProducts');
         if (savedProducts) {
-            try {
-                currentProducts = JSON.parse(savedProducts);
-            } catch (e) {
-                currentProducts = getDefaultProducts();
-            }
+            try { currentProducts = JSON.parse(savedProducts); } catch(e) { currentProducts = []; }
         } else {
-            currentProducts = getDefaultProducts();
+            currentProducts = [
+                { "id": "1", "name": "كيلو طماطم طازجة", "category": "خضروات", "price": 15, "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
+                { "id": "2", "name": "كيلو بطاطس للتحمير", "category": "خضروات", "price": 20, "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400" }
+            ];
         }
 
         let grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
 
         if (currentProducts.length === 0) {
-            grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">لا توجد منتجات مضافة حالياً من الإدارة.</p>`;
+            grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">لا توجد منتجات متاحة حالياً.</p>`;
             return;
         }
 
         currentProducts.forEach((p, index) => {
-            let imgSrc = p.image || p.img || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400';
-            let catName = p.category || p.cat || 'عام';
-            let pName = p.name || 'منتج بدون اسم';
-            let pPrice = p.price || 0;
-
             grid.innerHTML += `
-                <div class="product-card" data-name="${pName}">
-                    <img src="${imgSrc}" alt="${pName}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
+                <div class="product-card" data-name="${p.name}">
+                    <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200'">
                     <div class="product-info">
-                        <span class="product-cat">${catName}</span>
-                        <div class="product-title">${pName}</div>
-                        <div class="product-price">${pPrice} ج.م</div>
+                        <span class="product-cat">${p.category}</span>
+                        <div class="product-title">${p.name}</div>
+                        <div class="product-price">${p.price} ج.م</div>
                         <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
                     </div>
                 </div>
             `;
         });
-
         updateCartUI();
-    }
-
-    function getDefaultProducts() {
-        return [
-            {
-                "id": "1",
-                "name": "كيلو طماطم طازجة",
-                "category": "خضروات",
-                "price": 15,
-                "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400"
-            },
-            {
-                "id": "2",
-                "name": "كيلو بطاطس للتحمير",
-                "category": "خضروات",
-                "price": 20,
-                "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400"
-            },
-            {
-                "id": "3",
-                "name": "بصل ذهبي طازج",
-                "category": "خضروات",
-                "price": 25,
-                "image": "https://images.unsplash.com/photo-1618512499648-d0d62ef05c74?w=400"
-            }
-        ];
     }
 
     function filterProducts() {
         let query = document.getElementById('searchInput').value.toLowerCase();
-        let cards = document.querySelectorAll('.product-card');
-        cards.forEach(card => {
+        document.querySelectorAll('.product-card').forEach(card => {
             let name = card.getAttribute('data-name').toLowerCase();
             card.style.display = name.includes(query) ? 'flex' : 'none';
         });
@@ -220,42 +178,23 @@
     function getMyLocation() {
         let statusDiv = document.getElementById('locationStatus');
         if (!navigator.geolocation) {
-            statusDiv.style.color = '#ef4444';
-            statusDiv.innerText = 'متصفحك لا يدعم تحديد الموقع الجغرافي.';
+            statusDiv.innerText = 'متصفحك لا يدعم الموقع.';
             return;
         }
-
-        statusDiv.style.color = '#f59e0b';
-        statusDiv.innerText = '⏳ جاري تحديد موقعك بدقة على الخريطة...';
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                customerCoords = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                statusDiv.style.color = '#34d399';
-                statusDiv.innerHTML = `✅ تم تحديث موقعك بنجاح! (<a href="https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}" target="_blank" style="color:#38bdf8; text-decoration:underline;">عرض على الخريطة</a>)`;
-            },
-            (error) => {
-                statusDiv.style.color = '#ef4444';
-                statusDiv.innerText = '⚠ تعذر تحديد الموقع. يرجى السماح بالوصول للموقع.';
-            },
-            { enableHighAccuracy: true }
-        );
+        statusDiv.innerText = '⏳ جاري تحديد موقعك...';
+        navigator.geolocation.getCurrentPosition(pos => {
+            customerCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            statusDiv.innerHTML = `✅ تم تحديث موقعك بنجاح!`;
+        }, () => {
+            statusDiv.innerText = '⚠ تعذر تحديد الموقع.';
+        }, { enableHighAccuracy: true });
     }
 
     function addToCart(index) {
-        let product = currentProducts[index];
-        let pName = product.name;
-        let pPrice = product.price;
-
-        let existing = cart.find(i => i.name === pName);
-        if (existing) {
-            existing.qty += 1;
-        } else {
-            cart.push({ name: pName, price: pPrice, qty: 1 });
-        }
+        let p = currentProducts[index];
+        let existing = cart.find(i => i.name === p.name);
+        if (existing) { existing.qty += 1; } 
+        else { cart.push({ name: p.name, price: p.price, qty: 1 }); }
         updateCartUI();
     }
 
@@ -283,10 +222,7 @@
                 </tr>
             `;
         });
-
-        let fee = 20;
-        let grandTotal = subtotal + (subtotal > 0 ? fee : 0);
-        document.getElementById('grandTotalDisplay').innerText = grandTotal;
+        document.getElementById('grandTotalDisplay').innerText = subtotal + 20;
     }
 
     function updateQty(idx, qty) {
@@ -301,26 +237,18 @@
     }
 
     function submitOrder() {
-        if (cart.length === 0) {
-            alert('السلة فارغة! أضف منتجات أولاً قبل إتمام الطلب.');
-            return;
-        }
-
+        if (cart.length === 0) { alert('السلة فارغة!'); return; }
         let name = document.getElementById('custName').value.trim();
         let phone = document.getElementById('custPhone').value.trim();
         let address = document.getElementById('custAddress').value.trim();
         let paymentMethod = document.getElementById('paymentMethod').value;
 
-        if (!name || !phone || !address) {
-            alert('من فضلك أدخل الاسم ورقم الهاتف وعنوان الاستلام بالتفصيل!');
-            return;
-        }
+        if (!name || !phone || !address) { alert('أدخل الاسم ورقم الهاتف والعنوان!'); return; }
 
         let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        let fee = 20;
-        let grandTotal = subtotal + fee;
-
+        let grandTotal = subtotal + 20;
         let orderId = Math.floor(1000 + Math.random() * 9000);
+
         let newOrder = {
             id: orderId,
             date: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
@@ -331,8 +259,7 @@
             items: [...cart],
             total: grandTotal,
             paymentMethod: paymentMethod,
-            trackingStatus: trackingStepsList[0],
-            isNew: true
+            trackingStatus: trackingStepsList[0]
         };
 
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
@@ -341,84 +268,40 @@
         localStorage.setItem('lastActiveOrderPhone', phone);
 
         let itemsText = cart.map(i => `${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
-        let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'لم يحدد موقع GPS';
+        let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'غير متوفر';
 
-        let whatsappMessage = `🚨 *طلب جديد رقم #${orderId}* 🚀\n\n` +
-            `👤 *الاسم:* ${name}\n` +
-            `📞 *الهاتف:* ${phone}\n` +
-            `📍 *العنوان:* ${address}\n` +
-            `🗺 *رابط الخريطة:* ${mapLink}\n\n` +
-            `🛒 *المنتجات المطلوبة:*\n${itemsText}\n\n` +
-            `💰 *الإجمالي النهائي:* ${grandTotal} ج.م (شامل التوصيل)\n` +
-            `💳 *طريقة الدفع:* ${paymentMethod}`;
+        let whatsappMessage = `🚨 *طلب جديد #${orderId}* 🚀\n\n👤 *الاسم:* ${name}\n📞 *الهاتف:* ${phone}\n📍 *العنوان:* ${address}\n🗺 *الخريطة:* ${mapLink}\n\n🛒 *المنتجات:*\n${itemsText}\n\n💰 *الإجمالي:* ${grandTotal} ج.م\n💳 *الدفع:* ${paymentMethod}`;
 
         cart = [];
-        document.getElementById('custName').value = '';
-        document.getElementById('custPhone').value = '';
-        document.getElementById('custAddress').value = '';
-        document.getElementById('locationStatus').innerText = '';
-        customerCoords = null;
         updateCartUI();
+        document.getElementById('successBanner').style.display = 'block';
+        setTimeout(() => { document.getElementById('successBanner').style.display = 'none'; }, 6000);
 
-        let successBanner = document.getElementById('successBanner');
-        successBanner.style.display = 'block';
-        setTimeout(() => { successBanner.style.display = 'none'; }, 8000);
-
-        let adminPhone = '201034101822';
-        let whatsappUrl = `https://api.whatsapp.com/send?phone=${adminPhone}&text=` + encodeURIComponent(whatsappMessage);
-        window.location.href = whatsappUrl;
+        window.location.href = `https://api.whatsapp.com/send?phone=201034101822&text=` + encodeURIComponent(whatsappMessage);
     }
 
     function toggleTrackingSection() {
-        let section = document.getElementById('trackingSection');
-        if (section.style.display === 'block') {
-            section.style.display = 'none';
-        } else {
-            section.style.display = 'block';
-            renderLiveTracking();
+        let sec = document.getElementById('trackingSection');
+        sec.style.display = sec.style.display === 'block' ? 'none' : 'block';
+        if (sec.style.display === 'block') {
+            let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
+            let lastPhone = localStorage.getItem('lastActiveOrderPhone');
+            let myOrder = orders.find(o => o.customerPhone === lastPhone) || orders[0];
+            let content = document.getElementById('trackingContent');
+            if (!myOrder) {
+                content.innerHTML = `<p style="color: #94a3b8;">لا توجد طلبات نشطة.</p>`;
+                return;
+            }
+            let steps = '';
+            trackingStepsList.forEach((s, idx) => {
+                let active = myOrder.trackingStatus === s;
+                steps += `<div class="tracking-step ${active ? 'active' : ''}"><span>${active ? '📍 🟢' : '⚪'}</span> ${idx+1}. ${s}</div>`;
+            });
+            content.innerHTML = `<b style="color:#38bdf8">طلب رقم #${myOrder.id}</b><br>${steps}`;
         }
     }
 
-    function renderLiveTracking() {
-        let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
-        let lastPhone = localStorage.getItem('lastActiveOrderPhone');
-        let content = document.getElementById('trackingContent');
-        let myOrder = orders.find(o => o.customerPhone === lastPhone) || orders[0];
-
-        if (!myOrder) {
-            content.innerHTML = `<p style="color: #94a3b8;">لا توجد طلبات نشطة للعرض حالياً.</p>`;
-            return;
-        }
-
-        let status = myOrder.trackingStatus || trackingStepsList[0];
-        let stepsHtml = '';
-
-        trackingStepsList.forEach((s, idx) => {
-            let isActive = status === s;
-            stepsHtml += `<div class="tracking-step ${isActive ? 'active' : ''}">
-                <span>${isActive ? '📍 🟢' : '⚪'}</span> ${idx + 1}. ${s}
-            </div>`;
-        });
-
-        content.innerHTML = `
-            <div style="margin-bottom: 12px; font-size: 13px; color: #38bdf8;">
-                <b>رقم الطلب: #${myOrder.id}</b> | الحالة الحالية: <span style="color:#34d399">${status}</span>
-            </div>
-            ${stepsHtml}
-        `;
-    }
-
-    // تحديث المنتجات والطلبات تلقائياً لو حصل تعديل من لوحة الإدارة
-    window.onload = function() {
-        loadStoreProducts();
-    };
-
-    // الاستماع لأي تحديث في المنتجات من لوحة الإدارة في نفس المتصفح
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'storeProducts') {
-            loadStoreProducts();
-        }
-    });
+    window.onload = loadStoreProducts;
 </script>
 </body>
 </html>

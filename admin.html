@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة والتحكم - جاهز في بلطيم</title>
+    <title>لوحة الإدارة - جاهز في بلطيم</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; padding: 15px; }
         .container { max-width: 1100px; margin: 0 auto; }
         
-        header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;}
+        header { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 15px 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
         h1 { color: #6366f1; font-size: 20px; }
-        .nav-btns { display: flex; gap: 10px; }
-        .btn { background: #0ea5e9; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; font-size: 13px; }
-        .btn:hover { background: #0284c7; }
+        .btn { background: #22c55e; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13px; }
         
         .section-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
         h2 { color: #38bdf8; font-size: 17px; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 8px; }
         
-        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
+        input { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 13px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
         
         .btn-add { background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -27,93 +25,82 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid #334155; padding: 8px; text-align: center; }
         th { background: #334155; color: #38bdf8; }
-        
         .badge { background: #3b82f6; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-        .btn-delete { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .btn-delete:hover { background: #dc2626; }
+        .btn-delete { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>⚙️ لوحة الإدارة والتحكم الشاملة</h1>
-        <div class="nav-btns">
-            <a href="index.html" class="btn" style="background: #22c55e;">🌐 زيارة صفحة العملاء</a>
-        </div>
+        <h1>⚙️ لوحة الإدارة والتحكم</h1>
+        <a href="index.html" target="_blank" class="btn">🌐 فتح متجر العملاء</a>
     </header>
 
-    <!-- قسم إضافة وتعديل المنتجات والأقسام -->
     <div class="section-box">
-        <h2>📦 إضافة منتج جديد لصفحة العملاء</h2>
+        <h2>📦 إضافة منتج جديد</h2>
         <form id="addProductForm" onsubmit="addNewProduct(event)">
             <div class="form-grid">
-                <input type="text" id="prodName" placeholder="اسم المنتج (مثال: طماطم طازجة)" required>
-                <input type="text" id="prodCat" placeholder="القسم (مثال: خضروات، فواكه)" required>
-                <input type="number" id="prodPrice" placeholder="السعر بالجنيه (مثال: 15)" required>
+                <input type="text" id="prodName" placeholder="اسم المنتج" required>
+                <input type="text" id="prodCat" placeholder="القسم" required>
+                <input type="number" id="prodPrice" placeholder="السعر" required>
             </div>
-            <input type="text" id="prodImage" placeholder="رابط صورة المنتج (URL) أو اتركها فارغة للافتراضي">
-            <button type="submit" class="btn-add">➕ نشر المنتج فوراً في صفحة العملاء</button>
+            <input type="text" id="prodImage" placeholder="رابط صورة المنتج (URL)">
+            <button type="submit" class="btn-add">➕ إضافة المنتج للمتجر</button>
         </form>
     </div>
 
-    <!-- إدارة المنتجات الحالية -->
     <div class="section-box">
-        <h2>📋 قائمة المنتجات الحالية في المتجر</h2>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>الصورة</th>
-                        <th>اسم المنتج</th>
-                        <th>القسم</th>
-                        <th>السعر</th>
-                        <th>إجراء</th>
-                    </tr>
-                </thead>
-                <tbody id="adminProductsTable">
-                    <tr><td colspan="5" style="color: #94a3b8;">جاري التحميل...</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <h2>📋 المنتجات الحالية</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>الاسم</th>
+                    <th>القسم</th>
+                    <th>السعر</th>
+                    <th>إجراء</th>
+                </tr>
+            </thead>
+            <tbody id="adminProductsTable">
+                <tr><td colspan="5" style="color: #94a3b8;">جاري التحميل...</td></tr>
+            </tbody>
+        </table>
     </div>
 
-    <!-- إدارة الطلبات الواردة -->
     <div class="section-box">
         <h2>📥 طلبات العملاء الواردة</h2>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>رقم الطلب</th>
-                        <th>الوقت</th>
-                        <th>العميل ورقم الهاتف</th>
-                        <th>العنوان</th>
-                        <th>الإجمالي</th>
-                        <th>الحالة / التحكم</th>
-                    </tr>
-                </thead>
-                <tbody id="adminOrdersTable">
-                    <tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات جديدة حالياً.</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>الوقت</th>
+                    <th>العميل ورقم الهاتف</th>
+                    <th>العنوان</th>
+                    <th>الإجمالي</th>
+                    <th>حالة الطلب</th>
+                </tr>
+            </thead>
+            <tbody id="adminOrdersTable">
+                <tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات جديدة.</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script>
     function loadAdminData() {
         let savedProducts = localStorage.getItem('storeProducts');
-        let products = savedProducts ? JSON.parse(savedProducts) : getDefaultProducts();
-        
+        let products = savedProducts ? JSON.parse(savedProducts) : [
+            { "id": "1", "name": "كيلو طماطم طازجة", "category": "خضروات", "price": 15, "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" }
+        ];
+
         let tbody = document.getElementById('adminProductsTable');
         tbody.innerHTML = '';
-
         products.forEach((p, index) => {
-            let imgSrc = p.image || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=100';
             tbody.innerHTML += `
                 <tr>
-                    <td><img src="${imgSrc}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/40'"></td>
+                    <td><img src="${p.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/40'"></td>
                     <td><b>${p.name}</b></td>
                     <td><span class="badge">${p.category}</span></td>
                     <td>${p.price} ج.م</td>
@@ -122,15 +109,7 @@
             `;
         });
 
-        loadAdminOrders();
-    }
-
-    function getDefaultProducts() {
-        return [
-            { "id": "1", "name": "كيلو طماطم طازجة", "category": "خضروات", "price": 15, "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
-            { "id": "2", "name": "كيلو بطاطس للتحمير", "category": "خضروات", "price": 20, "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400" },
-            { "id": "3", "name": "بصل ذهبي طازج", "category": "خضروات", "price": 25, "image": "https://images.unsplash.com/photo-1618512499648-d0d62ef05c74?w=400" }
-        ];
+        loadOrders();
     }
 
     function addNewProduct(e) {
@@ -138,64 +117,46 @@
         let name = document.getElementById('prodName').value.trim();
         let cat = document.getElementById('prodCat').value.trim();
         let price = parseFloat(document.getElementById('prodPrice').value);
-        let image = document.getElementById('prodImage').value.trim();
+        let image = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400';
 
-        if (!name || !cat || isNaN(price)) {
-            alert('من فضلك أكمل بيانات المنتج بشكل صحيح.');
-            return;
-        }
-
-        let savedProducts = localStorage.getItem('storeProducts');
-        let products = savedProducts ? JSON.parse(savedProducts) : getDefaultProducts();
-
-        let newProd = {
-            id: Date.now().toString(),
-            name: name,
-            category: cat,
-            price: price,
-            image: image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'
-        };
-
-        products.push(newProd);
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+        products.push({ id: Date.now().toString(), name, category: cat, price, image });
         localStorage.setItem('storeProducts', JSON.stringify(products));
 
         document.getElementById('addProductForm').reset();
         loadAdminData();
-        alert('✅ تم إضافة المنتج بنجاح وسيظهر فوراً في صفحة العملاء!');
+        alert('✅ تم إضافة المنتج بنجاح!');
     }
 
     function deleteProduct(index) {
-        if (!confirm('هل أنت متأكد من حذف هذا المنتج من متجر العملاء؟')) return;
-        
-        let savedProducts = localStorage.getItem('storeProducts');
-        let products = savedProducts ? JSON.parse(savedProducts) : getDefaultProducts();
-        
+        if (!confirm('هل أنت متأكد من الحذف؟')) return;
+        let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
         products.splice(index, 1);
         localStorage.setItem('storeProducts', JSON.stringify(products));
         loadAdminData();
     }
 
-    function loadAdminOrders() {
+    function loadOrders() {
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         let tbody = document.getElementById('adminOrdersTable');
         tbody.innerHTML = '';
 
         if (orders.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات جديدة مسجلة حالياً.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="color: #94a3b8;">لا توجد طلبات.</td></tr>`;
             return;
         }
 
         orders.forEach((o, index) => {
-            let mapBtn = o.coords ? `<br><a href="https://maps.google.com/?q=${o.coords.lat},${o.coords.lng}" target="_blank" style="color:#38bdf8; font-size:11px;">📍 عرض موقع العميل</a>` : '';
+            let mapLink = o.coords ? `<br><a href="https://maps.google.com/?q=${o.coords.lat},${o.coords.lng}" target="_blank" style="color:#38bdf8;">📍 خريطة العميل</a>` : '';
             tbody.innerHTML += `
                 <tr>
                     <td><b>#${o.id}</b></td>
                     <td>${o.date}</td>
-                    <td><b>${o.customerName}</b><br><span style="color:#38bdf8">${o.customerPhone}</span></td>
-                    <td>${o.customerAddress} ${mapBtn}</td>
+                    <td><b>${o.customerName}</b><br>${o.customerPhone}</td>
+                    <td>${o.customerAddress} ${mapLink}</td>
                     <td style="color: #34d399; font-weight: bold;">${o.total} ج.م</td>
                     <td>
-                        <select onchange="updateOrderStatus(${index}, this.value)" style="margin:0; padding:4px;">
+                        <select onchange="updateStatus(${index}, this.value)" style="background:#0f172a; color:#fff; padding:4px;">
                             <option value="تم استلام الطلب من الإدارة وجاري التحضير" ${o.trackingStatus.includes('استلام') ? 'selected' : ''}>جاري التحضير</option>
                             <option value="الطلب استلمه المندوب" ${o.trackingStatus.includes('المندوب') ? 'selected' : ''}>استلمه المندوب</option>
                             <option value="المندوب في الطريق إليك" ${o.trackingStatus.includes('الطريق') ? 'selected' : ''}>المندوب بالطريق</option>
@@ -207,18 +168,16 @@
         });
     }
 
-    function updateOrderStatus(index, newStatus) {
+    function updateStatus(index, val) {
         let orders = JSON.parse(localStorage.getItem('storeOrders')) || [];
         if (orders[index]) {
-            orders[index].trackingStatus = newStatus;
+            orders[index].trackingStatus = val;
             localStorage.setItem('storeOrders', JSON.stringify(orders));
-            alert('✅ تم تحديث حالة تتبع الطلب للعميل بنجاح!');
+            alert('✅ تم تحديث حالة الطلب للعميل!');
         }
     }
 
-    window.onload = function() {
-        loadAdminData();
-    };
+    window.onload = loadAdminData;
 </script>
 </body>
 </html>
