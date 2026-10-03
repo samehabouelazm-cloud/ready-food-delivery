@@ -41,7 +41,7 @@
         .btn-location { background: #3b82f6; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 5px; }
         .btn-order { background: #10b981; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
         
-        /* لوحة التحكم السرية */
+        /* لوحة التحكم المحمية تماماً ومخفية افتراضياً */
         #adminPanel { display: none; background: #1e293b; border: 2px dashed #6366f1; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
         .admin-form input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
         .btn-add { background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -59,11 +59,11 @@
         <h1>🛒 جاهز - READY - في بلطيم</h1>
         <div class="nav-btns">
             <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            <button class="btn btn-admin" onclick="openAdminPanel()">⚙️ الإدارة</button>
+            <button class="btn btn-admin" onclick="requestAdminAccess()">⚙️ الإدارة</button>
         </div>
     </header>
 
-    <!-- لوحة التحكم المحمية بكلمة سر داخلية -->
+    <!-- لوحة التحكم المحمية -->
     <div id="adminPanel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h2 style="color: #6366f1; font-size: 18px;">🔒 لوحة التحكم والإدارة السرية</h2>
@@ -131,7 +131,7 @@
     </div>
 
     <div id="productsGrid" class="products-grid">
-        <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري تحميل المنتجات...</p>
+        <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري التحميل...</p>
     </div>
 
     <div class="cart-section">
@@ -199,25 +199,25 @@
             } catch(e) { 
                 currentProducts = []; 
             }
-        } 
-        
-        if (!currentProducts || currentProducts.length === 0) {
-            currentProducts = [
-                { name: "بيض بلدي - 30 بيضة", category: "سوبر ماركت جاهز", price: 130, image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" },
-                { name: "طماطم طازجة - كيلو", category: "خضار وفواكه", price: 15, image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" }
-            ];
-            localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
+        } else {
+            currentProducts = []; // تبدأ فارغة تماماً بدون أي منتجات افتراضية
         }
 
         let grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
+
+        if (!currentProducts || currentProducts.length === 0) {
+            grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8; padding: 20px;">لا توجد منتجات معروضة حالياً. يمكنك إضافتها من لوحة الإدارة ⚙️️</p>`;
+            updateCartUI();
+            return;
+        }
 
         currentProducts.forEach((p, index) => {
             grid.innerHTML += `
                 <div class="product-card" data-name="${p.name}">
                     <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200'">
                     <div class="product-info">
-                        <span class="product-cat">${p.category}</span>
+                        <span class="product-cat">${p.category || 'عام'}</span>
                         <div class="product-title">${p.name}</div>
                         <div class="product-price">${p.price} ج.م</div>
                         <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
@@ -228,9 +228,10 @@
         updateCartUI();
     }
 
-    function openAdminPanel() {
+    // دالة حماية صفحة الإدارة وطلب كلمة السر
+    function requestAdminAccess() {
         let pass = prompt("الرجاء إدخال كلمة مرور لوحة التحكم:");
-        if (pass === "1234") { // تقدر تغير الباسورد من هنا لو حابب
+        if (pass === "1234") { // الباسورد
             document.getElementById('adminPanel').style.display = 'block';
             loadAdminData();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -264,7 +265,7 @@
 
         loadStoreProducts();
         loadAdminData();
-        alert('تم إضافة ونشر المنتج بنجاح! 🚀');
+        alert('تم إضافة ونشر المنتج بنجاح للعملاء! 🚀');
     }
 
     function deleteProduct(index) {
@@ -279,17 +280,22 @@
     function loadAdminData() {
         let pTable = document.getElementById('adminProductsTable');
         pTable.innerHTML = '';
-        currentProducts.forEach((p, idx) => {
-            pTable.innerHTML += `
-                <tr>
-                    <td><img src="${p.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;" onerror="this.style.display='none'"></td>
-                    <td><b>${p.name}</b></td>
-                    <td>${p.category}</td>
-                    <td>${p.price} ج.م</td>
-                    <td><button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
-                </tr>
-            `;
-        });
+        
+        if (currentProducts.length === 0) {
+            pTable.innerHTML = `<tr><td colspan="5" style="color: #94a3b8;">لا توجد منتجات مسجلة حالياً.</td></tr>`;
+        } else {
+            currentProducts.forEach((p, idx) => {
+                pTable.innerHTML += `
+                    <tr>
+                        <td><img src="${p.image || ''}" width="40" height="40" style="object-fit:cover; border-radius:4px;" onerror="this.style.display='none'"></td>
+                        <td><b>${p.name}</b></td>
+                        <td>${p.category}</td>
+                        <td>${p.price} ج.م</td>
+                        <td><button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
+                    </tr>
+                `;
+            });
+        }
 
         let ordersTable = document.getElementById('adminOrdersTable');
         ordersTable.innerHTML = '';
