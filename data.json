@@ -1,103 +1,22 @@
 {
-  "drivers": [
+  "products": [
     {
-      "id": "1790528744607",
-      "name": "مهند سامح الشبة",
-      "phone": "01024421320"
-    }
-  ],
-  "orders": [
-    {
-      "id": "ord_203084",
-      "status": "قيد الانتظار",
-      "driverId": null,
-      "createdAt": "2026-09-27T19:23:44.301Z",
-      "driverLocation": {
-        "lat": 31.584,
-        "lng": 31.085
-      },
-      "customerLocation": {
-        "lat": 31.54647738195913,
-        "lng": 31.107471824171952
-      },
-      "customerName": "سامح الشبة",
-      "phone": "01034101822",
-      "item": "[الكل] كيلو طماطم طازجة",
-      "customerAddress": "بلطيم - عزبة بلال"
+      "name": "كشري مصري مميز",
+      "price": 35,
+      "category": "🍔 الوجبات السريعة",
+      "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&auto=format&fit=crop&q=60"
     },
     {
-      "id": "ord_919358",
-      "status": "قيد الانتظار",
-      "driverId": null,
-      "createdAt": "2026-09-27T19:33:06.020Z",
-      "driverLocation": {
-        "lat": 31.584,
-        "lng": 31.085
-      },
-      "customerLocation": {
-        "lat": 31.546271,
-        "lng": 31.1080645
-      },
-      "customerName": "حسن",
-      "phone": "01034762134",
-      "item": "[الكل] كيلو سمك بوري",
-      "customerAddress": "بلطيم - عزبة بلال"
-    }
-  ],
-  "categories": [
-    "🍔 مأكولات ومطاعم",
-    "🥦 خضروات وفواكه",
-    "🫘 بقوليات وعطارة",
-    "🐟 أسماك ومأكولات بحرية",
-    "🥩 لحوم وطيور",
-    "📱 إلكترونيات وصيانة",
-    "🛒 سوبر ماركت",
-    "🔥 توصيل غاز",
-    "🚗 توصيل مشاوير خاصة",
-    "📦 أطلب أي حاجة"
-  ],
-  "menu": [
-    {
-      "id": "1",
-      "name": "وجبة كفتة",
-      "category": "🍔 مأكولات ومطاعم",
-      "price": 150
+      "name": "ساندوتش فلافل ساخن",
+      "price": 10,
+      "category": "🥪 الساندوتشات",
+      "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&auto=format&fit=crop&q=60"
     },
     {
-      "id": "2",
-      "name": "كيلو طماطم طازجة",
-      "category": "🥦 خضروات وفواكه",
-      "price": 15
-    },
-    {
-      "id": "3",
-      "name": "كيلو سمك بوري",
-      "category": "🐟 أسماك ومأكولات بحرية",
-      "price": 180
-    },
-    {
-      "id": "4",
-      "name": "كيلو لحم بلدي",
-      "category": "🥩 لحوم وطيور",
-      "price": 380
-    },
-    {
-      "id": "5",
-      "name": "كرتونة بيض أحمر",
-      "category": "🛒 سوبر ماركت",
-      "price": 160
-    },
-    {
-      "id": "6",
-      "name": "تغيير وتوصيل أنبوبة غاز",
-      "category": "🔥 توصيل غاز",
-      "price": 100
-    },
-    {
-      "id": "7",
-      "name": "توصيل مشوار داخل بلطيم",
-      "category": "🚗 توصيل مشاوير خاصة",
-      "price": 40
+      "name": "بيتزا جبنة مشكلة",
+      "price": 120,
+      "category": "🍕 البيتزا",
+      "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&auto=format&fit=crop&q=60"
     }
   ]
 }
