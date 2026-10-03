@@ -160,9 +160,6 @@
     let customerCoords = null;
 
     const originalDefaultProducts = [
-        { name: "كيلو طماطم", price: 20, category: "السوق", image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
-        { name: "كيلو سمك بلطي مشوي", price: 100, category: "المشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400" },
-        { name: "بيض بلدي - 30 بيضة", price: 130, category: "السوبر ماركت", image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400" }
     ];
 
     const trackingStepsList = [
@@ -601,24 +598,7 @@
             إجمالي المنتجات: 0 ج.م | أجر التوصيل: <span id="deliveryFeeDisplay">20</span> ج.م | الإجمالي النهائي: <span id="grandTotalDisplay" style="color: #34d399;">0</span> ج.م
         </div>
 
-        <div class="checkout-form">
-            <h3 style="color: #38bdf8; margin-bottom: 10px; font-size: 15px;">📝 بيانات التوصيل والاستلام</h3>
-            <input type="text" id="custName" placeholder="اسمك الكريم *">
-            <input type="text" id="custPhone" placeholder="رقم الهاتف (للتواصل عند وصول الكابتن) *">
-            
-            <input type="text" id="custAddress" placeholder="عنوانك بالتفصيل (الشارع، رقم العمارة، الطابق) *">
-            <button type="button" class="btn-location" onclick="getMyLocation()">📍 حدد موقعي الحالي على الخريطة (GPS)</button>
-            <div id="locationStatus" style="font-size: 12px; color: #34d399; margin-bottom: 10px;"></div>
 
-            <select id="paymentMethod">
-                <option value="الدفع نقداً عند الاستلام">💵 الدفع نقداً عند الاستلام</option>
-                <option value="فودافون كاش">🔴 فودافون كاش</option>
-                <option value="تحويل إلكتروني / انستاباي">💳 تحويل إلكتروني / انستاباي</option>
-            </select>
-            <button onclick="submitOrder()" class="btn-order">إرسال الطلب للإدارة والواتساب 🚀</button>
-        </div>
-    </div>
-</div>
 
 <script src="script.js"></script>
 </body>
@@ -628,10 +608,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - READY - في بلطيم</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
     <div class="container">
         <header>
             <h1>جاهز - READY - في بلطيم</h1>
