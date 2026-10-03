@@ -138,8 +138,6 @@
             try { currentProducts = JSON.parse(savedProducts); } catch(e) { currentProducts = []; }
         } else {
             currentProducts = [
-                { "id": "1", "name": "كيلو طماطم طازجة", "category": "خضروات", "price": 15, "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400" },
-                { "id": "2", "name": "كيلو بطاطس للتحمير", "category": "خضروات", "price": 20, "image": "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400" }
             ];
         }
 
@@ -151,22 +149,21 @@
             return;
         }
 
-        currentProducts.forEach((p, index) => {
-            grid.innerHTML += `
-                <div class="product-card" data-name="${p.name}">
-                    <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200'">
-                    <div class="product-info">
-                        <span class="product-cat">${p.category}</span>
-                        <div class="product-title">${p.name}</div>
-                        <div class="product-price">${p.price} ج.م</div>
-                        <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
-                    </div>
+currentProducts.forEach((p, index) => {
+        grid.innerHTML += `
+            <div class="product-card" data-name="${p.name}">
+                <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200'">
+                <div class="product-info">
+                    <span class="product-cat">${p.category}</span>
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">${p.price} ج.م</div>
+                    <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
                 </div>
-            `;
-        });
-        updateCartUI();
-    }
-
+            </div>
+        `;
+    });
+    updateCartUI();
+}
     function filterProducts() {
         let query = document.getElementById('searchInput').value.toLowerCase();
         document.querySelectorAll('.product-card').forEach(card => {
