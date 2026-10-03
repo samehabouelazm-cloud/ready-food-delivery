@@ -199,21 +199,36 @@ const CURRENT_VERSION = "v10_new_images";
         }
     }
 
-    function loadStoreProducts() {
-        let savedVersion = localStorage.getItem('storeProductsVersion');
-        let products = JSON.parse(localStorage.getItem('storeProducts'));
-        
-        if (savedVersion !== CURRENT_VERSION || !products || products.length === 0) {
-            products = originalDefaultProducts;
-            localStorage.setItem('storeProducts', JSON.stringify(originalDefaultProducts));
-            localStorage.setItem('storeProductsVersion', CURRENT_VERSION);
-        }
+function loadStoreProducts() {
+    // إجبار الكود على قراءة المنتجات الجديدة وتحديث الـ localStorage فوراً
+    let products = originalDefaultProducts;
+    localStorage.setItem('storeProducts', JSON.stringify(originalDefaultProducts));
+    localStorage.setItem('storeProductsVersion', CURRENT_VERSION);
 
-        currentProducts = products;
-        let grid = document.getElementById('productsGrid');
-        grid.innerHTML = '';
+    currentProducts = products;
+    let grid = document.getElementById('productsGrid');
+    grid.innerHTML = '';
 
-        currentProducts.forEach((p, index) => {
+    currentProducts.forEach((p, index) => {
+        grid.innerHTML += `
+            <div class="product-card" data-name="${p.name}">
+                <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
+                <div class="product-info">
+                    <span class="product-cat">${p.category || 'عام'}</span>
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">${p.price} ج.م</div>
+                    <button class="add-to-cart" onclick="addToCart(${index})">إضافة للسلة 🛒</button>
+                </div>
+            </div>
+        `;
+    });
+
+    let fee = localStorage.getItem('storeDeliveryFee') || 20;
+    document.getElementById('deliveryFeeDisplay').innerText = fee;
+    updateCartUI();
+    updateAdminBadge();
+}
+    currentProducts.forEach((p, index) => {
             grid.innerHTML += `
                 <div class="product-card" data-name="${p.name}">
                     <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200?text=READY'">
