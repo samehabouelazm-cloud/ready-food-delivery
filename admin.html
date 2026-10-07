@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والإدارة - جاهز</title>
     <script>
+        // حماية أمنية فورية بكلمة السر
         let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
         if (pass !== "Ss@1234567890") {
             alert("كلمة المرور غير صحيحة!");
@@ -12,18 +13,104 @@
         }
     </script>
     <style>
-        body { background: #0f172a; color: #f8fafc; font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; text-align: right; }
-        .box { background: #1e293b; padding: 20px; border-radius: 10px; max-width: 600px; margin: 50px auto; border: 1px solid #334155; }
-        h1 { color: #38bdf8; font-size: 22px; margin-bottom: 15px; }
-        a { color: #34d399; text-decoration: none; font-weight: bold; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; padding: 20px; direction: rtl; text-align: right; }
+        .container { max-width: 1000px; margin: 0 auto; background: #1e293b; border: 2px dashed #6366f1; border-radius: 12px; padding: 20px; }
+        h1 { color: #38bdf8; font-size: 20px; margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; }
+        .btn { background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        th, td { border: 1px solid #334155; padding: 8px; text-align: center; }
+        th { background: #334155; color: #38bdf8; }
+        .back-btn { background: #3b82f6; color: #fff; padding: 8px 15px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>⚙️ مرحباً بك في لوحة الإدارة المحمية</h1>
-        <p>تم التحقق بنجاح.</p>
-        <br>
-        <a href="index.html">⬅ العودة للمتجر الرئيسي</a>
+
+<div class="container">
+    <h1>⚙️ لوحة التحكم وإدارة المنتجات والطلبات</h1>
+    
+    <div style="background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 10px;">📦 إضافة منتج جديد</h3>
+        <input type="text" id="pName" placeholder="اسم المنتج">
+        <input type="text" id="pCat" placeholder="القسم (خضروات، سوبر ماركت...)">
+        <input type="number" id="pPrice" placeholder="السعر بالجنيه">
+        <input type="text" id="pImg" placeholder="رابط الصورة (URL)">
+        <button class="btn" onclick="addProduct()">نشر المنتج في المتجر 🚀</button>
     </div>
+
+    <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 10px;">📋 المنتجات الحالية</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>الصورة</th>
+                <th>الاسم</th>
+                <th>القسم</th>
+                <th>السعر</th>
+                <th>إجراء</th>
+            </tr>
+        </thead>
+        <tbody id="adminProductsList"></tbody>
+    </table>
+
+    <a href="index.html" class="back-btn">⬅ العودة لصفحة المتجر الرئيسي</a>
+</div>
+
+<script>
+    let products = JSON.parse(localStorage.getItem('storeProducts')) || [];
+
+    function renderAdminProducts() {
+        let tbody = document.getElementById('adminProductsList');
+        tbody.innerHTML = '';
+        if (products.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color: #94a3b8;">لا توجد منتجات حالياً.</td></tr>`;
+            return;
+        }
+        products.forEach((p, idx) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><img src="${p.image || ''}" width="35" height="35" style="object-fit:cover; border-radius:4px;" onerror="this.style.display='none'"></td>
+                    <td><b>${p.name}</b></td>
+                    <td>${p.category}</td>
+                    <td>${p.price} ج.م</td>
+                    <td><button onclick="deleteProd(${idx})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function addProduct() {
+        let name = document.getElementById('pName').value.trim();
+        let cat = document.getElementById('pCat').value.trim();
+        let price = parseFloat(document.getElementById('pPrice').value);
+        let image = document.getElementById('pImg').value.trim();
+
+        if (!name || isNaN(price)) {
+            alert('أدخل اسم المنتج والسعر على الأقل!');
+            return;
+        }
+
+        products.push({ name, category: cat || 'عام', price, image });
+        localStorage.setItem('storeProducts', JSON.stringify(products));
+
+        document.getElementById('pName').value = '';
+        document.getElementById('pCat').value = '';
+        document.getElementById('pPrice').value = '';
+        document.getElementById('pImg').value = '';
+
+        renderAdminProducts();
+        alert('تم إضافة المنتج بنجاح للعملاء!');
+    }
+
+    function deleteProd(idx) {
+        if (confirm('هل أنت متأكد من الحذف؟')) {
+            products.splice(idx, 1);
+            localStorage.setItem('storeProducts', JSON.stringify(products));
+            renderAdminProducts();
+        }
+    }
+
+    window.onload = renderAdminProducts;
+</script>
 </body>
 </html>
