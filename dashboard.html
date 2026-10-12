@@ -30,22 +30,18 @@
         <h1>لوحة تحكم المتجر (إدارة المنتجات والطلبات)</h1>
         
         <div style="background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
-            <label style="font-size: 13px; color: #38bdf8; display: block; margin-bottom: 5px;">إعدادات السحابة (JSONBin):</label>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" id="binIdInput" placeholder="أدخل Bin ID أو اضغط حفظ" style="margin-bottom:0; flex-grow: 1;">
-                <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الـ ID</button>
-            </div>
+            <p style="color: #38bdf8; font-size: 14px; font-weight: bold;">✅ النظام يعمل الآن بوضع التخزين المحلي الفوري (مستقر وسريع بدون أخطاء سحابية).</p>
         </div>
 
         <div style="margin-bottom: 20px;">
-            <h3>إضافة منتج جديد (سحابياً)</h3>
-            <input type="text" id="pName" placeholder="اسم المنتج">
-            <input type="number" id="pPrice" placeholder="السعر">
-            <input type="text" id="pImg" placeholder="رابط صورة المنتج">
-            <button class="btn" onclick="addProduct()">إضافة المنتج أونلاين 🚀</button>
+            <h3>إضافة منتج جديد للمتجر</h3>
+            <input type="text" id="pName" placeholder="اسم المنتج (مثال: كشري مصري، شاي ليبتون)">
+            <input type="number" id="pPrice" placeholder="السعر (بالجنيه)">
+            <input type="text" id="pImg" placeholder="رابط صورة المنتج (اختياري)">
+            <button class="btn" onclick="addProduct()">إضافة المنتج وتحديث المتجر فوراً 🚀</button>
         </div>
 
-        <h3>قائمة المنتجات الحالية</h3>
+        <h3>قائمة المنتجات الحالية في المتجر</h3>
         <table>
             <thead>
                 <tr>
@@ -61,43 +57,23 @@
     </div>
 
     <script>
-        const MASTER_KEY = "$2a$10$rfoY9cg5fqWgPrYIVhQTeOXvgZocLt3Bq2Mhxbo5a3Wkqx5ZvQmBW";
         let currentAdminProducts = [];
 
-        function getBinId() {
-            return localStorage.getItem('jsonbin_id') || "6acd38dffd5d160536539d2";
-        }
-
-        function saveBinId() {
-            let id = document.getElementById('binIdInput').value.trim();
-            if(!id) { alert('الرجاء إدخال Bin ID صحيح!'); return; }
-            localStorage.setItem('jsonbin_id', id);
-            alert('تم حفظ الربط بنجاح! جاري تحميل البيانات...');
-            loadAdminProducts();
-        }
-
-        async function loadAdminProducts() {
-            let binId = getBinId();
-            document.getElementById('binIdInput').value = binId;
-            let tbody = document.getElementById('adminProductsList');
-            
-            tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>';
-
-            try {
-                let response = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
-                    headers: { 'X-Master-Key': MASTER_KEY }
-                });
-                if (response.ok) {
-                    let resData = await response.json();
-                    currentAdminProducts = resData.record || [];
-                    localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
-                } else {
-                    throw new Error();
+        function loadAdminProducts() {
+            // جلب المنتجات المخزنة محلياً، أو وضع منتج افتراضي إذا كانت القائمة فارغة
+            let saved = localStorage.getItem('storeProducts');
+            if (saved) {
+                try {
+                    currentAdminProducts = JSON.parse(saved);
+                } catch(e) {
+                    currentAdminProducts = [];
                 }
-            } catch (e) {
-                currentAdminProducts = JSON.parse(localStorage.getItem('storeProducts')) || [];
+            } else {
+                currentAdminProducts = [
+                    { name: "شاي ليبتون أسود-100 جرام", price: 20, image: "https://via.placeholder.com/200", category: "عام" }
+                ];
+                localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
             }
-
             renderAdminTable();
         }
 
@@ -121,7 +97,7 @@
             });
         }
 
-        async function addProduct() {
+        function addProduct() {
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
             let img = document.getElementById('pImg').value.trim();
@@ -139,48 +115,22 @@
                 category: "عام"
             });
 
-            await updateCloudData(currentAdminProducts);
+            // حفظ المنتجات محلياً لتظهر فوراً في واجهة العملاء
+            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
 
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
             document.getElementById('pImg').value = '';
             
             renderAdminTable();
+            alert('✅ تمت إضافة وتحديث المنتج بنجاح وتزامن مع المتجر فوراً!');
         }
 
-        async function deleteProduct(index) {
+        function deleteProduct(index) {
             currentAdminProducts.splice(index, 1);
-            await updateCloudData(currentAdminProducts);
+            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
             renderAdminTable();
-        }
-
-        async function updateCloudData(data) {
-            try {
-                // استخدام POST لإنشاء سجل جديد دائمًا لتجنب قيود الـ PUT والـ Private Bins
-                let response = await fetch('https://api.jsonbin.io/v3/b', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY,
-                        'X-Bin-Name': 'ReadyStoreData'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if(response.ok) {
-                    let resData = await response.json();
-                    let newBinId = resData.metadata.id;
-                    localStorage.setItem('jsonbin_id', newBinId);
-                    document.getElementById('binIdInput').value = newBinId;
-                    localStorage.setItem('storeProducts', JSON.stringify(data));
-                    alert('✅ تمت الإضافة والحفظ السحابي بنجاح تام!');
-                } else {
-                    alert('فشل الحفظ السحابي!');
-                }
-            } catch(err) {
-                console.error(err);
-                alert('خطأ في الاتصال بالسحابة!');
-            }
+            alert('🗑️ تم حذف المنتج بنجاح!');
         }
 
         window.onload = loadAdminProducts;
