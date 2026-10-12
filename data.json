@@ -1,22 +1,8 @@
-{
-  "products": [
-    {
-      "name": "كشري مصري مميز",
-      "price": 35,
-      "category": "🍔 الوجبات السريعة",
-      "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&auto=format&fit=crop&q=60"
-    },
-    {
-      "name": "ساندوتش فلافل ساخن",
-      "price": 10,
-      "category": "🥪 الساندوتشات",
-      "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&auto=format&fit=crop&q=60"
-    },
-    {
-      "name": "بيتزا جبنة مشكلة",
-      "price": 120,
-      "category": "🍕 البيتزا",
-      "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&auto=format&fit=crop&q=60"
-    }
-  ]
-}
+[
+  {
+    "name": "شاي ليبتون أسود-100 جرام",
+    "price": 20,
+    "category": "مشروبات",
+    "image": "https://via.placeholder.com/200"
+  }
+]
