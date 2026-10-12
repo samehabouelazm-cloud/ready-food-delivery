@@ -134,15 +134,24 @@
         "تم تسليم الطلب بنجاح"
     ];
 
-    function loadStoreProducts() {
-        let savedProducts = localStorage.getItem('storeProducts') || localStorage.getItem('store_products');
-        if (savedProducts) {
-            try { currentProducts = JSON.parse(savedProducts); } catch(e) { currentProducts = []; }
-        } else {
-            currentProducts = [];
+    async function loadStoreProducts() {
+        let grid = document.getElementById('productsGrid');
+        grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري جلب أحدث المنتجات...</p>`;
+
+        try {
+            // جلب المنتجات أونلاين مباشرة من ملف data.json مع منع التخزين المؤقت (no-cache)
+            let response = await fetch('./data.json?t=' + new Date().getTime());
+            if (response.ok) {
+                currentProducts = await response.json();
+                localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
+            } else {
+                throw new Error("تعذر الوصول لملف المنتجات");
+            }
+        } catch (e) {
+            let savedProducts = localStorage.getItem('storeProducts');
+            currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
         }
 
-        let grid = document.getElementById('productsGrid');
         grid.innerHTML = '';
 
         if (!currentProducts || currentProducts.length === 0) {
