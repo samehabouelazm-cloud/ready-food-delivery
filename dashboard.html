@@ -30,10 +30,11 @@
         <h1>لوحة تحكم المتجر (إدارة المنتجات والطلبات)</h1>
         
         <div style="background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
-            <label style="font-size: 13px; color: #38bdf8; display: block; margin-bottom: 5px;">ربط سحابي (JSONBin ID):</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="binIdInput" placeholder="أدخل Bin ID هنا..." style="margin-bottom:0;">
-                <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الربط</button>
+            <label style="font-size: 13px; color: #38bdf8; display: block; margin-bottom: 5px;">إعدادات السحابة (JSONBin):</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="binIdInput" placeholder="أدخل Bin ID موجود، أو اضغط إنشاء تلقائي مباشرة" style="margin-bottom:0; flex-grow: 1;">
+                <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الـ ID</button>
+                <button onclick="createBinAutomatically()" style="background: #8b5cf6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">✨ إنشاء Bin جديد تلقائياً</button>
             </div>
         </div>
 
@@ -76,13 +77,47 @@
             loadAdminProducts();
         }
 
+        async function createBinAutomatically() {
+            try {
+                let response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY,
+                        'X-Bin-Name': 'ReadyStoreProducts'
+                    },
+                    body: JSON.stringify([
+                        {
+                            name: "منتج تجريبي أولي",
+                            price: 15,
+                            category: "عام",
+                            image: "https://via.placeholder.com/200"
+                        }
+                    ])
+                });
+
+                if (response.ok) {
+                    let data = await response.json();
+                    let newBinId = data.metadata.id;
+                    localStorage.setItem('jsonbin_id', newBinId);
+                    document.getElementById('binIdInput').value = newBinId;
+                    alert('🎉 تم إنشاء الـ Bin الجديد وحفظه أونلاين بنجاح!\nBin ID: ' + newBinId);
+                    loadAdminProducts();
+                } else {
+                    alert('فشل إنشاء الـ Bin تلقائياً!');
+                }
+            } catch (err) {
+                alert('حدث خطأ أثناء الاتصال بـ JSONBin!');
+            }
+        }
+
         async function loadAdminProducts() {
             let binId = getBinId();
             document.getElementById('binIdInput').value = binId;
             let tbody = document.getElementById('adminProductsList');
             
             if(!binId) {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#f59e0b;">الرجاء إنشاء Bin في موقع JSONBin وإدخال الـ Bin ID بالأعلى لربط المتجر.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#f59e0b;">الرجاء الضغط على زر "✨ إنشاء Bin جديد تلقائياً" بالأعلى لربط المتجر فوراً.</td></tr>';
                 return;
             }
 
@@ -128,7 +163,7 @@
 
         async function addProduct() {
             let binId = getBinId();
-            if(!binId) { alert('الرجاء ربط Bin ID أولاً من الأعلى!'); return; }
+            if(!binId) { alert('الرجاء إنشاء أو ربط Bin ID أولاً من الأعلى!'); return; }
 
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
