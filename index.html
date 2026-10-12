@@ -8,7 +8,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #f8fafc; color: #1e293b; padding: 15px; direction: rtl; text-align: right; }
         
-        /* الهيدر العلوي */
+        /* الهيدر الرئيسي */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 10px; }
         .header h1 { color: #0284c7; font-size: 22px; display: flex; align-items: center; gap: 8px; }
         .header-actions { display: flex; gap: 10px; align-items: center; }
@@ -29,7 +29,7 @@
         .product-card .category-badge { display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 11px; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; font-weight: bold; }
         .product-card p { color: #059669; font-weight: bold; font-size: 17px; margin-bottom: 10px; }
         
-        /* عناصر التحكم بالكمية في البطاقة */
+        /* التحكم بالكمية */
         .qty-controls { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
         .qty-btn { background: #e2e8f0; color: #1e293b; border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .qty-btn:hover { background: #cbd5e1; }
@@ -40,7 +40,7 @@
 
         .empty-msg { grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; font-size: 16px; background: #fff; border-radius: 12px; }
 
-        /* النوافذ المنبثقة (السلة، الدفع، التتبع) */
+        /* النوافذ المنبثقة */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .modal-body { background: #fff; width: 100%; max-width: 520px; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
         .modal-body h2 { color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; }
@@ -66,7 +66,6 @@
 </head>
 <body>
 
-    <!-- الهيدر الرئيسي -->
     <div class="header">
         <h1>🍔 جاهز - منصة توصيل الطعام والمنتجات</h1>
         <div class="header-actions">
@@ -75,11 +74,10 @@
         </div>
     </div>
 
-    <!-- شريط البحث والفلترة -->
     <div class="search-filter-box">
         <input type="text" id="searchInput" placeholder="ابحث عن وجبتك أو منتجك المفضل..." oninput="filterProducts()">
         <select id="categoryFilter" onchange="filterProducts()">
-            <option value="all">جميع التصنيفات الأقسام</option>
+            <option value="all">جميع التصنيفات والأقسام</option>
             <option value="عام">عام</option>
             <option value="وجبات سريعة">وجبات سريعة</option>
             <option value="مشروبات">مشروبات</option>
@@ -88,9 +86,8 @@
         </select>
     </div>
 
-    <!-- شبكة عرض المنتجات -->
     <div class="products-grid" id="storeProductsGrid">
-        <div class="empty-msg">جاري تحميل المنتجات من السحابة... ⏳</div>
+        <div class="empty-msg">جاري تحميل المنتجات... ⏳</div>
     </div>
 
     <!-- 1. نافذة سلة المشتريات -->
@@ -141,7 +138,7 @@
         </div>
     </div>
 
-    <!-- 3. نافذة تتبع الطلب التفاعلي -->
+    <!-- 3. نافذة تتبع الطلب -->
     <div class="modal-overlay" id="trackerModal">
         <div class="modal-body">
             <h2><span>🛵 تتبع حالة طلبك المباشرة</span> <span style="cursor:pointer;" onclick="closeModal('trackerModal')">✕</span></h2>
@@ -178,24 +175,33 @@
 
     <script>
         const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
-        const ADMIN_WHATSAPP_NUMBER = "201000000000"; // يمكنك تغيير هذا الرقم لرقم واتساب الإدارة الخاص بك
+        const ADMIN_WHATSAPP_NUMBER = "201034101822"; // تم تحديث رقم الواتساب المخصص للإدارة
 
         let allProducts = [];
-        let cart = []; // تحتوي على { name, price, qty }
-        let productQuantities = {}; // لتتبع كميات الاختيار في البطاقات
+        let cart = [];
+        let productQuantities = {};
 
         async function loadStoreProducts() {
+            // عرض المنتجات المحفوظة مؤقتاً أولاً لسرعة فائقة بدون انتظار
+            let cached = localStorage.getItem('storeProductsCache');
+            if(cached) {
+                try {
+                    allProducts = JSON.parse(cached);
+                    displayProducts(allProducts);
+                } catch(e){}
+            }
+
+            // المزامنة مع السحابة في الخلفية
             try {
                 let res = await fetch(API_URL);
                 if (res.ok) {
                     allProducts = await res.json();
-                } else {
-                    allProducts = [];
+                    localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
+                    displayProducts(allProducts);
                 }
             } catch(e) {
-                allProducts = [];
+                if(!allProducts.length) displayProducts([]);
             }
-            displayProducts(allProducts);
         }
 
         function displayProducts(products) {
@@ -323,4 +329,59 @@
             document.getElementById('cartModal').style.display = 'flex';
         }
 
-        function closeModal(
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function goToCheckout() {
+            if(cart.length === 0) { alert('السلة فارغة!'); return; }
+            closeModal('cartModal');
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function submitOrderToWhatsApp() {
+            let name = document.getElementById('custName').value.trim();
+            let phone = document.getElementById('custPhone').value.trim();
+            let address = document.getElementById('custAddress').value.trim();
+            let payMethod = document.getElementById('payMethod').value;
+
+            if(!name || !phone || !address) {
+                alert('الرجاء تعبئة كافة بياناتك (الاسم، الجوال، والعنوان) لإكمال الطلب!');
+                return;
+            }
+
+            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let total = subtotal + 15;
+            let orderRef = Math.floor(1000 + Math.random() * 9000);
+
+            let msg = `*🍔 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
+            msg += `👤 *اسم العميل:* ${name}\n`;
+            msg += `📞 *رقم الجوال:* ${phone}\n`;
+            msg += `📍 *العنوان:* ${address}\n`;
+            msg += `💳 *طريقة الدفع:* ${payMethod}\n\n`;
+            msg += `*📦 قائمة الطلبات:*\n`;
+
+            cart.forEach((item, index) => {
+                msg += `${index + 1}. ${item.name} | العدد: ${item.qty} | السعر: ${item.price * item.qty} ج.م\n`;
+            });
+
+            msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
+            msg += `\n🛵 *التوصيل:* 15 ج.م`;
+            msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
+            msg += `يرجى تأكيد الطلب والبدء في التجهيز! وشكراً.`;
+
+            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+            window.open(waUrl, '_blank');
+
+            cart = [];
+            updateCartUI();
+            closeModal('checkoutModal');
+            
+            document.getElementById('orderRefText').innerText = `الرقم المرجعي للطلب: #${orderRef}`;
+            document.getElementById('trackerModal').style.display = 'flex';
+        }
+
+        window.onload = loadStoreProducts;
+    </script>
+</body>
+</html>
