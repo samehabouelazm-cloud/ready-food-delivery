@@ -34,7 +34,6 @@
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <input type="text" id="binIdInput" placeholder="أدخل Bin ID موجود، أو اضغط إنشاء تلقائي مباشرة" style="margin-bottom:0; flex-grow: 1;">
                 <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الـ ID</button>
-                <button onclick="createBinAutomatically()" style="background: #8b5cf6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">✨ إنشاء Bin جديد تلقائياً</button>
             </div>
         </div>
 
@@ -77,47 +76,13 @@
             loadAdminProducts();
         }
 
-        async function createBinAutomatically() {
-            try {
-                let response = await fetch('https://api.jsonbin.io/v3/b', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY,
-                        'X-Bin-Name': 'ReadyStoreProducts'
-                    },
-                    body: JSON.stringify([
-                        {
-                            name: "منتج تجريبي أولي",
-                            price: 15,
-                            category: "عام",
-                            image: "https://via.placeholder.com/200"
-                        }
-                    ])
-                });
-
-                if (response.ok) {
-                    let data = await response.json();
-                    let newBinId = data.metadata.id;
-                    localStorage.setItem('jsonbin_id', newBinId);
-                    document.getElementById('binIdInput').value = newBinId;
-                    alert('🎉 تم إنشاء الـ Bin الجديد وحفظه أونلاين بنجاح!\nBin ID: ' + newBinId);
-                    loadAdminProducts();
-                } else {
-                    alert('فشل إنشاء الـ Bin تلقائياً!');
-                }
-            } catch (err) {
-                alert('حدث خطأ أثناء الاتصال بـ JSONBin!');
-            }
-        }
-
         async function loadAdminProducts() {
             let binId = getBinId();
             document.getElementById('binIdInput').value = binId;
             let tbody = document.getElementById('adminProductsList');
             
             if(!binId) {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#f59e0b;">الرجاء الضغط على زر "✨ إنشاء Bin جديد تلقائياً" بالأعلى لربط المتجر فوراً.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#f59e0b;">الرجاء إدخال Bin ID الخاص بك بالأعلى والضغط على حفظ الـ ID.</td></tr>';
                 return;
             }
 
@@ -163,7 +128,7 @@
 
         async function addProduct() {
             let binId = getBinId();
-            if(!binId) { alert('الرجاء إنشاء أو ربط Bin ID أولاً من الأعلى!'); return; }
+            if(!binId) { alert('الرجاء ربط Bin ID أولاً من الأعلى!'); return; }
 
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
@@ -189,7 +154,6 @@
             document.getElementById('pImg').value = '';
             
             renderAdminTable();
-            alert('✅ تمت إضافة المنتج وحفظه أونلاين بنجاح!');
         }
 
         async function deleteProduct(index) {
@@ -208,16 +172,21 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
+                        'X-Master-Key': MASTER_KEY,
+                        'X-Bin-Versioning': 'false'
                     },
                     body: JSON.stringify(data)
                 });
                 if(response.ok) {
                     localStorage.setItem('storeProducts', JSON.stringify(data));
+                    alert('✅ تمت عملية الحفظ والتحديث في السحابة بنجاح!');
                 } else {
-                    alert('فشل التحديث في السحابة!');
+                    let errText = await response.text();
+                    console.error("JSONBin error:", errText);
+                    alert('فشل التحديث في السحابة! تأكد من صحة الـ Bin ID.');
                 }
             } catch(err) {
+                console.error(err);
                 alert('خطأ في الاتصال بالسحابة!');
             }
         }
