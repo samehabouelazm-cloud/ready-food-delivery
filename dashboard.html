@@ -28,13 +28,23 @@
 <body>
     <div class="container">
         <h1>لوحة تحكم المتجر (إدارة المنتجات والطلبات)</h1>
+        
+        <div style="background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
+            <label style="font-size: 13px; color: #38bdf8; display: block; margin-bottom: 5px;">ربط سحابي (JSONBin ID):</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="binIdInput" placeholder="أدخل Bin ID هنا..." style="margin-bottom:0;">
+                <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الربط</button>
+            </div>
+        </div>
+
         <div style="margin-bottom: 20px;">
-            <h3>إضافة منتج جديد</h3>
+            <h3>إضافة منتج جديد (سحابياً)</h3>
             <input type="text" id="pName" placeholder="اسم المنتج">
             <input type="number" id="pPrice" placeholder="السعر">
             <input type="text" id="pImg" placeholder="رابط صورة المنتج">
-            <button class="btn" onclick="addProduct()">إضافة المنتج</button>
+            <button class="btn" onclick="addProduct()">إضافة المنتج أونلاين 🚀</button>
         </div>
+
         <h3>قائمة المنتجات الحالية</h3>
         <table>
             <thead>
@@ -51,23 +61,46 @@
     </div>
 
     <script>
+        const MASTER_KEY = "$2a$10$rfoY9cg5fqWgPrYIVhQTeOXvgZocLt3Bq2Mhxbo5a3Wkqx5ZvQmBW";
         let currentAdminProducts = [];
 
+        function getBinId() {
+            return localStorage.getItem('jsonbin_id') || "";
+        }
+
+        function saveBinId() {
+            let id = document.getElementById('binIdInput').value.trim();
+            if(!id) { alert('الرجاء إدخال Bin ID صحيح!'); return; }
+            localStorage.setItem('jsonbin_id', id);
+            alert('تم حفظ الربط بنجاح! جاري تحميل البيانات...');
+            loadAdminProducts();
+        }
+
         async function loadAdminProducts() {
+            let binId = getBinId();
+            document.getElementById('binIdInput').value = binId;
             let tbody = document.getElementById('adminProductsList');
-            tbody.innerHTML = `<tr><td colspan="4" style="color:#94a3b8;">جاري التحميل...</td></tr>`;
+            
+            if(!binId) {
+                tbody.innerHTML = `<tr><td colspan="4" style="color:#f59e0b;">الرجاء إنشاء Bin في موقع JSONBin وإدخال الـ Bin ID بالأعلى لربط المتجر.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = `<tr><td colspan="4" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>`;
 
             try {
-                let response = await fetch('./data.json?t=' + new Date().getTime());
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
                 if (response.ok) {
-                    currentAdminProducts = await response.json();
+                    let resData = await response.json();
+                    currentAdminProducts = resData.record || [];
+                    localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
                 } else {
-                    let saved = localStorage.getItem('storeProducts') || localStorage.getItem('store_products');
-                    currentAdminProducts = saved ? JSON.parse(saved) : [];
+                    throw new Error();
                 }
             } catch (e) {
-                let saved = localStorage.getItem('storeProducts') || localStorage.getItem('store_products');
-                currentAdminProducts = saved ? JSON.parse(saved) : [];
+                currentAdminProducts = JSON.parse(localStorage.getItem('storeProducts')) || [];
             }
 
             renderAdminTable();
@@ -95,7 +128,10 @@
             });
         }
 
-        function addProduct() {
+        async function addProduct() {
+            let binId = getBinId();
+            if(!binId) { alert('الرجاء ربط Bin ID أولاً من الأعلى!'); return; }
+
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
             let img = document.getElementById('pImg').value.trim();
@@ -113,26 +149,42 @@
                 category: "عام"
             });
 
-            saveAndSyncProducts();
+            await updateCloudData(currentAdminProducts);
 
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
             document.getElementById('pImg').value = '';
             
             renderAdminTable();
-            alert('تمت إضافة المنتج بنجاح! (تأكد من تحديث ملف data.json في حال رفع المشروع على سيرفر نهائي)');
+            alert('✅ تمت إضافة المنتج وحفظه أونلاين بنجاح!');
         }
 
-        function deleteProduct(index) {
+        async function deleteProduct(index) {
+            let binId = getBinId();
+            if(!binId) return;
+
             currentAdminProducts.splice(index, 1);
-            saveAndSyncProducts();
+            await updateCloudData(currentAdminProducts);
             renderAdminTable();
         }
 
-        function saveAndSyncProducts() {
-            // حفظ محلياً في المفتاحين لضمان عدم الضياع
-            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
-            localStorage.setItem('store_products', JSON.stringify(currentAdminProducts));
+        async function updateCloudData(data) {
+            let binId = getBinId();
+            try {
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify(data)
+                });
+                if(response.ok) {
+                    localStorage.setItem('storeProducts', JSON.stringify(data));
+                }
+            } catch(err) {
+                alert('خطأ في الاتصال بالسحابة!');
+            }
         }
 
         window.onload = loadAdminProducts;

@@ -74,7 +74,7 @@
     </div>
 
     <div id="productsGrid" class="products-grid">
-        <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري تحميل المنتجات...</p>
+        <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري جلب أحدث المنتجات من السحابة...</p>
     </div>
 
     <div class="cart-section">
@@ -119,6 +119,9 @@
 
 <script>
     const MY_WHATSAPP_NUMBER = "201034101822";
+    const BIN_ID = localStorage.getItem('jsonbin_id') || ""; 
+    const MASTER_KEY = "$2a$10$rfoY9cg5fqWgPrYIVhQTeOXvgZocLt3Bq2Mhxbo5a3Wkqx5ZvQmBW";
+    
     let currentProducts = [];
     let cart = [];
     let customerCoords = null;
@@ -138,22 +141,32 @@
         let grid = document.getElementById('productsGrid');
         grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري جلب أحدث المنتجات...</p>`;
 
-        try {
-            // جلب المنتجات أونلاين مباشرة من ملف data.json مع منع التخزين المؤقت (no-cache)
-            let response = await fetch('./data.json?t=' + new Date().getTime());
-            if (response.ok) {
-                currentProducts = await response.json();
-                localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
-            } else {
-                throw new Error("تعذر الوصول لملف المنتجات");
-            }
-        } catch (e) {
-            let savedProducts = localStorage.getItem('storeProducts');
-            currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
+        if (!BIN_ID) {
+            currentProducts = JSON.parse(localStorage.getItem('storeProducts')) || [];
+            renderProducts(grid);
+            return;
         }
 
-        grid.innerHTML = '';
+        try {
+            let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': MASTER_KEY }
+            });
+            if (response.ok) {
+                let resData = await response.json();
+                currentProducts = resData.record || [];
+                localStorage.setItem('storeProducts', JSON.stringify(currentProducts));
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            currentProducts = JSON.parse(localStorage.getItem('storeProducts')) || [];
+        }
 
+        renderProducts(grid);
+    }
+
+    function renderProducts(grid) {
+        grid.innerHTML = '';
         if (!currentProducts || currentProducts.length === 0) {
             grid.innerHTML = `<p style="grid-column: span 3; text-align: center; color: #94a3b8; padding: 20px;">لا توجد منتجات معروضة حالياً. يمكن الإضافة من لوحة الإدارة ⚙</p>`;
             updateCartUI();
