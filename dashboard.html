@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والإدارة</title>
     <script>
-        // حماية أمنية فورية بكلمة المرور
         let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
         if (pass !== "Ss@1234567890") {
             alert("كلمة المرور غير صحيحة!");
-            window.location.href = "index.html"; // إعادة توجيه لصفحة المتجر لو كلمة السر غلط
+            window.location.href = "index.html";
         }
     </script>
     <style>
@@ -24,14 +23,11 @@
         th, td { border: 1px solid #334155; padding: 8px; text-align: center; }
         th { background: #334155; color: #38bdf8; }
         .back-btn { background: #3b82f6; color: #fff; padding: 8px 15px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
-        .back-btn:hover { background: #2563eb; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>لوحة تحكم المتجر (إدارة المنتجات والطلبات)</h1>
-        
         <div style="margin-bottom: 20px;">
             <h3>إضافة منتج جديد</h3>
             <input type="text" id="pName" placeholder="اسم المنتج">
@@ -39,7 +35,6 @@
             <input type="text" id="pImg" placeholder="رابط صورة المنتج">
             <button class="btn" onclick="addProduct()">إضافة المنتج</button>
         </div>
-
         <h3>قائمة المنتجات الحالية</h3>
         <table>
             <thead>
@@ -50,43 +45,35 @@
                     <th>الإجراء</th>
                 </tr>
             </thead>
-            <tbody id="adminProductsList">
-                <!-- المنتجات تظهر هنا تلقائياً -->
-            </tbody>
+            <tbody id="adminProductsList"></tbody>
         </table>
-
         <a href="index.html" class="back-btn">العودة إلى واجهة المتجر الرئيسية</a>
     </div>
-
     <script>
-        // دالة عرض وإدارة المنتجات في لوحة التحكم
         function loadAdminProducts() {
-            let products = JSON.parse(localStorage.getItem('store_products')) || [
-                {name: "وجبة برجر دجاج", price: 25, img: ""},
-                {name: "وجبة شاورما عربي", price: 18, img: ""}
-            ];
+            let products = JSON.parse(localStorage.getItem('store_products')) || [];
             let tbody = document.getElementById('adminProductsList');
             tbody.innerHTML = '';
+            if(products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="color:#94a3b8;">لا توجد منتجات مضافة حالياً.</td></tr>`;
+                return;
+            }
             products.forEach((p, index) => {
                 tbody.innerHTML += `
                     <tr>
                         <td><img src="${p.img || 'https://via.placeholder.com/50'}" width="40" height="40" style="border-radius:4px;"></td>
                         <td>${p.name}</td>
-                        <td>${p.price} ريال</td>
+                        <td>${p.price} ج.م</td>
                         <td><button onclick="deleteProduct(${index})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
                     </tr>
                 `;
             });
         }
-
         function addProduct() {
             let name = document.getElementById('pName').value;
             let price = document.getElementById('pPrice').value;
             let img = document.getElementById('pImg').value;
-            if(!name || !price) {
-                alert('الرجاء إدخال الاسم والسعر على الأقل!');
-                return;
-            }
+            if(!name || !price) { alert('الرجاء إدخال الاسم والسعر!'); return; }
             let products = JSON.parse(localStorage.getItem('store_products')) || [];
             products.push({name, price, img});
             localStorage.setItem('store_products', JSON.stringify(products));
@@ -96,14 +83,12 @@
             loadAdminProducts();
             alert('تمت إضافة المنتج بنجاح!');
         }
-
         function deleteProduct(index) {
             let products = JSON.parse(localStorage.getItem('store_products')) || [];
             products.splice(index, 1);
             localStorage.setItem('store_products', JSON.stringify(products));
             loadAdminProducts();
         }
-
         window.onload = loadAdminProducts;
     </script>
 </body>
