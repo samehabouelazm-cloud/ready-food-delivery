@@ -82,14 +82,14 @@
             let tbody = document.getElementById('adminProductsList');
             
             if(!binId) {
-                tbody.innerHTML = `<tr><td colspan="4" style="color:#f59e0b;">الرجاء إنشاء Bin في موقع JSONBin وإدخال الـ Bin ID بالأعلى لربط المتجر.</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#f59e0b;">الرجاء إنشاء Bin في موقع JSONBin وإدخال الـ Bin ID بالأعلى لربط المتجر.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = `<tr><td colspan="4" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>';
 
             try {
-                let response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                let response = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
                     headers: { 'X-Master-Key': MASTER_KEY }
                 });
                 if (response.ok) {
@@ -111,20 +111,18 @@
             tbody.innerHTML = '';
             
             if (!currentAdminProducts || currentAdminProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="color:#94a3b8;">لا توجد منتجات مضافة حالياً.</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">لا توجد منتجات مضافة حالياً.</td></tr>';
                 return;
             }
 
             currentAdminProducts.forEach((p, index) => {
                 let imgSrc = p.image || p.img || 'https://via.placeholder.com/50';
-                tbody.innerHTML += `
-                    <tr>
-                        <td><img src="${imgSrc}" width="40" height="40" style="border-radius:4px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/50'"></td>
-                        <td>${p.name}</td>
-                        <td>${p.price} ج.م</td>
-                        <td><button onclick="deleteProduct(${index})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
-                    </tr>
-                `;
+                tbody.innerHTML += '<tr>' +
+                    '<td><img src="' + imgSrc + '" width="40" height="40" style="border-radius:4px; object-fit: cover;" onerror="this.src=\'https://via.placeholder.com/50\'"></td>' +
+                    '<td>' + p.name + '</td>' +
+                    '<td>' + p.price + ' ج.م</td>' +
+                    '<td><button onclick="deleteProduct(' + index + ')" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>' +
+                '</tr>';
             });
         }
 
@@ -171,7 +169,7 @@
         async function updateCloudData(data) {
             let binId = getBinId();
             try {
-                let response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                let response = await fetch('https://api.jsonbin.io/v3/b/' + binId, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -181,6 +179,8 @@
                 });
                 if(response.ok) {
                     localStorage.setItem('storeProducts', JSON.stringify(data));
+                } else {
+                    alert('فشل التحديث في السحابة!');
                 }
             } catch(err) {
                 alert('خطأ في الاتصال بالسحابة!');
