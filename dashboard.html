@@ -32,7 +32,7 @@
         <div style="background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
             <label style="font-size: 13px; color: #38bdf8; display: block; margin-bottom: 5px;">إعدادات السحابة (JSONBin):</label>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" id="binIdInput" placeholder="أدخل Bin ID موجود، أو اضغط إنشاء تلقائي مباشرة" style="margin-bottom:0; flex-grow: 1;">
+                <input type="text" id="binIdInput" placeholder="أدخل Bin ID أو اضغط حفظ" style="margin-bottom:0; flex-grow: 1;">
                 <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الـ ID</button>
             </div>
         </div>
@@ -65,7 +65,7 @@
         let currentAdminProducts = [];
 
         function getBinId() {
-            return localStorage.getItem('jsonbin_id') || "";
+            return localStorage.getItem('jsonbin_id') || "6acd38dffd5d160536539d2";
         }
 
         function saveBinId() {
@@ -81,11 +81,6 @@
             document.getElementById('binIdInput').value = binId;
             let tbody = document.getElementById('adminProductsList');
             
-            if(!binId) {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#f59e0b;">الرجاء إدخال Bin ID الخاص بك بالأعلى والضغط على حفظ الـ ID.</td></tr>';
-                return;
-            }
-
             tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>';
 
             try {
@@ -127,9 +122,6 @@
         }
 
         async function addProduct() {
-            let binId = getBinId();
-            if(!binId) { alert('الرجاء ربط Bin ID أولاً من الأعلى!'); return; }
-
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
             let img = document.getElementById('pImg').value.trim();
@@ -157,33 +149,33 @@
         }
 
         async function deleteProduct(index) {
-            let binId = getBinId();
-            if(!binId) return;
-
             currentAdminProducts.splice(index, 1);
             await updateCloudData(currentAdminProducts);
             renderAdminTable();
         }
 
         async function updateCloudData(data) {
-            let binId = getBinId();
             try {
-                let response = await fetch('https://api.jsonbin.io/v3/b/' + binId, {
-                    method: 'PUT',
+                // استخدام POST لإنشاء سجل جديد دائمًا لتجنب قيود الـ PUT والـ Private Bins
+                let response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': MASTER_KEY,
-                        'X-Bin-Versioning': 'false'
+                        'X-Bin-Name': 'ReadyStoreData'
                     },
                     body: JSON.stringify(data)
                 });
+                
                 if(response.ok) {
+                    let resData = await response.json();
+                    let newBinId = resData.metadata.id;
+                    localStorage.setItem('jsonbin_id', newBinId);
+                    document.getElementById('binIdInput').value = newBinId;
                     localStorage.setItem('storeProducts', JSON.stringify(data));
-                    alert('✅ تمت عملية الحفظ والتحديث في السحابة بنجاح!');
+                    alert('✅ تمت الإضافة والحفظ السحابي بنجاح تام!');
                 } else {
-                    let errText = await response.text();
-                    console.error("JSONBin error:", errText);
-                    alert('فشل التحديث في السحابة! تأكد من صحة الـ Bin ID.');
+                    alert('فشل الحفظ السحابي!');
                 }
             } catch(err) {
                 console.error(err);
