@@ -54,7 +54,7 @@
         <h1>🛒 جاهز - READY - في بلطيم</h1>
         <div class="nav-btns">
             <button class="btn btn-track" onclick="toggleTrackingSection()">🔍 تتبع طلبي</button>
-            <a href="admin.html" class="btn btn-admin">⚙️ الإدارة</a>
+            <a href="dashboard.html" class="btn btn-admin">⚙️ الإدارة</a>
         </div>
     </header>
 
@@ -72,12 +72,7 @@
     <div class="search-box">
         <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضل هنا..." oninput="filterProducts()">
     </div>
-<script>
-    // وضع المتغير داخل وسوم السكريبت
-    const MY_WHATSAPP_NUMBER = "201034101822";
 
-    // بقية دوال الجافاسكربت والسلة...
-</script>
     <div id="productsGrid" class="products-grid">
         <p style="grid-column: span 3; text-align: center; color: #94a3b8;">جاري تحميل المنتجات...</p>
     </div>
@@ -123,6 +118,7 @@
 </div>
 
 <script>
+    const MY_WHATSAPP_NUMBER = "201034101822";
     let currentProducts = [];
     let cart = [];
     let customerCoords = null;
@@ -139,7 +135,7 @@
     ];
 
     function loadStoreProducts() {
-        let savedProducts = localStorage.getItem('storeProducts');
+        let savedProducts = localStorage.getItem('storeProducts') || localStorage.getItem('store_products');
         if (savedProducts) {
             try { currentProducts = JSON.parse(savedProducts); } catch(e) { currentProducts = []; }
         } else {
@@ -158,7 +154,7 @@
         currentProducts.forEach((p, index) => {
             grid.innerHTML += `
                 <div class="product-card" data-name="${p.name}">
-                    <img src="${p.image || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200'">
+                    <img src="${p.image || p.img || 'https://via.placeholder.com/200'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200'">
                     <div class="product-info">
                         <span class="product-cat">${p.category || 'عام'}</span>
                         <div class="product-title">${p.name}</div>
@@ -269,14 +265,14 @@
         let itemsText = cart.map(i => `${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م`).join('\n');
         let mapLink = customerCoords ? `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}` : 'غير متوفر';
 
-        let whatsappMessage = `🚨 *طلب جديد #${orderId}* 🚀\n\n👤 *الاسم:* ${name}\n📞 *الهاتف:* ${phone}\n📍 *العنوان:* ${address}\n🗺 *الخريطة:* ${mapLink}\n\n🛒 *المنتجات:*\n${itemsText}\n\n💰 *الإجمالي:* ${grandTotal} ج.م\n💳 *الدفع:* ${paymentMethod}`;
+        let whatsappMessage = `🚨 *طلب جديد #${orderId}🚀*\n\n👤 *الاسم:* ${name}\n📞 *الهاتف:* ${phone}\n📍 *العنوان:* ${address}\n🗺 *الخريطة:* ${mapLink}\n\n🛒 *المنتجات:*\n${itemsText}\n\n💰 *الإجمالي:* ${grandTotal} ج.م\n💳 *الدفع:* ${paymentMethod}`;
 
         cart = [];
         updateCartUI();
         document.getElementById('successBanner').style.display = 'block';
         setTimeout(() => { document.getElementById('successBanner').style.display = 'none'; }, 6000);
 
-        window.location.href = `https://api.whatsapp.com/send?phone=201034101822&text=` + encodeURIComponent(whatsappMessage);
+        window.open(`https://api.whatsapp.com/send?phone=${MY_WHATSAPP_NUMBER}&text=` + encodeURIComponent(whatsappMessage), '_blank');
     }
 
     function toggleTrackingSection() {
