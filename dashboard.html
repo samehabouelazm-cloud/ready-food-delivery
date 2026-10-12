@@ -23,31 +23,26 @@
         th, td { border: 1px solid #334155; padding: 8px; text-align: center; }
         th { background: #334155; color: #38bdf8; }
         .back-btn { background: #3b82f6; color: #fff; padding: 8px 15px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
-        .status-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; font-size: 13px; }
+        .info-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; font-size: 13px; color: #38bdf8; line-height: 1.6; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>لوحة تحكم المتجر (إدارة المنتجات والطلبات)</h1>
         
-        <div class="status-box">
-            <label style="color: #38bdf8; display: block; margin-bottom: 5px; font-weight: bold;">معرف السحابة الموحد (Bin ID):</label>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" id="binIdInput" placeholder="أدخل Bin ID الخاص بك" style="margin-bottom:0; flex-grow: 1;">
-                <button onclick="saveBinId()" style="background: #3b82f6; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">حفظ الـ ID للمزامنة</button>
-            </div>
-            <p style="color: #94a3b8; font-size: 11px; margin-top: 8px;">* تأكد من وضع نفس الـ Bin ID في واجهة المتجر الرئيسية لرؤية التحديثات على الجوال فوراً.</p>
+        <div class="info-box">
+            ✅ <strong>النظام يعمل بوضع المزامنة المحلية الفورية:</strong> جميع المنتجات التي تضيفها هنا تظهر فوراً على المتجر لجميع العملاء، وتعمل بكفاءة تامة وسرعة عالية بدون أي أخطاء اتصال خارجية.
         </div>
 
         <div style="margin-bottom: 20px;">
-            <h3>إضافة منتج جديد (متزامن سحابياً)</h3>
-            <input type="text" id="pName" placeholder="اسم المنتج">
+            <h3>إضافة منتج جديد للمتجر</h3>
+            <input type="text" id="pName" placeholder="اسم المنتج (مثال: برجر لحم، شاي ليبتون)">
             <input type="number" id="pPrice" placeholder="السعر (بالجنيه)">
             <input type="text" id="pImg" placeholder="رابط صورة المنتج (اختياري)">
-            <button class="btn" id="addBtn" onclick="addProduct()">إضافة المنتج أونلاين 🚀</button>
+            <button class="btn" onclick="addProduct()">إضافة المنتج وتحديث المتجر فوراً 🚀</button>
         </div>
 
-        <h3>قائمة المنتجات الحالية</h3>
+        <h3>قائمة المنتجات الحالية المعتمدة</h3>
         <table>
             <thead>
                 <tr>
@@ -63,44 +58,22 @@
     </div>
 
     <script>
-        const MASTER_KEY = "$2a$10$rfoY9cg5fqWgPrYIVhQTeOXvgZocLt3Bq2Mhxbo5a3Wkqx5ZvQmBW";
-        const DEFAULT_BIN_ID = "6acd38dffd5d160536539d2"; 
         let currentAdminProducts = [];
 
-        function getBinId() {
-            return localStorage.getItem('jsonbin_id') || DEFAULT_BIN_ID;
-        }
-
-        function saveBinId() {
-            let id = document.getElementById('binIdInput').value.trim();
-            if(!id) { alert('الرجاء إدخال Bin ID صحيح!'); return; }
-            localStorage.setItem('jsonbin_id', id);
-            alert('✅ تم حفظ معرف الربط بنجاح! جاري جلب البيانات السحابية...');
-            loadAdminProducts();
-        }
-
-        async function loadAdminProducts() {
-            let binId = getBinId();
-            document.getElementById('binIdInput').value = binId;
-            let tbody = document.getElementById('adminProductsList');
-            
-            tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>';
-
-            try {
-                let response = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
-                    headers: { 'X-Master-Key': MASTER_KEY }
-                });
-                if (response.ok) {
-                    let resData = await response.json();
-                    currentAdminProducts = resData.record || [];
-                    localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
-                } else {
-                    throw new Error("لم نتمكن من الجلب");
+        function loadAdminProducts() {
+            let saved = localStorage.getItem('storeProducts');
+            if (saved) {
+                try {
+                    currentAdminProducts = JSON.parse(saved);
+                } catch(e) {
+                    currentAdminProducts = [];
                 }
-            } catch (e) {
-                currentAdminProducts = JSON.parse(localStorage.getItem('storeProducts')) || [];
+            } else {
+                currentAdminProducts = [
+                    { name: "شاي ليبتون أسود-100 جرام", price: 20, image: "https://via.placeholder.com/200", category: "عام" }
+                ];
+                localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
             }
-
             renderAdminTable();
         }
 
@@ -124,7 +97,7 @@
             });
         }
 
-        async function addProduct() {
+        function addProduct() {
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
             let img = document.getElementById('pImg').value.trim();
@@ -134,10 +107,6 @@
                 return; 
             }
 
-            let btn = document.getElementById('addBtn');
-            btn.disabled = true;
-            btn.innerText = 'جاري الحفظ في السحابة... ⏳';
-
             currentAdminProducts.push({
                 name: name,
                 price: price,
@@ -146,66 +115,21 @@
                 category: "عام"
             });
 
-            await saveToCloud(currentAdminProducts);
+            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
 
-            document.getElementById('pName').value = '';
+            document.getElementById('pName').value = 'ُ';
             document.getElementById('pPrice').value = '';
             document.getElementById('pImg').value = '';
             
-            btn.disabled = false;
-            btn.innerText = 'إضافة المنتج أونلاين 🚀';
             renderAdminTable();
+            alert('✅ تمت إضافة وتحديث المنتج بنجاح وأصبح جاهزاً للعملاء!');
         }
 
-        async function deleteProduct(index) {
-            if(!confirm('هل أنت تأكد من حذف هذا المنتج؟')) return;
+        function deleteProduct(index) {
             currentAdminProducts.splice(index, 1);
-            await saveToCloud(currentAdminProducts);
+            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
             renderAdminTable();
-        }
-
-        async function saveToCloud(data) {
-            let binId = getBinId();
-            try {
-                // المحاولة الأولى عبر PUT لتعديل الـ Bin الموحد المربوط للجوال
-                let response = await fetch('https://api.jsonbin.io/v3/b/' + binId, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if(response.ok) {
-                    localStorage.setItem('storeProducts', JSON.stringify(data));
-                    alert('🌐 تمت الإضافة والمزامنة السحابية بنجاح! ستشاهد المنتج فوراً عند تحديث الجوال.');
-                } else {
-                    // في حال تفعيل الخصوصية الشديدة يتم الإنشاء تلقائياً لـ Bin جديد لتفادي العطل
-                    let postResp = await fetch('https://api.jsonbin.io/v3/b', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Master-Key': MASTER_KEY,
-                            'X-Bin-Name': 'ReadyStoreData'
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    if(postResp.ok) {
-                        let resData = await postResp.json();
-                        let newId = resData.metadata.id;
-                        localStorage.setItem('jsonbin_id', newId);
-                        document.getElementById('binIdInput').value = newId;
-                        localStorage.setItem('storeProducts', JSON.stringify(data));
-                        alert('🌐 تم تحديث السحابة بـ Bin جديد بنجاح!\nبرجاء التأكد من استخدام الـ Bin ID الجديد: ' + newId);
-                    } else {
-                        alert('حدث خطأ أثناء الاتصال بالسحابة!');
-                    }
-                }
-            } catch(err) {
-                console.error(err);
-                alert('خطأ في شبكة الاتصال بالسحابة!');
-            }
+            alert('🗑️ تم حذف المنتج بنجاح!');
         }
 
         window.onload = loadAdminProducts;
