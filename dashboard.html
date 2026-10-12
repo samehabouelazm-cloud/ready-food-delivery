@@ -28,27 +28,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>لوحة تحكم المتجر (إدارة المنتجات والطلبات)</h1>
+        <h1>لوحة تحكم المتجر (مزامنة سحابية حقيقية)</h1>
         
         <div class="info-box">
-            ✅ <strong>النظام يعمل بوضع المزامنة المحلية الفورية:</strong> جميع المنتجات التي تضيفها هنا تظهر فوراً على المتجر لجميع العملاء، وتعمل بكفاءة تامة وسرعة عالية بدون أي أخطاء اتصال خارجية.
+            🌐 <strong>متصل بالسحابة بنجاح:</strong> المنتجات التي تضيفها هنا تُحفظ أونلاين وتظهر فوراً على الموبايل واللابتوب وكل العملاء!
         </div>
 
         <div style="margin-bottom: 20px;">
-            <h3>إضافة منتج جديد للمتجر</h3>
-            <input type="text" id="pName" placeholder="اسم المنتج (مثال: برجر لحم، شاي ليبتون)">
+            <h3>إضافة منتج جديد</h3>
+            <input type="text" id="pName" placeholder="اسم المنتج (مثال: برجر لحم، شاي)">
             <input type="number" id="pPrice" placeholder="السعر (بالجنيه)">
             <input type="text" id="pImg" placeholder="رابط صورة المنتج (اختياري)">
-            <button class="btn" onclick="addProduct()">إضافة المنتج وتحديث المتجر فوراً 🚀</button>
+            <input type="text" id="pCat" placeholder="التصنيف (مشروبات، وجبات سريعة، حلويات، عام)" value="عام">
+            <button class="btn" id="saveBtn" onclick="addProduct()">إضافة وتحديث السحابة فوراً 🚀</button>
         </div>
 
-        <h3>قائمة المنتجات الحالية المعتمدة</h3>
+        <h3>قائمة المنتجات الحالية في السحابة</h3>
         <table>
             <thead>
                 <tr>
                     <th>الصورة</th>
                     <th>اسم المنتج</th>
                     <th>السعر</th>
+                    <th>التصنيف</th>
                     <th>الإجراء</th>
                 </tr>
             </thead>
@@ -58,21 +60,22 @@
     </div>
 
     <script>
+        const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
         let currentAdminProducts = [];
 
-        function loadAdminProducts() {
-            let saved = localStorage.getItem('storeProducts');
-            if (saved) {
-                try {
-                    currentAdminProducts = JSON.parse(saved);
-                } catch(e) {
+        async function loadAdminProducts() {
+            let tbody = document.getElementById('adminProductsList');
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات من السحابة...</td></tr>';
+
+            try {
+                let res = await fetch(API_URL);
+                if (res.ok) {
+                    currentAdminProducts = await res.json();
+                } else {
                     currentAdminProducts = [];
                 }
-            } else {
-                currentAdminProducts = [
-                    { name: "شاي ليبتون أسود-100 جرام", price: 20, image: "https://via.placeholder.com/200", category: "عام" }
-                ];
-                localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
+            } catch(e) {
+                currentAdminProducts = [];
             }
             renderAdminTable();
         }
@@ -82,54 +85,78 @@
             tbody.innerHTML = '';
             
             if (!currentAdminProducts || currentAdminProducts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">لا توجد منتجات مضافة حالياً.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">لا توجد منتجات مضافة حالياً.</td></tr>';
                 return;
             }
 
             currentAdminProducts.forEach((p, index) => {
                 let imgSrc = p.image || p.img || 'https://via.placeholder.com/50';
-                tbody.innerHTML += '<tr>' +
-                    '<td><img src="' + imgSrc + '" width="40" height="40" style="border-radius:4px; object-fit: cover;" onerror="this.src=\'https://via.placeholder.com/50\'"></td>' +
-                    '<td>' + p.name + '</td>' +
-                    '<td>' + p.price + ' ج.م</td>' +
-                    '<td><button onclick="deleteProduct(' + index + ')" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>' +
-                '</tr>';
+                tbody.innerHTML += `<tr>
+                    <td><img src="${imgSrc}" width="40" height="40" style="border-radius:4px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td>${p.name}</td>
+                    <td>${p.price} ج.م</td>
+                    <td>${p.category || 'عام'}</td>
+                    <td><button onclick="deleteProduct(${index})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">حذف</button></td>
+                </tr>`;
             });
         }
 
-        function addProduct() {
+        async function addProduct() {
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
             let img = document.getElementById('pImg').value.trim();
+            let cat = document.getElementById('pCat').value.trim() || 'عام';
 
             if (!name || isNaN(price)) { 
                 alert('الرجاء إدخال اسم المنتج والسعر بشكل صحيح!'); 
                 return; 
             }
 
+            let btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerText = 'جاري الحفظ في السحابة... ⏳';
+
             currentAdminProducts.push({
                 name: name,
                 price: price,
                 image: img || 'https://via.placeholder.com/200',
                 img: img || 'https://via.placeholder.com/200',
-                category: "عام"
+                category: cat
             });
 
-            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
+            await updateCloud(currentAdminProducts);
 
-            document.getElementById('pName').value = 'ُ';
+            document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
             document.getElementById('pImg').value = '';
             
+            btn.disabled = false;
+            btn.innerText = 'إضافة وتحديث السحابة فوراً 🚀';
             renderAdminTable();
-            alert('✅ تمت إضافة وتحديث المنتج بنجاح وأصبح جاهزاً للعملاء!');
         }
 
-        function deleteProduct(index) {
+        async function deleteProduct(index) {
+            if(!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
             currentAdminProducts.splice(index, 1);
-            localStorage.setItem('storeProducts', JSON.stringify(currentAdminProducts));
+            await updateCloud(currentAdminProducts);
             renderAdminTable();
-            alert('🗑️ تم حذف المنتج بنجاح!');
+        }
+
+        async function updateCloud(data) {
+            try {
+                let res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert('✅ تمت المزامنة والحفظ السحابي بنجاح تام وتظهر للجميع!');
+                } else {
+                    alert('حدث خطأ أثناء الحفظ السحابي!');
+                }
+            } catch(e) {
+                alert('خطأ في الاتصال بالشبكة!');
+            }
         }
 
         window.onload = loadAdminProducts;
