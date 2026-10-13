@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - منصة توصيل الطعام والمنتجات المتكاملة</title>
+    <title>جاهز - منصة التسوق والتوصيل المتكاملة</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: #f8fafc; color: #1e293b; padding: 15px; direction: rtl; text-align: right; }
@@ -15,7 +15,7 @@
         .admin-link { background: #3b82f6; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
         .cart-btn { background: #f59e0b; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; }
 
-        /* شريط البحث والفلترة */
+        /* شريط البحث والفلترة بأحدث الأقسام */
         .search-filter-box { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
         .search-filter-box input, .search-filter-box select { flex: 1; min-width: 180px; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; outline: none; }
         .search-filter-box input:focus, .search-filter-box select:focus { border-color: #0284c7; background: #fff; }
@@ -67,22 +67,26 @@
 <body>
 
     <div class="header">
-        <h1>🍔 جاهز - منصة توصيل الطعام والمنتجات</h1>
+        <h1>🛒 جاهز - منصة التسوق والتوصيل الشاملة</h1>
         <div class="header-actions">
             <button class="cart-btn" onclick="openCart()">🛒 السلة (<span id="cartCount">0</span>)</button>
             <a href="dashboard.html" class="admin-link">لوحة التحكم ⚙️</a>
         </div>
     </div>
 
+    <!-- شريط تصفح الأقسام المحدث بالشامل لكافة الأقسام الحديثة -->
     <div class="search-filter-box">
-        <input type="text" id="searchInput" placeholder="ابحث عن وجبتك أو منتجك المفضل..." oninput="filterProducts()">
+        <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضل..." oninput="filterProducts()">
         <select id="categoryFilter" onchange="filterProducts()">
-            <option value="all">جميع التصنيفات والأقسام</option>
-            <option value="عام">عام</option>
-            <option value="وجبات سريعة">وجبات سريعة</option>
-            <option value="مشروبات">مشروبات</option>
-            <option value="حلويات">حلويات</option>
-            <option value="مأكولات بحرية">مأكولات بحرية</option>
+            <option value="all">جميع الأقسام والتصنيفات</option>
+            <option value="سوبر ماركت">🛒 سوبر ماركت ومواد غذائية</option>
+            <option value="إلكترونيات">📱 إلكترونيات وأجهزة ذكية</option>
+            <option value="وجبات سريعة">🍔 وجبات سريعة ومطاعم</option>
+            <option value="مشروبات">🥤 مشروبات ومشروبات ساخنة</option>
+            <option value="حلويات">🍰 حلويات ومخبوزات</option>
+            <option value="أدوات منزلية">🏠 أدوات ومستلزمات منزلية</option>
+            <option value="موضة وأزياء">👕 موضة وأزياء</option>
+            <option value="عام">📦 تصنيفات عامة أخرى</option>
         </select>
     </div>
 
@@ -175,14 +179,13 @@
 
     <script>
         const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
-        const ADMIN_WHATSAPP_NUMBER = "201034101822"; // تم تحديث رقم الواتساب المخصص للإدارة
+        const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
 
         let allProducts = [];
         let cart = [];
         let productQuantities = {};
 
         async function loadStoreProducts() {
-            // عرض المنتجات المحفوظة مؤقتاً أولاً لسرعة فائقة بدون انتظار
             let cached = localStorage.getItem('storeProductsCache');
             if(cached) {
                 try {
@@ -191,7 +194,6 @@
                 } catch(e){}
             }
 
-            // المزامنة مع السحابة في الخلفية
             try {
                 let res = await fetch(API_URL);
                 if (res.ok) {
@@ -209,7 +211,7 @@
             grid.innerHTML = '';
 
             if (!products || products.length === 0) {
-                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات مضافة حالياً.</div>';
+                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات مضافة حالياً في هذا القسم.</div>';
                 return;
             }
 
@@ -354,7 +356,7 @@
             let total = subtotal + 15;
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
-            let msg = `*🍔 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
+            let msg = `*🛒 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
             msg += `👤 *اسم العميل:* ${name}\n`;
             msg += `📞 *رقم الجوال:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}\n`;
