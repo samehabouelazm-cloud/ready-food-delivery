@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - منصة التسوق العالمية</title>
+    <title>جاهز - منصة التسوق والطلبات الشاملة</title>
     <!-- خط تجولي العربي الاحترافي -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
@@ -26,10 +26,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
 
-        /* 1. الهيدر العائم العصرى */
+        /* 1. الهيدر العائم العصري */
         .header { 
             position: sticky; top: 0; z-index: 100;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             padding: 14px 24px;
             display: flex; justify-content: space-between; align-items: center;
@@ -65,18 +65,18 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
-        /* 2. بانر العروض الهيرو (Hero Banner) */
+        /* 2. بانر العروض والتسوق */
         .hero-banner {
             margin: 20px 0; border-radius: var(--radius-lg);
             background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            color: #fff; padding: 30px 25px; display: flex; justify-content: space-between; align-items: center;
+            color: #fff; padding: 28px 24px; display: flex; justify-content: space-between; align-items: center;
             box-shadow: var(--shadow-md); position: relative; overflow: hidden;
         }
         .hero-banner::after {
             content: '🛍️'; position: absolute; left: -20px; bottom: -20px; font-size: 140px; opacity: 0.15;
         }
-        .hero-text h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-        .hero-text p { font-size: 15px; opacity: 0.9; margin-bottom: 16px; }
+        .hero-text h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+        .hero-text p { font-size: 14px; opacity: 0.9; margin-bottom: 16px; }
         .hero-btn {
             background: var(--secondary); color: #fff; border: none; padding: 10px 22px;
             border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer;
@@ -84,16 +84,26 @@
         }
         .hero-btn:hover { transform: scale(1.05); }
 
-        /* 3. شريط الأقسام الدائري (Category Pills Slider) */
+        /* 3. شريط البحث التفاعلي */
+        .search-box {
+            background: var(--surface); border-radius: var(--radius-md); padding: 10px 16px;
+            display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0; margin-bottom: 20px;
+        }
+        .search-box input {
+            border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
+        }
+
+        /* 4. شريط الأقسام المحدث بالشامل لكافة الفئات */
         .categories-section { margin-bottom: 25px; }
-        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         .categories-scroll {
-            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;
         }
         .categories-scroll::-webkit-scrollbar { display: none; }
         .cat-pill {
             background: var(--surface); border: 1px solid #e2e8f0; border-radius: 30px;
-            padding: 10px 20px; white-space: nowrap; font-size: 14px; font-weight: 700; color: var(--text-muted);
+            padding: 9px 18px; white-space: nowrap; font-size: 14px; font-weight: 700; color: var(--text-muted);
             cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);
         }
         .cat-pill:hover, .cat-pill.active {
@@ -101,19 +111,9 @@
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
         }
 
-        /* 4. شريط البحث الفائق */
-        .search-box {
-            background: var(--surface); border-radius: var(--radius-md); padding: 8px 16px;
-            display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
-            border: 1px solid #e2e8f0; margin-bottom: 25px;
-        }
-        .search-box input {
-            border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
-        }
-
         /* 5. شبكة بطاقات المنتجات المبهجة */
         .products-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
         }
         .product-card {
             background: var(--surface); border-radius: var(--radius-lg); overflow: hidden;
@@ -124,19 +124,19 @@
             transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: #cbd5e1;
         }
         .product-img-wrapper {
-            position: relative; width: 100%; height: 160px; border-radius: var(--radius-md);
+            position: relative; width: 100%; height: 150px; border-radius: var(--radius-md);
             overflow: hidden; background: #f8fafc; margin-bottom: 12px;
         }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         .product-card:hover .product-img-wrapper img { transform: scale(1.05); }
         .product-badge {
-            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9);
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.92);
             backdrop-filter: blur(4px); color: var(--primary); font-size: 11px; font-weight: 800;
             padding: 4px 10px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
         .product-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; line-height: 1.3; }
-        .product-price { font-size: 18px; font-weight: 800; color: var(--secondary); margin-bottom: 14px; }
+        .product-price { font-size: 17px; font-weight: 800; color: var(--secondary); margin-bottom: 12px; }
 
         .qty-controls {
             display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -144,14 +144,14 @@
         }
         .qty-btn {
             background: var(--surface); color: var(--text-dark); border: 1px solid #cbd5e1;
-            width: 30px; height: 30px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 16px;
+            width: 28px; height: 28px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 16px;
             display: flex; align-items: center; justify-content: center; transition: background 0.15s;
         }
         .qty-btn:hover { background: #e2e8f0; }
-        .qty-val { font-weight: 800; font-size: 15px; min-width: 22px; text-align: center; }
+        .qty-val { font-weight: 800; font-size: 15px; min-width: 20px; text-align: center; }
 
         .add-btn {
-            background: var(--primary); color: #fff; border: none; padding: 11px;
+            background: var(--primary); color: #fff; border: none; padding: 10px;
             border-radius: var(--radius-md); font-weight: 700; font-size: 14px; cursor: pointer;
             width: 100%; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 6px;
         }
@@ -203,7 +203,7 @@
 </head>
 <body>
 
-    <!-- 1. الهيدر العائم العصرى -->
+    <!-- 1. الهيدر العائم العصري -->
     <header class="header">
         <a href="#" class="brand-logo">
             <div class="logo-icon">جـ</div>
@@ -222,7 +222,7 @@
         <div class="hero-banner">
             <div class="hero-text">
                 <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
-                <p>منتجات طازجة، إلكترونيات، وسوبرماركت يصلك حتى باب المنزل بسرعة واحترافية.</p>
+                <p>منتجات طازجة، سوبرماركت، وإلكترونيات تصلك حتى باب المنزل بسرعة واحترافية.</p>
                 <button class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
             </div>
         </div>
@@ -233,7 +233,7 @@
             <input type="text" id="searchInput" placeholder="ابحث عن أي منتج، وجبة، أو جهاز..." oninput="filterProducts()">
         </div>
 
-        <!-- 4. شريط الأقسام الدائري العصري -->
+        <!-- 4. شريط الأقسام العصري الشامل لكل الفئات -->
         <div class="categories-section">
             <div class="section-title">✨ تصفح حسب القسم</div>
             <div class="categories-scroll" id="categoriesBar">
@@ -249,9 +249,9 @@
             </div>
         </div>
 
-        <!-- 5. شبكة عرض المنتجات -->
+        <!-- 5. شبكة عرض المنتجات المحدثة من السحابة -->
         <div class="products-grid" id="storeProductsGrid">
-            <div class="empty-msg">جاري جلب أحدث المنتجات... ⏳</div>
+            <div class="empty-msg">جاري تحميل المنتجات... ⏳</div>
         </div>
     </div>
 
@@ -357,14 +357,16 @@
         let currentCategory = 'all';
 
         async function loadStoreProducts() {
+            // تحميل البيانات المحفوظة مؤقتاً لتظهر فوراً على الشاشة بدون تأخير
             let cached = localStorage.getItem('storeProductsCache');
             if(cached) {
                 try {
                     allProducts = JSON.parse(cached);
-                    displayProducts(allProducts);
+                    filterProducts();
                 } catch(e){}
             }
 
+            // الجلب والمزامنة الحية من رابط السحابة الموحد
             try {
                 let res = await fetch(API_URL);
                 if (res.ok) {
@@ -404,3 +406,165 @@
                         </div>
                         <div>
                             <div class="qty-controls">
+                                <button class="qty-btn" onclick="changeCardQty(${idx}, -1)">-</button>
+                                <span class="qty-val" id="cardQty_${idx}">${productQuantities[idx]}</span>
+                                <button class="qty-btn" onclick="changeCardQty(${idx}, 1)">+</button>
+                            </div>
+                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, ${idx})">إضافة للسلة 🛒</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function selectCategory(cat, elem) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
+            elem.classList.add('active');
+            filterProducts();
+        }
+
+        function changeCardQty(idx, delta) {
+            if(!productQuantities[idx]) productQuantities[idx] = 1;
+            productQuantities[idx] += delta;
+            if(productQuantities[idx] < 1) productQuantities[idx] = 1;
+            document.getElementById(`cardQty_${idx}`).innerText = productQuantities[idx];
+        }
+
+        function filterProducts() {
+            let query = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = allProducts.filter(p => {
+                let matchesName = p.name.toLowerCase().includes(query);
+                // فلترة ذكية لضمان إظهار المنتجات التي بدون قسم تحت "عام" أو الأقسام المطابقة
+                let pCat = p.category || 'عام';
+                let matchesCat = (currentCategory === 'all' || pCat === currentCategory);
+                return matchesName && matchesCat;
+            });
+
+            displayProducts(filtered);
+        }
+
+        function addToCart(name, price, idx) {
+            let qty = productQuantities[idx] || 1;
+            let existing = cart.find(item => item.name === name);
+            if(existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({ name, price, qty });
+            }
+            updateCartUI();
+            alert(`✅ تمت إضافة (${qty}) من "${name}" إلى سلة الشراء!`);
+        }
+
+        function updateCartUI() {
+            let totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = totalCount;
+            
+            let list = document.getElementById('cartItemsList');
+            let subTotalElem = document.getElementById('subTotal');
+            let grandTotalElem = document.getElementById('grandTotal');
+
+            if(cart.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
+                subTotalElem.innerText = '0 ج.م';
+                grandTotalElem.innerText = '15 ج.م';
+                return;
+            }
+
+            list.innerHTML = '';
+            let subtotal = 0;
+            cart.forEach((item, i) => {
+                let itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+                list.innerHTML += `
+                    <div class="cart-row">
+                        <div>
+                            <div style="font-weight:700;">${item.name}</div>
+                            <small style="color:var(--text-muted);">${item.price} ج.م × ${item.qty} = ${itemTotal} ج.م</small>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button class="qty-btn" onclick="updateCartItemQty(${i}, -1)">-</button>
+                            <span style="font-weight:800;">${item.qty}</span>
+                            <button class="qty-btn" onclick="updateCartItemQty(${i}, 1)">+</button>
+                            <button onclick="removeFromCart(${i})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px; margin-right:4px;">حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            subTotalElem.innerText = subtotal + ' ج.م';
+            grandTotalElem.innerText = (subtotal + 15) + ' ج.م';
+        }
+
+        function updateCartItemQty(i, delta) {
+            cart[i].qty += delta;
+            if(cart[i].qty <= 0) cart.splice(i, 1);
+            updateCartUI();
+        }
+
+        function removeFromCart(i) {
+            cart.splice(i, 1);
+            updateCartUI();
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function goToCheckout() {
+            if(cart.length === 0) { alert('السلة فارغة!'); return; }
+            closeModal('cartModal');
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function submitOrderToWhatsApp() {
+            let name = document.getElementById('custName').value.trim();
+            let phone = document.getElementById('custPhone').value.trim();
+            let address = document.getElementById('custAddress').value.trim();
+            let payMethod = document.getElementById('payMethod').value;
+
+            if(!name || !phone || !address) {
+                alert('الرجاء تعبئة كافة بياناتك لإكمال الطلب!');
+                return;
+            }
+
+            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let total = subtotal + 15;
+            let orderRef = Math.floor(1000 + Math.random() * 9000);
+
+            let msg = `*🛒 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
+            msg += `👤 *اسم العميل:* ${name}\n`;
+            msg += `📞 *رقم الجوال:* ${phone}\n`;
+            msg += `📍 *العنوان:* ${address}\n`;
+            msg += `💳 *طريقة الدفع:* ${payMethod}\n\n`;
+            msg += `*📦 المنتجات المطلوبة:*\n`;
+
+            cart.forEach((item, index) => {
+                msg += `${index + 1}. ${item.name} | العدد: ${item.qty} | السعر: ${item.price * item.qty} ج.م\n`;
+            });
+
+            msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
+            msg += `\n🛵 *التوصيل:* 20 ج.م`;
+            msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
+            msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
+
+            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+            window.open(waUrl, '_blank');
+
+            cart = [];
+            updateCartUI();
+            closeModal('checkoutModal');
+            
+            document.getElementById('orderRefText').innerText = `رقم المرجع للطلب: #${orderRef}`;
+            document.getElementById('trackerModal').style.display = 'flex';
+        }
+
+        window.onload = loadStoreProducts;
+    </script>
+</body>
+</html>
