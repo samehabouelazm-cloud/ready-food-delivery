@@ -3,121 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - منصة التسوق والتوصيل المتكاملة</title>
+    <title>جاهز - منصة التسوق العالمية</title>
+    <!-- خط تجولي العربي الاحترافي -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #f8fafc; color: #1e293b; padding: 15px; direction: rtl; text-align: right; }
-        
-        /* الهيدر الرئيسي */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 10px; }
-        .header h1 { color: #0284c7; font-size: 22px; display: flex; align-items: center; gap: 8px; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .admin-link { background: #3b82f6; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
-        .cart-btn { background: #f59e0b; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --bg-light: #f1f5f9;
+            --surface: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+        }
 
-        /* شريط البحث والفلترة بأحدث الأقسام */
-        .search-filter-box { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-        .search-filter-box input, .search-filter-box select { flex: 1; min-width: 180px; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 14px; outline: none; }
-        .search-filter-box input:focus, .search-filter-box select:focus { border-color: #0284c7; background: #fff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
 
-        /* شبكة المنتجات */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
-        .product-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); padding: 15px; text-align: center; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
-        .product-card:hover { transform: translateY(-3px); }
-        .product-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
-        .product-card h3 { font-size: 16px; margin-bottom: 6px; color: #0f172a; }
-        .product-card .category-badge { display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 11px; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; font-weight: bold; }
-        .product-card p { color: #059669; font-weight: bold; font-size: 17px; margin-bottom: 10px; }
-        
-        /* التحكم بالكمية */
-        .qty-controls { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .qty-btn { background: #e2e8f0; color: #1e293b; border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .qty-btn:hover { background: #cbd5e1; }
-        .qty-val { font-weight: bold; font-size: 15px; min-width: 20px; }
+        /* 1. الهيدر العائم العصرى */
+        .header { 
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 14px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-logo .logo-icon {
+            background: linear-gradient(135deg, var(--primary), #38bdf8);
+            color: #fff; width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; font-weight: bold; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+        }
+        .brand-logo h1 { font-size: 22px; font-weight: 800; color: var(--text-dark); letter-spacing: -0.5px; }
+        .brand-logo h1 span { color: var(--primary); }
 
-        .buy-btn { background: #10b981; color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px; }
-        .buy-btn:hover { background: #059669; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .cart-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff; border: none; padding: 10px 18px; border-radius: var(--radius-md);
+            font-weight: 700; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); transition: all 0.2s;
+        }
+        .cart-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35); }
+        .cart-badge { background: #fff; color: var(--accent); font-size: 12px; padding: 2px 7px; border-radius: 20px; font-weight: 800; }
 
-        .empty-msg { grid-column: 1 / -1; text-align: center; color: #64748b; padding: 40px; font-size: 16px; background: #fff; border-radius: 12px; }
+        .admin-btn {
+            background: #e0f2fe; color: var(--primary); border: 1px solid #bae6fd;
+            padding: 9px 16px; border-radius: var(--radius-md); text-decoration: none;
+            font-weight: 700; font-size: 14px; transition: all 0.2s;
+        }
+        .admin-btn:hover { background: var(--primary); color: #fff; }
 
-        /* النوافذ المنبثقة */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-        .modal-body { background: #fff; width: 100%; max-width: 520px; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
-        .modal-body h2 { color: #0f172a; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #475569; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; }
+        /* 2. بانر العروض الهيرو (Hero Banner) */
+        .hero-banner {
+            margin: 20px 0; border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #fff; padding: 30px 25px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-md); position: relative; overflow: hidden;
+        }
+        .hero-banner::after {
+            content: '🛍️'; position: absolute; left: -20px; bottom: -20px; font-size: 140px; opacity: 0.15;
+        }
+        .hero-text h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+        .hero-text p { font-size: 15px; opacity: 0.9; margin-bottom: 16px; }
+        .hero-btn {
+            background: var(--secondary); color: #fff; border: none; padding: 10px 22px;
+            border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: transform 0.2s;
+        }
+        .hero-btn:hover { transform: scale(1.05); }
 
-        /* شريط التتبع Step-by-step */
-        .tracker-steps { display: flex; justify-content: space-between; margin: 20px 0; position: relative; }
-        .tracker-steps::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; z-index: 1; }
-        .tracker-step { position: relative; z-index: 2; background: #fff; text-align: center; width: 25%; }
-        .step-icon { width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-weight: bold; font-size: 16px; }
-        .tracker-step.active .step-icon { background: #10b981; color: #fff; }
-        .tracker-step.completed .step-icon { background: #3b82f6; color: #fff; }
-        .step-label { font-size: 11px; font-weight: bold; color: #64748b; }
-        .tracker-step.active .step-label { color: #10b981; }
+        /* 3. شريط الأقسام الدائري (Category Pills Slider) */
+        .categories-section { margin-bottom: 25px; }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        .categories-scroll {
+            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;
+        }
+        .categories-scroll::-webkit-scrollbar { display: none; }
+        .cat-pill {
+            background: var(--surface); border: 1px solid #e2e8f0; border-radius: 30px;
+            padding: 10px 20px; white-space: nowrap; font-size: 14px; font-weight: 700; color: var(--text-muted);
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);
+        }
+        .cat-pill:hover, .cat-pill.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
+        }
 
-        .btn-action { background: #3b82f6; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-top: 10px; }
-        .btn-close { background: #ef4444; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-top: 6px; }
+        /* 4. شريط البحث الفائق */
+        .search-box {
+            background: var(--surface); border-radius: var(--radius-md); padding: 8px 16px;
+            display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0; margin-bottom: 25px;
+        }
+        .search-box input {
+            border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
+        }
+
+        /* 5. شبكة بطاقات المنتجات المبهجة */
+        .products-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;
+        }
+        .product-card {
+            background: var(--surface); border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: var(--shadow-sm); border: 1px solid #f1f5f9; transition: all 0.25s ease;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
+        }
+        .product-card:hover {
+            transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: #cbd5e1;
+        }
+        .product-img-wrapper {
+            position: relative; width: 100%; height: 160px; border-radius: var(--radius-md);
+            overflow: hidden; background: #f8fafc; margin-bottom: 12px;
+        }
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .product-card:hover .product-img-wrapper img { transform: scale(1.05); }
+        .product-badge {
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px); color: var(--primary); font-size: 11px; font-weight: 800;
+            padding: 4px 10px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .product-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; line-height: 1.3; }
+        .product-price { font-size: 18px; font-weight: 800; color: var(--secondary); margin-bottom: 14px; }
+
+        .qty-controls {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #f8fafc; border-radius: 10px; padding: 4px; margin-bottom: 10px; border: 1px solid #e2e8f0;
+        }
+        .qty-btn {
+            background: var(--surface); color: var(--text-dark); border: 1px solid #cbd5e1;
+            width: 30px; height: 30px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+        }
+        .qty-btn:hover { background: #e2e8f0; }
+        .qty-val { font-weight: 800; font-size: 15px; min-width: 22px; text-align: center; }
+
+        .add-btn {
+            background: var(--primary); color: #fff; border: none; padding: 11px;
+            border-radius: var(--radius-md); font-weight: 700; font-size: 14px; cursor: pointer;
+            width: 100%; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .add-btn:hover { background: var(--primary-dark); }
+        .add-btn:active { transform: scale(0.98); }
+
+        .empty-msg {
+            grid-column: 1 / -1; text-align: center; color: var(--text-muted);
+            padding: 50px 20px; background: var(--surface); border-radius: var(--radius-lg); font-size: 16px; font-weight: 700;
+        }
+
+        /* 6. النوافذ المنبثقة التفاعلية (Modals) */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 1000; padding: 16px;
+        }
+        .modal-body {
+            background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius-lg);
+            padding: 24px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; animation: popUp 0.25s ease;
+        }
+        @keyframes popUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
+        .modal-header h3 { font-size: 18px; font-weight: 800; color: var(--text-dark); }
+        .close-icon { cursor: pointer; font-size: 20px; color: var(--text-muted); font-weight: bold; }
+
+        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f8fafc; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; outline: none; background: #f8fafc;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); background: #fff; }
+
+        /* تتبع الطلب step tracker */
+        .tracker-steps { display: flex; justify-content: space-between; margin: 25px 0; position: relative; }
+        .tracker-steps::before { content: ''; position: absolute; top: 22px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; z-index: 1; }
+        .tracker-step { position: relative; z-index: 2; background: var(--surface); text-align: center; width: 25%; }
+        .step-icon { width: 44px; height: 44px; border-radius: 50%; background: #e2e8f0; color: var(--text-muted); display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; }
+        .tracker-step.completed .step-icon { background: var(--primary); color: #fff; }
+        .tracker-step.active .step-icon { background: var(--secondary); color: #fff; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+        .step-label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+        .tracker-step.active .step-label { color: var(--secondary); }
+
+        .btn-submit { background: var(--secondary); color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-cancel { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>🛒 جاهز - منصة التسوق والتوصيل الشاملة</h1>
+    <!-- 1. الهيدر العائم العصرى -->
+    <header class="header">
+        <a href="#" class="brand-logo">
+            <div class="logo-icon">جـ</div>
+            <h1>جاهز <span>Store</span></h1>
+        </a>
         <div class="header-actions">
-            <button class="cart-btn" onclick="openCart()">🛒 السلة (<span id="cartCount">0</span>)</button>
-            <a href="dashboard.html" class="admin-link">لوحة التحكم ⚙️</a>
+            <button class="cart-btn" onclick="openCart()">
+                🛒 السلة <span class="cart-badge" id="cartCount">0</span>
+            </button>
+            <a href="dashboard.html" class="admin-link admin-btn">لوحة التحكم ⚙️</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 2. بانر العروض المميزة -->
+        <div class="hero-banner">
+            <div class="hero-text">
+                <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
+                <p>منتجات طازجة، إلكترونيات، وسوبرماركت يصلك حتى باب المنزل بسرعة واحترافية.</p>
+                <button class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
+            </div>
+        </div>
+
+        <!-- 3. شريط البحث المطور -->
+        <div class="search-box">
+            <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
+            <input type="text" id="searchInput" placeholder="ابحث عن أي منتج، وجبة، أو جهاز..." oninput="filterProducts()">
+        </div>
+
+        <!-- 4. شريط الأقسام الدائري العصري -->
+        <div class="categories-section">
+            <div class="section-title">✨ تصفح حسب القسم</div>
+            <div class="categories-scroll" id="categoriesBar">
+                <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 الكل</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت', this)">🛒 سوبر ماركت</div>
+                <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
+                <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍔 وجبات سريعة</div>
+                <div class="cat-pill" onclick="selectCategory('مشروبات', this)">🥤 مشروبات</div>
+                <div class="cat-pill" onclick="selectCategory('حلويات', this)">🍰 حلويات</div>
+                <div class="cat-pill" onclick="selectCategory('أدوات منزلية', this)">🏠 أدوات منزلية</div>
+                <div class="cat-pill" onclick="selectCategory('موضة وأزياء', this)">👕 موضة وأزياء</div>
+                <div class="cat-pill" onclick="selectCategory('عام', this)">📦 عام</div>
+            </div>
+        </div>
+
+        <!-- 5. شبكة عرض المنتجات -->
+        <div class="products-grid" id="storeProductsGrid">
+            <div class="empty-msg">جاري جلب أحدث المنتجات... ⏳</div>
         </div>
     </div>
 
-    <!-- شريط تصفح الأقسام المحدث بالشامل لكافة الأقسام الحديثة -->
-    <div class="search-filter-box">
-        <input type="text" id="searchInput" placeholder="ابحث عن منتجك المفضل..." oninput="filterProducts()">
-        <select id="categoryFilter" onchange="filterProducts()">
-            <option value="all">جميع الأقسام والتصنيفات</option>
-            <option value="سوبر ماركت">🛒 سوبر ماركت ومواد غذائية</option>
-            <option value="إلكترونيات">📱 إلكترونيات وأجهزة ذكية</option>
-            <option value="وجبات سريعة">🍔 وجبات سريعة ومطاعم</option>
-            <option value="مشروبات">🥤 مشروبات ومشروبات ساخنة</option>
-            <option value="حلويات">🍰 حلويات ومخبوزات</option>
-            <option value="أدوات منزلية">🏠 أدوات ومستلزمات منزلية</option>
-            <option value="موضة وأزياء">👕 موضة وأزياء</option>
-            <option value="عام">📦 تصنيفات عامة أخرى</option>
-        </select>
-    </div>
-
-    <div class="products-grid" id="storeProductsGrid">
-        <div class="empty-msg">جاري تحميل المنتجات... ⏳</div>
-    </div>
-
-    <!-- 1. نافذة سلة المشتريات -->
+    <!-- 6. نافذة سلة المشتريات -->
     <div class="modal-overlay" id="cartModal">
         <div class="modal-body">
-            <h2><span>🛒 سلة الطلبات الخاصة بك</span> <span style="cursor:pointer;" onclick="closeModal('cartModal')">✕</span></h2>
-            <div id="cartItemsList" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px;"></div>
+            <div class="modal-header">
+                <h3>🛒 سلة التسوق الخاصة بك</h3>
+                <span class="close-icon" onclick="closeModal('cartModal')">✕</span>
+            </div>
+            <div id="cartItemsList" style="max-height: 240px; overflow-y: auto; margin-bottom: 15px;"></div>
             
-            <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:15px; font-size:13px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>المجموع:</span><span id="subTotal">0 ج.م</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>رسوم التوصيل:</span><span>15 ج.م</span></div>
-                <div style="display:flex; justify-content:space-between; font-weight:bold; border-top:1px dashed #ccc; padding-top:4px;"><span>الإجمالي الكلي:</span><span id="grandTotal">15 ج.م</span></div>
+            <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>المجموع الفرعي:</span><span id="subTotal" style="font-weight:700;">0 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل:</span><span style="font-weight:700;">15 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">15 ج.م</span></div>
             </div>
 
-            <button class="btn-action" style="background:#10b981;" onclick="goToCheckout()">متابعة الشراء وإدخال التفاصيل 📝</button>
-            <button class="btn-close" onclick="closeModal('cartModal')">إغلاق</button>
+            <button class="btn-submit" onclick="goToCheckout()">إكمال الشراء وتحديد العنوان 📝</button>
+            <button class="btn-cancel" onclick="closeModal('cartModal')">متابعة التسوق</button>
         </div>
     </div>
 
-    <!-- 2. نافذة إدخال بيانات العميل وطريقة الدفع -->
+    <!-- 7. نافذة إدخال بيانات العميل والدفع -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
-            <h2><span>📝 تفاصيل الطلب والدفع</span> <span style="cursor:pointer;" onclick="closeModal('checkoutModal')">✕</span></h2>
+            <div class="modal-header">
+                <h3>📝 بيانات العميل والدفع</h3>
+                <span class="close-icon" onclick="closeModal('checkoutModal')">✕</span>
+            </div>
             
             <div class="form-group">
-                <label>الاسم بالكامل:</label>
+                <label>الاسم الكامل:</label>
                 <input type="text" id="custName" placeholder="أدخل اسمك الكريم">
             </div>
             <div class="form-group">
@@ -125,11 +292,11 @@
                 <input type="tel" id="custPhone" placeholder="010xxxxxxx">
             </div>
             <div class="form-group">
-                <label>العنوان بالتفصيل (المدينة - الشارع - رقم العقار):</label>
-                <textarea id="custAddress" rows="2" placeholder="اكتب عنوانك بالتفصيل لتسليم سريع"></textarea>
+                <label>العنوان بالتفصيل:</label>
+                <textarea id="custAddress" rows="2" placeholder="المدينة - الشارع - رقم العقار"></textarea>
             </div>
             <div class="form-group">
-                <label>طريقة الدفع المفضلة:</label>
+                <label>طريقة الدفع:</label>
                 <select id="payMethod">
                     <option value="الدفع نقداً عند الاستلام (Cash on Delivery)">💵 الدفع نقداً عند الاستلام</option>
                     <option value="محفظة إلكترونية (InstaPay / فودافون كاش)">📱 InstaPay / فودافون كاش / اتصالات كاش</option>
@@ -137,43 +304,46 @@
                 </select>
             </div>
 
-            <button class="btn-action" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب وتتبعه 🚀</button>
-            <button class="btn-close" onclick="closeModal('checkoutModal')">إلغاء</button>
+            <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">تأكيد وإرسال الطلب للواتساب 🚀</button>
+            <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
     </div>
 
-    <!-- 3. نافذة تتبع الطلب -->
+    <!-- 8. نافذة التتبع التفاعلية -->
     <div class="modal-overlay" id="trackerModal">
         <div class="modal-body">
-            <h2><span>🛵 تتبع حالة طلبك المباشرة</span> <span style="cursor:pointer;" onclick="closeModal('trackerModal')">✕</span></h2>
+            <div class="modal-header">
+                <h3>🛵 تتبع حالة الطلب المباشرة</h3>
+                <span class="close-icon" onclick="closeModal('trackerModal')">✕</span>
+            </div>
             
-            <p style="text-align:center; font-size:13px; color:#475569;" id="orderRefText">رقم المرجعي للطلب: #1001</p>
+            <p style="text-align: center; font-weight: 700; color: var(--text-muted); font-size: 14px;" id="orderRefText">رقم المرجع: #1001</p>
             
             <div class="tracker-steps">
-                <div class="tracker-step completed" id="step1">
+                <div class="tracker-step completed">
                     <div class="step-icon">📝</div>
-                    <div class="step-label">تم الاستلام</div>
+                    <div class="step-label">استلام</div>
                 </div>
-                <div class="tracker-step active" id="step2">
+                <div class="tracker-step active">
                     <div class="step-icon">👨‍🍳</div>
-                    <div class="step-label">جاري التحضير</div>
+                    <div class="step-label">تحضير</div>
                 </div>
-                <div class="tracker-step" id="step3">
+                <div class="tracker-step">
                     <div class="step-icon">🛵</div>
                     <div class="step-label">في الطريق</div>
                 </div>
-                <div class="tracker-step" id="step4">
+                <div class="tracker-step">
                     <div class="step-icon">✅</div>
                     <div class="step-label">تم التسليم</div>
                 </div>
             </div>
 
-            <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:8px; font-size:13px; color:#166534; text-align:center; margin-bottom:15px;">
-                🎉 <b>تم إرسال طلبك للإدارة بنجاح!</b> يمكنك التواصل معنا مباشرة للتعديل أو الاستفسار.
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 14px; border-radius: 12px; font-size: 14px; color: #166534; text-align: center; margin-bottom: 16px;">
+                🎉 <b>تم إرسال طلبك للواتساب بنجاح!</b> سنتواصل معك فوراً لتأكيد الموعد والتوصيل.
             </div>
 
-            <button class="btn-action" onclick="window.print()">طباعة / حفظ الفاتورة 📄</button>
-            <button class="btn-close" onclick="closeModal('trackerModal')">إغلاق</button>
+            <button class="btn-submit" onclick="window.print()">طباعة / حفظ الفاتورة 📄</button>
+            <button class="btn-cancel" onclick="closeModal('trackerModal')">إغلاق</button>
         </div>
     </div>
 
@@ -184,6 +354,7 @@
         let allProducts = [];
         let cart = [];
         let productQuantities = {};
+        let currentCategory = 'all';
 
         async function loadStoreProducts() {
             let cached = localStorage.getItem('storeProductsCache');
@@ -199,7 +370,7 @@
                 if (res.ok) {
                     allProducts = await res.json();
                     localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
-                    displayProducts(allProducts);
+                    filterProducts();
                 }
             } catch(e) {
                 if(!allProducts.length) displayProducts([]);
@@ -211,12 +382,12 @@
             grid.innerHTML = '';
 
             if (!products || products.length === 0) {
-                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات مضافة حالياً في هذا القسم.</div>';
+                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات مضافة في هذا القسم حالياً. 🛍️</div>';
                 return;
             }
 
             products.forEach((p, idx) => {
-                let imgSrc = p.image || p.img || 'https://via.placeholder.com/240x140';
+                let imgSrc = p.image || p.img || 'https://via.placeholder.com/260x160';
                 let cat = p.category || 'عام';
                 let safeName = p.name.replace(/'/g, "\\'");
                 if(!productQuantities[idx]) productQuantities[idx] = 1;
@@ -224,166 +395,12 @@
                 grid.innerHTML += `
                     <div class="product-card">
                         <div>
-                            <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/240x140'">
-                            <span class="category-badge">${cat}</span>
-                            <h3>${p.name}</h3>
-                            <p>${p.price} ج.م</p>
+                            <div class="product-img-wrapper">
+                                <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/260x160'">
+                                <span class="product-badge">${cat}</span>
+                            </div>
+                            <div class="product-title">${p.name}</div>
+                            <div class="product-price">${p.price} ج.م</div>
                         </div>
                         <div>
                             <div class="qty-controls">
-                                <button class="qty-btn" onclick="changeCardQty(${idx}, -1)">-</button>
-                                <span class="qty-val" id="cardQty_${idx}">${productQuantities[idx]}</span>
-                                <button class="qty-btn" onclick="changeCardQty(${idx}, 1)">+</button>
-                            </div>
-                            <button class="buy-btn" onclick="addToCart('${safeName}', ${p.price}, ${idx})">إضافة للسلة 🛒</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function changeCardQty(idx, delta) {
-            if(!productQuantities[idx]) productQuantities[idx] = 1;
-            productQuantities[idx] += delta;
-            if(productQuantities[idx] < 1) productQuantities[idx] = 1;
-            document.getElementById(`cardQty_${idx}`).innerText = productQuantities[idx];
-        }
-
-        function filterProducts() {
-            let query = document.getElementById('searchInput').value.toLowerCase();
-            let selectedCat = document.getElementById('categoryFilter').value;
-
-            let filtered = allProducts.filter(p => {
-                let matchesName = p.name.toLowerCase().includes(query);
-                let matchesCat = (selectedCat === 'all' || (p.category && p.category === selectedCat));
-                return matchesName && matchesCat;
-            });
-
-            displayProducts(filtered);
-        }
-
-        function addToCart(name, price, idx) {
-            let qty = productQuantities[idx] || 1;
-            let existing = cart.find(item => item.name === name);
-            if(existing) {
-                existing.qty += qty;
-            } else {
-                cart.push({ name, price, qty });
-            }
-            updateCartUI();
-            alert(`✅ تمت إضافة (${qty}) من "${name}" إلى السلة بنجاح!`);
-        }
-
-        function updateCartUI() {
-            let totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCount').innerText = totalCount;
-            
-            let list = document.getElementById('cartItemsList');
-            let subTotalElem = document.getElementById('subTotal');
-            let grandTotalElem = document.getElementById('grandTotal');
-
-            if(cart.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:#64748b; padding:15px;">السلة فارغة حالياً.</p>';
-                subTotalElem.innerText = '0 ج.م';
-                grandTotalElem.innerText = '15 ج.م';
-                return;
-            }
-
-            list.innerHTML = '';
-            let subtotal = 0;
-            cart.forEach((item, i) => {
-                let itemTotal = item.price * item.qty;
-                subtotal += itemTotal;
-                list.innerHTML += `
-                    <div class="cart-item-row">
-                        <div>
-                            <b>${item.name}</b><br>
-                            <small style="color:#64748b;">${item.price} ج.م × ${item.qty} = ${itemTotal} ج.م</small>
-                        </div>
-                        <div>
-                            <button class="qty-btn" onclick="updateCartItemQty(${i}, -1)">-</button>
-                            <span style="font-weight:bold; margin:0 4px;">${item.qty}</span>
-                            <button class="qty-btn" onclick="updateCartItemQty(${i}, 1)">+</button>
-                            <button onclick="removeFromCart(${i})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px; margin-right:5px;">حذف</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            subTotalElem.innerText = subtotal + ' ج.م';
-            grandTotalElem.innerText = (subtotal + 15) + ' ج.م';
-        }
-
-        function updateCartItemQty(i, delta) {
-            cart[i].qty += delta;
-            if(cart[i].qty <= 0) {
-                cart.splice(i, 1);
-            }
-            updateCartUI();
-        }
-
-        function removeFromCart(i) {
-            cart.splice(i, 1);
-            updateCartUI();
-        }
-
-        function openCart() {
-            document.getElementById('cartModal').style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function goToCheckout() {
-            if(cart.length === 0) { alert('السلة فارغة!'); return; }
-            closeModal('cartModal');
-            document.getElementById('checkoutModal').style.display = 'flex';
-        }
-
-        function submitOrderToWhatsApp() {
-            let name = document.getElementById('custName').value.trim();
-            let phone = document.getElementById('custPhone').value.trim();
-            let address = document.getElementById('custAddress').value.trim();
-            let payMethod = document.getElementById('payMethod').value;
-
-            if(!name || !phone || !address) {
-                alert('الرجاء تعبئة كافة بياناتك (الاسم، الجوال، والعنوان) لإكمال الطلب!');
-                return;
-            }
-
-            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = subtotal + 15;
-            let orderRef = Math.floor(1000 + Math.random() * 9000);
-
-            let msg = `*🛒 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
-            msg += `👤 *اسم العميل:* ${name}\n`;
-            msg += `📞 *رقم الجوال:* ${phone}\n`;
-            msg += `📍 *العنوان:* ${address}\n`;
-            msg += `💳 *طريقة الدفع:* ${payMethod}\n\n`;
-            msg += `*📦 قائمة الطلبات:*\n`;
-
-            cart.forEach((item, index) => {
-                msg += `${index + 1}. ${item.name} | العدد: ${item.qty} | السعر: ${item.price * item.qty} ج.م\n`;
-            });
-
-            msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
-            msg += `\n🛵 *التوصيل:* 15 ج.م`;
-            msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
-            msg += `يرجى تأكيد الطلب والبدء في التجهيز! وشكراً.`;
-
-            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(waUrl, '_blank');
-
-            cart = [];
-            updateCartUI();
-            closeModal('checkoutModal');
-            
-            document.getElementById('orderRefText').innerText = `الرقم المرجعي للطلب: #${orderRef}`;
-            document.getElementById('trackerModal').style.display = 'flex';
-        }
-
-        window.onload = loadStoreProducts;
-    </script>
-</body>
-</html>
