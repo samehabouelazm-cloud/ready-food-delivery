@@ -218,7 +218,7 @@
             <h1>جاهز <span>Store</span></h1>
         </a>
         <div class="header-actions">
-            <button class="refresh-btn" onclick="loadStoreProducts(true)">🔄 تحديث فوري</button>
+            <button class="refresh-btn" onclick="fetchStoreProducts(true)">🔄 تحديث فوري</button>
             <button class="cart-btn" onclick="openCart()">
                 🛒 السلة <span class="cart-badge" id="cartCount">0</span>
             </button>
@@ -260,7 +260,7 @@
 
         <!-- 5. شبكة عرض المنتجات المحدثة من السحابة -->
         <div class="products-grid" id="storeProductsGrid">
-            <div class="empty-msg">جاري تحميل المنتجات... ⏳</div>
+            <div class="empty-msg">جاري تحميل المنتجات من السحابة... ⏳</div>
         </div>
     </div>
 
@@ -365,26 +365,18 @@
         let productQuantities = {};
         let currentCategory = 'all';
 
-        async function loadStoreProducts(showAlert = false) {
-            let cached = localStorage.getItem('storeProductsCache');
-            if(cached && !showAlert) {
-                try {
-                    allProducts = JSON.parse(cached);
-                    filterProducts();
-                } catch(e){}
-            }
-
+        async function fetchStoreProducts(showAlert = false) {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     allProducts = await res.json();
-                    localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
                     filterProducts();
-                    if(showAlert) alert('✅ تم تحديث بيانات المتجر ومنتجاته بنجاح!');
+                    if(showAlert) alert('✅ تم تحديث المنتجات مباشرة من السحابة لجميع الأجهزة!');
+                } else {
+                    if(showAlert) alert('⚠️ تعذر جلب التحديثات من السحابة.');
                 }
             } catch(e) {
-                if(!allProducts.length) displayProducts([]);
-                if(showAlert) alert('⚠️ تعذر الاتصال بالسحابة حالياً.');
+                if(showAlert) alert('⚠️ خطأ في الاتصال بالإنترنت.');
             }
         }
 
@@ -572,7 +564,8 @@
             document.getElementById('trackerModal').style.display = 'flex';
         }
 
-        window.onload = () => loadStoreProducts(false);
+        // جلب المنتجات فوراً من السحابة بدون كاش قديم
+        window.onload = () => fetchStoreProducts(false);
     </script>
 </body>
 </html>
