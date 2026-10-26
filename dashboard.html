@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والإدارة - جاهز</title>
+    <title>لوحة التحكم والإدارة - جاهز (أداء فائق السرعة)</title>
     <script>
         let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
         if (pass !== "Ss@1234567890") {
@@ -33,12 +33,12 @@
 <body>
     <div class="container">
         <h1>
-            <span>🛠️ لوحة تحكم وإدارة المنتجات (جاهز)</span>
+            <span>⚡ لوحة التحكم (السرعة القصوى للعملاء)</span>
             <button class="sync-btn" onclick="loadAdminProducts()">🔄 تحديث القائمة</button>
         </h1>
         
         <div class="info-box">
-            🌐 <strong>مزامنة حية لجميع الأجهزة:</strong> أي تعديل، إضافة، أو رفع صورة من جهازك سيتم حفظه مباشرة في السحابة ليظهر عند كافة العملاء فوراً.
+            🚀 <strong>أداء صاروخي:</strong> الاعتماد على روابط الصور المباشرة يجعل ملف المتجر خفيفاً للغاية، ويتحمل آلاف العملاء الفاتحين للصفحة في نفس اللحظة بدون أي بطء أو تعليق نهائياً.
         </div>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
@@ -46,7 +46,7 @@
             <input type="hidden" id="editIndex" value="-1">
             
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اسم المنتج:</label>
-            <input type="text" id="pName" placeholder="مثال: بيض بلدي، لابتوب MSI">
+            <input type="text" id="pName" placeholder="مثال: بيض بلدي، لابتوب">
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">السعر (بالجنيه):</label>
             <input type="number" id="pPrice" placeholder="مثال: 150">
@@ -63,10 +63,10 @@
                 <option value="عام">📦 قسم عام</option>
             </select>
 
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اختر صورة المنتج (من الموبايل أو الكمبيوتر مباشرة):</label>
-            <input type="file" id="pImageFile" accept="image/*" style="padding: 7px;">
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">رابط صورة المنتج (انسخ رابط الصورة المباشر هنا):</label>
+            <input type="text" id="pImage" placeholder="https://example.com/image.jpg">
 
-            <button class="btn" id="saveBtn" onclick="saveProduct()">حفظ ونشر التعديلات للسحابة 🚀</button>
+            <button class="btn" id="saveBtn" onclick="saveProduct()">حفظ ونشر فوري للسحابة ⚡</button>
             <button class="btn btn-cancel" id="cancelBtn" onclick="resetForm()">إلغاء التعديل</button>
         </div>
 
@@ -92,7 +92,7 @@
 
         async function loadAdminProducts() {
             let tbody = document.getElementById('adminProductsList');
-            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات من السحابة... ⏳</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات... ⏳</td></tr>';
 
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -135,7 +135,7 @@
             let name = document.getElementById('pName').value.trim();
             let price = parseFloat(document.getElementById('pPrice').value);
             let cat = document.getElementById('pCategory').value;
-            let fileInput = document.getElementById('pImageFile');
+            let image = document.getElementById('pImage').value.trim() || 'https://via.placeholder.com/260x160';
             let editIndex = parseInt(document.getElementById('editIndex').value);
 
             if (!name || isNaN(price)) { 
@@ -143,29 +143,11 @@
                 return; 
             }
 
-            let btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-            btn.innerText = 'جاري معالجة الصورة والرفع للسحابة... ⏳';
-
-            if (fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let base64Image = e.target.result;
-                    processSaving(name, price, cat, base64Image, editIndex);
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                let existingImage = (editIndex > -1) ? (currentAdminProducts[editIndex].image || currentAdminProducts[editIndex].img) : 'https://via.placeholder.com/260x160';
-                processSaving(name, price, cat, existingImage, editIndex);
-            }
-        }
-
-        async function processSaving(name, price, cat, imgSrc, editIndex) {
             let productData = {
                 name: name,
                 price: price,
-                image: imgSrc,
-                img: imgSrc,
+                image: image,
+                img: image,
                 category: cat
             };
 
@@ -175,9 +157,7 @@
                 currentAdminProducts.push(productData);
             }
 
-            await updateCloud(currentAdminProducts);
-            resetForm();
-            loadAdminProducts();
+            updateCloud(currentAdminProducts);
         }
 
         function editProduct(index) {
@@ -185,6 +165,7 @@
             document.getElementById('pName').value = p.name;
             document.getElementById('pPrice').value = p.price;
             document.getElementById('pCategory').value = p.category || 'عام';
+            document.getElementById('pImage').value = p.image || p.img || '';
             document.getElementById('editIndex').value = index;
             
             document.getElementById('formTitle').innerText = 'تعديل المنتج المحدد:';
@@ -196,22 +177,24 @@
         function resetForm() {
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
-            document.getElementById('pImageFile').value = '';
+            document.getElementById('pImage').value = '';
             document.getElementById('editIndex').value = '-1';
             document.getElementById('formTitle').innerText = 'إضافة منتج جديد:';
-            document.getElementById('saveBtn').innerText = 'حفظ ونشر التعديلات للسحابة 🚀';
-            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('saveBtn').innerText = 'حفظ ونشر فوري للسحابة ⚡';
             document.getElementById('cancelBtn').style.display = 'none';
         }
 
         async function deleteProduct(index) {
             if(!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
             currentAdminProducts.splice(index, 1);
-            await updateCloud(currentAdminProducts);
-            loadAdminProducts();
+            updateCloud(currentAdminProducts);
         }
 
         async function updateCloud(data) {
+            let btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerText = 'جاري الحفظ بالسحابة... ⏳';
+
             try {
                 let res = await fetch(API_URL, {
                     method: 'POST',
@@ -219,12 +202,18 @@
                     body: JSON.stringify(data)
                 });
                 if(res.ok) {
-                    alert('✅ تمت المزامنة بنجاح! التحديثات أصبحت متاحة لجميع العملاء.');
+                    alert('✅ تمت المزامنة بنجاح وبسرعة خارقة لجميع العملاء!');
+                    resetForm();
+                    loadAdminProducts();
                 } else {
                     alert('خطأ في حفظ البيانات بالسحابة!');
+                    btn.disabled = false;
+                    btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
                 }
             } catch(e) {
                 alert('فشل الاتصال بالإنترنت أو السحابة!');
+                btn.disabled = false;
+                btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
             }
         }
 

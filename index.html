@@ -218,7 +218,7 @@
             <h1>جاهز <span>Store</span></h1>
         </a>
         <div class="header-actions">
-            <button class="refresh-btn" onclick="fetchStoreProducts(true)">🔄 تحديث فوري</button>
+            <button class="refresh-btn" onclick="loadStoreProducts(true)">🔄 تحديث فوري</button>
             <button class="cart-btn" onclick="openCart()">
                 🛒 السلة <span class="cart-badge" id="cartCount">0</span>
             </button>
@@ -258,9 +258,9 @@
             </div>
         </div>
 
-        <!-- 5. شبكة عرض المنتجات المحدثة من السحابة -->
+        <!-- 5. شبكة عرض المنتجات الفائقة السرعة -->
         <div class="products-grid" id="storeProductsGrid">
-            <div class="empty-msg">جاري تحميل المنتجات من السحابة... ⏳</div>
+            <div class="empty-msg">جاري تحميل المنتجات فائق السرعة... ⚡</div>
         </div>
     </div>
 
@@ -365,18 +365,30 @@
         let productQuantities = {};
         let currentCategory = 'all';
 
-        async function fetchStoreProducts(showAlert = false) {
+        async function loadStoreProducts(showAlert = false) {
+            // التحميل الفوري الذكي من الذاكرة المحلية لعرض المتجر في جزء من الثانية
+            let cached = localStorage.getItem('storeProductsCache');
+            if (cached && !showAlert) {
+                try {
+                    allProducts = JSON.parse(cached);
+                    filterProducts();
+                } catch(e) {}
+            }
+
+            // الجلب الخفي من السحابة في الخلفية لضمان أحدث البيانات بدون أي إبطاء
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     allProducts = await res.json();
+                    localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
                     filterProducts();
-                    if(showAlert) alert('✅ تم تحديث المنتجات مباشرة من السحابة لجميع الأجهزة!');
-                } else {
-                    if(showAlert) alert('⚠️ تعذر جلب التحديثات من السحابة.');
+                    if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                 }
             } catch(e) {
-                if(showAlert) alert('⚠️ خطأ في الاتصال بالإنترنت.');
+                if(!allProducts.length) {
+                    document.getElementById('storeProductsGrid').innerHTML = '<div class="empty-msg">⚠️ تعذر الاتصال بالانترنت، تحقق من اتصالك.</div>';
+                }
+                if(showAlert) alert('⚠️ خطأ في الاتصال بالسحابة.');
             }
         }
 
@@ -399,7 +411,7 @@
                     <div class="product-card">
                         <div>
                             <div class="product-img-wrapper">
-                                <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/260x160'">
+                                <img src="${imgSrc}" loading="lazy" onerror="this.src='https://via.placeholder.com/260x160'">
                                 <span class="product-badge">${cat}</span>
                             </div>
                             <div class="product-title">${p.name}</div>
@@ -432,17 +444,19 @@
             document.getElementById(`cardQty_${idx}`).innerText = productQuantities[idx];
         }
 
+        let searchTimeout;
         function filterProducts() {
-            let query = document.getElementById('searchInput').value.toLowerCase();
-
-            let filtered = allProducts.filter(p => {
-                let matchesName = p.name.toLowerCase().includes(query);
-                let pCat = p.category || 'عام';
-                let matchesCat = (currentCategory === 'all' || pCat === currentCategory);
-                return matchesName && matchesCat;
-            });
-
-            displayProducts(filtered);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                let query = document.getElementById('searchInput').value.toLowerCase();
+                let filtered = allProducts.filter(p => {
+                    let matchesName = p.name.toLowerCase().includes(query);
+                    let pCat = p.category || 'عام';
+                    let matchesCat = (currentCategory === 'all' || pCat === currentCategory);
+                    return matchesName && matchesCat;
+                });
+                displayProducts(filtered);
+            }, 50);
         }
 
         function addToCart(name, price, idx) {
@@ -549,7 +563,7 @@
             });
 
             msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
-            msg += `\n🛵 *التوصيل:* 15 ج.م`;
+            msg += `\n🛵 *التوصيل:* 20 ج.م`;
             msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
             msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
 
@@ -564,8 +578,7 @@
             document.getElementById('trackerModal').style.display = 'flex';
         }
 
-        // جلب المنتجات فوراً من السحابة بدون كاش قديم
-        window.onload = () => fetchStoreProducts(false);
+        window.onload = () => loadStoreProducts(false);
     </script>
 </body>
 </html>
