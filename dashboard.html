@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والإدارة الاحترافية - جاهز</title>
+    <title>لوحة التحكم والإدارة - جاهز</title>
     <script>
         let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
         if (pass !== "Ss@1234567890") {
@@ -33,12 +33,12 @@
 <body>
     <div class="container">
         <h1>
-            <span>🛠️ لوحة التحكم والإدارة الشاملة (جاهز)</span>
-            <button class="sync-btn" onclick="loadAdminProducts()">🔄 تحديث السحابة الآن</button>
+            <span>🛠️ لوحة تحكم وإدارة المنتجات (جاهز)</span>
+            <button class="sync-btn" onclick="loadAdminProducts()">🔄 تحديث القائمة</button>
         </h1>
         
         <div class="info-box">
-            🌐 <strong>تحكم كامل ورفع مباشر للصور:</strong> يمكنك رفع صورة المنتج مباشرة من الموبايل أو اللابتوب، وتعديل أو حذف أي منتج بسهولة تامة لتظهر التحديثات فوراً عند العملاء.
+            🌐 <strong>مزامنة حية لجميع الأجهزة:</strong> أي تعديل، إضافة، أو رفع صورة من جهازك سيتم حفظه مباشرة في السحابة ليظهر عند كافة العملاء فوراً.
         </div>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
@@ -46,10 +46,10 @@
             <input type="hidden" id="editIndex" value="-1">
             
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اسم المنتج:</label>
-            <input type="text" id="pName" placeholder="مثال: شاي ليبتون، هاتف ذكي">
+            <input type="text" id="pName" placeholder="مثال: بيض بلدي، لابتوب MSI">
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">السعر (بالجنيه):</label>
-            <input type="number" id="pPrice" placeholder="مثال: 75">
+            <input type="number" id="pPrice" placeholder="مثال: 150">
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">القسم / التصنيف:</label>
             <select id="pCategory">
@@ -63,10 +63,10 @@
                 <option value="عام">📦 قسم عام</option>
             </select>
 
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اختر صورة المنتج (من الموبايل أو اللابتوب مباشرة):</label>
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اختر صورة المنتج (من الموبايل أو الكمبيوتر مباشرة):</label>
             <input type="file" id="pImageFile" accept="image/*" style="padding: 7px;">
 
-            <button class="btn" id="saveBtn" onclick="saveProduct()">إضافة المنتج ونشره للسحابة 🚀</button>
+            <button class="btn" id="saveBtn" onclick="saveProduct()">حفظ ونشر التعديلات للسحابة 🚀</button>
             <button class="btn btn-cancel" id="cancelBtn" onclick="resetForm()">إلغاء التعديل</button>
         </div>
 
@@ -145,7 +145,7 @@
 
             let btn = document.getElementById('saveBtn');
             btn.disabled = true;
-            btn.innerText = 'جاري معالجة الصورة والحفظ في السحابة... ⏳';
+            btn.innerText = 'جاري معالجة الصورة والرفع للسحابة... ⏳';
 
             if (fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
@@ -155,8 +155,7 @@
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                // إذا لم يتم اختيار صورة جديدة أثناء التعديل، نحتفظ بالصورة القديمة
-                let existingImage = (editIndex > -1) ? (currentAdminProducts[editIndex].image || currentAdminProducts[editIndex].img) : 'https://via.placeholder.com/240x140';
+                let existingImage = (editIndex > -1) ? (currentAdminProducts[editIndex].image || currentAdminProducts[editIndex].img) : 'https://via.placeholder.com/260x160';
                 processSaving(name, price, cat, existingImage, editIndex);
             }
         }
@@ -200,7 +199,7 @@
             document.getElementById('pImageFile').value = '';
             document.getElementById('editIndex').value = '-1';
             document.getElementById('formTitle').innerText = 'إضافة منتج جديد:';
-            document.getElementById('saveBtn').innerText = 'إضافة المنتج ونشره للسحابة 🚀';
+            document.getElementById('saveBtn').innerText = 'حفظ ونشر التعديلات للسحابة 🚀';
             document.getElementById('saveBtn').disabled = false;
             document.getElementById('cancelBtn').style.display = 'none';
         }
@@ -220,12 +219,12 @@
                     body: JSON.stringify(data)
                 });
                 if(res.ok) {
-                    alert('✅ تمت المزامنة وتحديث كافة البيانات في السحابة بنجاح!');
+                    alert('✅ تمت المزامنة بنجاح! التحديثات أصبحت متاحة لجميع العملاء.');
                 } else {
-                    alert('حدث خطأ أثناء الاتصال بالسحابة!');
+                    alert('خطأ في حفظ البيانات بالسحابة!');
                 }
             } catch(e) {
-                alert('خطأ في شبكة الاتصال بالسحابة!');
+                alert('فشل الاتصال بالإنترنت أو السحابة!');
             }
         }
 
