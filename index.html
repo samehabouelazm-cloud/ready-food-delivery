@@ -57,6 +57,14 @@
         .cart-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35); }
         .cart-badge { background: #fff; color: var(--accent); font-size: 12px; padding: 2px 7px; border-radius: 20px; font-weight: 800; }
 
+        .captain-btn {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #fff; border: none; padding: 9px 14px; border-radius: var(--radius-md);
+            font-weight: 700; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transition: all 0.2s;
+        }
+        .captain-btn:hover { transform: translateY(-2px); }
+
         .refresh-btn {
             background: #10b981; color: #fff; border: none; padding: 9px 14px;
             border-radius: var(--radius-md); font-weight: 700; font-size: 13px; cursor: pointer;
@@ -218,6 +226,7 @@
             <h1>جاهز <span>Store</span></h1>
         </a>
         <div class="header-actions">
+            <button class="captain-btn" onclick="openCaptainModal()">🛵 انضم ككابتن</button>
             <button class="refresh-btn" onclick="loadStoreProducts(true)">🔄 تحديث فوري</button>
             <button class="cart-btn" onclick="openCart()">
                 🛒 السلة <span class="cart-badge" id="cartCount">0</span>
@@ -315,6 +324,32 @@
 
             <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">تأكيد وإرسال الطلب للواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
+        </div>
+    </div>
+
+    <!-- نافذة انضمام كابتن توصيل الجديدة -->
+    <div class="modal-overlay" id="captainModal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h3>🛵 انضم إلى فريق مناديب جاهز</h3>
+                <span class="close-icon" onclick="closeModal('captainModal')">✕</span>
+            </div>
+            
+            <div class="form-group">
+                <label>الاسم الكامل:</label>
+                <input type="text" id="capName" placeholder="أدخل اسمك الكريم">
+            </div>
+            <div class="form-group">
+                <label>رقم الموبايل / الواتساب:</label>
+                <input type="tel" id="capPhone" placeholder="010xxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>العنوان / المنطقة:</label>
+                <textarea id="capAddress" rows="2" placeholder="المدينة - الحي - المنطقة التي تغطيها"></textarea>
+            </div>
+
+            <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">إرسال طلب الانضمام للواتساب 🚀</button>
+            <button class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
         </div>
     </div>
 
@@ -530,10 +565,39 @@
             document.getElementById(id).style.display = 'none';
         }
 
+        function openCaptainModal() {
+            document.getElementById('captainModal').style.display = 'flex';
+        }
+
         function goToCheckout() {
             if(cart.length === 0) { alert('السلة فارغة!'); return; }
             closeModal('cartModal');
             document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function submitCaptainToWhatsApp() {
+            let name = document.getElementById('capName').value.trim();
+            let phone = document.getElementById('capPhone').value.trim();
+            let address = document.getElementById('capAddress').value.trim();
+
+            if(!name || !phone || !address) {
+                alert('الرجاء تعبئة كافة بيانات الكابتن (الاسم، رقم الموبايل، العنوان)!');
+                return;
+            }
+
+            let msg = `*🛵 طلب انضمام ككابتن / مندوب توصيل جديد*\n\n`;
+            msg += `👤 *الاسم:* ${name}\n`;
+            msg += `📞 *رقم الموبايل:* ${phone}\n`;
+            msg += `📍 *العنوان / المنطقة:* ${address}\n\n`;
+            msg += `أرغب في الانضمام لفريق التوصيل بمنصة جاهز. يرجى التواصل معي!`;
+
+            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+            window.open(waUrl, '_blank');
+
+            document.getElementById('capName').value = '';
+            document.getElementById('capPhone').value = '';
+            document.getElementById('capAddress').value = '';
+            closeModal('captainModal');
         }
 
         function submitOrderToWhatsApp() {
