@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جاهز - منصة التسوق والطلبات الشاملة</title>
-    <!-- خط تجولي العربي الاحترافي -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -26,7 +25,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
 
-        /* الهيدر العائم العصري */
         .header { 
             position: sticky; top: 0; z-index: 100;
             background: rgba(255, 255, 255, 0.92);
@@ -81,7 +79,6 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
 
-        /* 2. بانر العروض والتسوق */
         .hero-banner {
             margin: 20px 0; border-radius: var(--radius-lg);
             background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
@@ -100,7 +97,6 @@
         }
         .hero-btn:hover { transform: scale(1.05); }
 
-        /* 3. شريط البحث التفاعلي */
         .search-box {
             background: var(--surface); border-radius: var(--radius-md); padding: 10px 16px;
             display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
@@ -110,7 +106,6 @@
             border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
         }
 
-        /* 4. شريط الأقسام الرئيسية والفروع التابعة للسوبر ماركت */
         .categories-section { margin-bottom: 25px; }
         .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         .categories-scroll {
@@ -127,7 +122,6 @@
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
         }
 
-        /* شريط الفروع الفرعية الخاصة بقسم السوبرماركت */
         .subcategories-container {
             display: none; background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-md);
             padding: 12px 16px; margin-top: 10px; box-shadow: var(--shadow-sm); animation: fadeIn 0.3s ease;
@@ -144,7 +138,6 @@
         .sub-pill:hover, .sub-pill.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 5. شبكة بطاقات المنتجات */
         .products-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
         }
@@ -196,7 +189,6 @@
             padding: 50px 20px; background: var(--surface); border-radius: var(--radius-lg); font-size: 16px; font-weight: 700;
         }
 
-        /* 6. النوافذ المنبثقة التفاعلية (Modals) */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
@@ -220,7 +212,6 @@
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); background: #fff; }
 
-        /* تتبع الطلب step tracker */
         .tracker-steps { display: flex; justify-content: space-between; margin: 25px 0; position: relative; }
         .tracker-steps::before { content: ''; position: absolute; top: 22px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; z-index: 1; }
         .tracker-step { position: relative; z-index: 2; background: var(--surface); text-align: center; width: 25%; }
@@ -236,7 +227,6 @@
 </head>
 <body>
 
-    <!-- الهيدر العائم العصري -->
     <header class="header">
         <a href="#" class="brand-logo">
             <div class="logo-icon">جـ</div>
@@ -253,7 +243,6 @@
     </header>
 
     <div class="container">
-        <!-- 2. بانر العروض المميزة -->
         <div class="hero-banner">
             <div class="hero-text">
                 <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
@@ -262,7 +251,6 @@
             </div>
         </div>
 
-        <!-- قسم "اطلب أي حاجة" -->
         <div style="margin: 20px 0;">
             <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: var(--radius-lg); color: #fff; padding: 22px 24px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div style="max-width: 650px;">
@@ -275,13 +263,11 @@
             </div>
         </div>
 
-        <!-- 3. شريط البحث التفاعلي -->
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
             <input type="text" id="searchInput" placeholder="ابحث عن أي منتج، وجبة، أو جهاز..." oninput="filterProducts()">
         </div>
 
-        <!-- 4. شريط الأقسام الرئيسية مع الفروع المنسدلة لقسم السوبر ماركت -->
         <div class="categories-section">
             <div class="section-title">🛍️ تسوق حسب الفئة</div>
             <div class="categories-scroll" id="categoriesBar">
@@ -293,7 +279,6 @@
                 <div class="cat-pill" onclick="selectCategory('عام', this)">📦 عام</div>
             </div>
 
-            <!-- فروع السوبر ماركت التي تظهر عند الضغط على سوبر ماركت -->
             <div class="subcategories-container" id="supermarketSubcategories">
                 <div class="sub-title">🛒 فروع قسم السوبر ماركت:</div>
                 <div class="sub-pills-scroll">
@@ -308,13 +293,11 @@
             </div>
         </div>
 
-        <!-- 5. شبكة عرض المنتجات الفائقة السرعة -->
         <div class="products-grid" id="storeProductsGrid">
             <div class="empty-msg">جاري تحميل المنتجات فائق السرعة... ⚡</div>
         </div>
     </div>
 
-    <!-- 6. نافذة سلة المشتريات -->
     <div class="modal-overlay" id="cartModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -334,7 +317,6 @@
         </div>
     </div>
 
-    <!-- 7. نافذة إدخال بيانات العميل والدفع -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -368,7 +350,6 @@
         </div>
     </div>
 
-    <!-- نافذة انضمام كابتن توصيل الجديدة -->
     <div class="modal-overlay" id="captainModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -394,7 +375,6 @@
         </div>
     </div>
 
-    <!-- نافذة "اطلب أي حاجة" -->
     <div class="modal-overlay" id="customOrderModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -424,7 +404,6 @@
         </div>
     </div>
 
-    <!-- 8. نافذة التتبع التفاعلية -->
     <div class="modal-overlay" id="trackerModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -466,6 +445,16 @@
         const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
         const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
 
+        // منتجات احتياطية تظهر مباشرة في حال وجود أي بطء أو انقطاع في السحابة
+        const defaultProducts = [
+            { name: "شاي العروسة 250جم", price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
+            { name: "قهوة بن معتوق 200جم", price: 85, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" },
+            { name: "شيبسي عائلي طماطم", price: 20, category: "وجبات خفيفة وحلويات", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500" },
+            { name: "زيت عافية ذرة 800مل", price: 95, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500" },
+            { name: "بهارات كمون مطحون 100جم", price: 25, category: "الأعشاب والبهارات والتوابل", image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500" },
+            { name: "عسل نخلة طبيعي 500جم", price: 120, category: "المربى والعسل والأطعمة القابلة للدهن", image: "https://images.unsplash.com/photo-1587049352847-4a222e784d33?w=500" }
+        ];
+
         let allProducts = [];
         let cart = [];
         let productQuantities = {};
@@ -473,27 +462,47 @@
         let currentSubCategory = 'all';
 
         async function loadStoreProducts(showAlert = false) {
+            let loaded = false;
+
+            // 1. محاولة قراءة الكاش المحلي أولاً
             let cached = localStorage.getItem('storeProductsCache');
-            if (cached && !showAlert) {
+            if (cached) {
                 try {
-                    allProducts = JSON.parse(cached);
-                    filterProducts();
+                    let parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        allProducts = parsed;
+                        filterProducts();
+                        loaded = true;
+                    }
                 } catch(e) {}
             }
 
+            // 2. المحاولة السريعة من السحابة (مع مهلة زمنية للتأكد)
             try {
-                let res = await fetch(API_URL + "?t=" + new Date().getTime());
+                let controller = new AbortController();
+                let timeoutId = setTimeout(() => controller.abort(), 4000); // 4 ثوان كحد أقصى
+
+                let res = await fetch(API_URL + "?t=" + new Date().getTime(), { signal: controller.signal });
+                clearTimeout(timeoutId);
+
                 if (res.ok) {
-                    allProducts = await res.json();
-                    localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
-                    filterProducts();
-                    if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
+                    let data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        allProducts = data;
+                        localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
+                        filterProducts();
+                        loaded = true;
+                        if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
+                    }
                 }
             } catch(e) {
-                if(!allProducts.length) {
-                    document.getElementById('storeProductsGrid').innerHTML = '<div class="empty-msg">⚠️ تعذر الاتصال بالانترنت، تحقق من اتصالك.</div>';
-                }
-                if(showAlert) alert('⚠️ خطأ في الاتصال بالسحابة.');
+                console.log('سحابة NPoint غير متاحة حالياً، تم الاعتماد على النسخة المحلية.');
+            }
+
+            // 3. إن لم تتوفر بيانات سحابية ولا كاش، شغل المنتجات الافتراضية فوراً
+            if (!loaded && (!allProducts || allProducts.length === 0)) {
+                allProducts = defaultProducts;
+                filterProducts();
             }
         }
 
@@ -537,7 +546,7 @@
 
         function selectCategory(cat, elem) {
             currentCategory = cat;
-            currentSubCategory = 'all'; // إعادة تعيين الفرعي عند تغيير الرئيسي
+            currentSubCategory = 'all';
             document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
             elem.classList.add('active');
 
@@ -580,7 +589,6 @@
                         matchesCat = true;
                     } else if (currentCategory === 'سوبر ماركت') {
                         if (currentSubCategory === 'all') {
-                            // يعرض أي منتج يتبع السوبر ماركت أو فروعها الفرعية
                             matchesCat = (pCat === 'سوبر ماركت' || pCat.includes('القهوة') || pCat.includes('وجبات خفيفة') || pCat.includes('لوازم الطهي') || pCat.includes('الأعشاب') || pCat.includes('المربى') || pCat.includes('الصلصات'));
                         } else {
                             matchesCat = (pCat === currentSubCategory);
@@ -686,7 +694,7 @@
             let address = document.getElementById('capAddress').value.trim();
 
             if(!name || !phone || !address) {
-                alert('الرجاء تعبئة كافة بيانات الكابتن (الاسم، رقم الموبايل، العنوان)!');
+                alert('الرجاء تعبئة كافة بيانات الكابتن!');
                 return;
             }
 
@@ -696,12 +704,7 @@
             msg += `📍 *العنوان / المنطقة:* ${address}\n\n`;
             msg += `أرغب في الانضمام لفريق التوصيل بمنصة جاهز. يرجى التواصل معي!`;
 
-            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(waUrl, '_blank');
-
-            document.getElementById('capName').value = '';
-            document.getElementById('capPhone').value = '';
-            document.getElementById('capAddress').value = '';
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('captainModal');
         }
 
@@ -712,7 +715,7 @@
             let address = document.getElementById('customAddress').value.trim();
 
             if(!name || !phone || !details || !address) {
-                alert('الرجاء تعبئة كافة البيانات (الاسم، الهاتف، تفاصيل الطلب، والعنوان)!');
+                alert('الرجاء تعبئة كافة البيانات!');
                 return;
             }
 
@@ -723,15 +726,8 @@
             msg += `📝 *تفاصيل الطلب المطلوبة:*\n${details}\n\n`;
             msg += `يرجى مراجعة الطلب وتوفيره للعميل!`;
 
-            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(waUrl, '_blank');
-
-            document.getElementById('customName').value = '';
-            document.getElementById('customPhone').value = '';
-            document.getElementById('customDetails').value = '';
-            document.getElementById('customAddress').value = '';
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('customOrderModal');
-            
             alert('✅ تم إرسال طلبك الخاص بنجاح إلى الإدارة عبر الواتساب!');
         }
 
@@ -751,7 +747,7 @@
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
             let msg = `*🛒 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
-            msg += `👤 *اسم العميل:* `${name}\n`;
+            msg += `👤 *اسم العميل:* ${name}\n`;
             msg += `📞 *رقم الجوال:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}\n`;
             msg += `💳 *طريقة الدفع:* ${payMethod}\n\n`;
@@ -766,8 +762,7 @@
             msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
             msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
 
-            let waUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(waUrl, '_blank');
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 
             cart = [];
             updateCartUI();
