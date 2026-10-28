@@ -28,7 +28,7 @@
         .back-btn { background: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
         .info-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; font-size: 13px; color: #38bdf8; line-height: 1.6; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #0284c7; color: #fff; font-size: 11px; }
-        .preset-btn { background: #8b5cf6; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin-bottom: 15px; display: inline-block; }
+        .preset-btn { background: #8b5cf6; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 15px; display: inline-block; width: 100%; }
         .preset-btn:hover { background: #7c3aed; }
     </style>
 </head>
@@ -40,10 +40,10 @@
         </h1>
         
         <div class="info-box">
-            🛒 <strong>إضافة منتجات السوبر ماركت الأساسية:</strong> يمكنك النقر أدناه على زر "تحميل منتجات السوبر ماركت الافتراضية" لإضافة الشاي، السكر، الزيت، والدقيق دفعة واحدة، أو إضافة أي منتج يدوياً.
+            🛒 <strong>إدارة السوبر ماركت:</strong> تم تفعيل زر الحقن السريع أدناه لإضافة منتجات (الشاي، السكر، الزيت، الدقيق، الأرز، المكرونة، السمن، الجبن) دفعة واحدة وبضغطة زر مباشرة للسحابة!
         </div>
 
-        <button class="preset-btn" onclick="loadSupermarketDefaults()">📥 تحميل منتجات السوبر ماركت الأساسية (شاي، سكر، زيت...) 🛒</button>
+        <button class="preset-btn" onclick="injectSupermarketDefaults()">📥 حقن وإضافة منتجات السوبر ماركت الأساسية الآن 🚀</button>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
             <h3 id="formTitle" style="color: #38bdf8; margin-bottom: 12px;">إضافة منتج جديد:</h3>
@@ -96,7 +96,7 @@
 
         async function loadAdminProducts() {
             let tbody = document.getElementById('adminProductsList');
-            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات... ⏳</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات من السحابة... ⏳</td></tr>';
 
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -135,10 +135,7 @@
             });
         }
 
-        // دالة إضافة منتجات السوبر ماركت الأساسية تلقائياً
-        async function loadSupermarketDefaults() {
-            if(!confirm('هل تريد إضافة منتجات السوبر ماركت الأساسية (شاي، سكر، زيت، دقيق، أرز...) إلى قائمتك الحالية؟')) return;
-
+        async function injectSupermarketDefaults() {
             let defaultSupermarketItems = [
                 { name: "شاي العروسة ناعم 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400" },
                 { name: "سكر الأبيض الموحد 1كجم", price: 35, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c714235?w=400" },
@@ -150,15 +147,18 @@
                 { name: "جبنة فريكو أو بريزيدون 250جم", price: 45, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400" }
             ];
 
-            // دمج المنتجات الجديدة مع المنتجات الموجودة أصلاً دون حذف الأقسام الأخرى
+            // التأكد من عدم تكرار المنتجات إذا كانت موجودة مسبقاً
             defaultSupermarketItems.forEach(newItem => {
-                currentAdminProducts.push({
-                    name: newItem.name,
-                    price: newItem.price,
-                    image: newItem.image,
-                    img: newItem.image,
-                    category: newItem.category
-                });
+                let exists = currentAdminProducts.some(p => p.name === newItem.name);
+                if (!exists) {
+                    currentAdminProducts.push({
+                        name: newItem.name,
+                        price: newItem.price,
+                        image: newItem.image,
+                        img: newItem.image,
+                        category: newItem.category
+                    });
+                }
             });
 
             await updateCloud(currentAdminProducts);
@@ -225,8 +225,10 @@
 
         async function updateCloud(data) {
             let btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-            btn.innerText = 'جاري الحفظ بالسحابة... ⏳';
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = 'جاري الحفظ بالسحابة... ⏳';
+            }
 
             try {
                 let res = await fetch(API_URL, {
@@ -235,18 +237,22 @@
                     body: JSON.stringify(data)
                 });
                 if(res.ok) {
-                    alert('✅ تمت المزامنة بنجاح وبسرعة خارقة لجميع العملاء!');
+                    alert('✅ تمت المزامنة بنجاح وحفظ المنتجات في السحابة!');
                     resetForm();
                     loadAdminProducts();
                 } else {
                     alert('خطأ في حفظ البيانات بالسحابة!');
-                    btn.disabled = false;
-                    btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
+                    if(btn) {
+                        btn.disabled = false;
+                        btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
+                    }
                 }
             } catch(e) {
                 alert('فشل الاتصال بالإنترنت أو السحابة!');
-                btn.disabled = false;
-                btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
+                if(btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
+                }
             }
         }
 
