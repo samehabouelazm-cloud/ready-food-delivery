@@ -28,8 +28,6 @@
         .back-btn { background: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
         .info-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; font-size: 13px; color: #38bdf8; line-height: 1.6; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #0284c7; color: #fff; font-size: 11px; }
-        .preset-btn { background: #8b5cf6; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 15px; display: inline-block; width: 100%; }
-        .preset-btn:hover { background: #7c3aed; }
     </style>
 </head>
 <body>
@@ -40,10 +38,8 @@
         </h1>
         
         <div class="info-box">
-            🛒 <strong>إدارة السوبر ماركت:</strong> تم تفعيل زر الحقن السريع أدناه لإضافة منتجات (الشاي، السكر، الزيت، الدقيق، الأرز، المكرونة، السمن، الجبن) دفعة واحدة وبضغطة زر مباشرة للسحابة!
+            🛒 <strong>تم الحقن التلقائي:</strong> تم إعداد النظام ليقوم بإضافة وتحديث منتجات السوبر ماركت الأساسية تلقائياً في السحابة فور تحميل لوحة التحكم.
         </div>
-
-        <button class="preset-btn" onclick="injectSupermarketDefaults()">📥 حقن وإضافة منتجات السوبر ماركت الأساسية الآن 🚀</button>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
             <h3 id="formTitle" style="color: #38bdf8; margin-bottom: 12px;">إضافة منتج جديد:</h3>
@@ -96,7 +92,7 @@
 
         async function loadAdminProducts() {
             let tbody = document.getElementById('adminProductsList');
-            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات من السحابة... ⏳</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب وحقن المنتجات تلقائياً... ⏳</td></tr>';
 
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -108,6 +104,43 @@
             } catch(e) {
                 currentAdminProducts = [];
             }
+
+            // حقن منتجات السوبر ماركت تلقائياً إذا لم تكن موجودة
+            let defaultSupermarketItems = [
+                { name: "شاي العروسة ناعم 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400" },
+                { name: "سكر الأبيض الموحد 1كجم", price: 35, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c714235?w=400" },
+                { name: "زيت عافية ذرة أو عباد 800مل", price: 95, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400" },
+                { name: "دقيق الضحى الفاخر 1كجم", price: 28, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400" },
+                { name: "أرز الموحد أو الضحى 1كجم", price: 34, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400" },
+                { name: "مكرونة الملكة أو بساطة 400جم", price: 14, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=400" },
+                { name: "سمن روابي أو جنه 700جم", price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400" },
+                { name: "جبنة فريكو أو بريزيدون 250جم", price: 45, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400" }
+            ];
+
+            let addedNew = false;
+            defaultSupermarketItems.forEach(newItem => {
+                let exists = currentAdminProducts.some(p => p.name === newItem.name);
+                if (!exists) {
+                    currentAdminProducts.push({
+                        name: newItem.name,
+                        price: newItem.price,
+                        image: newItem.image,
+                        img: newItem.image,
+                        category: newItem.category
+                    });
+                    addedNew = true;
+                }
+            });
+
+            if (addedNew) {
+                // حفظ المنتجات الجديدة تلقائياً في السحابة
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentAdminProducts)
+                });
+            }
+
             renderAdminTable();
         }
 
@@ -133,35 +166,6 @@
                     </td>
                 </tr>`;
             });
-        }
-
-        async function injectSupermarketDefaults() {
-            let defaultSupermarketItems = [
-                { name: "شاي العروسة ناعم 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400" },
-                { name: "سكر الأبيض الموحد 1كجم", price: 35, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c714235?w=400" },
-                { name: "زيت عافية ذرة أو عباد 800مل", price: 95, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400" },
-                { name: "دقيق الضحى الفاخر 1كجم", price: 28, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400" },
-                { name: "أرز الموحد أو الضحى 1كجم", price: 34, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400" },
-                { name: "مكرونة الملكة أو بساطة 400جم", price: 14, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=400" },
-                { name: "سمن روابي أو جنه 700جم", price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400" },
-                { name: "جبنة فريكو أو بريزيدون 250جم", price: 45, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400" }
-            ];
-
-            // التأكد من عدم تكرار المنتجات إذا كانت موجودة مسبقاً
-            defaultSupermarketItems.forEach(newItem => {
-                let exists = currentAdminProducts.some(p => p.name === newItem.name);
-                if (!exists) {
-                    currentAdminProducts.push({
-                        name: newItem.name,
-                        price: newItem.price,
-                        image: newItem.image,
-                        img: newItem.image,
-                        category: newItem.category
-                    });
-                }
-            });
-
-            await updateCloud(currentAdminProducts);
         }
 
         function saveProduct() {
@@ -237,7 +241,7 @@
                     body: JSON.stringify(data)
                 });
                 if(res.ok) {
-                    alert('✅ تمت المزامنة بنجاح وحفظ المنتجات في السحابة!');
+                    alert('✅ تمت المزامنة بنجاح وحفظ التغييرات في السحابة!');
                     resetForm();
                     loadAdminProducts();
                 } else {
