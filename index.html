@@ -110,7 +110,7 @@
             border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
         }
 
-        /* 4. شريط الأقسام المحدث بالشامل لكافة الفئات */
+        /* 4. شريط الأقسام المحدث (تسوق حسب الفئة - فروع السوبر ماركت) */
         .categories-section { margin-bottom: 25px; }
         .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         .categories-scroll {
@@ -127,7 +127,7 @@
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
         }
 
-        /* 5. شبكة بطاقات المنتجات المبهجة */
+        /* 5. شبكة بطاقات المنتجات */
         .products-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
         }
@@ -245,7 +245,7 @@
             </div>
         </div>
 
-        <!-- قسم "اطلب أي حاجة" الجديد -->
+        <!-- قسم "اطلب أي حاجة" -->
         <div style="margin: 20px 0;">
             <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: var(--radius-lg); color: #fff; padding: 22px 24px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div style="max-width: 650px;">
@@ -264,18 +264,20 @@
             <input type="text" id="searchInput" placeholder="ابحث عن أي منتج، وجبة، أو جهاز..." oninput="filterProducts()">
         </div>
 
-        <!-- 4. شريط الأقسام العصري الشامل لكل الفئات -->
+        <!-- 4. شريط الأقسام وفروع السوبر ماركت تحت عبارة "تسوق حسب الفئة" -->
         <div class="categories-section">
-            <div class="section-title">✨ تصفح حسب القسم</div>
+            <div class="section-title">🛍️ تسوق حسب الفئة</div>
             <div class="categories-scroll" id="categoriesBar">
                 <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 الكل</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت', this)">🛒 سوبر ماركت</div>
+                <div class="cat-pill" onclick="selectCategory('القهوة والشاي والمشروبات', this)">☕ القهوة والشاي والمشروبات</div>
+                <div class="cat-pill" onclick="selectCategory('وجبات خفيفة وحلويات', this)">🍪 وجبات خفيفة وحلويات</div>
+                <div class="cat-pill" onclick="selectCategory('لوازم الطهي والخبز', this)">🌾 لوازم الطهي والخبز</div>
+                <div class="cat-pill" onclick="selectCategory('الأعشاب والبهارات والتوابل', this)">🌿 الأعشاب والبهارات والتوابل</div>
+                <div class="cat-pill" onclick="selectCategory('المربى والعسل والأطعمة القابلة للدهن', this)">🍯 المربى والعسل والدهن</div>
+                <div class="cat-pill" onclick="selectCategory('الصلصات والمربى', this)">🍅 الصلصات والمربى</div>
                 <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
                 <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍔 وجبات سريعة</div>
-                <div class="cat-pill" onclick="selectCategory('مشروبات', this)">🥤 مشروبات</div>
-                <div class="cat-pill" onclick="selectCategory('حلويات', this)">🍰 حلويات</div>
                 <div class="cat-pill" onclick="selectCategory('أدوات منزلية', this)">🏠 أدوات منزلية</div>
-                <div class="cat-pill" onclick="selectCategory('موضة وأزياء', this)">👕 موضة وأزياء</div>
                 <div class="cat-pill" onclick="selectCategory('عام', this)">📦 عام</div>
             </div>
         </div>
@@ -366,7 +368,7 @@
         </div>
     </div>
 
-    <!-- نافذة "اطلب أي حاجة" الجديدة -->
+    <!-- نافذة "اطلب أي حاجة" -->
     <div class="modal-overlay" id="customOrderModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -444,7 +446,6 @@
         let currentCategory = 'all';
 
         async function loadStoreProducts(showAlert = false) {
-            // التحميل الفوري الذكي من الذاكرة المحلية لعرض المتجر في جزء من الثانية
             let cached = localStorage.getItem('storeProductsCache');
             if (cached && !showAlert) {
                 try {
@@ -453,7 +454,6 @@
                 } catch(e) {}
             }
 
-            // الجلب الخفي من السحابة في الخلفية لضمان أحدث البيانات بدون أي إبطاء
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
@@ -704,7 +704,7 @@
             });
 
             msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
-            msg += `\n🛵 *التوصيل:* 20 ج.م`;
+            msg += `\n🛵 *التوصيل:* 15 ج.م`;
             msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
             msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
 
