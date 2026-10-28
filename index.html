@@ -764,6 +764,25 @@
             let total = subtotal + 15;
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
+            // حساب الربح وتسجيل العملية في سجل المبيعات ل لوحة التحكم
+            let orderProfit = cart.reduce((sum, item) => {
+                let foundProd = allProducts.find(p => p.name === item.name);
+                let itemCost = foundProd ? (foundProd.cost || (item.price * 0.8)) : (item.price * 0.8);
+                return sum + ((item.price - itemCost) * item.qty);
+            }, 0);
+
+            let saleRecord = {
+                orderId: orderRef,
+                timestamp: new Date().getTime(),
+                total: total,
+                profit: Math.round(orderProfit),
+                itemsSummary: cart.map(i => `${i.name} (${i.qty})`).join(', ')
+            };
+
+            let existingSales = JSON.parse(localStorage.getItem('storeSalesLog') || '[]');
+            existingSales.push(saleRecord);
+            localStorage.setItem('storeSalesLog', JSON.stringify(existingSales));
+
             let msg = `*🛒 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
             msg += `👤 *اسم العميل:* ${name}\n`;
             msg += `📞 *رقم الجوال:* ${phone}\n`;
@@ -776,7 +795,7 @@
             });
 
             msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
-            msg += `\n🛵 *التوصيل:*20 ج.م`;
+            msg += `\n🛵 *التوصيل:* 20 ج.م`;
             msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
             msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
 
