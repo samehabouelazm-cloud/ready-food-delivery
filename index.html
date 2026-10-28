@@ -100,14 +100,14 @@
         .search-box {
             background: var(--surface); border-radius: var(--radius-md); padding: 10px 16px;
             display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
-            border: 1px solid #e2e8f0; margin-bottom: 20px;
+            border: 1px solid #e2e8f0; margin-bottom: 16px;
         }
         .search-box input {
             border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
         }
 
         .categories-section { margin-bottom: 25px; }
-        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); }
         .categories-scroll {
             display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;
         }
@@ -124,10 +124,16 @@
 
         .subcategories-container {
             display: none; background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-md);
-            padding: 12px 16px; margin-top: 10px; box-shadow: var(--shadow-sm); animation: fadeIn 0.3s ease;
+            padding: 14px 16px; margin-top: 10px; box-shadow: var(--shadow-sm); animation: fadeIn 0.3s ease;
         }
         .subcategories-container.show { display: block; }
-        .sub-title { font-size: 13px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+        .sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .sub-title { font-size: 14px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+        .sub-search {
+            display: flex; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 12px; font-size: 13px; min-width: 200px;
+        }
+        .sub-search input { border: none; outline: none; background: transparent; width: 100%; font-size: 13px; font-weight: 500; }
+
         .sub-pills-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
         .sub-pills-scroll::-webkit-scrollbar { display: none; }
         .sub-pill {
@@ -137,6 +143,8 @@
         }
         .sub-pill:hover, .sub-pill.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .products-status { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 14px; }
 
         .products-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
@@ -265,7 +273,7 @@
 
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
-            <input type="text" id="searchInput" placeholder="ابحث عن أي منتج، وجبة، أو جهاز..." oninput="filterProducts()">
+            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="filterProducts()">
         </div>
 
         <div class="categories-section">
@@ -280,7 +288,13 @@
             </div>
 
             <div class="subcategories-container" id="supermarketSubcategories">
-                <div class="sub-title">🛒 فروع قسم السوبر ماركت:</div>
+                <div class="sub-header">
+                    <div class="sub-title">🛒 فروع السوبر ماركت:</div>
+                    <div class="sub-search">
+                        <span>🔍</span>
+                        <input type="text" id="subSearchInput" placeholder="بحث سريع في هذا الفرع..." oninput="filterProducts()">
+                    </div>
+                </div>
                 <div class="sub-pills-scroll">
                     <div class="sub-pill active" onclick="selectSubCategory('all', this)">جميع المنتجات</div>
                     <div class="sub-pill" onclick="selectSubCategory('القهوة والشاي والمشروبات', this)">☕ القهوة والشاي والمشروبات</div>
@@ -293,11 +307,14 @@
             </div>
         </div>
 
+        <div class="products-status" id="productsStatusText">عرض المنتجات...</div>
+
         <div class="products-grid" id="storeProductsGrid">
             <div class="empty-msg">جاري تحميل المنتجات فائق السرعة... ⚡</div>
         </div>
     </div>
 
+    <!-- Modals -->
     <div class="modal-overlay" id="cartModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -445,7 +462,6 @@
         const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
         const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
 
-        // منتجات احتياطية تظهر مباشرة في حال وجود أي بطء أو انقطاع في السحابة
         const defaultProducts = [
             { name: "شاي العروسة 250جم", price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
             { name: "قهوة بن معتوق 200جم", price: 85, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" },
@@ -464,7 +480,6 @@
         async function loadStoreProducts(showAlert = false) {
             let loaded = false;
 
-            // 1. محاولة قراءة الكاش المحلي أولاً
             let cached = localStorage.getItem('storeProductsCache');
             if (cached) {
                 try {
@@ -477,10 +492,9 @@
                 } catch(e) {}
             }
 
-            // 2. المحاولة السريعة من السحابة (مع مهلة زمنية للتأكد)
             try {
                 let controller = new AbortController();
-                let timeoutId = setTimeout(() => controller.abort(), 4000); // 4 ثوان كحد أقصى
+                let timeoutId = setTimeout(() => controller.abort(), 4000);
 
                 let res = await fetch(API_URL + "?t=" + new Date().getTime(), { signal: controller.signal });
                 clearTimeout(timeoutId);
@@ -495,11 +509,8 @@
                         if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                     }
                 }
-            } catch(e) {
-                console.log('سحابة NPoint غير متاحة حالياً، تم الاعتماد على النسخة المحلية.');
-            }
+            } catch(e) {}
 
-            // 3. إن لم تتوفر بيانات سحابية ولا كاش، شغل المنتجات الافتراضية فوراً
             if (!loaded && (!allProducts || allProducts.length === 0)) {
                 allProducts = defaultProducts;
                 filterProducts();
@@ -508,10 +519,13 @@
 
         function displayProducts(products) {
             let grid = document.getElementById('storeProductsGrid');
+            let statusText = document.getElementById('productsStatusText');
             grid.innerHTML = '';
 
+            statusText.innerText = `عرض (${products.length}) منتج من إجمالي (${allProducts.length})`;
+
             if (!products || products.length === 0) {
-                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات مضافة في هذا القسم حالياً. 🛍️</div>';
+                grid.innerHTML = '<div class="empty-msg">عذراً، لم نجد منتجات تطابق بحثك حالياً. 🛍️</div>';
                 return;
             }
 
@@ -579,9 +593,13 @@
         function filterProducts() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                let query = document.getElementById('searchInput').value.toLowerCase();
+                let mainQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+                let subQuery = document.getElementById('subSearchInput') ? document.getElementById('subSearchInput').value.toLowerCase().trim() : '';
+                
                 let filtered = allProducts.filter(p => {
-                    let matchesName = p.name.toLowerCase().includes(query);
+                    let pName = p.name.toLowerCase();
+                    let matchesMainQuery = pName.includes(mainQuery);
+                    let matchesSubQuery = subQuery ? pName.includes(subQuery) : true;
                     let pCat = p.category || 'عام';
                     
                     let matchesCat = false;
@@ -597,10 +615,10 @@
                         matchesCat = (pCat === currentCategory);
                     }
 
-                    return matchesName && matchesCat;
+                    return matchesMainQuery && matchesSubQuery && matchesCat;
                 });
                 displayProducts(filtered);
-            }, 50);
+            }, 30);
         }
 
         function addToCart(name, price, idx) {
@@ -758,7 +776,7 @@
             });
 
             msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
-            msg += `\n🛵 *التوصيل:* 15 ج.م`;
+            msg += `\n🛵 *التوصيل:*20 ج.م`;
             msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
             msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
 
