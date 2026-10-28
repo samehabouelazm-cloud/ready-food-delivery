@@ -20,6 +20,7 @@
             --radius-md: 12px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
@@ -72,15 +73,18 @@
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: var(--secondary); }
         .btn-success:hover { background: #059669; }
+        .btn-warning { background: var(--accent); color: #fff; }
+        .btn-warning:hover { background: #d97706; }
 
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { padding: 12px 14px; text-align: right; border-bottom: 1px solid #f1f5f9; }
         th { background: #f8fafc; font-weight: 800; color: var(--text-muted); }
         
-        .actions-cell { display: flex; gap: 6px; }
+        .actions-cell { display: flex; gap: 6px; align-items: center; }
         .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
+        /* نافذة إدخال كلمة المرور */
         #authOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
@@ -98,16 +102,70 @@
             font-size: 16px; text-align: center; margin-bottom: 15px; outline: none; background: #f8fafc;
         }
         .auth-box input:focus { border-color: var(--primary); background: #fff; }
+
+        /* نافذة التعديل المنبثقة Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 1000; padding: 16px;
+        }
+        .modal-body {
+            background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius-lg);
+            padding: 24px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
+        .modal-header h3 { font-size: 18px; font-weight: 800; color: var(--text-dark); }
+        .close-icon { cursor: pointer; font-size: 20px; color: var(--text-muted); font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- شاشة تسجيل الدخول -->
     <div id="authOverlay">
         <div class="auth-box">
             <h3>🔒 لوحة التحكم الإدارية</h3>
             <p>الرجاء إدخال كلمة المرور السرية للمتابعة</p>
             <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور..." onkeydown="if(event.key === 'Enter') checkAdminPassword()">
             <button class="btn" style="width: 100%;" onclick="checkAdminPassword()">تسجيل الدخول 🔓</button>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل المنتج المنبثقة -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h3>✏️ تعديل بيانات المنتج</h3>
+                <span class="close-icon" onclick="closeEditModal()">✕</span>
+            </div>
+            <input type="hidden" id="editIndex">
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>اسم المنتج:</label>
+                <input type="text" id="editName">
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>سعر التكلفة:</label>
+                <input type="number" id="editCost">
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>سعر البيع:</label>
+                <input type="number" id="editPrice">
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>الفئة الرئيسية:</label>
+                <select id="editCategory">
+                    <option value="سوبر ماركت">🛒 سوبر ماركت</option>
+                    <option value="إلكترونيات">📱 إلكترونيات</option>
+                    <option value="وجبات سريعة">🍔 وجبات سريعة</option>
+                    <option value="أدوات منزلية">🏠 أدوات منزلية</option>
+                    <option value="عام">📦 عام</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label>رابط الصورة (URL):</label>
+                <input type="text" id="editImage">
+            </div>
+            <button class="btn btn-success" style="width:100%; margin-bottom:8px;" onclick="saveEditedProduct()">💾 حفظ التعديلات</button>
+            <button class="btn btn-danger" style="width:100%; background:#64748b;" onclick="closeEditModal()">إلغاء</button>
         </div>
     </div>
 
@@ -122,6 +180,8 @@
     </header>
 
     <div class="container">
+
+        <!-- لوحة الإحصائيات والأرباح الفورية -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">📅 مبيعات وأرباح اليوم</div>
@@ -145,6 +205,7 @@
             </div>
         </div>
 
+        <!-- إضافة منتج جديد -->
         <div class="card">
             <div class="card-title">📦 إضافة منتج جديد</div>
             <div class="form-grid">
@@ -178,6 +239,7 @@
             <button class="btn btn-success" onclick="addNewProduct()">➕ إضافة المنتج</button>
         </div>
 
+        <!-- قائمة المنتجات الحالية -->
         <div class="card">
             <div class="card-title">📋 قائمة منتجات المتجر المسجلة</div>
             <div class="table-responsive">
@@ -198,6 +260,7 @@
             </div>
         </div>
 
+        <!-- سجل المبيعات والأرباح -->
         <div class="card">
             <div class="card-title">💰 سجل المبيعات والأرباح المحققة</div>
             <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
@@ -219,10 +282,11 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <script>
-        // 🔑 كلمة المرور السرية المحدثة رسمياً
+        // كلمة المرور الإدارية المحددة
         const ADMIN_PASSWORD = "Ss@1234567890";
 
         function checkAdminPassword() {
@@ -284,11 +348,46 @@
                         <td style="color:var(--accent); font-weight:800;">+${profit} ج.م</td>
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
+                            <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 6px 10px; font-size: 12px;">تعديل ✏️</button>
                             <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 6px 10px; font-size: 12px;">حذف</button>
                         </td>
                     </tr>
                 `;
             });
+        }
+
+        function openEditModal(idx) {
+            let p = products[idx];
+            document.getElementById('editIndex').value = idx;
+            document.getElementById('editName').value = p.name || '';
+            document.getElementById('editCost').value = p.cost || '';
+            document.getElementById('editPrice').value = p.price || '';
+            document.getElementById('editCategory').value = p.category || 'عام';
+            document.getElementById('editImage').value = p.image || '';
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveEditedProduct() {
+            let idx = document.getElementById('editIndex').value;
+            let name = document.getElementById('editName').value.trim();
+            let cost = parseFloat(document.getElementById('editCost').value) || 0;
+            let price = parseFloat(document.getElementById('editPrice').value) || 0;
+            let category = document.getElementById('editCategory').value;
+            let image = document.getElementById('editImage').value.trim();
+
+            if (!name || price <= 0) {
+                alert('الرجاء إدخال اسم المنتج وسعر بيع صحيح!');
+                return;
+            }
+
+            products[idx] = { name, cost, price, category, image };
+            saveAndSync();
+            closeEditModal();
+            alert('✅ تم تعديل المنتج بنجاح!');
         }
 
         function addNewProduct() {
