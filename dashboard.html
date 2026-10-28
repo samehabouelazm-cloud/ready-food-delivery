@@ -3,234 +3,398 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والإدارة - جاهز (إدارة المنتجات والفروع)</title>
-    <script>
-        let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
-        if (pass !== "Ss@1234567890") {
-            alert("كلمة المرور غير صحيحة!");
-            window.location.href = "index.html";
-        }
-    </script>
+    <title>لوحة التحكم الإدارية - جاهز Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #0f172a; color: #f8fafc; padding: 20px; direction: rtl; text-align: right; }
-        .container { max-width: 1100px; margin: 0 auto; background: #1e293b; border: 2px dashed #6366f1; border-radius: 12px; padding: 20px; }
-        h1 { color: #38bdf8; font-size: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px; outline: none; }
-        input:focus, select:focus { border-color: #38bdf8; }
-        .btn { background: #10b981; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 15px; }
-        .btn:hover { background: #059669; }
-        .btn-cancel { background: #64748b; display: none; }
-        .sync-btn { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-        th, td { border: 1px solid #334155; padding: 10px; text-align: center; vertical-align: middle; }
-        th { background: #334155; color: #38bdf8; }
-        .back-btn { background: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
-        .info-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; font-size: 13px; color: #38bdf8; line-height: 1.6; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #0284c7; color: #fff; font-size: 11px; }
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --surface: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
+
+        .header { 
+            background: var(--surface); padding: 16px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm); border-bottom: 1px solid #e2e8f0;
+        }
+        .brand h1 { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+        .brand h1 span { color: var(--primary); }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+
+        /* لوحة احصائيات الأرباح والمبيعات */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: var(--surface); padding: 20px; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; border-right: 5px solid var(--primary);
+        }
+        .stat-card.success { border-right-color: var(--secondary); }
+        .stat-card.warning { border-right-color: var(--accent); }
+        .stat-card.purple { border-right-color: #8b5cf6; }
+
+        .stat-title { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+        .stat-sub { font-size: 11px; color: var(--secondary); font-weight: 700; margin-top: 4px; }
+
+        .card {
+            background: var(--surface); border-radius: var(--radius-lg); padding: 20px;
+            box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; margin-bottom: 25px;
+        }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; background: #f8fafc; outline: none;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); background: #fff; }
+
+        .btn {
+            background: var(--primary); color: #fff; border: none; padding: 10px 20px;
+            border-radius: var(--radius-md); font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-success { background: var(--secondary); }
+        .btn-success:hover { background: #059669; }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 12px 14px; text-align: right; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 800; color: var(--text-muted); }
+        
+        .actions-cell { display: flex; gap: 6px; }
+        .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     </style>
 </head>
 <body>
+
+    <header class="header">
+        <div class="brand">
+            <h1>لوحة تحكم جاهز <span>Dashboard</span></h1>
+        </div>
+        <div>
+            <a href="index.html" class="btn" style="text-decoration:none; font-size:13px;">🌐 الذهاب للمتجر</a>
+            <button class="btn btn-danger" onclick="resetData()" style="font-size:13px; margin-right: 6px;">🗑️ إعادة ضبط المنتجات</button>
+        </div>
+    </header>
+
     <div class="container">
-        <h1>
-            <span>⚡ لوحة التحكم (إدارة المنتجات وفروع السوبر ماركت)</span>
-            <button class="sync-btn" onclick="loadAdminProducts()">🔄 تحديث القائمة</button>
-        </h1>
-        
-        <div class="info-box">
-            🛒 <strong>إدارة الفروع الفرعية:</strong> يمكنك الآن تخصيص كل منتج وربطه بفرعه المناسب ضمن أقسام السوبر ماركت (القهوة والشاي، لوازم الطهي، البهارات، إلخ) لتظهر للعملاء في مكانها الصحيح بدقة فائقة.
+
+        <!-- لوحة الإحصائيات والأرباح الفورية -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">📅 مبيعات وأرباح اليوم</div>
+                <div class="stat-value" id="statDaySales">0 ج.م</div>
+                <div class="stat-sub" id="statDayProfit">الربح: 0 ج.م</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-title">📆 مبيعات وأرباح الأسبوع</div>
+                <div class="stat-value" id="statWeekSales">0 ج.م</div>
+                <div class="stat-sub" id="statWeekProfit">الربح: 0 ج.م</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-title">📊 مبيعات وأرباح الشهر</div>
+                <div class="stat-value" id="statMonthSales">0 ج.م</div>
+                <div class="stat-sub" id="statMonthProfit">الربح: 0 ج.م</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-title">🏆 مبيعات وأرباح السنة</div>
+                <div class="stat-value" id="statYearSales">0 ج.م</div>
+                <div class="stat-sub" id="statYearProfit">الربح: 0 ج.م</div>
+            </div>
         </div>
 
-        <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
-            <h3 id="formTitle" style="color: #38bdf8; margin-bottom: 12px;">إضافة منتج جديد:</h3>
-            <input type="hidden" id="editIndex" value="-1">
-            
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اسم المنتج:</label>
-            <input type="text" id="pName" placeholder="مثال: شاي العروسة، زيت عافية، بهارات مشكلة...">
-
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">السعر (بالجنيه):</label>
-            <input type="number" id="pPrice" placeholder="مثال: 55">
-
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">القسم أو الفرع الفرعي:</label>
-            <select id="pCategory">
-                <optgroup label="☕ فروع قسم السوبر ماركت">
-                    <option value="القهوة والشاي والمشروبات">القهوة والشاي والمشروبات</option>
-                    <option value="وجبات خفيفة وحلويات">وجبات خفيفة وحلويات</option>
-                    <option value="لوازم الطهي والخبز">لوازم الطهي والخبز</option>
-                    <option value="الأعشاب والبهارات والتوابل">الأعشاب والبهارات والتوابل</option>
-                    <option value="المربى والعسل والأطعمة القابلة للدهن">المربى والعسل والأطعمة القابلة للدهن</option>
-                    <option value="الصلصات والمربى">الصلصات والمربى</option>
-                </optgroup>
-                <optgroup label="🛍️ الأقسام الرئيسية الأخرى">
-                    <option value="سوبر ماركت">سوبر ماركت (عام)</option>
-                    <option value="إلكترونيات">إلكترونيات</option>
-                    <option value="وجبات سريعة">وجبات سريعة</option>
-                    <option value="أدوات منزلية">أدوات منزلية</option>
-                    <option value="عام">عام</option>
-                </optgroup>
-            </select>
-
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">رابط صورة المنتج المباشر:</label>
-            <input type="text" id="pImage" placeholder="https://images.unsplash.com/photo-...">
-
-            <button class="btn" id="saveBtn" onclick="saveProduct()">حفظ ونشر فوري للسحابة ⚡</button>
-            <button class="btn btn-cancel" id="cancelBtn" onclick="resetForm()">إلغاء التعديل</button>
+        <!-- قسم إدارة وإضافة المنتجات (مع سعر التكلفة لحساب الربح) -->
+        <div class="card">
+            <div class="card-title">📦 إضافة منتج جديد (لتحديد سعر التكلفة والبيع)</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>اسم المنتج:</label>
+                    <input type="text" id="prodName" placeholder="مثال: شاي العروسة">
+                </div>
+                <div class="form-group">
+                    <label>سعر التكلفة (للشراء):</label>
+                    <input type="number" id="prodCost" placeholder="مثال: 45">
+                </div>
+                <div class="form-group">
+                    <label>سعر البيع (للعميل):</label>
+                    <input type="number" id="prodPrice" placeholder="مثال: 55">
+                </div>
+                <div class="form-group">
+                    <label>الفئة الرئيسية:</label>
+                    <select id="prodCategory">
+                        <option value="سوبر ماركت">🛒 سوبر ماركت</option>
+                        <option value="إلكترونيات">📱 إلكترونيات</option>
+                        <option value="وجبات سريعة">🍔 وجبات سريعة</option>
+                        <option value="أدوات منزلية">🏠 أدوات منزلية</option>
+                        <option value="عام">📦 عام</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة (URL):</label>
+                    <input type="text" id="prodImage" placeholder="https://...">
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="addNewProduct()">➕ إضافة المنتج للسحابة</button>
         </div>
 
-        <h3>قائمة المنتجات الحالية في السحابة</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>الصورة</th>
-                    <th>اسم المنتج</th>
-                    <th>السعر</th>
-                    <th>القسم / الفرع</th>
-                    <th>الإجراءات</th>
-                </tr>
-            </thead>
-            <tbody id="adminProductsList"></tbody>
-        </table>
-        <a href="index.html" class="back-btn">العودة إلى واجهة المتجر الرئيسية 🏪</a>
+        <!-- قائمة المنتجات الحالية -->
+        <div class="card">
+            <div class="card-title">📋 قائمة منتجات المتجر المسجلة</div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الصورة</th>
+                            <th>اسم المنتج</th>
+                            <th>التكلفة</th>
+                            <th>سعر البيع</th>
+                            <th>هامش الربح</th>
+                            <th>الفئة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminProductsTable">
+                        <!-- تُعبأ ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- سجل المبيعات المسجلة لحساب الأرباح -->
+        <div class="card">
+            <div class="card-title">💰 سجل العمليات والمبيعات المكتملة</div>
+            <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
+                <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل الأرباح هنا عند إتمام وتأكيد الطلبات أولاً بأول.</p>
+                <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح سجل المبيعات</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>التاريخ والوقت</th>
+                            <th>إجمالي المبيعات</th>
+                            <th>صافي الربح المحقق</th>
+                            <th>تفاصيل المنتجات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesLogTable">
+                        <!-- سجل المبيعات -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
         const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
-        let currentAdminProducts = [];
 
-        async function loadAdminProducts() {
-            let tbody = document.getElementById('adminProductsList');
-            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات... ⏳</td></tr>';
+        let products = [];
+        let salesLog = [];
 
-            try {
-                let res = await fetch(API_URL + "?t=" + new Date().getTime());
-                if (res.ok) {
-                    currentAdminProducts = await res.json();
-                } else {
-                    currentAdminProducts = [];
-                }
-            } catch(e) {
-                currentAdminProducts = [];
+        // بيانات أولية افتراضية في حال عدم وجود منتجات
+        const defaultAdminProducts = [
+            { name: "شاي العروسة 250جم", cost: 45, price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
+            { name: "قهوة بن معتوق 200جم", cost: 70, price: 85, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" },
+            { name: "شيبسي عائلي طماطم", cost: 15, price: 20, category: "وجبات خفيفة وحلويات", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500" },
+            { name: "زيت عافية ذرة 800مل", cost: 80, price: 95, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500" }
+        ];
+
+        async function initDashboard() {
+            // استدعاء المنتجات
+            let savedProd = localStorage.getItem('storeProductsCache');
+            if (savedProd) {
+                try { products = JSON.parse(savedProd); } catch(e) {}
             }
-            renderAdminTable();
+            if (!products || products.length === 0) {
+                products = defaultAdminProducts;
+            }
+
+            // استدعاء سجل المبيعات والأرباح
+            let savedSales = localStorage.getItem('storeSalesLog');
+            if (savedSales) {
+                try { salesLog = JSON.parse(savedSales); } catch(e) {}
+            }
+
+            renderAdminProducts();
+            calculateFinancials();
+            renderSalesLog();
         }
 
-        function renderAdminTable() {
-            let tbody = document.getElementById('adminProductsList');
+        function renderAdminProducts() {
+            let tbody = document.getElementById('adminProductsTable');
             tbody.innerHTML = '';
-            
-            if (!currentAdminProducts || currentAdminProducts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">لا توجد منتجات مضافة حالياً.</td></tr>';
-                return;
-            }
 
-            currentAdminProducts.forEach((p, index) => {
-                let imgSrc = p.image || p.img || 'https://via.placeholder.com/50';
-                tbody.innerHTML += `<tr>
-                    <td><img src="${imgSrc}" width="40" height="40" style="border-radius:6px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/50'"></td>
-                    <td><b>${p.name}</b></td>
-                    <td style="color:#10b981; font-weight:bold;">${p.price} ج.م</td>
-                    <td><span class="badge">${p.category || 'عام'}</span></td>
-                    <td>
-                        <button onclick="editProduct(${index})" style="background:#3b82f6; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-left:5px;">تعديل ✏️</button>
-                        <button onclick="deleteProduct(${index})" style="background:#ef4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">حذف 🗑️</button>
-                    </td>
-                </tr>`;
+            products.forEach((p, idx) => {
+                let cost = p.cost || (p.price * 0.8); // افتراضي 80% لو لم يُحدد
+                let profit = p.price - cost;
+                let img = p.image || 'https://via.placeholder.com/50';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;"></td>
+                        <td style="font-weight:700;">${p.name}</td>
+                        <td>${cost} ج.م</td>
+                        <td style="color:var(--secondary); font-weight:800;">${p.price} ج.م</td>
+                        <td style="color:var(--accent); font-weight:800;">+${profit} ج.م</td>
+                        <td><span class="badge">${p.category || 'عام'}</span></td>
+                        <td class="actions-cell">
+                            <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 6px 10px; font-size: 12px;">حذف</button>
+                        </td>
+                    </tr>
+                `;
             });
         }
 
-        function saveProduct() {
-            let name = document.getElementById('pName').value.trim();
-            let price = parseFloat(document.getElementById('pPrice').value);
-            let cat = document.getElementById('pCategory').value;
-            let image = document.getElementById('pImage').value.trim() || 'https://via.placeholder.com/260x160';
-            let editIndex = parseInt(document.getElementById('editIndex').value);
+        function addNewProduct() {
+            let name = document.getElementById('prodName').value.trim();
+            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
+            let price = parseFloat(document.getElementById('prodPrice').value) || 0;
+            let category = document.getElementById('prodCategory').value;
+            let image = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500';
 
-            if (!name || isNaN(price)) { 
-                alert('الرجاء إدخال اسم المنتج والسعر بشكل صحيح!'); 
-                return; 
+            if (!name || price <= 0) {
+                alert('الرجاء إدخال اسم المنتج وسعر بيع صحيح!');
+                return;
             }
 
-            let productData = {
-                name: name,
-                price: price,
-                image: image,
-                img: image,
-                category: cat
-            };
-
-            if (editIndex > -1) {
-                currentAdminProducts[editIndex] = productData;
-            } else {
-                currentAdminProducts.push(productData);
-            }
-
-            updateCloud(currentAdminProducts);
-        }
-
-        function editProduct(index) {
-            let p = currentAdminProducts[index];
-            document.getElementById('pName').value = p.name;
-            document.getElementById('pPrice').value = p.price;
-            document.getElementById('pCategory').value = p.category || 'عام';
-            document.getElementById('pImage').value = p.image || p.img || '';
-            document.getElementById('editIndex').value = index;
+            products.push({ name, cost, price, category, image });
+            saveAndSync();
             
-            document.getElementById('formTitle').innerText = 'تعديل المنتج المحدد:';
-            document.getElementById('saveBtn').innerText = 'تحديث وحفظ التعديلات 💾';
-            document.getElementById('cancelBtn').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodCost').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodImage').value = '';
+            alert('✅ تم إضافة المنتج بنجاح!');
         }
 
-        function resetForm() {
-            document.getElementById('pName').value = '';
-            document.getElementById('pPrice').value = '';
-            document.getElementById('pImage').value = '';
-            document.getElementById('editIndex').value = '-1';
-            document.getElementById('formTitle').innerText = 'إضافة منتج جديد:';
-            document.getElementById('saveBtn').innerText = 'حفظ ونشر فوري للسحابة ⚡';
-            document.getElementById('cancelBtn').style.display = 'none';
-        }
-
-        async function deleteProduct(index) {
-            if(!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
-            currentAdminProducts.splice(index, 1);
-            updateCloud(currentAdminProducts);
-        }
-
-        async function updateCloud(data) {
-            let btn = document.getElementById('saveBtn');
-            if(btn) {
-                btn.disabled = true;
-                btn.innerText = 'جاري الحفظ بالسحابة... ⏳';
-            }
-
-            try {
-                let res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if(res.ok) {
-                    alert('✅ تمت المزامنة بنجاح وحفظ التغييرات في السحابة!');
-                    resetForm();
-                    loadAdminProducts();
-                } else {
-                    alert('خطأ في حفظ البيانات بالسحابة!');
-                    if(btn) {
-                        btn.disabled = false;
-                        btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
-                    }
-                }
-            } catch(e) {
-                alert('فشل الاتصال بالإنترنت أو السحابة!');
-                if(btn) {
-                    btn.disabled = false;
-                    btn.innerText = 'حفظ ونشر فوري للسحابة ⚡';
-                }
+        function deleteProduct(idx) {
+            if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                products.splice(idx, 1);
+                saveAndSync();
             }
         }
 
-        window.onload = loadAdminProducts;
+        function saveAndSync() {
+            localStorage.setItem('storeProductsCache', JSON.stringify(products));
+            renderAdminProducts();
+        }
+
+        // دالة احتساب المبيعات والأرباح (يومي، أسبوعي، شهري، سنوي)
+        function calculateFinancials() {
+            let now = new Date();
+            let todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+
+            let daySales = 0, dayProfit = 0;
+            let weekSales = 0, weekProfit = 0;
+            let monthSales = 0, monthProfit = 0;
+            let yearSales = 0, yearProfit = 0;
+
+            salesLog.forEach(sale => {
+                let saleDate = new Date(sale.timestamp);
+                let saleDateStr = saleDate.toISOString().split('T')[0];
+
+                // حساب اليوم
+                if (saleDateStr === todayStr) {
+                    daySales += sale.total;
+                    dayProfit += sale.profit;
+                }
+
+                // حساب الأسبوع (خلال آخر 7 أيام)
+                let diffTime = Math.abs(now - saleDate);
+                let diffDays = diffTime / (1000 * 60 * 60 * 24);
+                if (diffDays <= 7) {
+                    weekSales += sale.total;
+                    weekProfit += sale.profit;
+                }
+
+                // حساب الشهر (نفس الشهر الحالي والسنة الحالية)
+                if (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear()) {
+                    monthSales += sale.total;
+                    monthProfit += sale.profit;
+                }
+
+                // حساب السنة (نفس السنة الحالية)
+                if (saleDate.getFullYear() === now.getFullYear()) {
+                    yearSales += sale.total;
+                    yearProfit += sale.profit;
+                }
+            });
+
+            // تحديث الواجهة
+            document.getElementById('statDaySales').innerText = daySales + ' ج.م';
+            document.getElementById('statDayProfit').innerText = `الربح: ${dayProfit} ج.م`;
+
+            document.getElementById('statWeekSales').innerText = weekSales + ' ج.م';
+            document.getElementById('statWeekProfit').innerText = `الربح: ${weekProfit} ج.م`;
+
+            document.getElementById('statMonthSales').innerText = monthSales + ' ج.م';
+            document.getElementById('statMonthProfit').innerText = `الربح: ${monthProfit} ج.م`;
+
+            document.getElementById('statYearSales').innerText = yearSales + ' ج.م';
+            document.getElementById('statYearProfit').innerText = `الربح: ${yearProfit} ج.م`;
+        }
+
+        function renderSalesLog() {
+            let tbody = document.getElementById('salesLogTable');
+            tbody.innerHTML = '';
+
+            if(!salesLog || salesLog.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد مبيعات مسجلة حتى الآن.</td></tr>`;
+                return;
+            }
+
+            salesLog.slice().reverse().forEach(s => {
+                let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="badge">#${s.orderId}</span></td>
+                        <td>${dateFormatted}</td>
+                        <td style="font-weight:700;">${s.total} ج.م</td>
+                        <td style="color:var(--secondary); font-weight:800;">+${s.profit} ج.م</td>
+                        <td style="font-size:13px; color:var(--text-muted);">${s.itemsSummary}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function clearSalesLog() {
+            if(confirm('هل تريد مسح سجل المبيعات والأرباح بالكامل؟')) {
+                salesLog = [];
+                localStorage.removeItem('storeSalesLog');
+                renderSalesLog();
+                calculateFinancials();
+            }
+        }
+
+        function resetData() {
+            if(confirm('هل تريد إعادة ضبط المنتجات للوضع الافتراضي؟')) {
+                localStorage.removeItem('storeProductsCache');
+                initDashboard();
+                alert('✅ تم إعادة الضبط بنجاح!');
+            }
+        }
+
+        window.onload = initDashboard;
     </script>
 </body>
 </html>
