@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والإدارة - جاهز (أداء فائق السرعة)</title>
+    <title>لوحة التحكم والإدارة - جاهز (إدارة المنتجات)</title>
     <script>
         let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
         if (pass !== "Ss@1234567890") {
@@ -28,28 +28,32 @@
         .back-btn { background: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; display: inline-block; margin-top: 15px; font-weight: bold; }
         .info-box { background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; font-size: 13px; color: #38bdf8; line-height: 1.6; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #0284c7; color: #fff; font-size: 11px; }
+        .preset-btn { background: #8b5cf6; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; margin-bottom: 15px; display: inline-block; }
+        .preset-btn:hover { background: #7c3aed; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>
-            <span>⚡ لوحة التحكم (السرعة القصوى للعملاء)</span>
+            <span>⚡ لوحة التحكم (إدارة المنتجات والأقسام)</span>
             <button class="sync-btn" onclick="loadAdminProducts()">🔄 تحديث القائمة</button>
         </h1>
         
         <div class="info-box">
-            🚀 <strong>أداء صاروخي:</strong> الاعتماد على روابط الصور المباشرة يجعل ملف المتجر خفيفاً للغاية، ويتحمل آلاف العملاء الفاتحين للصفحة في نفس اللحظة بدون أي بطء أو تعليق نهائياً.
+            🛒 <strong>إضافة منتجات السوبر ماركت الأساسية:</strong> يمكنك النقر أدناه على زر "تحميل منتجات السوبر ماركت الافتراضية" لإضافة الشاي، السكر، الزيت، والدقيق دفعة واحدة، أو إضافة أي منتج يدوياً.
         </div>
+
+        <button class="preset-btn" onclick="loadSupermarketDefaults()">📥 تحميل منتجات السوبر ماركت الأساسية (شاي، سكر، زيت...) 🛒</button>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
             <h3 id="formTitle" style="color: #38bdf8; margin-bottom: 12px;">إضافة منتج جديد:</h3>
             <input type="hidden" id="editIndex" value="-1">
             
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اسم المنتج:</label>
-            <input type="text" id="pName" placeholder="مثال: بيض بلدي، لابتوب">
+            <input type="text" id="pName" placeholder="مثال: شاي العروسة، سكر الأبيض">
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">السعر (بالجنيه):</label>
-            <input type="number" id="pPrice" placeholder="مثال: 150">
+            <input type="number" id="pPrice" placeholder="مثال: 45">
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">القسم / التصنيف:</label>
             <select id="pCategory">
@@ -63,8 +67,8 @@
                 <option value="عام">📦 قسم عام</option>
             </select>
 
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">رابط صورة المنتج (انسخ رابط الصورة المباشر هنا):</label>
-            <input type="text" id="pImage" placeholder="https://example.com/image.jpg">
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">رابط صورة المنتج المباشر:</label>
+            <input type="text" id="pImage" placeholder="https://images.unsplash.com/photo-...">
 
             <button class="btn" id="saveBtn" onclick="saveProduct()">حفظ ونشر فوري للسحابة ⚡</button>
             <button class="btn btn-cancel" id="cancelBtn" onclick="resetForm()">إلغاء التعديل</button>
@@ -129,6 +133,35 @@
                     </td>
                 </tr>`;
             });
+        }
+
+        // دالة إضافة منتجات السوبر ماركت الأساسية تلقائياً
+        async function loadSupermarketDefaults() {
+            if(!confirm('هل تريد إضافة منتجات السوبر ماركت الأساسية (شاي، سكر، زيت، دقيق، أرز...) إلى قائمتك الحالية؟')) return;
+
+            let defaultSupermarketItems = [
+                { name: "شاي العروسة ناعم 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400" },
+                { name: "سكر الأبيض الموحد 1كجم", price: 35, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c714235?w=400" },
+                { name: "زيت عافية ذرة أو عباد 800مل", price: 95, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400" },
+                { name: "دقيق الضحى الفاخر 1كجم", price: 28, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400" },
+                { name: "أرز الموحد أو الضحى 1كجم", price: 34, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400" },
+                { name: "مكرونة الملكة أو بساطة 400جم", price: 14, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=400" },
+                { name: "سمن روابي أو جنه 700جم", price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400" },
+                { name: "جبنة فريكو أو بريزيدون 250جم", price: 45, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400" }
+            ];
+
+            // دمج المنتجات الجديدة مع المنتجات الموجودة أصلاً دون حذف الأقسام الأخرى
+            defaultSupermarketItems.forEach(newItem => {
+                currentAdminProducts.push({
+                    name: newItem.name,
+                    price: newItem.price,
+                    image: newItem.image,
+                    img: newItem.image,
+                    category: newItem.category
+                });
+            });
+
+            await updateCloud(currentAdminProducts);
         }
 
         function saveProduct() {
