@@ -35,7 +35,6 @@
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
 
-        /* لوحة احصائيات الأرباح والمبيعات */
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px;
         }
@@ -91,7 +90,7 @@
         </div>
         <div>
             <a href="index.html" class="btn" style="text-decoration:none; font-size:13px;">🌐 الذهاب للمتجر</a>
-            <button class="btn btn-danger" onclick="resetData()" style="font-size:13px; margin-right: 6px;">🗑️ إعادة ضبط المنتجات</button>
+            <button class="btn btn-danger" onclick="resetData()" style="font-size:13px; margin-right: 6px;">🗑️ إعادة الضبط</button>
         </div>
     </header>
 
@@ -121,9 +120,9 @@
             </div>
         </div>
 
-        <!-- قسم إدارة وإضافة المنتجات (مع سعر التكلفة لحساب الربح) -->
+        <!-- إضافة منتج جديد (لتحديد التكلفة والبيع) -->
         <div class="card">
-            <div class="card-title">📦 إضافة منتج جديد (لتحديد سعر التكلفة والبيع)</div>
+            <div class="card-title">📦 إضافة منتج جديد</div>
             <div class="form-grid">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
@@ -152,7 +151,7 @@
                     <input type="text" id="prodImage" placeholder="https://...">
                 </div>
             </div>
-            <button class="btn btn-success" onclick="addNewProduct()">➕ إضافة المنتج للسحابة</button>
+            <button class="btn btn-success" onclick="addNewProduct()">➕ إضافة المنتج</button>
         </div>
 
         <!-- قائمة المنتجات الحالية -->
@@ -171,19 +170,17 @@
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody id="adminProductsTable">
-                        <!-- تُعبأ ديناميكياً -->
-                    </tbody>
+                    <tbody id="adminProductsTable"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- سجل المبيعات المسجلة لحساب الأرباح -->
+        <!-- سجل المبيعات والأرباح -->
         <div class="card">
-            <div class="card-title">💰 سجل العمليات والمبيعات المكتملة</div>
+            <div class="card-title">💰 سجل المبيعات والأرباح المحققة</div>
             <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
-                <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل الأرباح هنا عند إتمام وتأكيد الطلبات أولاً بأول.</p>
-                <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح سجل المبيعات</button>
+                <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل المبيعات هنا تلقائياً عند إتمام الطلبات.</p>
+                <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
             </div>
             <div class="table-responsive">
                 <table>
@@ -192,13 +189,11 @@
                             <th>رقم الطلب</th>
                             <th>التاريخ والوقت</th>
                             <th>إجمالي المبيعات</th>
-                            <th>صافي الربح المحقق</th>
+                            <th>صافي الربح</th>
                             <th>تفاصيل المنتجات</th>
                         </tr>
                     </thead>
-                    <tbody id="salesLogTable">
-                        <!-- سجل المبيعات -->
-                    </tbody>
+                    <tbody id="salesLogTable"></tbody>
                 </table>
             </div>
         </div>
@@ -206,12 +201,9 @@
     </div>
 
     <script>
-        const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
-
         let products = [];
         let salesLog = [];
 
-        // بيانات أولية افتراضية في حال عدم وجود منتجات
         const defaultAdminProducts = [
             { name: "شاي العروسة 250جم", cost: 45, price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
             { name: "قهوة بن معتوق 200جم", cost: 70, price: 85, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" },
@@ -219,8 +211,7 @@
             { name: "زيت عافية ذرة 800مل", cost: 80, price: 95, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500" }
         ];
 
-        async function initDashboard() {
-            // استدعاء المنتجات
+        function initDashboard() {
             let savedProd = localStorage.getItem('storeProductsCache');
             if (savedProd) {
                 try { products = JSON.parse(savedProd); } catch(e) {}
@@ -229,7 +220,6 @@
                 products = defaultAdminProducts;
             }
 
-            // استدعاء سجل المبيعات والأرباح
             let savedSales = localStorage.getItem('storeSalesLog');
             if (savedSales) {
                 try { salesLog = JSON.parse(savedSales); } catch(e) {}
@@ -245,7 +235,7 @@
             tbody.innerHTML = '';
 
             products.forEach((p, idx) => {
-                let cost = p.cost || (p.price * 0.8); // افتراضي 80% لو لم يُحدد
+                let cost = p.cost || (p.price * 0.8);
                 let profit = p.price - cost;
                 let img = p.image || 'https://via.placeholder.com/50';
 
@@ -299,10 +289,9 @@
             renderAdminProducts();
         }
 
-        // دالة احتساب المبيعات والأرباح (يومي، أسبوعي، شهري، سنوي)
         function calculateFinancials() {
             let now = new Date();
-            let todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+            let todayStr = now.toISOString().split('T')[0];
 
             let daySales = 0, dayProfit = 0;
             let weekSales = 0, weekProfit = 0;
@@ -313,13 +302,11 @@
                 let saleDate = new Date(sale.timestamp);
                 let saleDateStr = saleDate.toISOString().split('T')[0];
 
-                // حساب اليوم
                 if (saleDateStr === todayStr) {
                     daySales += sale.total;
                     dayProfit += sale.profit;
                 }
 
-                // حساب الأسبوع (خلال آخر 7 أيام)
                 let diffTime = Math.abs(now - saleDate);
                 let diffDays = diffTime / (1000 * 60 * 60 * 24);
                 if (diffDays <= 7) {
@@ -327,20 +314,17 @@
                     weekProfit += sale.profit;
                 }
 
-                // حساب الشهر (نفس الشهر الحالي والسنة الحالية)
                 if (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear()) {
                     monthSales += sale.total;
                     monthProfit += sale.profit;
                 }
 
-                // حساب السنة (نفس السنة الحالية)
                 if (saleDate.getFullYear() === now.getFullYear()) {
                     yearSales += sale.total;
                     yearProfit += sale.profit;
                 }
             });
 
-            // تحديث الواجهة
             document.getElementById('statDaySales').innerText = daySales + ' ج.م';
             document.getElementById('statDayProfit').innerText = `الربح: ${dayProfit} ج.م`;
 
@@ -387,7 +371,7 @@
         }
 
         function resetData() {
-            if(confirm('هل تريد إعادة ضبط المنتجات للوضع الافتراضي؟')) {
+            if(confirm('هل تريد إعادة ضبط المنتجات؟')) {
                 localStorage.removeItem('storeProductsCache');
                 initDashboard();
                 alert('✅ تم إعادة الضبط بنجاح!');
