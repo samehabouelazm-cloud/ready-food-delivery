@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والإدارة - جاهز (إدارة المنتجات)</title>
+    <title>لوحة التحكم والإدارة - جاهز (إدارة المنتجات والفروع)</title>
     <script>
         let pass = prompt("الرجاء إدخال كلمة سر لوحة التحكم:");
         if (pass !== "Ss@1234567890") {
@@ -33,12 +33,12 @@
 <body>
     <div class="container">
         <h1>
-            <span>⚡ لوحة التحكم (إدارة المنتجات والفروع)</span>
+            <span>⚡ لوحة التحكم (إدارة المنتجات وفروع السوبر ماركت)</span>
             <button class="sync-btn" onclick="loadAdminProducts()">🔄 تحديث القائمة</button>
         </h1>
         
         <div class="info-box">
-            🛒 <strong>إدارة فروع السوبر ماركت:</strong> يمكنك الآن إضافة أو تعديل المنتجات وتصنيفها تحت فروع السوبر ماركت المخصصة بكل مرونة.
+            🛒 <strong>إدارة الفروع الفرعية:</strong> يمكنك الآن تخصيص كل منتج وربطه بفرعه المناسب ضمن أقسام السوبر ماركت (القهوة والشاي، لوازم الطهي، البهارات، إلخ) لتظهر للعملاء في مكانها الصحيح بدقة فائقة.
         </div>
 
         <div style="background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155;">
@@ -46,23 +46,28 @@
             <input type="hidden" id="editIndex" value="-1">
             
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">اسم المنتج:</label>
-            <input type="text" id="pName" placeholder="مثال: شاي العروسة، نسكافيه، بهارات...">
+            <input type="text" id="pName" placeholder="مثال: شاي العروسة، زيت عافية، بهارات مشكلة...">
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">السعر (بالجنيه):</label>
             <input type="number" id="pPrice" placeholder="مثال: 55">
 
-            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">القسم / التصنيف (فروع السوبر ماركت):</label>
+            <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">القسم أو الفرع الفرعي:</label>
             <select id="pCategory">
-                <option value="القهوة والشاي والمشروبات">☕ القهوة والشاي والمشروبات</option>
-                <option value="وجبات خفيفة وحلويات">🍪 وجبات خفيفة وحلويات</option>
-                <option value="لوازم الطهي والخبز">🌾 لوازم الطهي والخبز</option>
-                <option value="الأعشاب والبهارات والتوابل">🌿 الأعشاب والبهارات والتوابل</option>
-                <option value="المربى والعسل والأطعمة القابلة للدهن">🍯 المربى والعسل والأطعمة القابلة للدهن</option>
-                <option value="الصلصات والمربى">🍅 الصلصات والمربى</option>
-                <option value="إلكترونيات">📱 إلكترونيات وأجهزة ذكية</option>
-                <option value="وجبات سريعة">🍔 وجبات سريعة ومطاعم</option>
-                <option value="أدوات منزلية">🏠 أدوات ومستلزمات منزلية</option>
-                <option value="عام">📦 قسم عام</option>
+                <optgroup label="☕ فروع قسم السوبر ماركت">
+                    <option value="القهوة والشاي والمشروبات">القهوة والشاي والمشروبات</option>
+                    <option value="وجبات خفيفة وحلويات">وجبات خفيفة وحلويات</option>
+                    <option value="لوازم الطهي والخبز">لوازم الطهي والخبز</option>
+                    <option value="الأعشاب والبهارات والتوابل">الأعشاب والبهارات والتوابل</option>
+                    <option value="المربى والعسل والأطعمة القابلة للدهن">المربى والعسل والأطعمة القابلة للدهن</option>
+                    <option value="الصلصات والمربى">الصلصات والمربى</option>
+                </optgroup>
+                <optgroup label="🛍️ الأقسام الرئيسية الأخرى">
+                    <option value="سوبر ماركت">سوبر ماركت (عام)</option>
+                    <option value="إلكترونيات">إلكترونيات</option>
+                    <option value="وجبات سريعة">وجبات سريعة</option>
+                    <option value="أدوات منزلية">أدوات منزلية</option>
+                    <option value="عام">عام</option>
+                </optgroup>
             </select>
 
             <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">رابط صورة المنتج المباشر:</label>
@@ -79,7 +84,7 @@
                     <th>الصورة</th>
                     <th>اسم المنتج</th>
                     <th>السعر</th>
-                    <th>القسم / الفئة</th>
+                    <th>القسم / الفرع</th>
                     <th>الإجراءات</th>
                 </tr>
             </thead>
@@ -94,7 +99,7 @@
 
         async function loadAdminProducts() {
             let tbody = document.getElementById('adminProductsList');
-            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب وحقن المنتجات... ⏳</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="color:#94a3b8;">جاري جلب المنتجات... ⏳</td></tr>';
 
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -106,39 +111,6 @@
             } catch(e) {
                 currentAdminProducts = [];
             }
-
-            let defaultSupermarketItems = [
-                { name: "شاي العروسة ناعم 250جم", price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400" },
-                { name: "شاي ليبتون فتلة 100 فتلة", price: 110, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400" },
-                { name: "سكر الأبيض الموحد 1كجم", price: 35, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c714235?w=400" },
-                { name: "زيت عافية ذرة 800مل", price: 95, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400" },
-                { name: "دقيق الضحى الفاخر 1كجم", price: 28, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400" },
-                { name: "نسكافيه بلاك كلاسيك 100جم", price: 120, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400" }
-            ];
-
-            let addedNew = false;
-            defaultSupermarketItems.forEach(newItem => {
-                let exists = currentAdminProducts.some(p => p.name === newItem.name);
-                if (!exists) {
-                    currentAdminProducts.push({
-                        name: newItem.name,
-                        price: newItem.price,
-                        image: newItem.image,
-                        img: newItem.image,
-                        category: newItem.category
-                    });
-                    addedNew = true;
-                }
-            });
-
-            if (addedNew) {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(currentAdminProducts)
-                });
-            }
-
             renderAdminTable();
         }
 
