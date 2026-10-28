@@ -110,7 +110,7 @@
             border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
         }
 
-        /* 4. شريط الأقسام المحدث (تسوق حسب الفئة - فروع السوبر ماركت) */
+        /* 4. شريط الأقسام الرئيسية والفروع التابعة للسوبر ماركت */
         .categories-section { margin-bottom: 25px; }
         .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         .categories-scroll {
@@ -126,6 +126,23 @@
             background: var(--primary); color: #fff; border-color: var(--primary);
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
         }
+
+        /* شريط الفروع الفرعية الخاصة بقسم السوبرماركت */
+        .subcategories-container {
+            display: none; background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-md);
+            padding: 12px 16px; margin-top: 10px; box-shadow: var(--shadow-sm); animation: fadeIn 0.3s ease;
+        }
+        .subcategories-container.show { display: block; }
+        .sub-title { font-size: 13px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+        .sub-pills-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+        .sub-pills-scroll::-webkit-scrollbar { display: none; }
+        .sub-pill {
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 20px;
+            padding: 6px 14px; white-space: nowrap; font-size: 13px; font-weight: 700; color: var(--text-dark);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .sub-pill:hover, .sub-pill.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* 5. شبكة بطاقات المنتجات */
         .products-grid {
@@ -258,27 +275,36 @@
             </div>
         </div>
 
-        <!-- 3. شريط البحث المطور -->
+        <!-- 3. شريط البحث التفاعلي -->
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
             <input type="text" id="searchInput" placeholder="ابحث عن أي منتج، وجبة، أو جهاز..." oninput="filterProducts()">
         </div>
 
-        <!-- 4. شريط الأقسام وفروع السوبر ماركت تحت عبارة "تسوق حسب الفئة" -->
+        <!-- 4. شريط الأقسام الرئيسية مع الفروع المنسدلة لقسم السوبر ماركت -->
         <div class="categories-section">
             <div class="section-title">🛍️ تسوق حسب الفئة</div>
             <div class="categories-scroll" id="categoriesBar">
                 <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 الكل</div>
-                <div class="cat-pill" onclick="selectCategory('القهوة والشاي والمشروبات', this)">☕ القهوة والشاي والمشروبات</div>
-                <div class="cat-pill" onclick="selectCategory('وجبات خفيفة وحلويات', this)">🍪 وجبات خفيفة وحلويات</div>
-                <div class="cat-pill" onclick="selectCategory('لوازم الطهي والخبز', this)">🌾 لوازم الطهي والخبز</div>
-                <div class="cat-pill" onclick="selectCategory('الأعشاب والبهارات والتوابل', this)">🌿 الأعشاب والبهارات والتوابل</div>
-                <div class="cat-pill" onclick="selectCategory('المربى والعسل والأطعمة القابلة للدهن', this)">🍯 المربى والعسل والدهن</div>
-                <div class="cat-pill" onclick="selectCategory('الصلصات والمربى', this)">🍅 الصلصات والمربى</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت', this)">🛒 سوبر ماركت</div>
                 <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
                 <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍔 وجبات سريعة</div>
                 <div class="cat-pill" onclick="selectCategory('أدوات منزلية', this)">🏠 أدوات منزلية</div>
                 <div class="cat-pill" onclick="selectCategory('عام', this)">📦 عام</div>
+            </div>
+
+            <!-- فروع السوبر ماركت التي تظهر عند الضغط على سوبر ماركت -->
+            <div class="subcategories-container" id="supermarketSubcategories">
+                <div class="sub-title">🛒 فروع قسم السوبر ماركت:</div>
+                <div class="sub-pills-scroll">
+                    <div class="sub-pill active" onclick="selectSubCategory('all', this)">جميع المنتجات</div>
+                    <div class="sub-pill" onclick="selectSubCategory('القهوة والشاي والمشروبات', this)">☕ القهوة والشاي والمشروبات</div>
+                    <div class="sub-pill" onclick="selectSubCategory('وجبات خفيفة وحلويات', this)">🍪 وجبات خفيفة وحلويات</div>
+                    <div class="sub-pill" onclick="selectSubCategory('لوازم الطهي والخبز', this)">🌾 لوازم الطهي والخبز</div>
+                    <div class="sub-pill" onclick="selectSubCategory('الأعشاب والبهارات والتوابل', this)">🌿 الأعشاب والبهارات والتوابل</div>
+                    <div class="sub-pill" onclick="selectSubCategory('المربى والعسل والأطعمة القابلة للدهن', this)">🍯 المربى والعسل والدهن</div>
+                    <div class="sub-pill" onclick="selectSubCategory('الصلصات والمربى', this)">🍅 الصلصات والمربى</div>
+                </div>
             </div>
         </div>
 
@@ -444,6 +470,7 @@
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
+        let currentSubCategory = 'all';
 
         async function loadStoreProducts(showAlert = false) {
             let cached = localStorage.getItem('storeProductsCache');
@@ -510,7 +537,24 @@
 
         function selectCategory(cat, elem) {
             currentCategory = cat;
+            currentSubCategory = 'all'; // إعادة تعيين الفرعي عند تغيير الرئيسي
             document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
+            elem.classList.add('active');
+
+            let subContainer = document.getElementById('supermarketSubcategories');
+            if (cat === 'سوبر ماركت') {
+                subContainer.classList.add('show');
+            } else {
+                subContainer.classList.remove('show');
+            }
+
+            filterProducts();
+        }
+
+        function selectSubCategory(subCat, elem) {
+            currentSubCategory = subCat;
+            let subPills = document.querySelectorAll('.sub-pill');
+            subPills.forEach(el => el.classList.remove('active'));
             elem.classList.add('active');
             filterProducts();
         }
@@ -530,7 +574,21 @@
                 let filtered = allProducts.filter(p => {
                     let matchesName = p.name.toLowerCase().includes(query);
                     let pCat = p.category || 'عام';
-                    let matchesCat = (currentCategory === 'all' || pCat === currentCategory);
+                    
+                    let matchesCat = false;
+                    if (currentCategory === 'all') {
+                        matchesCat = true;
+                    } else if (currentCategory === 'سوبر ماركت') {
+                        if (currentSubCategory === 'all') {
+                            // يعرض أي منتج يتبع السوبر ماركت أو فروعها الفرعية
+                            matchesCat = (pCat === 'سوبر ماركت' || pCat.includes('القهوة') || pCat.includes('وجبات خفيفة') || pCat.includes('لوازم الطهي') || pCat.includes('الأعشاب') || pCat.includes('المربى') || pCat.includes('الصلصات'));
+                        } else {
+                            matchesCat = (pCat === currentSubCategory);
+                        }
+                    } else {
+                        matchesCat = (pCat === currentCategory);
+                    }
+
                     return matchesName && matchesCat;
                 });
                 displayProducts(filtered);
@@ -693,7 +751,7 @@
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
             let msg = `*🛒 طلب جديد من منصة جاهز (#${orderRef})*\n\n`;
-            msg += `👤 *اسم العميل:* ${name}\n`;
+            msg += `👤 *اسم العميل:* `${name}\n`;
             msg += `📞 *رقم الجوال:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}\n`;
             msg += `💳 *طريقة الدفع:* ${payMethod}\n\n`;
