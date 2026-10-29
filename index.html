@@ -248,7 +248,7 @@
         <div class="products-status" id="productsStatusText">عرض المنتجات...</div>
 
         <div class="products-grid" id="storeProductsGrid">
-            <div class="empty-msg">جاري تحميل المنتجات فائق السرعة... ⚡</div>
+            <div class="empty-msg">جاري تحميل أحدث المنتجات سحابياً... ⚡</div>
         </div>
     </div>
 
@@ -329,14 +329,13 @@
     </div>
 
     <script>
+        const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         const defaultProducts = [
-            { name: "شاي العروسة 250جم", price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
-            { name: "قهوة بن معتوق 200جم", price: 85, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" },
-            { name: "شيبسي عائلي طماطم", price: 20, category: "وجبات خفيفة وحلويات", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500" },
-            { name: "زيت عافية ذرة 800مل", price: 95, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500" }
+            { name: "شاي العروسة 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
+            { name: "قهوة بن معتوق 200جم", price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" }
         ];
 
         let allProducts = [];
@@ -344,24 +343,41 @@
         let productQuantities = {};
         let currentCategory = 'all';
 
-        function loadStoreProducts(showAlert = false) {
-            let saved = localStorage.getItem('storeProductsCache');
-            if (saved) {
-                try {
-                    let parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        allProducts = parsed;
+        async function loadStoreProducts(showAlert = false) {
+            let loaded = false;
+
+            try {
+                let res = await fetch(API_URL + "?t=" + new Date().getTime());
+                if (res.ok) {
+                    let data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        allProducts = data;
+                        localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
+                        filterProducts();
+                        loaded = true;
+                        if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                     }
-                } catch(e) {}
+                }
+            } catch (e) {}
+
+            if (!loaded) {
+                let saved = localStorage.getItem('storeProductsCache');
+                if (saved) {
+                    try {
+                        let parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            allProducts = parsed;
+                            filterProducts();
+                            loaded = true;
+                        }
+                    } catch(e) {}
+                }
             }
 
-            if (!allProducts || allProducts.length === 0) {
+            if (!loaded) {
                 allProducts = defaultProducts;
-                localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
+                filterProducts();
             }
-
-            filterProducts();
-            if(showAlert) alert('✅ تم تحديث وعرض المنتجات الفورية بنجاح!');
         }
 
         function displayProducts(products) {
@@ -553,12 +569,6 @@
             closeModal('checkoutModal');
             alert('✅ تم إرسال طلبك بنجاح!');
         }
-
-        window.addEventListener('storage', (event) => {
-            if (event.key === 'storeProductsCache') {
-                loadStoreProducts(false);
-            }
-        });
 
         window.onload = () => loadStoreProducts(false);
     </script>
