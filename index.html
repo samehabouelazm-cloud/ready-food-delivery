@@ -228,6 +228,19 @@
             </div>
         </div>
 
+        <!-- زر اطلب اللي تحتاجه / طلب خاص -->
+        <div style="margin: 20px 0;">
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: var(--radius-lg); color: #fff; padding: 22px 24px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="max-width: 650px;">
+                    <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">✨ مش لاقي اللي بتدور عليه؟ "اطلب أي حاجة"!</h3>
+                    <p style="font-size: 14px; opacity: 0.95; line-height: 1.5;">اكتب لنا أي صنف، دواء، أو طلب ناقصك، واحنا هنجهزه ونوصله لحد باب بيتك فوراً.</p>
+                </div>
+                <button onclick="openCustomOrderModal()" style="background: #fff; color: #d97706; border: none; padding: 11px 22px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;">
+                    📝 اطلب اللي تحتاجه الآن
+                </button>
+            </div>
+        </div>
+
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
             <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="filterProducts()">
@@ -325,6 +338,34 @@
             </div>
             <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">إرسال طلب الانضمام للواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- نافذة طلب خاص / اطلب اللي تحتاجه -->
+    <div class="modal-overlay" id="customOrderModal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h3>🛍️ طلب خاص (اطلب اللي تحتاجه)</h3>
+                <span class="close-icon" onclick="closeModal('customOrderModal')">✕</span>
+            </div>
+            <div class="form-group">
+                <label>اسمك الكريم:</label>
+                <input type="text" id="customName" placeholder="أدخل اسمك الكريم">
+            </div>
+            <div class="form-group">
+                <label>رقم الجوال / الواتساب:</label>
+                <input type="tel" id="customPhone" placeholder="010xxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>تفاصيل الطلب (اكتب أي أصناف أو منتجات تريدها):</label>
+                <textarea id="customDetails" rows="4" placeholder="مثال: أريد 2 كيلو طماطم، علبة جبنة، وطلب من الصيدلية..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>عنوان التوصيل بالتفصيل:</label>
+                <textarea id="customAddress" rows="2" placeholder="المدينة - الشارع - رقم العقار"></textarea>
+            </div>
+            <button class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص للإدارة عبر الواتساب 🚀</button>
+            <button class="btn-cancel" onclick="closeModal('customOrderModal')">إلغاء</button>
         </div>
     </div>
 
@@ -512,6 +553,8 @@
         function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function openCaptainModal() { document.getElementById('captainModal').style.display = 'flex'; }
+        function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
+
         function goToCheckout() {
             if(cart.length === 0) { alert('السلة فارغة!'); return; }
             closeModal('cartModal');
@@ -526,6 +569,28 @@
             let msg = `*🛵 طلب انضمام ككابتن جديد*\n👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 المنطقة: ${address}`;
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('captainModal');
+        }
+
+        function submitCustomOrderToWhatsApp() {
+            let name = document.getElementById('customName').value.trim();
+            let phone = document.getElementById('customPhone').value.trim();
+            let details = document.getElementById('customDetails').value.trim();
+            let address = document.getElementById('customAddress').value.trim();
+
+            if(!name || !phone || !details || !address) {
+                alert('الرجاء تعبئة كافة الحقول الخاصة بالطلب الخاص!');
+                return;
+            }
+
+            let msg = `*🛍️ طلب خاص جديد (اطلب اللي تحتاجه)*\n\n`;
+            msg += `👤 اسم العميل: ${name}\n`;
+            msg += `📞 رقم الجوال: ${phone}\n`;
+            msg += `📍 العنوان: ${address}\n\n`;
+            msg += `📝 *تفاصيل الطلب:*\n${details}`;
+
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+            closeModal('customOrderModal');
+            alert('✅ تم إرسال طلبك الخاص بنجاح إلى الإدارة عبر الواتساب!');
         }
 
         function submitOrderToWhatsApp() {
