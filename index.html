@@ -764,7 +764,6 @@
             let total = subtotal + 15;
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
-            // حساب الربح وتسجيل العملية في سجل المبيعات ل لوحة التحكم
             let orderProfit = cart.reduce((sum, item) => {
                 let foundProd = allProducts.find(p => p.name === item.name);
                 let itemCost = foundProd ? (foundProd.cost || (item.price * 0.8)) : (item.price * 0.8);
@@ -795,7 +794,7 @@
             });
 
             msg += `\n💵 *المجموع:* ${subtotal} ج.م`;
-            msg += `\n🛵 *التوصيل:* 20 ج.م`;
+            msg += `\n🛵 *التوصيل:* 15 ج.م`;
             msg += `\n💰 *الإجمالي النهائي:* ${total} ج.م\n\n`;
             msg += `يرجى تأكيد واستلام الطلب! وشكراً.`;
 
@@ -808,6 +807,13 @@
             document.getElementById('orderRefText').innerText = `رقم المرجع للطلب: #${orderRef}`;
             document.getElementById('trackerModal').style.display = 'flex';
         }
+
+        // الاستماع الفوري للتحديثات من لوحة التحكم لتحديث المتجر تلقائياً
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'storeProductsCache') {
+                loadStoreProducts(false);
+            }
+        });
 
         window.onload = () => loadStoreProducts(false);
     </script>
