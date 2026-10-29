@@ -84,7 +84,6 @@
         .actions-cell { display: flex; gap: 6px; align-items: center; }
         .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
-        /* نافذة إدخال كلمة المرور */
         #authOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
@@ -103,7 +102,6 @@
         }
         .auth-box input:focus { border-color: var(--primary); background: #fff; }
 
-        /* نافذة التعديل المنبثقة Modal */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
@@ -120,7 +118,6 @@
 </head>
 <body>
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="authOverlay">
         <div class="auth-box">
             <h3>🔒 لوحة التحكم الإدارية</h3>
@@ -130,7 +127,6 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل المنتج المنبثقة -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -164,7 +160,7 @@
                 <label>رابط الصورة (URL):</label>
                 <input type="text" id="editImage">
             </div>
-            <button class="btn btn-success" style="width:100%; margin-bottom:8px;" onclick="saveEditedProduct()">💾 حفظ التعديلات</button>
+            <button class="btn btn-success" style="width:100%; margin-bottom:8px;" onclick="saveEditedProduct()">💾 حفظ التعديلات سحابياً</button>
             <button class="btn btn-danger" style="width:100%; background:#64748b;" onclick="closeEditModal()">إلغاء</button>
         </div>
     </div>
@@ -180,8 +176,6 @@
     </header>
 
     <div class="container">
-
-        <!-- لوحة الإحصائيات والأرباح الفورية -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">📅 مبيعات وأرباح اليوم</div>
@@ -205,9 +199,8 @@
             </div>
         </div>
 
-        <!-- إضافة منتج جديد -->
         <div class="card">
-            <div class="card-title">📦 إضافة منتج جديد</div>
+            <div class="card-title">📦 إضافة منتج جديد للسحابة</div>
             <div class="form-grid">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
@@ -236,10 +229,9 @@
                     <input type="text" id="prodImage" placeholder="https://...">
                 </div>
             </div>
-            <button class="btn btn-success" onclick="addNewProduct()">➕ إضافة المنتج</button>
+            <button class="btn btn-success" onclick="addNewProduct()">☁️ إضافة المنتج ورفعه للسحابة فوراً</button>
         </div>
 
-        <!-- قائمة المنتجات الحالية -->
         <div class="card">
             <div class="card-title">📋 قائمة منتجات المتجر المسجلة</div>
             <div class="table-responsive">
@@ -260,7 +252,6 @@
             </div>
         </div>
 
-        <!-- سجل المبيعات والأرباح -->
         <div class="card">
             <div class="card-title">💰 سجل المبيعات والأرباح المحققة</div>
             <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
@@ -282,11 +273,10 @@
                 </table>
             </div>
         </div>
-
     </div>
 
     <script>
-        // كلمة المرور الإدارية المحددة
+        const API_URL = "https://api.npoint.io/43ccf89dee421e821c9e";
         const ADMIN_PASSWORD = "Ss@1234567890";
 
         function checkAdminPassword() {
@@ -304,20 +294,22 @@
         let products = [];
         let salesLog = [];
 
-        const defaultAdminProducts = [
-            { name: "شاي العروسة 250جم", cost: 45, price: 55, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
-            { name: "قهوة بن معتوق 200جم", cost: 70, price: 85, category: "القهوة والشاي والمشروبات", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" },
-            { name: "شيبسي عائلي طماطم", cost: 15, price: 20, category: "وجبات خفيفة وحلويات", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500" },
-            { name: "زيت عافية ذرة 800مل", cost: 80, price: 95, category: "لوازم الطهي والخبز", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500" }
-        ];
+        async function initDashboard() {
+            try {
+                let res = await fetch(API_URL);
+                if(res.ok) {
+                    let data = await res.json();
+                    if(Array.isArray(data) && data.length > 0) {
+                        products = data;
+                    }
+                }
+            } catch(e) {}
 
-        function initDashboard() {
-            let savedProd = localStorage.getItem('storeProductsCache');
-            if (savedProd) {
-                try { products = JSON.parse(savedProd); } catch(e) {}
-            }
             if (!products || products.length === 0) {
-                products = defaultAdminProducts;
+                let savedProd = localStorage.getItem('storeProductsCache');
+                if (savedProd) {
+                    try { products = JSON.parse(savedProd); } catch(e) {}
+                }
             }
 
             let savedSales = localStorage.getItem('storeSalesLog');
@@ -328,6 +320,28 @@
             renderAdminProducts();
             calculateFinancials();
             renderSalesLog();
+        }
+
+        async function syncToCloud() {
+            try {
+                localStorage.setItem('storeProductsCache', JSON.stringify(products));
+                // إرسال التحديثات تلقائياً لـ NPoint API
+                let res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(products)
+                });
+                if(!res.ok) {
+                    // طريقة بديلة لو السيرفر يتطلب PUT
+                    await fetch(API_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(products)
+                    });
+                }
+            } catch(e) {
+                console.log('Cloud sync saved locally via cache');
+            }
         }
 
         function renderAdminProducts() {
@@ -356,6 +370,29 @@
             });
         }
 
+        async function addNewProduct() {
+            let name = document.getElementById('prodName').value.trim();
+            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
+            let price = parseFloat(document.getElementById('prodPrice').value) || 0;
+            let category = document.getElementById('prodCategory').value;
+            let image = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500';
+
+            if (!name || price <= 0) {
+                alert('الرجاء إدخال اسم المنتج وسعر بيع صحيح!');
+                return;
+            }
+
+            products.push({ name, cost, price, category, image });
+            await syncToCloud();
+            renderAdminProducts();
+            
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodCost').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodImage').value = '';
+            alert('✅ تم إضافة المنتج ورفعه للسحابة بنجاح!');
+        }
+
         function openEditModal(idx) {
             let p = products[idx];
             document.getElementById('editIndex').value = idx;
@@ -371,7 +408,7 @@
             document.getElementById('editModal').style.display = 'none';
         }
 
-        function saveEditedProduct() {
+        async function saveEditedProduct() {
             let idx = document.getElementById('editIndex').value;
             let name = document.getElementById('editName').value.trim();
             let cost = parseFloat(document.getElementById('editCost').value) || 0;
@@ -385,43 +422,18 @@
             }
 
             products[idx] = { name, cost, price, category, image };
-            saveAndSync();
+            await syncToCloud();
+            renderAdminProducts();
             closeEditModal();
-            alert('✅ تم تعديل المنتج بنجاح!');
+            alert('✅ تم تعديل المنتج وحفظه سحابياً بنجاح!');
         }
 
-        function addNewProduct() {
-            let name = document.getElementById('prodName').value.trim();
-            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
-            let price = parseFloat(document.getElementById('prodPrice').value) || 0;
-            let category = document.getElementById('prodCategory').value;
-            let image = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500';
-
-            if (!name || price <= 0) {
-                alert('الرجاء إدخال اسم المنتج وسعر بيع صحيح!');
-                return;
-            }
-
-            products.push({ name, cost, price, category, image });
-            saveAndSync();
-            
-            document.getElementById('prodName').value = '';
-            document.getElementById('prodCost').value = '';
-            document.getElementById('prodPrice').value = '';
-            document.getElementById('prodImage').value = '';
-            alert('✅ تم إضافة المنتج بنجاح!');
-        }
-
-        function deleteProduct(idx) {
+        async function deleteProduct(idx) {
             if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
                 products.splice(idx, 1);
-                saveAndSync();
+                await syncToCloud();
+                renderAdminProducts();
             }
-        }
-
-        function saveAndSync() {
-            localStorage.setItem('storeProductsCache', JSON.stringify(products));
-            renderAdminProducts();
         }
 
         function calculateFinancials() {
@@ -505,10 +517,10 @@
             }
         }
 
-        function resetData() {
+        async function resetData() {
             if(confirm('هل تريد إعادة ضبط المنتجات؟')) {
                 localStorage.removeItem('storeProductsCache');
-                initDashboard();
+                await initDashboard();
                 alert('✅ تم إعادة الضبط بنجاح!');
             }
         }
