@@ -611,6 +611,7 @@
                 return sum + ((item.price - cost) * item.qty);
             }, 0);
 
+            // تسجيل الطلب في الذاكرة المحلية والمسجلة لتظهر في لوحة التحكم الإدارية
             let saleRecord = {
                 orderId: orderRef,
                 timestamp: new Date().getTime(),
@@ -632,7 +633,7 @@
             cart = [];
             updateCartUI();
             closeModal('checkoutModal');
-            alert('✅ تم إرسال طلبك بنجاح!');
+            alert('✅ تم إرسال طلبك بنجاح وحفظه في سجل المبيعات باللوحة!');
         }
 
         window.onload = () => loadStoreProducts(false);
