@@ -380,6 +380,7 @@
         ];
 
         let allProducts = [];
+        let allSales = [];
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
@@ -391,33 +392,49 @@
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     let data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
+                    if (Array.isArray(data)) {
                         allProducts = data;
-                        localStorage.setItem('storeProductsCache', JSON.stringify(allProducts));
-                        filterProducts();
                         loaded = true;
+                    } else if (data && typeof data === 'object') {
+                        allProducts = Array.isArray(data.products) ? data.products : defaultProducts;
+                        allSales = Array.isArray(data.sales) ? data.sales : [];
+                        loaded = true;
+                    }
+                    if (loaded) {
+                        filterProducts();
                         if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                     }
                 }
             } catch (e) {}
 
             if (!loaded) {
-                let saved = localStorage.getItem('storeProductsCache');
-                if (saved) {
-                    try {
-                        let parsed = JSON.parse(saved);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            allProducts = parsed;
-                            filterProducts();
-                            loaded = true;
-                        }
-                    } catch(e) {}
-                }
-            }
-
-            if (!loaded) {
                 allProducts = defaultProducts;
                 filterProducts();
+            }
+        }
+
+        async function syncSaleToCloud(saleRecord) {
+            try {
+                let res = await fetch(API_URL + "?t=" + new Date().getTime());
+                let currentCloudData = { products: allProducts, sales: [] };
+                if (res.ok) {
+                    let data = await res.json();
+                    if (Array.isArray(data)) {
+                        currentCloudData.products = data;
+                    } else if (data && typeof data === 'object') {
+                        currentCloudData.products = Array.isArray(data.products) ? data.products : allProducts;
+                        currentCloudData.sales = Array.isArray(data.sales) ? data.sales : [];
+                    }
+                }
+                currentCloudData.sales.push(saleRecord);
+
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentCloudData)
+                });
+            } catch (e) {
+                console.error('فشل حفظ المبيعات سحابياً');
             }
         }
 
@@ -571,7 +588,7 @@
             closeModal('captainModal');
         }
 
-        function submitCustomOrderToWhatsApp() {
+        async function submitCustomOrderToWhatsApp() {
             let name = document.getElementById('customName').value.trim();
             let phone = document.getElementById('customPhone').value.trim();
             let details = document.getElementById('customDetails').value.trim();
@@ -588,13 +605,10 @@
                 timestamp: new Date().getTime(),
                 total: 0,
                 profit: 0,
-                itemsSummary: `طلب خاص: ${details.substring(0, 40)}...`
+                itemsSummary: `طلب خاص: ${details}`
             };
 
-            // حفظ الطلب في التخزين المحلي لكي يظهر فوراً في لوحة التحكم الإدارية
-            let sales = JSON.parse(localStorage.getItem('storeSalesLog') || '[]');
-            sales.push(saleRecord);
-            localStorage.setItem('storeSalesLog', JSON.stringify(sales));
+            await syncSaleToCloud(saleRecord);
 
             let msg = `*🛍️ طلب خاص جديد (اطلب اللي تحتاجه) #${orderRef}*\n\n`;
             msg += `👤 اسم العميل: ${name}\n`;
@@ -607,7 +621,7 @@
             alert('✅ تم إرسال الطلب الخاص وحفظه في سجل الإدارة بنجاح!');
         }
 
-        function submitOrderToWhatsApp() {
+        async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let address = document.getElementById('custAddress').value.trim();
@@ -625,7 +639,6 @@
                 return sum + ((item.price - cost) * item.qty);
             }, 0);
 
-            // تسجيل الطلب في الذاكرة المحلية والمسجلة لتظهر فوراً في لوحة التحكم الإدارية
             let saleRecord = {
                 orderId: orderRef,
                 timestamp: new Date().getTime(),
@@ -634,9 +647,7 @@
                 itemsSummary: cart.map(i => `${i.name} (${i.qty})`).join(', ')
             };
 
-            let sales = JSON.parse(localStorage.getItem('storeSalesLog') || '[]');
-            sales.push(saleRecord);
-            localStorage.setItem('storeSalesLog', JSON.stringify(sales));
+            await syncSaleToCloud(saleRecord);
 
             let msg = `*🛒 طلب جديد من متجر جاهز (#${orderRef})*\n\n`;
             msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
