@@ -582,7 +582,21 @@
                 return;
             }
 
-            let msg = `*🛍️ طلب خاص جديد (اطلب اللي تحتاجه)*\n\n`;
+            let orderRef = Math.floor(1000 + Math.random() * 9000);
+            let saleRecord = {
+                orderId: orderRef,
+                timestamp: new Date().getTime(),
+                total: 0,
+                profit: 0,
+                itemsSummary: `طلب خاص: ${details.substring(0, 40)}...`
+            };
+
+            // حفظ الطلب في التخزين المحلي لكي يظهر فوراً في لوحة التحكم الإدارية
+            let sales = JSON.parse(localStorage.getItem('storeSalesLog') || '[]');
+            sales.push(saleRecord);
+            localStorage.setItem('storeSalesLog', JSON.stringify(sales));
+
+            let msg = `*🛍️ طلب خاص جديد (اطلب اللي تحتاجه) #${orderRef}*\n\n`;
             msg += `👤 اسم العميل: ${name}\n`;
             msg += `📞 رقم الجوال: ${phone}\n`;
             msg += `📍 العنوان: ${address}\n\n`;
@@ -590,7 +604,7 @@
 
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('customOrderModal');
-            alert('✅ تم إرسال طلبك الخاص بنجاح إلى الإدارة عبر الواتساب!');
+            alert('✅ تم إرسال الطلب الخاص وحفظه في سجل الإدارة بنجاح!');
         }
 
         function submitOrderToWhatsApp() {
@@ -611,7 +625,7 @@
                 return sum + ((item.price - cost) * item.qty);
             }, 0);
 
-            // تسجيل الطلب في الذاكرة المحلية والمسجلة لتظهر في لوحة التحكم الإدارية
+            // تسجيل الطلب في الذاكرة المحلية والمسجلة لتظهر فوراً في لوحة التحكم الإدارية
             let saleRecord = {
                 orderId: orderRef,
                 timestamp: new Date().getTime(),
