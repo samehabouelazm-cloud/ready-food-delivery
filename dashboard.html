@@ -171,7 +171,7 @@
         </div>
         <div>
             <a href="index.html" class="btn" style="text-decoration:none; font-size:13px;">🌐 الذهاب للمتجر</a>
-            <button class="btn btn-danger" onclick="resetData()" style="font-size:13px; margin-right: 6px;">🗑️ إعادة الضبط</button>
+            <button class="btn btn-success" onclick="initDashboard()" style="font-size:13px; margin-right: 6px;">🔄 تحديث المبيعات</button>
         </div>
     </header>
 
@@ -255,7 +255,7 @@
         <div class="card">
             <div class="card-title">💰 سجل المبيعات والأرباح المحققة</div>
             <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
-                <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل المبيعات هنا تلقائياً عند إتمام الطلبات.</p>
+                <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل المبيعات هنا تلقائياً من طلبات العملاء عبر السحابة.</p>
                 <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
             </div>
             <div class="table-responsive">
@@ -292,10 +292,9 @@
             }
         }
 
-        let products = [];
-        let salesLog = [];
+        let cloudData = { products: [], sales: [] };
 
-        const defaultAdminProducts = [
+        const defaultProducts = [
             { name: "شاي العروسة 250جم", cost: 45, price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
             { name: "قهوة بن معتوق 200جم", cost: 70, price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" }
         ];
@@ -305,26 +304,18 @@
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     let data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        products = data;
+                    if (Array.isArray(data)) {
+                        cloudData.products = data;
+                        cloudData.sales = [];
+                    } else if (data && typeof data === 'object') {
+                        cloudData.products = Array.isArray(data.products) ? data.products : defaultProducts;
+                        cloudData.sales = Array.isArray(data.sales) ? data.sales : [];
                     }
                 }
             } catch (e) {}
 
-            if (!products || products.length === 0) {
-                let savedProd = localStorage.getItem('storeProductsCache');
-                if (savedProd) {
-                    try { products = JSON.parse(savedProd); } catch(e) {}
-                }
-            }
-
-            if (!products || products.length === 0) {
-                products = defaultAdminProducts;
-            }
-
-            let savedSales = localStorage.getItem('storeSalesLog');
-            if (savedSales) {
-                try { salesLog = JSON.parse(savedSales); } catch(e) {}
+            if (!cloudData.products || cloudData.products.length === 0) {
+                cloudData.products = defaultProducts;
             }
 
             renderAdminProducts();
@@ -333,17 +324,18 @@
         }
 
         async function saveAndSync() {
-            localStorage.setItem('storeProductsCache', JSON.stringify(products));
             renderAdminProducts();
+            calculateFinancials();
+            renderSalesLog();
 
             try {
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(products)
+                    body: JSON.stringify(cloudData)
                 });
             } catch (e) {
-                console.error('فشل الرفع السحابي، جاري الاحتفاظ بالنسخة المحلية');
+                console.error('فشل الرفع السحابي');
             }
         }
 
@@ -351,7 +343,7 @@
             let tbody = document.getElementById('adminProductsTable');
             tbody.innerHTML = '';
 
-            products.forEach((p, idx) => {
+            cloudData.products.forEach((p, idx) => {
                 let cost = p.cost || (p.price * 0.8);
                 let profit = p.price - cost;
                 let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
@@ -385,25 +377,18 @@
                 return;
             }
 
-            let btn = document.getElementById('addBtn');
-            btn.innerText = '⏳ جاري الحفظ والرفع للسحابة...';
-            btn.disabled = true;
-
-            products.push({ name, cost, price, category, image });
+            cloudData.products.push({ name, cost, price, category, image });
             await saveAndSync();
             
             document.getElementById('prodName').value = '';
             document.getElementById('prodCost').value = '';
             document.getElementById('prodPrice').value = '';
             document.getElementById('prodImage').value = '';
-            
-            btn.innerText = '☁️ إضافة المنتج ورفعه للسحابة فوراً';
-            btn.disabled = false;
             alert('✅ تم إضافة المنتج ورفعه للسحابة ليعمل على جميع الهواتف!');
         }
 
         function openEditModal(idx) {
-            let p = products[idx];
+            let p = cloudData.products[idx];
             document.getElementById('editIndex').value = idx;
             document.getElementById('editName').value = p.name || '';
             document.getElementById('editCost').value = p.cost || '';
@@ -430,15 +415,15 @@
                 return;
             }
 
-            products[idx] = { name, cost, price, category, image };
+            cloudData.products[idx] = { name, cost, price, category, image };
             await saveAndSync();
             closeEditModal();
-            alert('✅ تم تعديل المنتج وحفظه سحابياً لجميع الجوالات!');
+            alert('✅ تم تعديل المنتج وحفظه سحابياً!');
         }
 
         async function deleteProduct(idx) {
             if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-                products.splice(idx, 1);
+                cloudData.products.splice(idx, 1);
                 await saveAndSync();
             }
         }
@@ -452,7 +437,7 @@
             let monthSales = 0, monthProfit = 0;
             let yearSales = 0, yearProfit = 0;
 
-            salesLog.forEach(sale => {
+            (cloudData.sales || []).forEach(sale => {
                 let saleDate = new Date(sale.timestamp);
                 let saleDateStr = saleDate.toISOString().split('T')[0];
 
@@ -496,12 +481,12 @@
             let tbody = document.getElementById('salesLogTable');
             tbody.innerHTML = '';
 
-            if(!salesLog || salesLog.length === 0) {
+            if(!cloudData.sales || cloudData.sales.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد مبيعات مسجلة حتى الآن.</td></tr>`;
                 return;
             }
 
-            salesLog.slice().reverse().forEach(s => {
+            cloudData.sales.slice().reverse().forEach(s => {
                 let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
                 tbody.innerHTML += `
                     <tr>
@@ -515,20 +500,10 @@
             });
         }
 
-        function clearSalesLog() {
+        async function clearSalesLog() {
             if(confirm('هل تريد مسح سجل المبيعات والأرباح بالكامل؟')) {
-                salesLog = [];
-                localStorage.removeItem('storeSalesLog');
-                renderSalesLog();
-                calculateFinancials();
-            }
-        }
-
-        async function resetData() {
-            if(confirm('هل تريد إعادة ضبط المنتجات؟')) {
-                products = defaultAdminProducts;
+                cloudData.sales = [];
                 await saveAndSync();
-                alert('✅ تم إعادة الضبط بنجاح!');
             }
         }
 
