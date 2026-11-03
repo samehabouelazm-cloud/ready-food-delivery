@@ -275,8 +275,8 @@
             
             <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>المجموع الفرعي:</span><span id="subTotal" style="font-weight:700;">0 ج.م</span></div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل المقدرة:</span><span id="deliveryFeeDisplay" style="font-weight:700;">15 ج.م</span></div>
-                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">15 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل المقدرة:</span><span id="deliveryFeeDisplay" style="font-weight:700;">20 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">20 ج.م</span></div>
             </div>
 
             <button class="btn-submit" onclick="goToCheckout()">إكمال الشراء وتحديد العنوان 📝</button>
@@ -302,10 +302,7 @@
             <div class="form-group">
                 <label>منطقة التوصيل (بلطيم):</label>
                 <select id="deliveryZone" onchange="updateDeliveryFee()">
-                    <option value="15">وسط المدينة / شارع بورسعيد وما حولها (15 ج.م)</option>
-                    <option value="20">الشارع الجديد / الموقف (20 ج.م)</option>
-                    <option value="25">منطقة الكورنيش والمدخل (25 ج.م)</option>
-                    <option value="35">المناطق الخارجة والقرى المجاورة (35 ج.م)</option>
+                    <option value="20">شارع بورسعيد - شارع التحرير - الموقف الشرقي - شارع السلخانة - المساكن الشرقية - المناطق المجاورة (20 ج.م)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -528,7 +525,7 @@
             let grandTotalElem = document.getElementById('grandTotal');
 
             let zoneSelect = document.getElementById('deliveryZone');
-            let currentDeliveryFee = zoneSelect ? parseFloat(zoneSelect.value) : 15;
+            let currentDeliveryFee = zoneSelect ? parseFloat(zoneSelect.value) : 20;
 
             if(cart.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
