@@ -200,6 +200,7 @@
 
         .btn-submit { background: var(--secondary); color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-cancel { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
+        .btn-gps { background: #0284c7; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -276,7 +277,7 @@
             
             <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>المجموع الفرعي:</span><span id="subTotal" style="font-weight:700;">0 ج.م</span></div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل:</span><span style="font-weight:700;">15 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل المقدرة:</span><span id="deliveryFeeDisplay" style="font-weight:700;">15 ج.م</span></div>
                 <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">15 ج.م</span></div>
             </div>
 
@@ -288,7 +289,7 @@
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
-                <h3>📝 بيانات العميل والدفع</h3>
+                <h3>📝 بيانات العميل وتحديد تكلفة التوصيل</h3>
                 <span class="close-icon" onclick="closeModal('checkoutModal')">✕</span>
             </div>
             
@@ -303,6 +304,8 @@
             <div class="form-group">
                 <label>العنوان بالتفصيل:</label>
                 <textarea id="custAddress" rows="2" placeholder="المدينة - الشارع - رقم العقار"></textarea>
+                <button type="button" class="btn-gps" onclick="getLocationAndCalculateFee()">📍 حساب التوصيل التلقائي عبر الموقع (GPS)</button>
+                <div id="gpsStatus" style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 700;"></div>
             </div>
             <div class="form-group">
                 <label>طريقة الدفع:</label>
@@ -374,6 +377,9 @@
         const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
+        // إحداثيات المتجر الرئيسية (مصر / القاهرة افتراضياً - يمكنك تعديلها)
+        const STORE_LOCATION = { lat: 30.0444, lng: 31.2357 }; 
+
         const defaultProducts = [
             { name: "شاي العروسة 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
             { name: "قهوة بن معتوق 200جم", price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" }
@@ -384,6 +390,47 @@
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
+
+        let calculatedDeliveryFee = 15; // الرسم الافتراضي
+        let calculatedDistanceKm = 0;
+
+        // حساب المسافة بالكم بين نقطتين اعتماداً على معادلة Haversine
+        function getDistanceInKm(lat1, lon1, lat2, lon2) {
+            let R = 6371;
+            let dLat = (lat2 - lat1) * Math.PI / 180;
+            let dLon = (lon2 - lon1) * Math.PI / 180;
+            let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function getLocationAndCalculateFee() {
+            let status = document.getElementById('gpsStatus');
+            if (!navigator.geolocation) {
+                status.innerText = "❌ خاصية تحديد الموقع غير مدعومة في متصفحك.";
+                return;
+            }
+            status.innerText = "⏳ جاري جلب موقعك وتحديد المسافة...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                let userLat = pos.coords.latitude;
+                let userLng = pos.coords.longitude;
+                
+                let dist = getDistanceInKm(STORE_LOCATION.lat, STORE_LOCATION.lng, userLat, userLng);
+                calculatedDistanceKm = dist.toFixed(1);
+
+                // حساب التكلفة: 15ج رسم ثابت + 5ج لكل كم إضافي
+                let baseFee = 15;
+                let extraFee = Math.ceil(dist) * 5;
+                calculatedDeliveryFee = baseFee + extraFee;
+
+                status.innerText = `✅ المسافة: ${calculatedDistanceKm} كم | رسوم التوصيل للكابتن: ${calculatedDeliveryFee} ج.م`;
+                updateCartUI();
+            }, () => {
+                status.innerText = "⚠️ تعذر جلب الموقع. تم اعتماد التوصيل القياسي (15 ج.م).";
+            });
+        }
 
         async function loadStoreProducts(showAlert = false) {
             let loaded = false;
@@ -522,12 +569,14 @@
             
             let list = document.getElementById('cartItemsList');
             let subTotalElem = document.getElementById('subTotal');
+            let deliveryFeeElem = document.getElementById('deliveryFeeDisplay');
             let grandTotalElem = document.getElementById('grandTotal');
 
             if(cart.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
                 subTotalElem.innerText = '0 ج.م';
-                grandTotalElem.innerText = '15 ج.م';
+                deliveryFeeElem.innerText = calculatedDeliveryFee + ' ج.م';
+                grandTotalElem.innerText = calculatedDeliveryFee + ' ج.م';
                 return;
             }
 
@@ -553,7 +602,8 @@
             });
 
             subTotalElem.innerText = subtotal + ' ج.م';
-            grandTotalElem.innerText = (subtotal + 15) + ' ج.م';
+            deliveryFeeElem.innerText = calculatedDeliveryFee + ' ج.م';
+            grandTotalElem.innerText = (subtotal + calculatedDeliveryFee) + ' ج.م';
         }
 
         function updateCartItemQty(i, delta) {
@@ -630,7 +680,7 @@
             if(!name || !phone || !address) { alert('الرجاء تعبئة بياناتك لإتمام الطلب!'); return; }
 
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = subtotal + 15;
+            let total = subtotal + calculatedDeliveryFee;
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
             let orderProfit = cart.reduce((sum, item) => {
@@ -652,7 +702,7 @@
             let msg = `*🛒 طلب جديد من متجر جاهز (#${orderRef})*\n\n`;
             msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
             cart.forEach((i, idx) => { msg += `${idx + 1}. ${i.name} | العدد: ${i.qty} | السعر: ${i.price * i.qty} ج.م\n`; });
-            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 التوصيل: 15 ج.م\n💰 الإجمالي: ${total} ج.م`;
+            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 التوصيل (${calculatedDistanceKm > 0 ? calculatedDistanceKm + ' كم' : 'افتراضي'}): ${calculatedDeliveryFee} ج.م\n💰 الإجمالي: ${total} ج.م`;
 
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             cart = [];
