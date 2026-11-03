@@ -300,11 +300,21 @@
                 <input type="tel" id="custPhone" placeholder="010xxxxxxx">
             </div>
             <div class="form-group">
-                <label>منطقة التوصيل (بلطيم):</label>
-                <select id="deliveryZone" onchange="updateDeliveryFee()">
-                    <option value="20">شارع بورسعيد - شارع التحرير - الموقف الشرقي - شارع السلخانة - المساكن الشرقية - المناطق المجاورة (20 ج.م)</option>
+                <label>منطقة التوصيل:</label>
+                <select id="deliveryZone" onchange="toggleExtraKmField()">
+                    <option value="20">شارع بورسعيد - شارع التحرير - الموقف الشرقي - شارع السلخانة - المساكن الشرقية والمناطق المجاورة (20 ج.م)</option>
+                    <option value="25">الموقف الغربي والمناطق المجاورة (25 ج.م)</option>
+                    <option value="external">خارج بلطيم (حساب بالكيلومتر)</option>
                 </select>
             </div>
+
+            <!-- حقل إدخال عدد الكيلومترات للخارج -->
+            <div class="form-group" id="externalKmGroup" style="display: none;">
+                <label>حدد عدد الكيلومترات (خارج بلطيم):</label>
+                <input type="number" id="externalKmInput" min="1" value="1" oninput="updateDeliveryFee()">
+                <small style="color: var(--text-muted);">السعر: 30 جنيه أساسي + 5 جنيه لكل كيلومتر</small>
+            </div>
+
             <div class="form-group">
                 <label>العنوان بالتفصيل (رقم العقار / المعلم المميز):</label>
                 <textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea>
@@ -384,11 +394,30 @@
         let productQuantities = {};
         let currentCategory = 'all';
 
-        function updateDeliveryFee() {
+        function toggleExtraKmField() {
             let zoneSelect = document.getElementById('deliveryZone');
-            if(zoneSelect) {
-                updateCartUI();
+            let kmGroup = document.getElementById('externalKmGroup');
+            if (zoneSelect.value === 'external') {
+                kmGroup.style.display = 'block';
+            } else {
+                kmGroup.style.display = 'none';
             }
+            updateCartUI();
+        }
+
+        function getCalculatedDeliveryFee() {
+            let zoneSelect = document.getElementById('deliveryZone');
+            if (!zoneSelect) return 20;
+            
+            if (zoneSelect.value === 'external') {
+                let km = parseFloat(document.getElementById('externalKmInput').value) || 1;
+                return 30 + (km * 5); // 30 جنيه أساسي للخارج + 5 جنيه لكل كيلومتر
+            }
+            return parseFloat(zoneSelect.value) || 20;
+        }
+
+        function updateDeliveryFee() {
+            updateCartUI();
         }
 
         async function loadStoreProducts(showAlert = false) {
@@ -524,8 +553,7 @@
             let deliveryFeeElem = document.getElementById('deliveryFeeDisplay');
             let grandTotalElem = document.getElementById('grandTotal');
 
-            let zoneSelect = document.getElementById('deliveryZone');
-            let currentDeliveryFee = zoneSelect ? parseFloat(zoneSelect.value) : 20;
+            let currentDeliveryFee = getCalculatedDeliveryFee();
 
             if(cart.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
@@ -630,8 +658,16 @@
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let zoneSelect = document.getElementById('deliveryZone');
-            let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
-            let deliveryFee = parseFloat(zoneSelect.value);
+            let zoneText = "";
+            
+            if (zoneSelect.value === 'external') {
+                let km = document.getElementById('externalKmInput').value || 1;
+                zoneText = `خارج بلطيم (مسافة ${km} كم)`;
+            } else {
+                zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
+            }
+
+            let deliveryFee = getCalculatedDeliveryFee();
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
 
