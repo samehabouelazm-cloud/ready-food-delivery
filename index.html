@@ -200,7 +200,6 @@
 
         .btn-submit { background: var(--secondary); color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-cancel { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
-        .btn-gps { background: #0284c7; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -276,8 +275,8 @@
             
             <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>المجموع الفرعي:</span><span id="subTotal" style="font-weight:700;">0 ج.م</span></div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل المقدرة:</span><span id="deliveryFeeDisplay" style="font-weight:700;">15 ج.م</span></div>
-                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">15 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل المقدرة:</span><span id="deliveryFeeDisplay" style="font-weight:700;">20 ج.م</span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">20 ج.م</span></div>
             </div>
 
             <button class="btn-submit" onclick="goToCheckout()">إكمال الشراء وتحديد العنوان 📝</button>
@@ -288,7 +287,7 @@
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
-                <h3>📝 بيانات العميل وتحديد تكلفة التوصيل</h3>
+                <h3>📝 بيانات العميل وتحديد منطقة التوصيل</h3>
                 <span class="close-icon" onclick="closeModal('checkoutModal')">✕</span>
             </div>
             
@@ -301,10 +300,15 @@
                 <input type="tel" id="custPhone" placeholder="010xxxxxxx">
             </div>
             <div class="form-group">
-                <label>العنوان بالتفصيل:</label>
+                <label>منطقة التوصيل:</label>
+                <select id="deliveryZone" onchange="updateDeliveryFee()">
+                    <option value="20">داخل بلطيم (20 ج.م)</option>
+                    <option value="50">المناطق المجاورة لبلطيم (50 ج.م)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>العنوان بالتفصيل (الشارع / رقم العقار):</label>
                 <textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea>
-                <button type="button" class="btn-gps" onclick="getLocationAndCalculateFee()">📍 حساب التوصيل الدقيق من شارع جمال عبد الناصر (GPS)</button>
-                <div id="gpsStatus" style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 700;"></div>
             </div>
             <div class="form-group">
                 <label>طريقة الدفع:</label>
@@ -375,66 +379,19 @@
         const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
-        // إحداثيات المتجر المركزية بدقة في شارع جمال عبد الناصر ببلطيم (بجوار الموقف الشرقي)
-        const STORE_LOCATION = { lat: 31.5678, lng: 31.2385 }; 
-
         let allProducts = [];
         let allSales = [];
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
 
-        let calculatedDeliveryFee = 15; // الحد الأدنى الافتراضي
-        let calculatedDistanceKm = 0;
-
-        function getDistanceInKm(lat1, lon1, lat2, lon2) {
-            let R = 6371; // نصف قطر الأرض بالكيلومتر
-            let dLat = (lat2 - lat1) * Math.PI / 180;
-            let dLon = (lon2 - lon1) * Math.PI / 180;
-            let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+        function updateDeliveryFee() {
+            updateCartUI();
         }
 
-        function getLocationAndCalculateFee() {
-            let status = document.getElementById('gpsStatus');
-            if (!navigator.geolocation) {
-                status.innerText = "❌ خاصية تحديد الموقع غير مدعومة في متصفحك.";
-                return;
-            }
-            status.innerText = "⏳ جاري تفعيل الـ GPS بدقة عالية وتحديد موقعك من شارع جمال عبد الناصر ببلطيم...";
-            
-            navigator.geolocation.getCurrentPosition((pos) => {
-                let userLat = pos.coords.latitude;
-                let userLng = pos.coords.longitude;
-                
-                let dist = getDistanceInKm(STORE_LOCATION.lat, STORE_LOCATION.lng, userLat, userLng);
-                
-                if(dist > 100) {
-                    status.innerText = "⚠️ إحداثيات الـ GPS غير دقيقة (تأكد من إذن الموقع). تم اعتماد الحد الأدنى (15 ج.م).";
-                    calculatedDeliveryFee = 15;
-                    calculatedDistanceKm = 0;
-                    updateCartUI();
-                    return;
-                }
-
-                calculatedDistanceKm = dist.toFixed(2);
-
-                // تسعير عادل بناءً على المسافة الحقيقية: 15 جنيه أساسي لأول 2 كيلومتر، ثم 5 جنيه لكل كيلومتر إضافي
-                let baseFee = 15;
-                let extraFee = 0;
-                if (dist > 2) {
-                    extraFee = Math.ceil(dist - 2) * 5;
-                }
-                calculatedDeliveryFee = baseFee + extraFee;
-
-                status.innerText = `✅ المسافة من شارع جمال عبد الناصر: ${calculatedDistanceKm} كم | رسوم الكابتن: ${calculatedDeliveryFee} ج.م`;
-                updateCartUI();
-            }, (err) => {
-                status.innerText = "⚠️ تعذر جلب الموقع بدقة. تم اعتماد التوصيل القياسي (15 ج.م).";
-            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        function getDeliveryFee() {
+            let zoneSelect = document.getElementById('deliveryZone');
+            return zoneSelect ? parseFloat(zoneSelect.value) : 20;
         }
 
         async function loadStoreProducts(showAlert = false) {
@@ -570,11 +527,13 @@
             let deliveryFeeElem = document.getElementById('deliveryFeeDisplay');
             let grandTotalElem = document.getElementById('grandTotal');
 
+            let deliveryFee = getDeliveryFee();
+
             if(cart.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
                 subTotalElem.innerText = '0 ج.م';
-                deliveryFeeElem.innerText = calculatedDeliveryFee + ' ج.م';
-                grandTotalElem.innerText = calculatedDeliveryFee + ' ج.م';
+                deliveryFeeElem.innerText = deliveryFee + ' ج.م';
+                grandTotalElem.innerText = deliveryFee + ' ج.م';
                 return;
             }
 
@@ -600,8 +559,8 @@
             });
 
             subTotalElem.innerText = subtotal + ' ج.م';
-            deliveryFeeElem.innerText = calculatedDeliveryFee + ' ج.م';
-            grandTotalElem.innerText = (subtotal + calculatedDeliveryFee) + ' ج.م';
+            deliveryFeeElem.innerText = deliveryFee + ' ج.م';
+            grandTotalElem.innerText = (subtotal + deliveryFee) + ' ج.م';
         }
 
         function updateCartItemQty(i, delta) {
@@ -672,13 +631,16 @@
         async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
+            let zoneSelect = document.getElementById('deliveryZone');
+            let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
+            let deliveryFee = parseFloat(zoneSelect.value);
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
 
             if(!name || !phone || !address) { alert('الرجاء تعبئة بياناتك لإتمام الطلب!'); return; }
 
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = subtotal + calculatedDeliveryFee;
+            let total = subtotal + deliveryFee;
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
             let orderProfit = cart.reduce((sum, item) => {
@@ -698,9 +660,9 @@
             await syncSaleToCloud(saleRecord);
 
             let msg = `*🛒 طلب جديد من فرع بلطيم - شارع جمال عبد الناصر (#${orderRef})*\n\n`;
-            msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
+            msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 التوصيل: ${zoneText}\n🏢 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
             cart.forEach((i, idx) => { msg += `${idx + 1}. ${i.name} | العدد: ${i.qty} | السعر: ${i.price * i.qty} ج.م\n`; });
-            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 التوصيل من شارع جمال عبد الناصر [المسافة: ${calculatedDistanceKm} كم]: ${calculatedDeliveryFee} ج.م\n💰 الإجمالي: ${total} ج.م`;
+            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 رسوم التوصيل: ${deliveryFee} ج.م\n💰 الإجمالي الكلي: ${total} ج.م`;
 
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             cart = [];
