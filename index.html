@@ -200,7 +200,6 @@
 
         .btn-submit { background: var(--secondary); color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-cancel { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
-        .btn-gps { background: #0284c7; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -224,7 +223,7 @@
         <div class="hero-banner">
             <div class="hero-text">
                 <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
-                <p>منتجات طازجة، سوبرماركت، وإلكترونيات تصلك حتى باب المنزل بسرعة واحترافية.</p>
+                <p>منتجات طازجة، سوبرماركت، وإلكترونيات تصلك حتى باب المنزل من فرعنا ببلطيم - شارع بورسعيد بسرعة واحترافية.</p>
                 <button class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
             </div>
         </div>
@@ -288,7 +287,7 @@
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
-                <h3>📝 بيانات العميل وتحديد تكلفة التوصيل</h3>
+                <h3>📝 بيانات العميل وتحديد منطقة التوصيل</h3>
                 <span class="close-icon" onclick="closeModal('checkoutModal')">✕</span>
             </div>
             
@@ -301,10 +300,17 @@
                 <input type="tel" id="custPhone" placeholder="010xxxxxxx">
             </div>
             <div class="form-group">
-                <label>العنوان بالتفصيل:</label>
-                <textarea id="custAddress" rows="2" placeholder="بلطيم - شارع بورسعيد - شارع..."></textarea>
-                <button type="button" class="btn-gps" onclick="getLocationAndCalculateFee()">📍 حساب التوصيل الدقيق من فرع بلطيم (GPS)</button>
-                <div id="gpsStatus" style="font-size: 12px; color: var(--primary); margin-top: 4px; font-weight: 700;"></div>
+                <label>منطقة التوصيل (بلطيم):</label>
+                <select id="deliveryZone" onchange="updateDeliveryFee()">
+                    <option value="15">وسط المدينة / شارع بورسعيد وما حولها (15 ج.م)</option>
+                    <option value="20">الشارع الجديد / الموقف (20 ج.م)</option>
+                    <option value="25">منطقة الكورنيش والمدخل (25 ج.م)</option>
+                    <option value="35">المناطق الخارجة والقرى المجاورة (35 ج.م)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>العنوان بالتفصيل (رقم العقار / المعلم المميز):</label>
+                <textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea>
             </div>
             <div class="form-group">
                 <label>طريقة الدفع:</label>
@@ -335,8 +341,8 @@
                 <input type="tel" id="capPhone" placeholder="010xxxxxxx">
             </div>
             <div class="form-group">
-                <label>العنوان / المنطقة:</label>
-                <textarea id="capAddress" rows="2" placeholder="المدينة - الحي - المنطقة"></textarea>
+                <label>العنوان / المنطقة ببلطيم:</label>
+                <textarea id="capAddress" rows="2" placeholder="الحي - المنطقة"></textarea>
             </div>
             <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">إرسال طلب الانضمام للواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
@@ -362,8 +368,8 @@
                 <textarea id="customDetails" rows="4" placeholder="مثال: أريد 2 كيلو طماطم، علبة جبنة، وطلب من الصيدلية..."></textarea>
             </div>
             <div class="form-group">
-                <label>عنوان التوصيل بالتفصيل:</label>
-                <textarea id="customAddress" rows="2" placeholder="المدينة - الشارع - رقم العقار"></textarea>
+                <label>العنوان بالتفصيل ببلطيم:</label>
+                <textarea id="customAddress" rows="2" placeholder="الشارع - رقم العقار"></textarea>
             </div>
             <button class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص للإدارة عبر الواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('customOrderModal')">إلغاء</button>
@@ -375,73 +381,17 @@
         const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
-        // إحداثيات المتجر المركزية بدقة: بلطيم - شارع بورسعيد
-        const STORE_LOCATION = { lat: 31.5683, lng: 31.2372 }; 
-
-        const defaultProducts = [
-            { name: "شاي العروسة 250جم", price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
-            { name: "قهوة بن معتوق 200جم", price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" }
-        ];
-
         let allProducts = [];
         let allSales = [];
         let cart = [];
         let productQuantities = {};
         let currentCategory = 'all';
 
-        let calculatedDeliveryFee = 15; // الحد الأدنى الافتراضي
-        let calculatedDistanceKm = 0;
-
-        function getDistanceInKm(lat1, lon1, lat2, lon2) {
-            let R = 6371; // نصف قطر الأرض بالكيلومتر
-            let dLat = (lat2 - lat1) * Math.PI / 180;
-            let dLon = (lon2 - lon1) * Math.PI / 180;
-            let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        function getLocationAndCalculateFee() {
-            let status = document.getElementById('gpsStatus');
-            if (!navigator.geolocation) {
-                status.innerText = "❌ خاصية تحديد الموقع غير مدعومة في متصفحك.";
-                return;
-            }
-            status.innerText = "⏳ جاري تفعيل الـ GPS بدقة عالية وتحديد موقعك من شارع بورسعيد ببلطيم...";
-            
-            navigator.geolocation.getCurrentPosition((pos) => {
-                let userLat = pos.coords.latitude;
-                let userLng = pos.coords.longitude;
-                
-                // حساب المسافة الدقيقة
-                let dist = getDistanceInKm(STORE_LOCATION.lat, STORE_LOCATION.lng, userLat, userLng);
-                
-                // حماية من الأخطاء والمسافات الوهمية (إذا كانت المسافة أقل من 0.05 كم نجعلها 0 أو قريبة جداً)
-                if(dist > 500) {
-                    status.innerText = "⚠️ يبدو أن إحداثيات الـ GPS غير دقيقة (أرجو تفعيل دقة الموقع العالية). تم اعتماد الحد الأدنى (15 ج.م).";
-                    calculatedDeliveryFee = 15;
-                    calculatedDistanceKm = 0;
-                    updateCartUI();
-                    return;
-                }
-
-                calculatedDistanceKm = dist.toFixed(2); // بالسنتيمتر / المتر بدقة عالية
-
-                // تسعير عادل داخل بلطيم: 15 جنيه أساسي لأول 2 كيلومتر، ثم 5 جنيهات لكل كيلومتر إضافي
-                let baseFee = 15;
-                let extraFee = 0;
-                if (dist > 2) {
-                    extraFee = Math.ceil(dist - 2) * 5;
-                }
-                calculatedDeliveryFee = baseFee + extraFee;
-
-                status.innerText = `✅ المسافة: ${calculatedDistanceKm} كم | رسوم التوصيل للكابتن: ${calculatedDeliveryFee} ج.م`;
+        function updateDeliveryFee() {
+            let zoneSelect = document.getElementById('deliveryZone');
+            if(zoneSelect) {
                 updateCartUI();
-            }, (err) => {
-                status.innerText = "⚠️ تعذر جلب الموقع بدقة. تأكد من إذن الموقع بالمتجر. تم اعتماد (15 ج.م).";
-            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+            }
         }
 
         async function loadStoreProducts(showAlert = false) {
@@ -454,7 +404,7 @@
                         allProducts = data;
                         loaded = true;
                     } else if (data && typeof data === 'object') {
-                        allProducts = Array.isArray(data.products) ? data.products : defaultProducts;
+                        allProducts = Array.isArray(data.products) ? data.products : [];
                         allSales = Array.isArray(data.sales) ? data.sales : [];
                         loaded = true;
                     }
@@ -464,11 +414,6 @@
                     }
                 }
             } catch (e) {}
-
-            if (!loaded) {
-                allProducts = defaultProducts;
-                filterProducts();
-            }
         }
 
         async function syncSaleToCloud(saleRecord) {
@@ -582,11 +527,14 @@
             let deliveryFeeElem = document.getElementById('deliveryFeeDisplay');
             let grandTotalElem = document.getElementById('grandTotal');
 
+            let zoneSelect = document.getElementById('deliveryZone');
+            let currentDeliveryFee = zoneSelect ? parseFloat(zoneSelect.value) : 15;
+
             if(cart.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
                 subTotalElem.innerText = '0 ج.م';
-                deliveryFeeElem.innerText = calculatedDeliveryFee + ' ج.م';
-                grandTotalElem.innerText = calculatedDeliveryFee + ' ج.م';
+                deliveryFeeElem.innerText = currentDeliveryFee + ' ج.م';
+                grandTotalElem.innerText = currentDeliveryFee + ' ج.م';
                 return;
             }
 
@@ -612,8 +560,8 @@
             });
 
             subTotalElem.innerText = subtotal + ' ج.م';
-            deliveryFeeElem.innerText = calculatedDeliveryFee + ' ج.م';
-            grandTotalElem.innerText = (subtotal + calculatedDeliveryFee) + ' ج.م';
+            deliveryFeeElem.innerText = currentDeliveryFee + ' ج.م';
+            grandTotalElem.innerText = (subtotal + currentDeliveryFee) + ' ج.م';
         }
 
         function updateCartItemQty(i, delta) {
@@ -673,7 +621,7 @@
             let msg = `*🛍️ طلب خاص جديد (اطلب اللي تحتاجه) #${orderRef}*\n\n`;
             msg += `👤 اسم العميل: ${name}\n`;
             msg += `📞 رقم الجوال: ${phone}\n`;
-            msg += `📍 العنوان: ${address}\n\n`;
+            msg += `📍 العنوان ببلطيم: ${address}\n\n`;
             msg += `📝 *تفاصيل الطلب:*\n${details}`;
 
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -684,13 +632,16 @@
         async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
+            let zoneSelect = document.getElementById('deliveryZone');
+            let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
+            let deliveryFee = parseFloat(zoneSelect.value);
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
 
             if(!name || !phone || !address) { alert('الرجاء تعبئة بياناتك لإتمام الطلب!'); return; }
 
             let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = subtotal + calculatedDeliveryFee;
+            let total = subtotal + deliveryFee;
             let orderRef = Math.floor(1000 + Math.random() * 9000);
 
             let orderProfit = cart.reduce((sum, item) => {
@@ -709,10 +660,10 @@
 
             await syncSaleToCloud(saleRecord);
 
-            let msg = `*🛒 طلب جديد من متجر جاهز (#${orderRef})*\n\n`;
-            msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
+            let msg = `*🛒 طلب جديد من فرع بلطيم - شارع بورسعيد (#${orderRef})*\n\n`;
+            msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 المنطقة: ${zoneText}\n🏢 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
             cart.forEach((i, idx) => { msg += `${idx + 1}. ${i.name} | العدد: ${i.qty} | السعر: ${i.price * i.qty} ج.م\n`; });
-            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 التوصيل من فرع بلطيم (شارع بورسعيد) [المسافة: ${calculatedDistanceKm} كم]: ${calculatedDeliveryFee} ج.م\n💰 الإجمالي: ${total} ج.م`;
+            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 رسوم التوصيل للكابتن: ${deliveryFee} ج.م\n💰 الإجمالي الكلي: ${total} ج.م`;
 
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             cart = [];
