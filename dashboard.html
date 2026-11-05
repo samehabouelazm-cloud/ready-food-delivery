@@ -235,18 +235,19 @@
         </div>
 
         <div class="card">
-            <div class="card-title">📋 قائمة منتجات المتجر المسجلة</div>
+            <div class="card-title">📋 قائمة منتجات المتجر المسجلة (ترتيب العرض)</div>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
+                            <th>الترتيب</th>
                             <th>الصورة</th>
                             <th>اسم المنتج</th>
                             <th>التكلفة</th>
                             <th>سعر البيع</th>
                             <th>هامش الربح</th>
                             <th>الفئة</th>
-                            <th>الإجراءات</th>
+                            <th>الإجراءات والترتيب</th>
                         </tr>
                     </thead>
                     <tbody id="adminProductsTable"></tbody>
@@ -296,11 +297,6 @@
 
         let cloudData = { products: [], sales: [] };
 
-        const defaultProducts = [
-            { name: "شاي العروسة 250جم", cost: 45, price: 55, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500" },
-            { name: "قهوة بن معتوق 200جم", cost: 70, price: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500" }
-        ];
-
         async function initDashboard() {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -310,15 +306,11 @@
                         cloudData.products = data;
                         cloudData.sales = [];
                     } else if (data && typeof data === 'object') {
-                        cloudData.products = Array.isArray(data.products) ? data.products : defaultProducts;
+                        cloudData.products = Array.isArray(data.products) ? data.products : [];
                         cloudData.sales = Array.isArray(data.sales) ? data.sales : [];
                     }
                 }
             } catch (e) {}
-
-            if (!cloudData.products || cloudData.products.length === 0) {
-                cloudData.products = defaultProducts;
-            }
 
             renderAdminProducts();
             calculateFinancials();
@@ -345,6 +337,11 @@
             let tbody = document.getElementById('adminProductsTable');
             tbody.innerHTML = '';
 
+            if(!cloudData.products || cloudData.products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مسجلة.</td></tr>`;
+                return;
+            }
+
             cloudData.products.forEach((p, idx) => {
                 let cost = p.cost || (p.price * 0.8);
                 let profit = p.price - cost;
@@ -352,6 +349,7 @@
 
                 tbody.innerHTML += `
                     <tr>
+                        <td><span class="badge">#${idx + 1}</span></td>
                         <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" onerror="this.src='${DEFAULT_IMAGE}'"></td>
                         <td style="font-weight:700;">${p.name}</td>
                         <td>${cost} ج.م</td>
@@ -359,12 +357,25 @@
                         <td style="color:var(--accent); font-weight:800;">+${profit} ج.م</td>
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
+                            <button class="btn" onclick="moveProduct(${idx}, -1)" style="padding: 6px 8px; font-size: 11px;" ${idx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
+                            <button class="btn" onclick="moveProduct(${idx}, 1)" style="padding: 6px 8px; font-size: 11px;" ${idx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
                             <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 6px 10px; font-size: 12px;">تعديل ✏️</button>
                             <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 6px 10px; font-size: 12px;">حذف</button>
                         </td>
                     </tr>
                 `;
             });
+        }
+
+        async function moveProduct(idx, direction) {
+            let targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= cloudData.products.length) return;
+            
+            let temp = cloudData.products[idx];
+            cloudData.products[idx] = cloudData.products[targetIdx];
+            cloudData.products[targetIdx] = temp;
+
+            await saveAndSync();
         }
 
         async function addNewProduct() {
