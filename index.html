@@ -499,28 +499,12 @@
 
         function filterProducts() {
             let query = document.getElementById('searchInput').value.toLowerCase().trim();
+            // تصفية المنتجات مع الحفاظ التام على ترتيب المصفوفة المسجل في لوحة التحكم
             let filtered = allProducts.filter(p => {
                 let matchesQuery = p.name.toLowerCase().includes(query);
                 let matchesCat = (currentCategory === 'all' || p.category === currentCategory);
                 return matchesQuery && matchesCat;
             });
-
-            // الترتيب التلقائي: Single أولاً ثم Double في قائمة هابي ميلز
-            if (currentCategory === 'هابي ميلز' || currentCategory === 'all') {
-                filtered.sort((a, b) => {
-                    let nameA = a.name.toLowerCase();
-                    let nameB = b.name.toLowerCase();
-                    let isSingleA = nameA.includes('single') || nameA.includes('سينجل');
-                    let isDoubleA = nameA.includes('double') || nameA.includes('دبل');
-                    let isSingleB = nameB.includes('single') || nameB.includes('سينجل');
-                    let isDoubleB = nameB.includes('double') || nameB.includes('دبل');
-
-                    if (isSingleA && isDoubleB) return -1;
-                    if (isDoubleA && isSingleB) return 1;
-                    return 0;
-                });
-            }
-
             displayProducts(filtered);
         }
 
