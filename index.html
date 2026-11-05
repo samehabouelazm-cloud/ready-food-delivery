@@ -504,16 +504,6 @@
                 let matchesCat = (currentCategory === 'all' || p.category === currentCategory);
                 return matchesQuery && matchesCat;
             });
-            
-            // ترتيب ذكي لضمان ظهور Happy Grand Single ثم Double فوراً عند اختيار فئة هابي ميلز أو الكل
-            filtered.sort((a, b) => {
-                let nameA = a.name.toLowerCase();
-                let nameB = b.name.toLowerCase();
-                if (nameA.includes('single') && nameB.includes('double')) return -1;
-                if (nameA.includes('double') && nameB.includes('single')) return 1;
-                return 0;
-            });
-
             displayProducts(filtered);
         }
 
