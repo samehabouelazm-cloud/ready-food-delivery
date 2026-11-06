@@ -270,7 +270,7 @@
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         const CATEGORIES_LIST = [
-            // سوبر ماركت (محدث ومضاف إليه الأقسام الجديدة)
+            // سوبر ماركت
             "سوبر ماركت - الزيت",
             "سوبر ماركت - السمن",
             "سوبر ماركت - الشاي والسكر",
@@ -302,9 +302,7 @@
             "فطير هابي ميلز - فطير حلو",
             "قسم إضافات",
             "قسم صواني هابي ميلز",
-            // الغربي (بدون كلمة قسم)
-            "الغربي",
-            // الأقسام الختامية
+            // الأقسام الختامية (بدون الغربي)
             "إلكترونيات",
             "وجبات سريعة",
             "أدوات منزلية",
@@ -335,11 +333,10 @@
             let groups = [
                 { title: "🛒 سوبر ماركت", items: CATEGORIES_LIST.slice(0, 14) },
                 { title: "🍗 هابي ميلز", items: CATEGORIES_LIST.slice(14, 30) },
-                { title: "🍔 الغربي", items: CATEGORIES_LIST.slice(30, 31) },
-                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(31, 32) },
-                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(32, 33) },
-                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(33, 34) },
-                { title: "📦 عام", items: CATEGORIES_LIST.slice(34) }
+                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(30, 31) },
+                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(31, 32) },
+                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(32, 33) },
+                { title: "📦 عام", items: CATEGORIES_LIST.slice(33) }
             ];
 
             groups.forEach(g => {
