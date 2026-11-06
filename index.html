@@ -109,9 +109,11 @@
         .categories-section { margin-bottom: 25px; }
         .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); }
         .categories-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin;
         }
-        .categories-scroll::-webkit-scrollbar { display: none; }
+        .categories-scroll::-webkit-scrollbar { height: 6px; }
+        .categories-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
         .cat-pill {
             background: var(--surface); border: 1px solid #e2e8f0; border-radius: 30px;
             padding: 9px 18px; white-space: nowrap; font-size: 14px; font-weight: 700; color: var(--text-muted);
@@ -246,11 +248,27 @@
         </div>
 
         <div class="categories-section">
-            <div class="section-title">🛍️ تسوق حسب الفئة</div>
+            <div class="section-title">🍔 أقسام هابي ميلز والمنتجات</div>
             <div class="categories-scroll" id="categoriesBar">
                 <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 الكل</div>
+                <div class="cat-pill" onclick="selectCategory('تشيكن تندر', this)">🍗 تشيكن تندر</div>
+                <div class="cat-pill" onclick="selectCategory('فرايد تشيكن', this)">🍗 فرايد تشيكن</div>
+                <div class="cat-pill" onclick="selectCategory('مشويات', this)">🔥 مشويات</div>
+                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الساندوتشات', this)">🌯 شاورما (ساندوتشات)</div>
+                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الوجبات', this)">🍱 شاورما (وجبات)</div>
+                <div class="cat-pill" onclick="selectCategory('شاورما بالوزن', this)">⚖️ شاورما بالوزن</div>
+                <div class="cat-pill" onclick="selectCategory('كريب - قسم الكريب الحادق', this)">🥞 كريب حادق</div>
+                <div class="cat-pill" onclick="selectCategory('كريب - قسم الكريب الحلو', this)">🍫 كريب حلو</div>
+                <div class="cat-pill" onclick="selectCategory('قسم البيتزا', this)">🍕 قسم البيتزا</div>
+                <div class="cat-pill" onclick="selectCategory('قسم المدخنات', this)">🥩 قسم المدخنات</div>
+                <div class="cat-pill" onclick="selectCategory('قسم الهوت دوج', this)">🌭 قسم الهوت دوج</div>
+                <div class="cat-pill" onclick="selectCategory('قسم النجرسكو', this)">🍝 قسم النجرسكو</div>
+                <div class="cat-pill" onclick="selectCategory('فطير هابي ميلز - فطير اسكندراني', this)">🫓 فطير اسكندراني</div>
+                <div class="cat-pill" onclick="selectCategory('فطير هابي ميلز - فطير حلو', this)">🥞 فطير حلو</div>
+                <div class="cat-pill" onclick="selectCategory('قسم إضافات', this)">🧀 إضافات</div>
+                <div class="cat-pill" onclick="selectCategory('قسم صواني هابي ميلز', this)">🥘 صواني هابي ميلز</div>
+                <div class="cat-pill" onclick="selectCategory('قسم الغربي', this)">🍔 الغربي</div>
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت', this)">🛒 سوبر ماركت</div>
-                <div class="cat-pill" onclick="selectCategory('هابي ميلز', this)">🍔 هابي ميلز</div>
                 <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
                 <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍟 وجبات سريعة</div>
                 <div class="cat-pill" onclick="selectCategory('أدوات منزلية', this)">🏠 أدوات منزلية</div>
@@ -450,7 +468,7 @@
             statusText.innerText = `عرض (${products.length}) منتج متاح`;
 
             if (!products || products.length === 0) {
-                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات متاحة حالياً. أضف منتجات من لوحة التحكم! 🛍️</div>';
+                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات متاحة في هذا القسم حالياً. 🛍️</div>';
                 return;
             }
 
@@ -499,7 +517,6 @@
 
         function filterProducts() {
             let query = document.getElementById('searchInput').value.toLowerCase().trim();
-            // تصفية المنتجات مع الحفاظ التام على ترتيب المصفوفة المسجل في لوحة التحكم
             let filtered = allProducts.filter(p => {
                 let matchesQuery = p.name.toLowerCase().includes(query);
                 let matchesCat = (currentCategory === 'all' || p.category === currentCategory);
