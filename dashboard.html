@@ -130,7 +130,7 @@
     <div class="modal-overlay" id="editModal">
         <div class="modal-body">
             <div class="modal-header">
-                <h3>✏️ تعديل بيانات المنتج</h3>
+                <h3>✏️ تعديل بيانات المنتج ونقله</h3>
                 <span class="close-icon" onclick="closeEditModal()">✕</span>
             </div>
             <input type="hidden" id="editIndex">
@@ -147,21 +147,14 @@
                 <input type="number" id="editPrice">
             </div>
             <div class="form-group" style="margin-bottom: 12px;">
-                <label>الفئة الرئيسية:</label>
-                <select id="editCategory">
-                    <option value="سوبر ماركت">🛒 سوبر ماركت</option>
-                    <option value="هابي ميلز">🍔 هابي ميلز</option>
-                    <option value="إلكترونيات">📱 إلكترونيات</option>
-                    <option value="وجبات سريعة">🍟 وجبات سريعة</option>
-                    <option value="أدوات منزلية">🏠 أدوات منزلية</option>
-                    <option value="عام">📦 عام</option>
-                </select>
+                <label>القسم / الفئة الفرعية:</label>
+                <select id="editCategory"></select>
             </div>
             <div class="form-group" style="margin-bottom: 18px;">
                 <label>رابط الصورة (URL):</label>
                 <input type="text" id="editImage" placeholder="ترك فارغاً لظهور الصورة الافتراضية">
             </div>
-            <button class="btn btn-success" style="width:100%; margin-bottom:8px;" onclick="saveEditedProduct()">💾 حفظ التعديلات سحابياً</button>
+            <button class="btn btn-success" style="width:100%; margin-bottom:8px;" onclick="saveEditedProduct()">💾 حفظ التعديلات ونقل المنتج</button>
             <button class="btn btn-danger" style="width:100%; background:#64748b;" onclick="closeEditModal()">إلغاء</button>
         </div>
     </div>
@@ -201,41 +194,34 @@
         </div>
 
         <div class="card">
-            <div class="card-title">📦 إضافة منتج جديد ورفعه للسحابة</div>
+            <div class="card-title">📦 إضافة منتج جديد إلى القسم المخصص</div>
             <div class="form-grid">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="prodName" placeholder="مثال: شاي العروسة">
+                    <input type="text" id="prodName" placeholder="مثال: وجبة تشيكن تندر 3 قطع">
                 </div>
                 <div class="form-group">
                     <label>سعر التكلفة (للشراء):</label>
-                    <input type="number" id="prodCost" placeholder="مثال: 45">
+                    <input type="number" id="prodCost" placeholder="مثال: 80">
                 </div>
                 <div class="form-group">
                     <label>سعر البيع (للعميل):</label>
-                    <input type="number" id="prodPrice" placeholder="مثال: 55">
+                    <input type="number" id="prodPrice" placeholder="مثال: 100">
                 </div>
                 <div class="form-group">
-                    <label>الفئة الرئيسية:</label>
-                    <select id="prodCategory">
-                        <option value="سوبر ماركت">🛒 سوبر ماركت</option>
-                        <option value="هابي ميلز">🍔 هابي ميلز</option>
-                        <option value="إلكترونيات">📱 إلكترونيات</option>
-                        <option value="وجبات سريعة">🍟 وجبات سريعة</option>
-                        <option value="أدوات منزلية">🏠 أدوات منزلية</option>
-                        <option value="عام">📦 عام</option>
-                    </select>
+                    <label>القسم / الفئة الفرعية:</label>
+                    <select id="prodCategory"></select>
                 </div>
                 <div class="form-group">
                     <label>رابط الصورة (URL):</label>
                     <input type="text" id="prodImage" placeholder="ترك فارغاً لظهور صورة افتراضية">
                 </div>
             </div>
-            <button class="btn btn-success" id="addBtn" onclick="addNewProduct()">☁️ إضافة المنتج ورفعه للسحابة فوراً</button>
+            <button class="btn btn-success" id="addBtn" onclick="addNewProduct()">☁️ إضافة المنتج ورفعه للقسم سحابياً</button>
         </div>
 
         <div class="card">
-            <div class="card-title">📋 قائمة منتجات المتجر المسجلة (ترتيب العرض)</div>
+            <div class="card-title">📋 قائمة منتجات المتجر المسجلة (ترتيب العرض والنقل)</div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -246,8 +232,8 @@
                             <th>التكلفة</th>
                             <th>سعر البيع</th>
                             <th>هامش الربح</th>
-                            <th>الفئة</th>
-                            <th>الإجراءات والترتيب</th>
+                            <th>القسم الفرعي</th>
+                            <th>الإجراءات والنقل والترتيب</th>
                         </tr>
                     </thead>
                     <tbody id="adminProductsTable"></tbody>
@@ -283,6 +269,32 @@
         const ADMIN_PASSWORD = "Ss@1234567890";
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
+        // أقسام هابي ميلز المقسمة والأقسام العامة للمتجر
+        const CATEGORIES_LIST = [
+            "تشيكن تندر",
+            "فرايد تشيكن",
+            "مشويات",
+            "شاورما - قسم الساندوتشات",
+            "شاورما - قسم الوجبات",
+            "شاورما بالوزن",
+            "كريب - قسم الكريب الحادق",
+            "كريب - قسم الكريب الحلو",
+            "قسم البيتزا",
+            "قسم المدخنات",
+            "قسم الهوت دوج",
+            "قسم النجرسكو",
+            "فطير هابي ميلز - فطير اسكندراني",
+            "فطير هابي ميلز - فطير حلو",
+            "قسم إضافات",
+            "قسم صواني هابي ميلز",
+            "قسم الغربي",
+            "🛒 سوبر ماركت",
+            "📱 إلكترونيات",
+            "🍟 وجبات سريعة",
+            "🏠 أدوات منزلية",
+            "📦 عام"
+        ];
+
         function checkAdminPassword() {
             let enteredPass = document.getElementById('adminPasswordInput').value;
             if (enteredPass === ADMIN_PASSWORD) {
@@ -297,7 +309,21 @@
 
         let cloudData = { products: [], sales: [] };
 
+        function populateCategoryDropdowns() {
+            let prodCatSelect = document.getElementById('prodCategory');
+            let editCatSelect = document.getElementById('editCategory');
+            
+            prodCatSelect.innerHTML = '';
+            editCatSelect.innerHTML = '';
+
+            CATEGORIES_LIST.forEach(cat => {
+                prodCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                editCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
         async function initDashboard() {
+            populateCategoryDropdowns();
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
@@ -359,7 +385,7 @@
                         <td class="actions-cell">
                             <button class="btn" onclick="moveProduct(${idx}, -1)" style="padding: 6px 8px; font-size: 11px;" ${idx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
                             <button class="btn" onclick="moveProduct(${idx}, 1)" style="padding: 6px 8px; font-size: 11px;" ${idx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
-                            <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 6px 10px; font-size: 12px;">تعديل ✏️</button>
+                            <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 6px 10px; font-size: 12px;">تعديل ونقل ✏️</button>
                             <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 6px 10px; font-size: 12px;">حذف</button>
                         </td>
                     </tr>
@@ -397,7 +423,7 @@
             document.getElementById('prodCost').value = '';
             document.getElementById('prodPrice').value = '';
             document.getElementById('prodImage').value = '';
-            alert('✅ تم إضافة المنتج ورفعه للسحابة ليعمل على جميع الهواتف!');
+            alert('✅ تم إضافة المنتج وتعيينه في القسم المخصص سحابياً!');
         }
 
         function openEditModal(idx) {
@@ -406,7 +432,7 @@
             document.getElementById('editName').value = p.name || '';
             document.getElementById('editCost').value = p.cost || '';
             document.getElementById('editPrice').value = p.price || '';
-            document.getElementById('editCategory').value = p.category || 'عام';
+            document.getElementById('editCategory').value = p.category || 'تشيكن تندر';
             document.getElementById('editImage').value = p.image || '';
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -431,7 +457,7 @@
             cloudData.products[idx] = { name, cost, price, category, image };
             await saveAndSync();
             closeEditModal();
-            alert('✅ تم تعديل المنتج وحفظه سحابياً!');
+            alert('✅ تم تعديل بيانات المنتج ونقله سحابياً إلى القسم المخصص!');
         }
 
         async function deleteProduct(idx) {
