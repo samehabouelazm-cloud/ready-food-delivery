@@ -270,17 +270,21 @@
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         const CATEGORIES_LIST = [
-            // سوبر ماركت
+            // سوبر ماركت (محدث ومضاف إليه الأقسام الجديدة)
             "سوبر ماركت - الزيت",
             "سوبر ماركت - السمن",
-            "سوبر ماركت - الشاي",
-            "سوبر ماركت - السكر",
+            "سوبر ماركت - الشاي والسكر",
             "سوبر ماركت - الدقيق",
             "سوبر ماركت - المكرونة",
+            "سوبر ماركت - الأجبان والألبان",
+            "سوبر ماركت - الشيبسي",
+            "سوبر ماركت - البسكويت والفطائر",
+            "سوبر ماركت - العصائر والمياه",
             "سوبر ماركت - مياه غازية",
             "سوبر ماركت - شيكولاتة ونوتيلا",
             "سوبر ماركت - عسل وطحينة",
             "سوبر ماركت - خل",
+            "سوبر ماركت - منوعات",
             // هابي ميلز
             "تشيكن تندر",
             "فرايد تشيكن",
@@ -298,9 +302,9 @@
             "فطير هابي ميلز - فطير حلو",
             "قسم إضافات",
             "قسم صواني هابي ميلز",
-            // قسم الغربي (بعد صواني هابي ميلز مباشرةً)
-            "قسم الغربي",
-            // الأقسام المستقلة الأخرى بدون جملة أقسام أخرى
+            // الغربي (بدون كلمة قسم)
+            "الغربي",
+            // الأقسام الختامية
             "إلكترونيات",
             "وجبات سريعة",
             "أدوات منزلية",
@@ -329,13 +333,13 @@
             editCatSelect.innerHTML = '';
 
             let groups = [
-                { title: "🛒 سوبر ماركت", items: CATEGORIES_LIST.slice(0, 10) },
-                { title: "🍗 هابي ميلز", items: CATEGORIES_LIST.slice(10, 26) },
-                { title: "🍔 قسم الغربي", items: CATEGORIES_LIST.slice(26, 27) },
-                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(27, 28) },
-                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(28, 29) },
-                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(29, 30) },
-                { title: "📦 عام", items: CATEGORIES_LIST.slice(30) }
+                { title: "🛒 سوبر ماركت", items: CATEGORIES_LIST.slice(0, 14) },
+                { title: "🍗 هابي ميلز", items: CATEGORIES_LIST.slice(14, 30) },
+                { title: "🍔 الغربي", items: CATEGORIES_LIST.slice(30, 31) },
+                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(31, 32) },
+                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(32, 33) },
+                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(33, 34) },
+                { title: "📦 عام", items: CATEGORIES_LIST.slice(34) }
             ];
 
             groups.forEach(g => {
