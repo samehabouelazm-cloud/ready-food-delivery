@@ -108,8 +108,14 @@
 
         .categories-section { margin-bottom: 25px; }
         .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); }
+        
+        .category-group-label {
+            font-size: 14px; font-weight: 800; color: var(--primary); margin: 12px 0 6px 0;
+            display: flex; align-items: center; gap: 6px; border-bottom: 2px solid #bae6fd; padding-bottom: 4px;
+        }
+
         .categories-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin;
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; margin-bottom: 10px;
         }
         .categories-scroll::-webkit-scrollbar { height: 6px; }
         .categories-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -225,7 +231,7 @@
         <div class="hero-banner">
             <div class="hero-text">
                 <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
-                <p>منتجات طازجة، سوبرماركت، وإلكترونيات تصلك حتى باب المنزل من فرعنا بشارع جمال عبد الناصر ببلطيم بسرعة واحترافية.</p>
+                <p>منتجات السوبرماركت، وجبات هابي ميلز الطازجة، وتوصيل سريع حتى باب المنزل من فرعنا بشارع جمال عبد الناصر ببلطيم.</p>
                 <button class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
             </div>
         </div>
@@ -248,38 +254,48 @@
         </div>
 
         <div class="categories-section">
-            <div class="section-title">🛒 أقسام السوبر ماركت، هابي ميلز والأقسام الأخرى</div>
+            <div class="section-title">📂 تصفح الأقسام والمنتجات</div>
+            
             <div class="categories-scroll" id="categoriesBar">
-                <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 الكل</div>
-                <!-- 1. أقسام السوبر ماركت أولاً -->
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الزيت', this)">🟡 سوبر ماركت (الزيت)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - السمن', this)">🧈 سوبر ماركت (السمن)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الشاي', this)">🍵 سوبر ماركت (الشاي)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - السكر', this)">🍚 سوبر ماركت (السكر)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الدقيق', this)">🌾 سوبر ماركت (الدقيق)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - المكرونة', this)">🍝 سوبر ماركت (المكرونة)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - مياه غازية', this)">🥤 سوبر ماركت (مياه غازية)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - شيكولاتة ونوتيلا', this)">🍫 سوبر ماركت (شيكولاتة ونوتيلا)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - عسل وطحينة', this)">🍯 سوبر ماركت (عسل وطحينة)</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - خل', this)">🍾 سوبر ماركت (خل)</div>
-                <!-- 2. يليه قسم هابي ميلز بأقسامه -->
+                <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 عرض الكل</div>
+                
+                <!-- فاصل وقسم السوبر ماركت بخصوصيته الكاملة -->
+                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
+                <div class="category-group-label">🛒 قسم السوبر ماركت (المواد والسلع الغذائية):</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الزيت', this)">🟡 الزيت</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - السمن', this)">🧈 السمن</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الشاي', this)">🍵 الشاي</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - السكر', this)">🍚 السكر</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الدقيق', this)">🌾 الدقيق</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - المكرونة', this)">🍝 المكرونة</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - مياه غازية', this)">🥤 مياه غازية</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - شيكولاتة ونوتيلا', this)">🍫 شيكولاتة ونوتيلا</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - عسل وطحينة', this)">🍯 عسل وطحينة</div>
+                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - خل', this)">🍾 خل</div>
+
+                <!-- فاصل وقسم هابي ميلز بخصوصيته الكاملة -->
+                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
+                <div class="category-group-label">🍗 قسم هابي ميلز (الوجبات والمشويات والمخبوزات):</div>
                 <div class="cat-pill" onclick="selectCategory('تشيكن تندر', this)">🍗 تشيكن تندر</div>
                 <div class="cat-pill" onclick="selectCategory('فرايد تشيكن', this)">🍗 فرايد تشيكن</div>
                 <div class="cat-pill" onclick="selectCategory('مشويات', this)">🔥 مشويات</div>
-                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الساندوتشات', this)">🌯 شاورما (ساندوتشات)</div>
-                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الوجبات', this)">🍱 شاورما (وجبات)</div>
+                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الساندوتشات', this)">🌯 شاورما ساندوتشات</div>
+                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الوجبات', this)">🍱 شاورما وجبات</div>
                 <div class="cat-pill" onclick="selectCategory('شاورما بالوزن', this)">⚖️ شاورما بالوزن</div>
                 <div class="cat-pill" onclick="selectCategory('كريب - قسم الكريب الحادق', this)">🥞 كريب حادق</div>
                 <div class="cat-pill" onclick="selectCategory('كريب - قسم الكريب الحلو', this)">🍫 كريب حلو</div>
-                <div class="cat-pill" onclick="selectCategory('قسم البيتزا', this)">🍕 قسم البيتزا</div>
-                <div class="cat-pill" onclick="selectCategory('قسم المدخنات', this)">🥩 قسم المدخنات</div>
-                <div class="cat-pill" onclick="selectCategory('قسم الهوت دوج', this)">🌭 قسم الهوت دوج</div>
-                <div class="cat-pill" onclick="selectCategory('قسم النجرسكو', this)">🍝 قسم النجرسكو</div>
+                <div class="cat-pill" onclick="selectCategory('قسم البيتزا', this)">🍕 البيتزا</div>
+                <div class="cat-pill" onclick="selectCategory('قسم المدخنات', this)">🥩 المدخنات</div>
+                <div class="cat-pill" onclick="selectCategory('قسم الهوت دوج', this)">🌭 هوت دوج</div>
+                <div class="cat-pill" onclick="selectCategory('قسم النجرسكو', this)">🍝 النجرسكو</div>
                 <div class="cat-pill" onclick="selectCategory('فطير هابي ميلز - فطير اسكندراني', this)">🫓 فطير اسكندراني</div>
                 <div class="cat-pill" onclick="selectCategory('فطير هابي ميلز - فطير حلو', this)">🥞 فطير حلو</div>
                 <div class="cat-pill" onclick="selectCategory('قسم إضافات', this)">🧀 إضافات</div>
                 <div class="cat-pill" onclick="selectCategory('قسم صواني هابي ميلز', this)">🥘 صواني هابي ميلز</div>
-                <!-- 3. يليها باقي الأقسام -->
+
+                <!-- فاصل وباقي أقسام المتجر -->
+                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
+                <div class="category-group-label">📦 أقسام المتجر الأخرى:</div>
                 <div class="cat-pill" onclick="selectCategory('قسم الغربي', this)">🍔 الغربي</div>
                 <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
                 <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍟 وجبات سريعة</div>
