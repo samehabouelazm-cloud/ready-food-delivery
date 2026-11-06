@@ -198,7 +198,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="prodName" placeholder="مثال: وجبة تشيكن تندر 3 قطع">
+                    <input type="text" id="prodName" placeholder="مثال: زيت عافية ذرة">
                 </div>
                 <div class="form-group">
                     <label>سعر التكلفة (للشراء):</label>
@@ -206,7 +206,7 @@
                 </div>
                 <div class="form-group">
                     <label>سعر البيع (للعميل):</label>
-                    <input type="number" id="prodPrice" placeholder="مثال: 100">
+                    <input type="number" id="prodPrice" placeholder="مثال: 95">
                 </div>
                 <div class="form-group">
                     <label>القسم / الفئة الفرعية:</label>
@@ -270,6 +270,16 @@
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         const CATEGORIES_LIST = [
+            "سوبر ماركت - الزيت",
+            "سوبر ماركت - السمن",
+            "سوبر ماركت - الشاي",
+            "سوبر ماركت - السكر",
+            "سوبر ماركت - الدقيق",
+            "سوبر ماركت - المكرونة",
+            "سوبر ماركت - مياه غازية",
+            "سوبر ماركت - شيكولاتة ونوتيلا",
+            "سوبر ماركت - عسل وطحينة",
+            "سوبر ماركت - خل",
             "تشيكن تندر",
             "فرايد تشيكن",
             "مشويات",
@@ -287,7 +297,6 @@
             "قسم إضافات",
             "قسم صواني هابي ميلز",
             "قسم الغربي",
-            "سوبر ماركت",
             "إلكترونيات",
             "وجبات سريعة",
             "أدوات منزلية",
@@ -431,7 +440,7 @@
             document.getElementById('editName').value = p.name || '';
             document.getElementById('editCost').value = p.cost || '';
             document.getElementById('editPrice').value = p.price || '';
-            document.getElementById('editCategory').value = p.category || 'تشيكن تندر';
+            document.getElementById('editCategory').value = p.category || 'سوبر ماركت - الزيت';
             document.getElementById('editImage').value = p.image || '';
             document.getElementById('editModal').style.display = 'flex';
         }
