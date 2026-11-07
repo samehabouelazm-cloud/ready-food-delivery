@@ -535,7 +535,6 @@
             document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
             elem.classList.add('active');
 
-            // إظهار زر العودة لكل المنتجات إذا كان القسم المختار ليس "الكل"
             let resetBtn = document.getElementById('resetCatBtn');
             if (cat !== 'all') {
                 resetBtn.style.display = 'inline-block';
@@ -544,8 +543,6 @@
             }
 
             filterProducts();
-            
-            // التمرير التلقائي البسيط لعرض المنتجات مباشرة
             window.scrollTo({ top: 350, behavior: 'smooth' });
         }
 
