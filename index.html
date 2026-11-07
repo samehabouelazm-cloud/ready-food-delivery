@@ -100,83 +100,53 @@
         .search-box {
             background: var(--surface); border-radius: var(--radius-md); padding: 10px 16px;
             display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
-            border: 1px solid #e2e8f0; margin-bottom: 16px;
+            border: 1px solid #e2e8f0; margin-bottom: 25px;
         }
         .search-box input {
             border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
         }
 
-        .categories-section { margin-bottom: 25px; }
-        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
-        
-        .categories-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; margin-bottom: 10px; flex-wrap: wrap;
-        }
-        .categories-scroll::-webkit-scrollbar { height: 6px; }
-        .categories-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        
-        .cat-pill {
-            background: var(--surface); border: 1px solid #e2e8f0; border-radius: 30px;
-            padding: 9px 18px; white-space: nowrap; font-size: 14px; font-weight: 700; color: var(--text-muted);
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);
-        }
-        .cat-pill:hover, .cat-pill.active {
-            background: var(--primary); color: #fff; border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
+        /* تنسيقات الأقسام والمنتجات الموزعة والمقسمة */
+        .main-category-section { margin-bottom: 35px; }
+        .main-category-title {
+            font-size: 20px; font-weight: 800; color: var(--primary-dark); border-bottom: 3px solid #bae6fd;
+            padding-bottom: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
         }
 
-        .products-status { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background: #e0f2fe; padding: 10px 16px; border-radius: var(--radius-md); }
+        .sub-category-group { margin-bottom: 25px; background: #fff; padding: 16px; border-radius: var(--radius-lg); border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); }
+        .sub-category-title {
+            font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: space-between; border-right: 4px solid var(--primary); padding-right: 10px;
+        }
 
         .products-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;
         }
         .product-card {
-            background: var(--surface); border-radius: var(--radius-lg); overflow: hidden;
-            box-shadow: var(--shadow-sm); border: 1px solid #f1f5f9; transition: all 0.25s ease;
-            display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
+            background: var(--surface); border-radius: var(--radius-md); overflow: hidden;
+            box-shadow: var(--shadow-sm); border: 1px solid #f1f5f9; padding: 12px;
+            display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s;
         }
-        .product-card:hover {
-            transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: #cbd5e1;
-        }
-        .product-img-wrapper {
-            position: relative; width: 100%; height: 150px; border-radius: var(--radius-md);
-            overflow: hidden; background: #f8fafc; margin-bottom: 12px;
-        }
-        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .product-card:hover .product-img-wrapper img { transform: scale(1.05); }
-        .product-badge {
-            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(4px); color: var(--primary); font-size: 11px; font-weight: 800;
-            padding: 4px 10px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        .product-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; line-height: 1.3; }
-        .product-price { font-size: 17px; font-weight: 800; color: var(--secondary); margin-bottom: 12px; }
+        .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .product-img-wrapper { width: 100%; height: 130px; border-radius: 8px; overflow: hidden; background: #f8fafc; margin-bottom: 10px; position: relative; }
+        .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .product-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .product-price { font-size: 16px; font-weight: 800; color: var(--secondary); margin-bottom: 10px; }
 
         .qty-controls {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: #f8fafc; border-radius: 10px; padding: 4px; margin-bottom: 10px; border: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: #f8fafc; border-radius: 8px; padding: 4px; margin-bottom: 8px; border: 1px solid #e2e8f0;
         }
-        .qty-btn {
-            background: var(--surface); color: var(--text-dark); border: 1px solid #cbd5e1;
-            width: 28px; height: 28px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 16px;
-            display: flex; align-items: center; justify-content: center; transition: background 0.15s;
-        }
-        .qty-btn:hover { background: #e2e8f0; }
-        .qty-val { font-weight: 800; font-size: 15px; min-width: 20px; text-align: center; }
+        .qty-btn { background: #fff; border: 1px solid #cbd5e1; width: 26px; height: 26px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .qty-val { font-weight: bold; font-size: 14px; min-width: 20px; text-align: center; }
 
         .add-btn {
-            background: var(--primary); color: #fff; border: none; padding: 10px;
-            border-radius: var(--radius-md); font-weight: 700; font-size: 14px; cursor: pointer;
-            width: 100%; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: var(--primary); color: #fff; border: none; padding: 9px;
+            border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; width: 100%;
         }
         .add-btn:hover { background: var(--primary-dark); }
-        .add-btn:active { transform: scale(0.98); }
 
-        .empty-msg {
-            grid-column: 1 / -1; text-align: center; color: var(--text-muted);
-            padding: 50px 20px; background: var(--surface); border-radius: var(--radius-lg); font-size: 16px; font-weight: 700;
-        }
+        .empty-section { color: var(--text-muted); font-size: 13px; text-align: center; padding: 15px; background: #f8fafc; border-radius: 8px; }
 
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -231,6 +201,7 @@
             </div>
         </div>
 
+        <!-- بنر طلب خاص (اطلب أي حاجة) -->
         <div style="margin: 20px 0;">
             <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: var(--radius-lg); color: #fff; padding: 22px 24px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div style="max-width: 650px;">
@@ -245,72 +216,16 @@
 
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
-            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="filterProducts()">
+            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="renderStoreSections()">
         </div>
 
-        <div class="categories-section">
-            <div class="section-title">
-                <span>📂 الأقسام السريعة</span>
-                <span id="resetCatBtn" style="font-size: 13px; color: var(--primary); cursor: pointer; display: none;" onclick="resetCategoryFilter()">🔄 إرجاع الكل</span>
-            </div>
-            
-            <div class="categories-scroll" id="categoriesBar">
-                <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 عرض الكل</div>
-                
-                <!-- قسم السوبر ماركت -->
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الزيت', this)">🟡 الزيت</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - السمن', this)">🧈 السمن</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الشاي والسكر', this)">🍵 الشاي والسكر</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الدقيق', this)">🌾 الدقيق</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - المكرونة', this)">🍝 المكرونة</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الأجبان والألبان', this)">🧀 الأجبان والألبان</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الشيبسي', this)">🥔 الشيبسي</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - البسكويت والفطائر', this)">🍪 البسكويت والفطائر</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - العصائر والمياه', this)">🧃 العصائر والمياه</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - مياه غازية', this)">🥤 مياه غازية</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - شيكولاتة ونوتيلا', this)">🍫 شيكولاتة ونوتيلا</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - عسل وطحينة', this)">🍯 عسل وطحينة</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - خل', this)">🍾 خل</div>
-                <div class="cat-pill" onclick="selectCategory('سوبر ماركت - منوعات', this)">🏷️ منوعات</div>
-
-                <!-- قسم هابي ميلز -->
-                <div class="cat-pill" onclick="selectCategory('تشيكن تندر', this)">🍗 تشيكن تندر</div>
-                <div class="cat-pill" onclick="selectCategory('فرايد تشيكن', this)">🍗 فرايد تشيكن</div>
-                <div class="cat-pill" onclick="selectCategory('مشويات', this)">🔥 مشويات</div>
-                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الساندوتشات', this)">🌯 شاورما ساندوتشات</div>
-                <div class="cat-pill" onclick="selectCategory('شاورما - فتة', this)">🍲 شاورما فتة</div>
-                <div class="cat-pill" onclick="selectCategory('شاورما - قسم الوجبات', this)">🍱 شاورما وجبات</div>
-                <div class="cat-pill" onclick="selectCategory('شاورما بالوزن', this)">⚖️ شاورما بالوزن</div>
-                <div class="cat-pill" onclick="selectCategory('كريب - قسم الكريب الحادق', this)">🥞 كريب حادق</div>
-                <div class="cat-pill" onclick="selectCategory('كريب - قسم الكريب الحلو', this)">🍫 كريب حلو</div>
-                <div class="cat-pill" onclick="selectCategory('قسم البيتزا', this)">🍕 البيتزا</div>
-                <div class="cat-pill" onclick="selectCategory('قسم المدخنات', this)">🥩 المدخنات</div>
-                <div class="cat-pill" onclick="selectCategory('قسم الهوت دوج', this)">🌭 هوت دوج</div>
-                <div class="cat-pill" onclick="selectCategory('قسم النجرسكو', this)">🍝 النجرسكو</div>
-                <div class="cat-pill" onclick="selectCategory('فطير هابي ميلز - فطير اسكندراني', this)">🫓 فطير اسكندراني</div>
-                <div class="cat-pill" onclick="selectCategory('فطير هابي ميلز - فطير حلو', this)">🥞 فطير حلو</div>
-                <div class="cat-pill" onclick="selectCategory('قسم إضافات', this)">🧀 إضافات</div>
-                <div class="cat-pill" onclick="selectCategory('قسم صواني هابي ميلز', this)">🥘 صواني هابي ميلز</div>
-
-                <!-- الأقسام الختامية -->
-                <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
-                <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍟 وجبات سريعة</div>
-                <div class="cat-pill" onclick="selectCategory('أدوات منزلية', this)">🏠 أدوات منزلية</div>
-                <div class="cat-pill" onclick="selectCategory('عام', this)">📦 عام</div>
-            </div>
-        </div>
-
-        <div class="products-status" id="productsStatusText">
-            <span id="statusTitle">عرض كافة المنتجات</span>
-            <span id="productsCountBadge" style="background:#fff; color:var(--primary); padding:2px 10px; border-radius:20px; font-size:12px;">0 منتج</span>
-        </div>
-
-        <div class="products-grid" id="storeProductsGrid">
-            <div class="empty-msg">جاري تحميل أحدث المنتجات سحابياً... ⚡</div>
+        <!-- حاوية الأقسام الرئيسية والفرعية الموزعة أسفل كل قسم -->
+        <div id="storeSectionsContainer">
+            <div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">جاري تحميل أحدث المنتجات سحابياً... ⚡</div>
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- النافذة المنسدلة: السلة -->
     <div class="modal-overlay" id="cartModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -330,6 +245,7 @@
         </div>
     </div>
 
+    <!-- النافذة المنسدلة: الدفع وإدخال بيانات العميل -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -370,6 +286,7 @@
         </div>
     </div>
 
+    <!-- النافذة المنسدلة: انضم ككابتن -->
     <div class="modal-overlay" id="captainModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -393,6 +310,7 @@
         </div>
     </div>
 
+    <!-- النافذة المنسدلة: طلب خاص -->
     <div class="modal-overlay" id="customOrderModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -429,7 +347,27 @@
         let allSales = [];
         let cart = [];
         let productQuantities = {};
-        let currentCategory = 'all';
+
+        // الهيكل الشامل للأقسام الرئيسية والفرعية
+        const storeHierarchy = {
+            "🛒 قسم السوبر ماركت": [
+                "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
+                "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
+                "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
+                "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
+                "سوبر ماركت - خل", "سوبر ماركت - منوعات"
+            ],
+            "🍗 قسم هابي ميلز (الوجبات والمشويات والمخبوزات)": [
+                "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
+                "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
+                "كريب - قسم الكريب الحلو", "قسم البيتزا", "قسم المدخنات", "قسم الهوت دوج",
+                "قسم النجرسكو", "فطير هابي ميلز - فطير اسكندراني", "فطير هابي ميلز - فطير حلو",
+                "قسم إضافات", "قسم صواني هابي ميلز"
+            ],
+            "📱 الأقسام الأخرى العامة": [
+                "إلكترونيات", "وجبات سريعة", "أدوات منزلية", "عام"
+            ]
+        };
 
         function updateDeliveryFee() {
             updateCartUI();
@@ -455,11 +393,13 @@
                         loaded = true;
                     }
                     if (loaded) {
-                        filterProducts();
+                        renderStoreSections();
                         if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                     }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error("فشل التحميل من السحابة");
+            }
         }
 
         async function syncSaleToCloud(saleRecord) {
@@ -487,89 +427,92 @@
             }
         }
 
-        function displayProducts(products) {
-            let grid = document.getElementById('storeProductsGrid');
-            let countBadge = document.getElementById('productsCountBadge');
-            let statusTitle = document.getElementById('statusTitle');
-            grid.innerHTML = '';
+        // عرض المتجر مقسماً للأقسام مع المنتجات الخاصة بها
+        function renderStoreSections() {
+            const container = document.getElementById('storeSectionsContainer');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            container.innerHTML = '';
 
-            countBadge.innerText = `${products.length} منتج`;
-            statusTitle.innerText = currentCategory === 'all' ? 'عرض كافة المنتجات' : `قسم: ${currentCategory}`;
+            let mainCounter = 0;
+            for (const [mainCat, subCats] of Object.entries(storeHierarchy)) {
+                mainCounter++;
+                let subGroupsHtml = '';
+                let hasProductsInMain = false;
 
-            if (!products || products.length === 0) {
-                grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات متاحة في هذا القسم حالياً. 🛍️</div>';
-                return;
-            }
+                let subCounter = 0;
+                subCats.forEach(subCat => {
+                    subCounter++;
+                    let subProducts = allProducts.filter(p => (p.category || 'عام') === subCat);
+                    
+                    if (searchVal) {
+                        subProducts = subProducts.filter(p => p.name.toLowerCase().includes(searchVal));
+                    }
 
-            products.forEach((p, idx) => {
-                let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                let cat = p.category || 'عام';
-                let safeName = p.name.replace(/'/g, "\\'");
-                if(!productQuantities[idx]) productQuantities[idx] = 1;
+                    if (subProducts.length > 0 || !searchVal) {
+                        hasProductsInMain = true;
+                        let cardsHtml = '';
 
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <div>
-                            <div class="product-img-wrapper">
-                                <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
-                                <span class="product-badge">${cat}</span>
+                        subProducts.forEach((p, pIdx) => {
+                            let uniqueKey = `${mainCounter}_${subCounter}_${pIdx}`;
+                            if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
+                            let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
+                            let safeName = p.name.replace(/'/g, "\\'");
+
+                            cardsHtml += `
+                                <div class="product-card">
+                                    <div>
+                                        <div class="product-img-wrapper">
+                                            <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
+                                        </div>
+                                        <div class="product-title">${p.name}</div>
+                                        <div class="product-price">${p.price} ج.م</div>
+                                    </div>
+                                    <div>
+                                        <div class="qty-controls">
+                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
+                                            <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
+                                        </div>
+                                        <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">إضافة للسلة 🛒</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        subGroupsHtml += `
+                            <div class="sub-category-group">
+                                <div class="sub-category-title">
+                                    <span>📂 ${subCat}</span>
+                                    <span style="font-size:12px; color:var(--text-muted);">(${subProducts.length} منتج)</span>
+                                </div>
+                                <div class="products-grid">
+                                    ${cardsHtml || '<div class="empty-section">لا توجد منتجات متاحة في هذا القسم حالياً.</div>'}
+                                </div>
                             </div>
-                            <div class="product-title">${p.name}</div>
-                            <div class="product-price">${p.price} ج.م</div>
-                        </div>
-                        <div>
-                            <div class="qty-controls">
-                                <button class="qty-btn" onclick="changeCardQty(${idx}, -1)">-</button>
-                                <span class="qty-val" id="cardQty_${idx}">${productQuantities[idx]}</span>
-                                <button class="qty-btn" onclick="changeCardQty(${idx}, 1)">+</button>
-                            </div>
-                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, ${idx})">إضافة للسلة 🛒</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+                        `;
+                    }
+                });
 
-        function selectCategory(cat, elem) {
-            currentCategory = cat;
-            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
-            elem.classList.add('active');
-
-            let resetBtn = document.getElementById('resetCatBtn');
-            if (cat !== 'all') {
-                resetBtn.style.display = 'inline-block';
-            } else {
-                resetBtn.style.display = 'none';
+                if (hasProductsInMain) {
+                    container.innerHTML += `
+                        <div class="main-category-section">
+                            <div class="main-category-title">🏷️ ${mainCat}</div>
+                            ${subGroupsHtml}
+                        </div>
+                    `;
+                }
             }
-
-            filterProducts();
-            window.scrollTo({ top: 350, behavior: 'smooth' });
         }
 
-        function resetCategoryFilter() {
-            let allBtn = document.querySelector('.cat-pill');
-            selectCategory('all', allBtn);
+        function changeQty(key, delta) {
+            if(!productQuantities[key]) productQuantities[key] = 1;
+            productQuantities[key] += delta;
+            if(productQuantities[key] < 1) productQuantities[key] = 1;
+            document.getElementById(`qtyVal_${key}`).innerText = productQuantities[key];
         }
 
-        function changeCardQty(idx, delta) {
-            if(!productQuantities[idx]) productQuantities[idx] = 1;
-            productQuantities[idx] += delta;
-            if(productQuantities[idx] < 1) productQuantities[idx] = 1;
-            document.getElementById(`cardQty_${idx}`).innerText = productQuantities[idx];
-        }
-
-        function filterProducts() {
-            let query = document.getElementById('searchInput').value.toLowerCase().trim();
-            let filtered = allProducts.filter(p => {
-                let matchesQuery = p.name.toLowerCase().includes(query);
-                let matchesCat = (currentCategory === 'all' || p.category === currentCategory);
-                return matchesQuery && matchesCat;
-            });
-            displayProducts(filtered);
-        }
-
-        function addToCart(name, price, idx) {
-            let qty = productQuantities[idx] || 1;
+        function addToCart(name, price, key) {
+            let qty = productQuantities[key] || 1;
             let existing = cart.find(item => item.name === name);
             if (existing) {
                 existing.qty += qty;
