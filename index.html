@@ -106,18 +106,41 @@
             border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
         }
 
-        /* تنسيقات الأقسام والمنتجات الموزعة والمقسمة */
-        .main-category-section { margin-bottom: 35px; }
-        .main-category-title {
-            font-size: 20px; font-weight: 800; color: var(--primary-dark); border-bottom: 3px solid #bae6fd;
-            padding-bottom: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+        /* تصميم الهيكلة المنسدلة (الأكورديون) */
+        .main-cat-card {
+            background: var(--surface); border-radius: var(--radius-lg); margin-bottom: 16px;
+            border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm); overflow: hidden;
+        }
+        .main-cat-header {
+            padding: 16px 20px; background: linear-gradient(90deg, #f8fafc, #ffffff);
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            font-size: 18px; font-weight: 800; color: var(--primary-dark); user-select: none;
+            transition: background 0.2s;
+        }
+        .main-cat-header:hover { background: #e0f2fe; }
+        .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; }
+        .main-cat-card.active .main-cat-arrow { transform: rotate(180deg); }
+
+        .main-cat-content { display: none; padding: 16px; background: #fafafa; border-top: 1px solid #e2e8f0; }
+        .main-cat-card.active .main-cat-content { display: block; }
+
+        /* الأقسام الفرعية كأيقونات/أزرار */
+        .sub-cats-grid {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;
+        }
+        .sub-cat-pill {
+            background: #fff; border: 1px solid #cbd5e1; border-radius: 25px;
+            padding: 8px 16px; font-size: 14px; font-weight: 700; color: var(--text-dark);
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .sub-cat-pill:hover, .sub-cat-pill.active {
+            background: var(--primary); color: #fff; border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
         }
 
-        .sub-category-group { margin-bottom: 25px; background: #fff; padding: 16px; border-radius: var(--radius-lg); border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); }
-        .sub-category-title {
-            font-size: 16px; font-weight: 700; color: #334155; margin-bottom: 14px;
-            display: flex; align-items: center; justify-content: space-between; border-right: 4px solid var(--primary); padding-right: 10px;
-        }
+        /* عرض منتجات القسم الفرعي عند الفتح */
+        .sub-cat-products-container { display: none; padding-top: 10px; }
+        .sub-cat-products-container.active { display: block; }
 
         .products-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;
@@ -201,7 +224,7 @@
             </div>
         </div>
 
-        <!-- بنر طلب خاص (اطلب أي حاجة) -->
+        <!-- بنر طلب خاص -->
         <div style="margin: 20px 0;">
             <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: var(--radius-lg); color: #fff; padding: 22px 24px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div style="max-width: 650px;">
@@ -216,16 +239,16 @@
 
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
-            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="renderStoreSections()">
+            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="searchStore()">
         </div>
 
-        <!-- حاوية الأقسام الرئيسية والفرعية الموزعة أسفل كل قسم -->
-        <div id="storeSectionsContainer">
-            <div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">جاري تحميل أحدث المنتجات سحابياً... ⚡</div>
+        <!-- الأقسام الهيكلية المنسدلة -->
+        <div id="accordionContainer">
+            <div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">جاري تحميل تنظيم الأقسام والمنتجات... ⚡</div>
         </div>
     </div>
 
-    <!-- النافذة المنسدلة: السلة -->
+    <!-- Modals -->
     <div class="modal-overlay" id="cartModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -245,7 +268,6 @@
         </div>
     </div>
 
-    <!-- النافذة المنسدلة: الدفع وإدخال بيانات العميل -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -286,7 +308,6 @@
         </div>
     </div>
 
-    <!-- النافذة المنسدلة: انضم ككابتن -->
     <div class="modal-overlay" id="captainModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -310,7 +331,6 @@
         </div>
     </div>
 
-    <!-- النافذة المنسدلة: طلب خاص -->
     <div class="modal-overlay" id="customOrderModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -348,7 +368,6 @@
         let cart = [];
         let productQuantities = {};
 
-        // الهيكل الشامل للأقسام الرئيسية والفرعية
         const storeHierarchy = {
             "🛒 قسم السوبر ماركت": [
                 "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
@@ -357,22 +376,19 @@
                 "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
                 "سوبر ماركت - خل", "سوبر ماركت - منوعات"
             ],
-            "🍗 قسم هابي ميلز (الوجبات والمشويات والمخبوزات)": [
+            "🍗 قسم هابي ميلز (الوجبات والمشويات)": [
                 "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
                 "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
                 "كريب - قسم الكريب الحلو", "قسم البيتزا", "قسم المدخنات", "قسم الهوت دوج",
                 "قسم النجرسكو", "فطير هابي ميلز - فطير اسكندراني", "فطير هابي ميلز - فطير حلو",
                 "قسم إضافات", "قسم صواني هابي ميلز"
             ],
-            "📱 الأقسام الأخرى العامة": [
+            "📱 الأقسام العامة والأخرى": [
                 "إلكترونيات", "وجبات سريعة", "أدوات منزلية", "عام"
             ]
         };
 
-        function updateDeliveryFee() {
-            updateCartUI();
-        }
-
+        function updateDeliveryFee() { updateCartUI(); }
         function getDeliveryFee() {
             let zoneSelect = document.getElementById('deliveryZone');
             return zoneSelect ? parseFloat(zoneSelect.value) : 20;
@@ -393,7 +409,7 @@
                         loaded = true;
                     }
                     if (loaded) {
-                        renderStoreSections();
+                        renderAccordionStore();
                         if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                     }
                 }
@@ -422,86 +438,134 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(currentCloudData)
                 });
-            } catch (e) {
-                console.error('فشل حفظ المبيعات سحابياً');
-            }
+            } catch (e) {}
         }
 
-        // عرض المتجر مقسماً للأقسام مع المنتجات الخاصة بها
-        function renderStoreSections() {
-            const container = document.getElementById('storeSectionsContainer');
-            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+        // دالة بناء الواجهة المنسدلة
+        function renderAccordionStore() {
+            const container = document.getElementById('accordionContainer');
             container.innerHTML = '';
 
-            let mainCounter = 0;
-            for (const [mainCat, subCats] of Object.entries(storeHierarchy)) {
-                mainCounter++;
-                let subGroupsHtml = '';
-                let hasProductsInMain = false;
+            let mainIdx = 0;
+            for (const [mainCatName, subCatList] of Object.entries(storeHierarchy)) {
+                mainIdx++;
 
-                let subCounter = 0;
-                subCats.forEach(subCat => {
-                    subCounter++;
-                    let subProducts = allProducts.filter(p => (p.category || 'عام') === subCat);
+                // بناء كروت الأقسام الفرعية داخل القسم الرئيسي
+                let subPillsHtml = '';
+                let subProductsContainersHtml = '';
+
+                subCatList.forEach((subCatName, subIdx) => {
+                    let subProducts = allProducts.filter(p => (p.category || 'عام') === subCatName);
                     
-                    if (searchVal) {
-                        subProducts = subProducts.filter(p => p.name.toLowerCase().includes(searchVal));
-                    }
+                    subPillsHtml += `
+                        <div class="sub-cat-pill" id="pill_${mainIdx}_${subIdx}" onclick="toggleSubCat('${mainIdx}', '${subIdx}')">
+                            🏷️ ${subCatName} (${subProducts.length})
+                        </div>
+                    `;
 
-                    if (subProducts.length > 0 || !searchVal) {
-                        hasProductsInMain = true;
-                        let cardsHtml = '';
+                    // بناء شبكة المنتجات لكل قسم فرعي
+                    let cardsHtml = '';
+                    subProducts.forEach((p, pIdx) => {
+                        let uniqueKey = `${mainIdx}_${subIdx}_${pIdx}`;
+                        if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
+                        let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
+                        let safeName = p.name.replace(/'/g, "\\'");
 
-                        subProducts.forEach((p, pIdx) => {
-                            let uniqueKey = `${mainCounter}_${subCounter}_${pIdx}`;
-                            if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
-                            let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                            let safeName = p.name.replace(/'/g, "\\'");
-
-                            cardsHtml += `
-                                <div class="product-card">
-                                    <div>
-                                        <div class="product-img-wrapper">
-                                            <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
-                                        </div>
-                                        <div class="product-title">${p.name}</div>
-                                        <div class="product-price">${p.price} ج.م</div>
+                        cardsHtml += `
+                            <div class="product-card">
+                                <div>
+                                    <div class="product-img-wrapper">
+                                        <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
                                     </div>
-                                    <div>
-                                        <div class="qty-controls">
-                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                            <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
-                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
-                                        </div>
-                                        <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">إضافة للسلة 🛒</button>
+                                    <div class="product-title">${p.name}</div>
+                                    <div class="product-price">${p.price} ج.م</div>
+                                </div>
+                                <div>
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
+                                        <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                        <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
                                     </div>
-                                </div>
-                            `;
-                        });
-
-                        subGroupsHtml += `
-                            <div class="sub-category-group">
-                                <div class="sub-category-title">
-                                    <span>📂 ${subCat}</span>
-                                    <span style="font-size:12px; color:var(--text-muted);">(${subProducts.length} منتج)</span>
-                                </div>
-                                <div class="products-grid">
-                                    ${cardsHtml || '<div class="empty-section">لا توجد منتجات متاحة في هذا القسم حالياً.</div>'}
+                                    <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">إضافة للسلة 🛒</button>
                                 </div>
                             </div>
                         `;
-                    }
-                });
+                    });
 
-                if (hasProductsInMain) {
-                    container.innerHTML += `
-                        <div class="main-category-section">
-                            <div class="main-category-title">🏷️ ${mainCat}</div>
-                            ${subGroupsHtml}
+                    subProductsContainersHtml += `
+                        <div class="sub-cat-products-container" id="subProducts_${mainIdx}_${subIdx}">
+                            <div style="font-size:15px; font-weight:800; color:var(--primary); margin-bottom:12px; border-bottom:2px solid #e0f2fe; padding-bottom:6px;">
+                                📂 ${subCatName}
+                            </div>
+                            <div class="products-grid">
+                                ${cardsHtml || '<div class="empty-section">لا توجد منتجات مضافة في هذا القسم الفرعي حالياً.</div>'}
+                            </div>
                         </div>
                     `;
-                }
+                });
+
+                container.innerHTML += `
+                    <div class="main-cat-card" id="mainCard_${mainIdx}">
+                        <div class="main-cat-header" onclick="toggleMainCat('${mainIdx}')">
+                            <span>${mainCatName}</span>
+                            <span class="main-cat-arrow" id="arrow_${mainIdx}">▼</span>
+                        </div>
+                        <div class="main-cat-content" id="mainContent_${mainIdx}">
+                            <div class="sub-cats-grid">
+                                ${subPillsHtml}
+                            </div>
+                            ${subProductsContainersHtml}
+                        </div>
+                    </div>
+                `;
             }
+        }
+
+        // دالة فتح/إغلاق القسم الرئيسي
+        function toggleMainCat(mainIdx) {
+            let card = document.getElementById(`mainCard_${mainIdx}`);
+            card.classList.toggle('active');
+        }
+
+        // دالة فتح/إغلاق القسم الفرعي لعرض منتجاته
+        function toggleSubCat(mainIdx, subIdx) {
+            let pill = document.getElementById(`pill_${mainIdx}_${subIdx}`);
+            let container = document.getElementById(`subProducts_${mainIdx}_${subIdx}`);
+
+            let isAlreadyActive = pill.classList.contains('active');
+
+            // إغلاق كافة الأقسام الفرعية في نفس الكارت الرئيسي أولاً
+            document.querySelectorAll(`#mainContent_${mainIdx} .sub-cat-pill`).forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`#mainContent_${mainIdx} .sub-cat-products-container`).forEach(el => el.classList.remove('active'));
+
+            // إذا لم يكن مفتوحاً، افتحه
+            if (!isAlreadyActive) {
+                pill.classList.add('active');
+                container.classList.add('active');
+            }
+        }
+
+        // البحث الشامل في المتجر (يفتح تلقائياً الأقسام المعنية)
+        function searchStore() {
+            let query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if(!query) {
+                renderAccordionStore();
+                return;
+            }
+
+            // عند البحث، قم بفتح الأقسام وتصفية المنتجات المطابقة
+            document.querySelectorAll('.main-cat-card').forEach(card => card.classList.add('active'));
+            document.querySelectorAll('.sub-cat-products-container').forEach(c => c.classList.add('active'));
+            document.querySelectorAll('.sub-cat-pill').forEach(p => p.classList.add('active'));
+
+            document.querySelectorAll('.product-card').forEach(card => {
+                let title = card.querySelector('.product-title').innerText.toLowerCase();
+                if(title.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
 
         function changeQty(key, delta) {
