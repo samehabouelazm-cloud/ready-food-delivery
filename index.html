@@ -107,13 +107,8 @@
         }
 
         .categories-section { margin-bottom: 25px; }
-        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
         
-        .category-group-label {
-            font-size: 14px; font-weight: 800; color: var(--primary); margin: 12px 0 6px 0;
-            display: flex; align-items: center; gap: 6px; border-bottom: 2px solid #bae6fd; padding-bottom: 4px;
-        }
-
         .categories-scroll {
             display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; margin-bottom: 10px; flex-wrap: wrap;
         }
@@ -130,7 +125,7 @@
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transform: translateY(-2px);
         }
 
-        .products-status { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 14px; }
+        .products-status { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; background: #e0f2fe; padding: 10px 16px; border-radius: var(--radius-md); }
 
         .products-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;
@@ -254,14 +249,15 @@
         </div>
 
         <div class="categories-section">
-            <div class="section-title">📂 تصفح الأقسام والمنتجات</div>
+            <div class="section-title">
+                <span>📂 الأقسام السريعة</span>
+                <span id="resetCatBtn" style="font-size: 13px; color: var(--primary); cursor: pointer; display: none;" onclick="resetCategoryFilter()">🔄 إرجاع الكل</span>
+            </div>
             
             <div class="categories-scroll" id="categoriesBar">
                 <div class="cat-pill active" onclick="selectCategory('all', this)">🌐 عرض الكل</div>
                 
                 <!-- قسم السوبر ماركت -->
-                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
-                <div class="category-group-label">🛒 قسم السوبر ماركت (المواد والسلع الغذائية):</div>
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الزيت', this)">🟡 الزيت</div>
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت - السمن', this)">🧈 السمن</div>
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت - الشاي والسكر', this)">🍵 الشاي والسكر</div>
@@ -278,8 +274,6 @@
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت - منوعات', this)">🏷️ منوعات</div>
 
                 <!-- قسم هابي ميلز -->
-                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
-                <div class="category-group-label">🍗 قسم هابي ميلز (الوجبات والمشويات والمخبوزات):</div>
                 <div class="cat-pill" onclick="selectCategory('تشيكن تندر', this)">🍗 تشيكن تندر</div>
                 <div class="cat-pill" onclick="selectCategory('فرايد تشيكن', this)">🍗 فرايد تشيكن</div>
                 <div class="cat-pill" onclick="selectCategory('مشويات', this)">🔥 مشويات</div>
@@ -299,25 +293,17 @@
                 <div class="cat-pill" onclick="selectCategory('قسم صواني هابي ميلز', this)">🥘 صواني هابي ميلز</div>
 
                 <!-- الأقسام الختامية -->
-                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
-                <div class="category-group-label">📱 قسم الإلكترونيات:</div>
                 <div class="cat-pill" onclick="selectCategory('إلكترونيات', this)">📱 إلكترونيات</div>
-
-                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
-                <div class="category-group-label">🍟 قسم الوجبات السريعة:</div>
                 <div class="cat-pill" onclick="selectCategory('وجبات سريعة', this)">🍟 وجبات سريعة</div>
-
-                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
-                <div class="category-group-label">🏠 قسم الأدوات المنزلية:</div>
                 <div class="cat-pill" onclick="selectCategory('أدوات منزلية', this)">🏠 أدوات منزلية</div>
-
-                <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
-                <div class="category-group-label">📦 القسم العام:</div>
                 <div class="cat-pill" onclick="selectCategory('عام', this)">📦 عام</div>
             </div>
         </div>
 
-        <div class="products-status" id="productsStatusText">عرض المنتجات...</div>
+        <div class="products-status" id="productsStatusText">
+            <span id="statusTitle">عرض كافة المنتجات</span>
+            <span id="productsCountBadge" style="background:#fff; color:var(--primary); padding:2px 10px; border-radius:20px; font-size:12px;">0 منتج</span>
+        </div>
 
         <div class="products-grid" id="storeProductsGrid">
             <div class="empty-msg">جاري تحميل أحدث المنتجات سحابياً... ⚡</div>
@@ -503,10 +489,12 @@
 
         function displayProducts(products) {
             let grid = document.getElementById('storeProductsGrid');
-            let statusText = document.getElementById('productsStatusText');
+            let countBadge = document.getElementById('productsCountBadge');
+            let statusTitle = document.getElementById('statusTitle');
             grid.innerHTML = '';
 
-            statusText.innerText = `عرض (${products.length}) منتج متاح`;
+            countBadge.innerText = `${products.length} منتج`;
+            statusTitle.innerText = currentCategory === 'all' ? 'عرض كافة المنتجات' : `قسم: ${currentCategory}`;
 
             if (!products || products.length === 0) {
                 grid.innerHTML = '<div class="empty-msg">عذراً، لا توجد منتجات متاحة في هذا القسم حالياً. 🛍️</div>';
@@ -546,7 +534,24 @@
             currentCategory = cat;
             document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
             elem.classList.add('active');
+
+            // إظهار زر العودة لكل المنتجات إذا كان القسم المختار ليس "الكل"
+            let resetBtn = document.getElementById('resetCatBtn');
+            if (cat !== 'all') {
+                resetBtn.style.display = 'inline-block';
+            } else {
+                resetBtn.style.display = 'none';
+            }
+
             filterProducts();
+            
+            // التمرير التلقائي البسيط لعرض المنتجات مباشرة
+            window.scrollTo({ top: 350, behavior: 'smooth' });
+        }
+
+        function resetCategoryFilter() {
+            let allBtn = document.querySelector('.cat-pill');
+            selectCategory('all', allBtn);
         }
 
         function changeCardQty(idx, delta) {
@@ -712,7 +717,7 @@
             let address = document.getElementById('capAddress').value.trim();
 
             if (!name || !phone || !address) {
-                alert('الرجاء إدخال كافة البيانات المطلوبة.');
+                alert('الرجاء إكمال كافة البيانات المطلوبة.');
                 return;
             }
 
