@@ -115,7 +115,7 @@
         }
 
         .categories-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; margin-bottom: 10px;
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; margin-bottom: 10px; flex-wrap: wrap;
         }
         .categories-scroll::-webkit-scrollbar { height: 6px; }
         .categories-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -277,7 +277,7 @@
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت - خل', this)">🍾 خل</div>
                 <div class="cat-pill" onclick="selectCategory('سوبر ماركت - منوعات', this)">🏷️ منوعات</div>
 
-                <!-- قسم هابي ميلز (تم إضافة شاورما فتة بعد ساندوتشات مباشرة) -->
+                <!-- قسم هابي ميلز -->
                 <div style="width: 100%; flex-basis: 100%; height: 0;"></div>
                 <div class="category-group-label">🍗 قسم هابي ميلز (الوجبات والمشويات والمخبوزات):</div>
                 <div class="cat-pill" onclick="selectCategory('تشيكن تندر', this)">🍗 تشيكن تندر</div>
@@ -569,126 +569,86 @@
         function addToCart(name, price, idx) {
             let qty = productQuantities[idx] || 1;
             let existing = cart.find(item => item.name === name);
-            if(existing) {
+            if (existing) {
                 existing.qty += qty;
             } else {
                 cart.push({ name, price, qty });
             }
             updateCartUI();
-            alert(`✅ تمت إضافة (${qty}) من "${name}" إلى السلة!`);
+            alert(`تمت إضافة (${qty}) من ${name} إلى السلة بنجاح! 🛒`);
         }
 
         function updateCartUI() {
-            let totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCount').innerText = totalCount;
+            let totalCount = 0;
+            let subTotal = 0;
+            cart.forEach(item => {
+                totalCount += item.qty;
+                subTotal += (item.price * item.qty);
+            });
             
-            let list = document.getElementById('cartItemsList');
-            let subTotalElem = document.getElementById('subTotal');
-            let deliveryFeeElem = document.getElementById('deliveryFeeDisplay');
-            let grandTotalElem = document.getElementById('grandTotal');
-
+            document.getElementById('cartCount').innerText = totalCount;
             let deliveryFee = getDeliveryFee();
+            let grandTotal = subTotal + (totalCount > 0 ? deliveryFee : 0);
 
-            if(cart.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً.</p>';
-                subTotalElem.innerText = '0 ج.م';
-                deliveryFeeElem.innerText = deliveryFee + ' ج.م';
-                grandTotalElem.innerText = deliveryFee + ' ج.م';
+            document.getElementById('subTotal').innerText = subTotal + " ج.م";
+            document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + " ج.م";
+            document.getElementById('grandTotal').innerText = grandTotal + " ج.م";
+
+            let list = document.getElementById('cartItemsList');
+            list.innerHTML = '';
+            if (cart.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً 🛒</div>';
                 return;
             }
 
-            list.innerHTML = '';
-            let subtotal = 0;
-            cart.forEach((item, i) => {
-                let itemTotal = item.price * item.qty;
-                subtotal += itemTotal;
+            cart.forEach((item, index) => {
                 list.innerHTML += `
                     <div class="cart-row">
                         <div>
-                            <div style="font-weight:700;">${item.name}</div>
-                            <small style="color:var(--text-muted);">${item.price} ج.م × ${item.qty} = ${itemTotal} ج.م</small>
+                            <div style="font-weight:700; font-size:14px;">${item.name}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">${item.price} ج.م × ${item.qty}</div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <button class="qty-btn" onclick="updateCartItemQty(${i}, -1)">-</button>
-                            <span style="font-weight:800;">${item.qty}</span>
-                            <button class="qty-btn" onclick="updateCartItemQty(${i}, 1)">+</button>
-                            <button onclick="removeFromCart(${i})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px; margin-right:4px;">حذف</button>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-weight:800; color:var(--secondary);">${item.price * item.qty} ج.م</span>
+                            <button onclick="removeFromCart(${index})" style="background:#ef4444; color:#fff; border:none; width:24px; height:24px; border-radius:6px; cursor:pointer; font-weight:bold;">×</button>
                         </div>
                     </div>
                 `;
             });
-
-            subTotalElem.innerText = subtotal + ' ج.م';
-            deliveryFeeElem.innerText = deliveryFee + ' ج.م';
-            grandTotalElem.innerText = (subtotal + deliveryFee) + ' ج.م';
         }
 
-        function updateCartItemQty(i, delta) {
-            cart[i].qty += delta;
-            if(cart[i].qty <= 0) cart.splice(i, 1);
+        function removeFromCart(index) {
+            cart.splice(index, 1);
             updateCartUI();
         }
 
-        function removeFromCart(i) {
-            cart.splice(i, 1);
+        function openCart() {
             updateCartUI();
+            document.getElementById('cartModal').style.display = 'flex';
         }
 
-        function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function openCaptainModal() { document.getElementById('captainModal').style.display = 'flex'; }
-        function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
+        function openCaptainModal() {
+            document.getElementById('captainModal').style.display = 'flex';
+        }
+
+        function openCustomOrderModal() {
+            document.getElementById('customOrderModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
 
         function goToCheckout() {
-            if(cart.length === 0) { alert('السلة فارغة!'); return; }
+            if (cart.length === 0) {
+                alert('سلة التسوق فارغة!');
+                return;
+            }
             closeModal('cartModal');
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
-        function submitCaptainToWhatsApp() {
-            let name = document.getElementById('capName').value.trim();
-            let phone = document.getElementById('capPhone').value.trim();
-            let address = document.getElementById('capAddress').value.trim();
-            if(!name || !phone || !address) { alert('الرجاء تعبئة كافة بيانات الكابتن!'); return; }
-            let msg = `*🛵 طلب انضمام ككابتن جديد*\n👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 المنطقة: ${address}`;
-            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-            closeModal('captainModal');
-        }
-
-        async function submitCustomOrderToWhatsApp() {
-            let name = document.getElementById('customName').value.trim();
-            let phone = document.getElementById('customPhone').value.trim();
-            let details = document.getElementById('customDetails').value.trim();
-            let address = document.getElementById('customAddress').value.trim();
-
-            if(!name || !phone || !details || !address) {
-                alert('الرجاء تعبئة كافة الحقول الخاصة بالطلب الخاص!');
-                return;
-            }
-
-            let orderRef = Math.floor(1000 + Math.random() * 9000);
-            let saleRecord = {
-                orderId: orderRef,
-                timestamp: new Date().getTime(),
-                total: 0,
-                profit: 0,
-                itemsSummary: `طلب خاص: ${details}`
-            };
-
-            await syncSaleToCloud(saleRecord);
-
-            let msg = `*🛍️ طلب خاص جديد (اطلب اللي تحتاجه) #${orderRef}*\n\n`;
-            msg += `👤 اسم العميل: ${name}\n`;
-            msg += `📞 رقم الجوال: ${phone}\n`;
-            msg += `📍 العنوان ببلطيم: ${address}\n\n`;
-            msg += `📝 *تفاصيل الطلب:*\n${details}`;
-
-            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-            closeModal('customOrderModal');
-            alert('✅ تم إرسال الطلب الخاص وحفظه في سجل الإدارة بنجاح!');
-        }
-
-        async function submitOrderToWhatsApp() {
+        function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let zoneSelect = document.getElementById('deliveryZone');
@@ -697,41 +657,102 @@
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
 
-            if(!name || !phone || !address) { alert('الرجاء تعبئة بياناتك لإتمام الطلب!'); return; }
+            if (!name || !phone || !address) {
+                alert('الرجاء إكمال كافة بيانات العميل والعنوان.');
+                return;
+            }
 
-            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = subtotal + deliveryFee;
-            let orderRef = Math.floor(1000 + Math.random() * 9000);
+            let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let grandTotal = subTotal + deliveryFee;
 
-            let orderProfit = cart.reduce((sum, item) => {
-                let found = allProducts.find(p => p.name === item.name);
-                let cost = found ? (found.cost || (item.price * 0.8)) : (item.price * 0.8);
-                return sum + ((item.price - cost) * item.qty);
-            }, 0);
+            let msg = `🛒 *طلب جديد عبر منصة جاهز (بلطيم)*\n\n`;
+            msg += `👤 *الاسم:* ${name}\n`;
+            msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📍 *المنطقة:* ${zoneText}\n`;
+            msg += `🏠 *العنوان:* ${address}\n`;
+            msg += `💳 *الدفع:* ${payMethod}\n\n`;
+            msg += `📋 *المنتجات المطلوبة:*\n`;
+
+            cart.forEach((item, idx) => {
+                msg += `${idx + 1}. ${item.name} (${item.qty} × ${item.price} ج.م) = ${item.price * item.qty} ج.م\n`;
+            });
+
+            msg += `\n------------------\n`;
+            msg += `📦 المجموع الفرعي: ${subTotal} ج.م\n`;
+            msg += `🛵 رسوم التوصيل: ${deliveryFee} ج.م\n`;
+            msg += `💰 *الإجمالي الكلي: ${grandTotal} ج.م*\n`;
 
             let saleRecord = {
-                orderId: orderRef,
-                timestamp: new Date().getTime(),
-                total: total,
-                profit: Math.round(orderProfit),
-                itemsSummary: cart.map(i => `${i.name} (${i.qty})`).join(', ')
+                id: 'SALE_' + Date.now(),
+                date: new Date().toISOString(),
+                customerName: name,
+                customerPhone: phone,
+                address: address,
+                zone: zoneText,
+                items: cart,
+                subTotal: subTotal,
+                deliveryFee: deliveryFee,
+                total: grandTotal,
+                paymentMethod: payMethod
             };
 
-            await syncSaleToCloud(saleRecord);
+            syncSaleToCloud(saleRecord);
 
-            let msg = `*🛒 طلب جديد من فرع بلطيم - شارع جمال عبد الناصر (#${orderRef})*\n\n`;
-            msg += `👤 الاسم: ${name}\n📞 الموبايل: ${phone}\n📍 التوصيل: ${zoneText}\n🏢 العنوان: ${address}\n💳 الدفع: ${payMethod}\n\n*المنتجات المطلوبة:*\n`;
-            cart.forEach((i, idx) => { msg += `${idx + 1}. ${i.name} | العدد: ${i.qty} | السعر: ${i.price * i.qty} ج.م\n`; });
-            msg += `\n💵 المجموع: ${subtotal} ج.م\n🛵 رسوم التوصيل: ${deliveryFee} ج.م\n💰 الإجمالي الكلي: ${total} ج.م`;
-
-            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
+            window.open(url, '_blank');
             cart = [];
             updateCartUI();
             closeModal('checkoutModal');
-            alert('✅ تم إرسال طلبك بنجاح وحفظه في سجل المبيعات باللوحة!');
+            alert('✅ تم إرسال طلبك بنجاح إلى الإدارة عبر الواتساب!');
         }
 
-        window.onload = () => loadStoreProducts(false);
+        function submitCaptainToWhatsApp() {
+            let name = document.getElementById('capName').value.trim();
+            let phone = document.getElementById('capPhone').value.trim();
+            let address = document.getElementById('capAddress').value.trim();
+
+            if (!name || !phone || !address) {
+                alert('الرجاء إدخال كافة البيانات المطلوبة.');
+                return;
+            }
+
+            let msg = `🛵 *طلب انضمام ككابتن لتوصيل الطلبات (جاهز)*\n\n`;
+            msg += `👤 *الاسم:* ${name}\n`;
+            msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📍 *المنطقة:* ${address}\n`;
+
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
+            window.open(url, '_blank');
+            closeModal('captainModal');
+            alert('✅ تم إرسال طلب الانضمام بنجاح للإدارة عبر الواتساب!');
+        }
+
+        function submitCustomOrderToWhatsApp() {
+            let name = document.getElementById('customName').value.trim();
+            let phone = document.getElementById('customPhone').value.trim();
+            let details = document.getElementById('customDetails').value.trim();
+            let address = document.getElementById('customAddress').value.trim();
+
+            if (!name || !phone || !details || !address) {
+                alert('الرجاء إكمال كافة تفاصيل الطلب الخاص.');
+                return;
+            }
+
+            let msg = `🛍️ *طلب خاص جديد عبر منصة جاهز (بلطيم)*\n\n`;
+            msg += `👤 *الاسم:* ${name}\n`;
+            msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📝 *تفاصيل الطلب:* ${details}\n`;
+            msg += `📍 *العنوان:* ${address}\n`;
+
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
+            window.open(url, '_blank');
+            closeModal('customOrderModal');
+            alert('✅ تم إرسال طلبك الخاص بنجاح للإدارة عبر الواتساب!');
+        }
+
+        window.onload = function() {
+            loadStoreProducts(false);
+        };
     </script>
 </body>
 </html>
