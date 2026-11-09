@@ -270,12 +270,12 @@
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         const CATEGORIES_LIST = [
-            // سوبر ماركت
+            // سوبر ماركت (مضاف حديثاً: صوصات، مجمدات، مناديل)
             "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
             "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
             "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
             "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
-            "سوبر ماركت - خل", "سوبر ماركت - منوعات",
+            "سوبر ماركت - خل", "سوبر ماركت - صوصات", "سوبر ماركت - مجمدات", "سوبر ماركت - مناديل", "سوبر ماركت - منوعات",
             // هابي ميلز
             "هابي ميلز", "قسم الغربي", "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
             "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
@@ -312,14 +312,14 @@
             editCatSelect.innerHTML = '';
 
             let groups = [
-                { title: "🛒 سوبر ماركت", items: CATEGORIES_LIST.slice(0, 14) },
-                { title: "🍗 هابي ميلز", items: CATEGORIES_LIST.slice(14, 33) },
-                { title: "🍳 فول وطعمية", items: CATEGORIES_LIST.slice(33, 37) },
-                { title: "🐟 سمكة مشوية", items: CATEGORIES_LIST.slice(37, 41) },
-                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(41, 42) },
-                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(42, 43) },
-                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(43, 44) },
-                { title: "📦 عام", items: CATEGORIES_LIST.slice(44) }
+                { title: "🛒 سوبر ماركت", items: CATEGORIES_LIST.slice(0, 17) },
+                { title: "🍗 هابي ميلز", items: CATEGORIES_LIST.slice(17, 36) },
+                { title: "🍳 فول وطعمية", items: CATEGORIES_LIST.slice(36, 40) },
+                { title: "🐟 سمكة مشوية", items: CATEGORIES_LIST.slice(40, 44) },
+                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(44, 45) },
+                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(45, 46) },
+                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(46, 47) },
+                { title: "📦 عام", items: CATEGORIES_LIST.slice(47) }
             ];
 
             groups.forEach(g => {
