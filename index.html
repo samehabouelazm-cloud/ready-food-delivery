@@ -281,11 +281,19 @@
             </div>
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
-                <select id="deliveryZone" onchange="updateDeliveryFee()">
-                    <option value="20">داخل بلطيم (20 ج.م)</option>
-                    <option value="50">المناطق المجاورة لبلطيم (50 ج.م)</option>
+                <select id="deliveryZone" onchange="toggleExtraKmField()">
+                    <option value="baltim">داخل بلطيم (حسب عدد الأقسام)</option>
+                    <option value="outside">خارج بلطيم (وضواحيها)</option>
                 </select>
             </div>
+            
+            <!-- حقل عدد الكيلومترات الزائدة يظهر فقط إذا اختار خارج بلطيم -->
+            <div class="form-group" id="extraKmGroup" style="display: none;">
+                <label>عدد الكيلومترات الإضافية خارج بلطيم:</label>
+                <input type="number" id="extraKm" min="1" value="1" placeholder="مثال: 2" oninput="updateDeliveryFee()">
+                <small style="color: var(--text-muted); font-size: 11px;">تضاف 5 جنيهات لكل 1 إلى 2 كيلو إضافي.</small>
+            </div>
+
             <div class="form-group">
                 <label>العنوان بالتفصيل (الشارع / رقم العقار):</label>
                 <textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea>
@@ -370,7 +378,8 @@
                 "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
                 "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
                 "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
-                "سوبر ماركت - خل", "سوبر ماركت - منوعات"
+                "سوبر ماركت - خل", "سوبر ماركت - صوصات", "سوبر ماركت - مجمدات", 
+                "سوبر ماركت - مناديل", "سوبر ماركت - منوعات"
             ],
             "🍗 قسم هابي ميلز (الوجبات والمشويات)": [
                 "هابي ميلز", "قسم الغربي", "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
@@ -390,10 +399,49 @@
             ]
         };
 
+        function toggleExtraKmField() {
+            let zone = document.getElementById('deliveryZone').value;
+            let extraGroup = document.getElementById('extraKmGroup');
+            extraGroup.style.display = (zone === 'outside') ? 'block' : 'none';
+            updateDeliveryFee();
+        }
+
         function updateDeliveryFee() { updateCartUI(); }
+
         function getDeliveryFee() {
             let zoneSelect = document.getElementById('deliveryZone');
-            return zoneSelect ? parseFloat(zoneSelect.value) : 20;
+            let isOutside = zoneSelect && zoneSelect.value === 'outside';
+
+            // حساب عدد الأقسام الرئيسية المختلفة في السلة
+            let activeMainCategories = new Set();
+            cart.forEach(cartItem => {
+                for (const [mainCatName, subCatList] of Object.entries(storeHierarchy)) {
+                    let found = allProducts.find(p => p.name === cartItem.name && subCatList.includes(p.category));
+                    if (found) {
+                        activeMainCategories.add(mainCatName);
+                        break;
+                    }
+                }
+            });
+
+            let count = activeMainCategories.size;
+            let baseFee = 20; // الافتراضي قسم واحد
+
+            if (count === 1) baseFee = 20;
+            else if (count === 2) baseFee = 25;
+            else if (count === 3) baseFee = 30;
+            else if (count >= 4) baseFee = 35;
+
+            // إذا كان خارج بلطيم، نزيد 5 جنيهات عن كل 1 أو 2 كيلو إضافي
+            if (isOutside) {
+                let extraKmInput = document.getElementById('extraKm');
+                let km = extraKmInput ? parseInt(extraKmInput.value) || 1 : 1;
+                // نفترض زيادة 5 جنيه لكل 2 كيلو أو بناء على المدخل
+                let extraCharge = Math.ceil(km / 2) * 5; 
+                return baseFee + extraCharge;
+            }
+
+            return baseFee;
         }
 
         async function loadStoreProducts(showAlert = false) {
@@ -649,8 +697,8 @@
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let zoneSelect = document.getElementById('deliveryZone');
-            let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
-            let deliveryFee = parseFloat(zoneSelect.value);
+            let zoneText = zoneSelect.value === 'outside' ? 'خارج بلطيم' : 'داخل بلطيم (حسب الأقسام)';
+            let deliveryFee = getDeliveryFee();
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
 
@@ -680,17 +728,13 @@
             msg += `💰 *الإجمالي الكلي: ${grandTotal} ج.م*\n`;
 
             let saleRecord = {
-                id: 'SALE_' + Date.now(),
-                date: new Date().toISOString(),
+                orderId: 'ORD_' + Math.floor(1000 + Math.random() * 9000),
+                timestamp: new Date().toISOString(),
                 customerName: name,
                 customerPhone: phone,
-                address: address,
-                zone: zoneText,
-                items: cart,
-                subTotal: subTotal,
-                deliveryFee: deliveryFee,
                 total: grandTotal,
-                paymentMethod: payMethod
+                profit: subTotal * 0.2, // تقدير هامش الربح 20%
+                itemsSummary: cart.map(i => `${i.name} (${i.qty})`).join(', ')
             };
 
             syncSaleToCloud(saleRecord);
