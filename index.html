@@ -238,7 +238,6 @@
             <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="searchStore()">
         </div>
 
-        <!-- الأقسام الهيكلية المنسدلة -->
         <div id="accordionContainer">
             <div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">جاري تحميل تنظيم الأقسام والمنتجات... ⚡</div>
         </div>
@@ -282,22 +281,22 @@
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
                 <select id="deliveryZone" onchange="toggleAreaSelect()">
-                    <option value="baltim">📍 داخل بلطيم (حسب عدد الأقسام الرئيسية)</option>
-                    <option value="outside">🌍 خارج بلطيم وضواحيها (حساب أوتوماتيكي بالكيلو)</option>
+                    <option value="baltim">📍 داخل بلطيم (حسب عدد الأقسام)</option>
+                    <option value="outside">🌍 خارج بلطيم وضواحيها (رسوم ثابتة لكل منطقة)</option>
                 </select>
             </div>
             
-            <!-- قائمة منسدلة أوتوماتيكية للضواحي والمناطق الخارجية مع تحديد المسافة بالكيلو متر -->
+            <!-- قائمة منسدلة بالأماكن الخارجية والرسوم الثابتة المخصصة -->
             <div class="form-group" id="outsideAreaGroup" style="display: none;">
-                <label>اختر المنطقة أو القرية الخارجية:</label>
+                <label>اختر المنطقة الخارجية:</label>
                 <select id="outsideAreaKm" onchange="updateDeliveryFee()">
-                    <option value="2">المنطقة المجاورة الأولى (2 كم - زيادة 5 ج)</option>
-                    <option value="4">منطقة متوسطة البعد (4 كم - زيادة 10 ج)</option>
-                    <option value="6">منطقة بعيدة نسبياً (6 كم - زيادة 15 ج)</option>
-                    <option value="8">منطقة أطراف الضواحي (8 كم - زيادة 20 ج)</option>
-                    <option value="10">القرى والمناطق النائية (10 كم - زيادة 25 ج)</option>
+                    <option value="50">الشيخ مبارك (توصيل: 50 ج.م)</option>
+                    <option value="60">أبو شعلان (توصيل: 60 ج.م)</option>
+                    <option value="70">الكوم الأحمر (توصيل: 70 ج.م)</option>
+                    <option value="80">سوق الثلاثاء (توصيل: 80 ج.م)</option>
+                    <option value="120">مصيف بلطيم (توصيل: 120 ج.م)</option>
                 </select>
-                <small style="color: var(--text-muted); font-size: 11px;">⚡ يتم حساب الزيادة أتوماتيكياً (5 جنيهات لكل 2 كيلو).</small>
+                <small style="color: var(--text-muted); font-size: 11px;">⚡ يتم اعتماد قيمة التوصيل الثابتة الخاصة بالمنطقة المختارة فوراً.</small>
             </div>
 
             <div class="form-group">
@@ -418,7 +417,11 @@
             let zoneSelect = document.getElementById('deliveryZone');
             let isOutside = zoneSelect && zoneSelect.value === 'outside';
 
-            // حساب عدد الأقسام الرئيسية المختلفة في السلة لتحديد القاعدة الأساسية داخل بلطيم
+            if (isOutside) {
+                let areaSelect = document.getElementById('outsideAreaKm');
+                return areaSelect ? parseInt(areaSelect.value) || 50 : 50;
+            }
+
             let activeMainCategories = new Set();
             cart.forEach(cartItem => {
                 for (const [mainCatName, subCatList] of Object.entries(storeHierarchy)) {
@@ -431,20 +434,12 @@
             });
 
             let count = activeMainCategories.size;
-            let baseFee = 20; // الافتراضي قسم واحد
+            let baseFee = 20;
 
             if (count === 1) baseFee = 20;
             else if (count === 2) baseFee = 25;
             else if (count === 3) baseFee = 30;
             else if (count >= 4) baseFee = 35;
-
-            // إذا كان الطلب خارج بلطيم، يتم إضافة الزيادة الأوتوماتيكية بناءً على عدد الكيلومترات المختار من القائمة
-            if (isOutside) {
-                let areaSelect = document.getElementById('outsideAreaKm');
-                let km = areaSelect ? parseInt(areaSelect.value) || 2 : 2;
-                let extraCharge = Math.ceil(km / 2) * 5; 
-                return baseFee + extraCharge;
-            }
 
             return baseFee;
         }
@@ -702,7 +697,11 @@
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let zoneSelect = document.getElementById('deliveryZone');
-            let zoneText = zoneSelect.value === 'outside' ? 'خارج بلطيم (حساب أوتوماتيكي بالكيلو)' : 'داخل بلطيم (حسب الأقسام)';
+            let isOutside = zoneSelect.value === 'outside';
+            
+            let areaSelect = document.getElementById('outsideAreaKm');
+            let areaName = isOutside ? areaSelect.options[areaSelect.selectedIndex].text : 'داخل بلطيم (حسب الأقسام)';
+            
             let deliveryFee = getDeliveryFee();
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
@@ -718,7 +717,7 @@
             let msg = `🛒 *طلب جديد عبر منصة جاهز (بلطيم)*\n\n`;
             msg += `👤 *الاسم:* ${name}\n`;
             msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📍 *المنطقة:* ${zoneText}\n`;
+            msg += `📍 *المنطقة:* ${areaName}\n`;
             msg += `🏠 *العنوان:* ${address}\n`;
             msg += `💳 *الدفع:* ${payMethod}\n\n`;
             msg += `📋 *المنتجات المطلوبة:*\n`;
