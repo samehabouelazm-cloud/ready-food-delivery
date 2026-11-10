@@ -282,16 +282,16 @@
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
                 <select id="deliveryZone" onchange="toggleExtraKmField()">
-                    <option value="baltim">داخل بلطيم (حسب عدد الأقسام)</option>
-                    <option value="outside">خارج بلطيم (وضواحيها)</option>
+                    <option value="baltim">داخل بلطيم (حسب عدد الأقسام الرئيسية)</option>
+                    <option value="outside">خارج بلطيم وضواحيها (حساب بالكيلو)</option>
                 </select>
             </div>
             
-            <!-- حقل عدد الكيلومترات الزائدة يظهر فقط إذا اختار خارج بلطيم -->
+            <!-- حقل إدخال عدد الكيلومترات الإضافية (يظهر فقط عند اختيار خارج بلطيم) -->
             <div class="form-group" id="extraKmGroup" style="display: none;">
                 <label>عدد الكيلومترات الإضافية خارج بلطيم:</label>
-                <input type="number" id="extraKm" min="1" value="1" placeholder="مثال: 2" oninput="updateDeliveryFee()">
-                <small style="color: var(--text-muted); font-size: 11px;">تضاف 5 جنيهات لكل 1 إلى 2 كيلو إضافي.</small>
+                <input type="number" id="extraKm" min="1" value="1" placeholder="مثال: 3" oninput="updateDeliveryFee()">
+                <small style="color: var(--text-muted); font-size: 11px;">⚠️ تُضاف 5 جنيهات زيادة عن كل 1 إلى 2 كيلو إضافي خارج المدينة.</small>
             </div>
 
             <div class="form-group">
@@ -436,7 +436,6 @@
             if (isOutside) {
                 let extraKmInput = document.getElementById('extraKm');
                 let km = extraKmInput ? parseInt(extraKmInput.value) || 1 : 1;
-                // نفترض زيادة 5 جنيه لكل 2 كيلو أو بناء على المدخل
                 let extraCharge = Math.ceil(km / 2) * 5; 
                 return baseFee + extraCharge;
             }
@@ -697,7 +696,7 @@
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let zoneSelect = document.getElementById('deliveryZone');
-            let zoneText = zoneSelect.value === 'outside' ? 'خارج بلطيم' : 'داخل بلطيم (حسب الأقسام)';
+            let zoneText = zoneSelect.value === 'outside' ? 'خارج بلطيم (حساب بالكيلو)' : 'داخل بلطيم (حسب الأقسام)';
             let deliveryFee = getDeliveryFee();
             let address = document.getElementById('custAddress').value.trim();
             let payMethod = document.getElementById('payMethod').value;
@@ -733,7 +732,7 @@
                 customerName: name,
                 customerPhone: phone,
                 total: grandTotal,
-                profit: subTotal * 0.2, // تقدير هامش الربح 20%
+                profit: subTotal * 0.2,
                 itemsSummary: cart.map(i => `${i.name} (${i.qty})`).join(', ')
             };
 
