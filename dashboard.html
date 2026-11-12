@@ -241,7 +241,12 @@
         </div>
 
         <div class="card">
-            <div class="card-title">📋 قائمة منتجات المتجر المسجلة (حالة التوفر والترتيب)</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div class="card-title" style="margin-bottom: 0;">📋 قائمة منتجات المتجر المسجلة</div>
+                <div style="width: 260px;">
+                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج أو قسم..." oninput="filterAdminProducts()" style="width: 100%; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                </div>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -309,7 +314,6 @@
             if (enteredPass === ADMIN_PASSWORD) {
                 document.getElementById('authOverlay').style.display = 'none';
                 initDashboard();
-                // الفحص في الخلفية للطلبات الجديدة فقط بدون إعادة رسم المنتجات
                 setInterval(checkOnlyNewOrders, 12000);
             } else {
                 alert('❌ كلمة المرور غير صحيحة!');
@@ -358,7 +362,6 @@
             await fetchAllData(true);
         }
 
-        // جلب كامل البيانات أول مرة
         async function fetchAllData(isInitial = false) {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -375,14 +378,13 @@
                     lastKnownSalesCount = cloudData.sales.length;
                     isFirstCheck = false;
 
-                    renderAdminProducts();
+                    filterAdminProducts();
                     calculateFinancials();
                     renderSalesLog();
                 }
             } catch (e) {}
         }
 
-        // فحص خفيف للطلبات الجديدة فقط بدون إعادة رسم جدول المنتجات لتوفير السرعة
         async function checkOnlyNewOrders() {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -432,7 +434,10 @@
             }
         }
 
-        function renderAdminProducts() {
+        // دالة البحث والفلترة السريعة
+        function filterAdminProducts() {
+            let queryInput = document.getElementById('adminSearchInput');
+            let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
             let tbody = document.getElementById('adminProductsTable');
             tbody.innerHTML = '';
 
@@ -441,14 +446,26 @@
                 return;
             }
 
-            cloudData.products.forEach((p, idx) => {
+            let filteredProducts = cloudData.products.filter(p => {
+                let nameMatch = p.name && p.name.toLowerCase().includes(query);
+                let catMatch = p.category && p.category.toLowerCase().includes(query);
+                return nameMatch || catMatch;
+            });
+
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مطابقة للبحث.</td></tr>`;
+                return;
+            }
+
+            filteredProducts.forEach((p) => {
+                let realIdx = cloudData.products.indexOf(p);
                 let cost = p.cost || (p.price * 0.8);
                 let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                 let isOut = p.outOfStock === true;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><span class="badge">#${idx + 1}</span></td>
+                        <td><span class="badge">#${realIdx + 1}</span></td>
                         <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" onerror="this.src='${DEFAULT_IMAGE}'"></td>
                         <td style="font-weight:700;">${p.name}</td>
                         <td>${cost} ج.م / <span style="color:var(--secondary); font-weight:800;">${p.price} ج.م</span></td>
@@ -459,11 +476,11 @@
                         </td>
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
-                            <button class="btn" onclick="toggleOutOfStock(${idx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
-                            <button class="btn" onclick="moveProduct(${idx}, -1)" style="padding: 5px 8px; font-size: 11px;" ${idx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
-                            <button class="btn" onclick="moveProduct(${idx}, 1)" style="padding: 5px 8px; font-size: 11px;" ${idx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
-                            <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 5px 8px; font-size: 11px;">تعديل ✏️</button>
-                            <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
+                            <button class="btn" onclick="toggleOutOfStock(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
+                            <button class="btn" onclick="moveProduct(${realIdx}, -1)" style="padding: 5px 8px; font-size: 11px;" ${realIdx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
+                            <button class="btn" onclick="moveProduct(${realIdx}, 1)" style="padding: 5px 8px; font-size: 11px;" ${realIdx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
+                            <button class="btn btn-warning" onclick="openEditModal(${realIdx})" style="padding: 5px 8px; font-size: 11px;">تعديل ✏️</button>
+                            <button class="btn btn-danger" onclick="deleteProduct(${realIdx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
                         </td>
                     </tr>
                 `;
@@ -473,8 +490,8 @@
         async function toggleOutOfStock(idx) {
             if (cloudData.products[idx]) {
                 cloudData.products[idx].outOfStock = !cloudData.products[idx].outOfStock;
-                renderAdminProducts(); // تحديث فوري للمتصفح محلياً
-                await saveAndSync();   // حفظ في السحابة في الخلفية
+                filterAdminProducts();
+                await saveAndSync();
             }
         }
 
@@ -484,7 +501,7 @@
             let temp = cloudData.products[idx];
             cloudData.products[idx] = cloudData.products[targetIdx];
             cloudData.products[targetIdx] = temp;
-            renderAdminProducts();
+            filterAdminProducts();
             await saveAndSync();
         }
 
@@ -501,7 +518,7 @@
             }
 
             cloudData.products.push({ name, cost, price, category, image, outOfStock: false });
-            renderAdminProducts();
+            filterAdminProducts();
             await saveAndSync();
             
             document.getElementById('prodName').value = '';
@@ -541,7 +558,7 @@
 
             let existingOut = cloudData.products[idx].outOfStock || false;
             cloudData.products[idx] = { name, cost, price, category, image, outOfStock: existingOut };
-            renderAdminProducts();
+            filterAdminProducts();
             closeEditModal();
             await saveAndSync();
             alert('✅ تم تعديل المنتج بنجاح!');
@@ -550,7 +567,7 @@
         async function deleteProduct(idx) {
             if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
                 cloudData.products.splice(idx, 1);
-                renderAdminProducts();
+                filterAdminProducts();
                 await saveAndSync();
             }
         }
