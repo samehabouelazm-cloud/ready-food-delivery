@@ -77,10 +77,10 @@
         .btn-warning { background: var(--accent); color: #fff; }
         .btn-warning:hover { background: #d97706; }
 
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px 14px; text-align: right; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 800; color: var(--text-muted); }
+        .table-responsive { overflow-x: auto; max-height: 500px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 800; color: var(--text-muted); position: sticky; top: 0; z-index: 10; }
         
         .actions-cell { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
@@ -119,7 +119,6 @@
 </head>
 <body>
 
-    <!-- مشغل صوت التنبيه (مخفي) -->
     <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="authOverlay">
@@ -245,7 +244,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <div class="card-title" style="margin-bottom: 0;">📋 قائمة منتجات المتجر المسجلة</div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج أو قسم..." oninput="filterAdminProducts()" style="width: 240px; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج أو قسم..." oninput="debounceFilter()" style="width: 240px; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
                     <button class="btn btn-success" onclick="exportProductsToExcel()" style="padding: 8px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
                         📊 تصدير المنتجات إلى Excel
                     </button>
@@ -323,7 +322,7 @@
             if (enteredPass === ADMIN_PASSWORD) {
                 document.getElementById('authOverlay').style.display = 'none';
                 initDashboard();
-                setInterval(checkOnlyNewOrders, 12000);
+                setInterval(checkOnlyNewOrders, 15000);
             } else {
                 alert('❌ كلمة المرور غير صحيحة!');
                 document.getElementById('adminPasswordInput').value = '';
@@ -334,6 +333,7 @@
         let cloudData = { products: [], sales: [] };
         let lastKnownSalesCount = 0;
         let isFirstCheck = true;
+        let searchTimeout = null;
 
         function populateCategoryDropdowns() {
             let prodCatSelect = document.getElementById('prodCategory');
@@ -443,12 +443,18 @@
             }
         }
 
+        function debounceFilter() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterAdminProducts();
+            }, 150);
+        }
+
         function filterAdminProducts() {
             let queryInput = document.getElementById('adminSearchInput');
             let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
             let tbody = document.getElementById('adminProductsTable');
-            tbody.innerHTML = '';
-
+            
             if(!cloudData.products || cloudData.products.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مسجلة.</td></tr>`;
                 return;
@@ -465,16 +471,17 @@
                 return;
             }
 
+            let htmlRows = '';
             filteredProducts.forEach((p) => {
                 let realIdx = cloudData.products.indexOf(p);
                 let cost = p.cost || (p.price * 0.8);
                 let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                 let isOut = p.outOfStock === true;
 
-                tbody.innerHTML += `
+                htmlRows += `
                     <tr>
                         <td><span class="badge">#${realIdx + 1}</span></td>
-                        <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" onerror="this.src='${DEFAULT_IMAGE}'"></td>
+                        <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'"></td>
                         <td style="font-weight:700;">${p.name}</td>
                         <td>${cost} ج.م / <span style="color:var(--secondary); font-weight:800;">${p.price} ج.م</span></td>
                         <td>
@@ -493,6 +500,7 @@
                     </tr>
                 `;
             });
+            tbody.innerHTML = htmlRows;
         }
 
         async function toggleOutOfStock(idx) {
@@ -631,7 +639,6 @@
         function renderTopProductsReport() {
             let tbody = document.getElementById('topProductsTable');
             if (!tbody) return;
-            tbody.innerHTML = '';
 
             let productStats = {};
             (cloudData.sales || []).forEach(sale => {
@@ -663,9 +670,10 @@
                 return;
             }
 
+            let htmlRows = '';
             sortedProducts.forEach((item, index) => {
                 let rankBadge = index === 0 ? '🥇 الأول' : (index === 1 ? '🥈 الثاني' : (index === 2 ? '🥉 الثالث' : `#${index + 1}`));
-                tbody.innerHTML += `
+                htmlRows += `
                     <tr>
                         <td><span class="badge">${rankBadge}</span></td>
                         <td style="font-weight:700;">${item.name}</td>
@@ -674,20 +682,20 @@
                     </tr>
                 `;
             });
+            tbody.innerHTML = htmlRows;
         }
 
         function renderSalesLog() {
             let tbody = document.getElementById('salesLogTable');
-            tbody.innerHTML = '';
-
             if(!cloudData.sales || cloudData.sales.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد مبيعات مسجلة حتى الآن.</td></tr>`;
                 return;
             }
 
+            let htmlRows = '';
             cloudData.sales.slice().reverse().forEach(s => {
                 let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
-                tbody.innerHTML += `
+                htmlRows += `
                     <tr>
                         <td><span class="badge">#${s.orderId}</span></td>
                         <td>${dateFormatted}</td>
@@ -697,6 +705,7 @@
                     </tr>
                 `;
             });
+            tbody.innerHTML = htmlRows;
         }
 
         async function clearSalesLog() {
@@ -708,7 +717,6 @@
             }
         }
 
-        // تصدير قائمة المنتجات إلى Excel
         function exportProductsToExcel() {
             if (!cloudData.products || cloudData.products.length === 0) {
                 alert('❌ لا توجد منتجات لتصديرها!');
@@ -774,7 +782,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // تصدير سجل المبيعات والأرباح إلى Excel
         function exportSalesToExcel() {
             if (!cloudData.sales || cloudData.sales.length === 0) {
                 alert('❌ لا توجد سجلات مبيعات لتصديرها حالياً!');
