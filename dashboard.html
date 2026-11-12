@@ -30,6 +30,7 @@
             background: var(--surface); padding: 16px 24px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: var(--shadow-sm); border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap; gap: 10px;
         }
         .brand h1 { font-size: 20px; font-weight: 800; color: var(--text-dark); }
         .brand h1 span { color: var(--primary); }
@@ -243,8 +244,11 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <div class="card-title" style="margin-bottom: 0;">📋 قائمة منتجات المتجر المسجلة</div>
-                <div style="width: 260px;">
-                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج أو قسم..." oninput="filterAdminProducts()" style="width: 100%; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج أو قسم..." oninput="filterAdminProducts()" style="width: 240px; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                    <button class="btn btn-success" onclick="exportProductsToExcel()" style="padding: 8px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                        📊 تصدير المنتجات إلى Excel
+                    </button>
                 </div>
             </div>
             <div class="table-responsive">
@@ -267,9 +271,14 @@
 
         <div class="card">
             <div class="card-title">💰 سجل المبيعات والأرباح المحققة</div>
-            <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center;">
+            <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
                 <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل المبيعات هنا تلقائياً من طلبات العملاء عبر السحابة.</p>
-                <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-success" onclick="exportSalesToExcel()" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                        📊 تصدير المبيعات والأرباح إلى Excel
+                    </button>
+                    <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
+                </div>
             </div>
             <div class="table-responsive">
                 <table>
@@ -434,7 +443,6 @@
             }
         }
 
-        // دالة البحث والفلترة السريعة
         function filterAdminProducts() {
             let queryInput = document.getElementById('adminSearchInput');
             let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
@@ -698,6 +706,147 @@
                 calculateFinancials();
                 await saveAndSync();
             }
+        }
+
+        // تصدير قائمة المنتجات إلى Excel
+        function exportProductsToExcel() {
+            if (!cloudData.products || cloudData.products.length === 0) {
+                alert('❌ لا توجد منتجات لتصديرها!');
+                return;
+            }
+
+            let excelContent = `
+                <html dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; font-family: 'Tajawal', sans-serif; }
+                        th { background-color: #0284c7; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
+                        td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 13px; }
+                    </style>
+                </head>
+                <body>
+                    <h2 style="text-align: center; font-family: 'Tajawal'; color: #0f172a;">قائمة منتجات المتجر - جاهز Store</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الرقم</th>
+                                <th>اسم المنتج</th>
+                                <th>سعر التكلفة (ج.م)</th>
+                                <th>سعر البيع (ج.م)</th>
+                                <th>حالة التوفر</th>
+                                <th>القسم الفرعي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            cloudData.products.forEach((p, index) => {
+                let cost = p.cost || (p.price * 0.8);
+                let stockStatus = p.outOfStock ? 'غير متوفر' : 'متوفر';
+                excelContent += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${p.name || ''}</td>
+                        <td>${cost}</td>
+                        <td>${p.price || 0}</td>
+                        <td>${stockStatus}</td>
+                        <td>${p.category || 'عام'}</td>
+                    </tr>
+                `;
+            });
+
+            excelContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `Products_Report_${new Date().toISOString().split('T')[0]}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // تصدير سجل المبيعات والأرباح إلى Excel
+        function exportSalesToExcel() {
+            if (!cloudData.sales || cloudData.sales.length === 0) {
+                alert('❌ لا توجد سجلات مبيعات لتصديرها حالياً!');
+                return;
+            }
+
+            let excelContent = `
+                <html dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; font-family: 'Tajawal', sans-serif; }
+                        th { background-color: #10b981; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
+                        td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 13px; }
+                    </style>
+                </head>
+                <body>
+                    <h2 style="text-align: center; font-family: 'Tajawal'; color: #0f172a;">تقرير سجل المبيعات والأرباح - جاهز Store</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الطلب</th>
+                                <th>التاريخ والوقت</th>
+                                <th>إجمالي المبيعات (ج.م)</th>
+                                <th>صافي الربح (ج.م)</th>
+                                <th>تفاصيل المنتجات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            let totalSalesSum = 0;
+            let totalProfitSum = 0;
+
+            cloudData.sales.forEach(s => {
+                let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
+                totalSalesSum += (s.total || 0);
+                totalProfitSum += (s.profit || 0);
+
+                excelContent += `
+                    <tr>
+                        <td>#${s.orderId || ''}</td>
+                        <td>${dateFormatted}</td>
+                        <td>${s.total || 0}</td>
+                        <td>${s.profit || 0}</td>
+                        <td>${s.itemsSummary || ''}</td>
+                    </tr>
+                `;
+            });
+
+            excelContent += `
+                        <tr style="background-color: #f1f5f9; font-weight: bold;">
+                            <td colspan="2">الإجمالي الكلي</td>
+                            <td>${totalSalesSum} ج.م</td>
+                            <td style="color: #059669;">+${totalProfitSum} ج.م</td>
+                            <td>-</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `Sales_And_Profit_Report_${new Date().toISOString().split('T')[0]}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         window.onload = () => {
