@@ -118,6 +118,9 @@
 </head>
 <body>
 
+    <!-- مشغل صوت التنبيه (مخفي) -->
+    <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
     <div id="authOverlay">
         <div class="auth-box">
             <h3>🔒 لوحة التحكم الإدارية</h3>
@@ -289,6 +292,8 @@
             if (enteredPass === ADMIN_PASSWORD) {
                 document.getElementById('authOverlay').style.display = 'none';
                 initDashboard();
+                // بدء فحص الطلبات الجديدة كل 10 ثوانٍ بعد تسجيل الدخول
+                setInterval(checkNewOrdersForAlert, 10000);
             } else {
                 alert('❌ كلمة المرور غير صحيحة! حاول مرة أخرى.');
                 document.getElementById('adminPasswordInput').value = '';
@@ -297,6 +302,8 @@
         }
 
         let cloudData = { products: [], sales: [] };
+        let lastKnownSalesCount = 0;
+        let isFirstCheck = true;
 
         function populateCategoryDropdowns() {
             let prodCatSelect = document.getElementById('prodCategory');
@@ -332,23 +339,73 @@
 
         async function initDashboard() {
             populateCategoryDropdowns();
+            await fetchCloudData(true);
+        }
+
+        async function fetchCloudData(isInitial = false) {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     let data = await res.json();
+                    let fetchedProducts = [];
+                    let fetchedSales = [];
+
                     if (Array.isArray(data)) {
-                        cloudData.products = data;
-                        cloudData.sales = [];
+                        fetchedProducts = data;
                     } else if (data && typeof data === 'object') {
-                        cloudData.products = Array.isArray(data.products) ? data.products : [];
-                        cloudData.sales = Array.isArray(data.sales) ? data.sales : [];
+                        fetchedProducts = Array.isArray(data.products) ? data.products : [];
+                        fetchedSales = Array.isArray(data.sales) ? data.sales : [];
                     }
+
+                    if (!isInitial) {
+                        // التحقق من وصول طلبات جديدة
+                        if (fetchedSales.length > lastKnownSalesCount && !isFirstCheck) {
+                            playAlertSound();
+                            showNewOrderBanner(fetchedSales[fetchedSales.length - 1]);
+                        }
+                    } else {
+                        isFirstCheck = false;
+                    }
+
+                    lastKnownSalesCount = fetchedSales.length;
+                    cloudData.products = fetchedProducts;
+                    cloudData.sales = fetchedSales;
+
+                    renderAdminProducts();
+                    calculateFinancials();
+                    renderSalesLog();
                 }
             } catch (e) {}
+        }
 
-            renderAdminProducts();
-            calculateFinancials();
-            renderSalesLog();
+        // دالة الفحص التلقائي للطلبات الجديدة في الخلفية
+        async function checkNewOrdersForAlert() {
+            await fetchCloudData(false);
+        }
+
+        function playAlertSound() {
+            let sound = document.getElementById('alertSound');
+            if (sound) {
+                sound.play().catch(error => {
+                    console.log("يتطلب المتصفح تفاعلاً لتشغيل الصوت تلقائياً.");
+                });
+            }
+        }
+
+        function showNewOrderBanner(latestSale) {
+            let banner = document.createElement('div');
+            banner.style.cssText = `
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                background: #10b981; color: #fff; padding: 14px 26px; border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; font-weight: 800;
+                font-size: 16px; text-align: center; border: 2px solid #fff;
+            `;
+            banner.innerHTML = `🚨 طلب جديد وصل! (رقم: #${latestSale.orderId} - المجموع: ${latestSale.total} ج.م)`;
+            document.body.appendChild(banner);
+
+            setTimeout(() => {
+                banner.remove();
+            }, 7000);
         }
 
         async function saveAndSync() {
