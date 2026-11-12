@@ -81,7 +81,7 @@
         th, td { padding: 12px 14px; text-align: right; border-bottom: 1px solid #f1f5f9; }
         th { background: #f8fafc; font-weight: 800; color: var(--text-muted); }
         
-        .actions-cell { display: flex; gap: 6px; align-items: center; }
+        .actions-cell { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
         #authOverlay {
@@ -165,7 +165,7 @@
         </div>
         <div>
             <a href="index.html" class="btn" style="text-decoration:none; font-size:13px;">🌐 الذهاب للمتجر</a>
-            <button class="btn btn-success" onclick="initDashboard()" style="font-size:13px; margin-right: 6px;">🔄 تحديث المبيعات</button>
+            <button class="btn btn-success" onclick="initDashboard()" style="font-size:13px; margin-right: 6px;">🔄 تحديث البيانات</button>
         </div>
     </header>
 
@@ -217,11 +217,11 @@
                     <input type="text" id="prodImage" placeholder="ترك فارغاً لظهور صورة افتراضية">
                 </div>
             </div>
-            <button class="btn btn-success" id="addBtn" onclick="addNewProduct()">☁️ إضافة المنتج ورفعه للقسم سحابياً</button>
+            <button class="btn btn-success" onclick="addNewProduct()">☁️ إضافة المنتج ورفعه للقسم سحابياً</button>
         </div>
 
         <div class="card">
-            <div class="card-title">📋 قائمة منتجات المتجر المسجلة (ترتيب العرض والنقل)</div>
+            <div class="card-title">📋 قائمة منتجات المتجر المسجلة (حالة التوفر والترتيب)</div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -229,11 +229,10 @@
                             <th>الترتيب</th>
                             <th>الصورة</th>
                             <th>اسم المنتج</th>
-                            <th>التكلفة</th>
-                            <th>سعر البيع</th>
-                            <th>هامش الربح</th>
+                            <th>التكلفة / البيع</th>
+                            <th>حالة التوفر</th>
                             <th>القسم الفرعي</th>
-                            <th>الإجراءات والنقل والترتيب</th>
+                            <th>الإجراءات والتحكم</th>
                         </tr>
                     </thead>
                     <tbody id="adminProductsTable"></tbody>
@@ -270,23 +269,18 @@
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         const CATEGORIES_LIST = [
-            // سوبر ماركت (مضاف حديثاً: صوصات، مجمدات، مناديل)
             "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
             "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
             "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
             "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
             "سوبر ماركت - خل", "سوبر ماركت - صوصات", "سوبر ماركت - مجمدات", "سوبر ماركت - مناديل", "سوبر ماركت - منوعات",
-            // هابي ميلز
             "هابي ميلز", "قسم الغربي", "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
             "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
             "كريب - قسم الكريب الحلو", "قسم البيتزا", "قسم المدخنات", "قسم الهوت دوج",
             "قسم النجرسكو", "فطير هابي ميلز - فطير اسكندراني", "فطير هابي ميلز - فطير حلو",
             "قسم إضافات", "قسم صواني هابي ميلز",
-            // فول وطعمية
             "فول وطعمية - الأطباق والساندوتشات", "فول وطعمية - عجينة وقلي", "فول وطعمية - سلطات ومخللات", "فول وطعمية - إضافات",
-            // سمكة مشوية
             "سمكة مشوية - أسماك طازجة ومشويات", "سمكة مشوية - سي فود وسنجاري", "سمكة مشوية - أرز ووربات وشوربة", "سمكة مشوية - سلطات ومخللات",
-            // الأقسام العامة والأخرى
             "إلكترونيات", "وجبات سريعة", "أدوات منزلية", "عام"
         ];
 
@@ -378,33 +372,44 @@
             tbody.innerHTML = '';
 
             if(!cloudData.products || cloudData.products.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مسجلة.</td></tr>`;
                 return;
             }
 
             cloudData.products.forEach((p, idx) => {
                 let cost = p.cost || (p.price * 0.8);
-                let profit = p.price - cost;
                 let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
+                let isOut = p.outOfStock === true;
 
                 tbody.innerHTML += `
                     <tr>
                         <td><span class="badge">#${idx + 1}</span></td>
                         <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" onerror="this.src='${DEFAULT_IMAGE}'"></td>
                         <td style="font-weight:700;">${p.name}</td>
-                        <td>${cost} ج.م</td>
-                        <td style="color:var(--secondary); font-weight:800;">${p.price} ج.م</td>
-                        <td style="color:var(--accent); font-weight:800;">+${profit} ج.م</td>
+                        <td>${cost} ج.م / <span style="color:var(--secondary); font-weight:800;">${p.price} ج.م</span></td>
+                        <td>
+                            <span style="display:inline-block; padding:3px 8px; border-radius:15px; font-size:11px; font-weight:800; ${isOut ? 'background:#fee2e2; color:#ef4444;' : 'background:#d1fae5; color:#059669;'}">
+                                ${isOut ? '⛔ غير متوفر' : '✅ متوفر'}
+                            </span>
+                        </td>
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
-                            <button class="btn" onclick="moveProduct(${idx}, -1)" style="padding: 6px 8px; font-size: 11px;" ${idx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
-                            <button class="btn" onclick="moveProduct(${idx}, 1)" style="padding: 6px 8px; font-size: 11px;" ${idx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
-                            <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 6px 10px; font-size: 12px;">تعديل ونقل ✏️</button>
-                            <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 6px 10px; font-size: 12px;">حذف</button>
+                            <button class="btn" onclick="toggleOutOfStock(${idx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};" title="تغيير حالة التوفر">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
+                            <button class="btn" onclick="moveProduct(${idx}, -1)" style="padding: 5px 8px; font-size: 11px;" ${idx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
+                            <button class="btn" onclick="moveProduct(${idx}, 1)" style="padding: 5px 8px; font-size: 11px;" ${idx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
+                            <button class="btn btn-warning" onclick="openEditModal(${idx})" style="padding: 5px 8px; font-size: 11px;">تعديل ✏️</button>
+                            <button class="btn btn-danger" onclick="deleteProduct(${idx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
                         </td>
                     </tr>
                 `;
             });
+        }
+
+        async function toggleOutOfStock(idx) {
+            if (cloudData.products[idx]) {
+                cloudData.products[idx].outOfStock = !cloudData.products[idx].outOfStock;
+                await saveAndSync();
+            }
         }
 
         async function moveProduct(idx, direction) {
@@ -430,7 +435,7 @@
                 return;
             }
 
-            cloudData.products.push({ name, cost, price, category, image });
+            cloudData.products.push({ name, cost, price, category, image, outOfStock: false });
             await saveAndSync();
             
             document.getElementById('prodName').value = '';
@@ -468,7 +473,8 @@
                 return;
             }
 
-            cloudData.products[idx] = { name, cost, price, category, image };
+            let existingOut = cloudData.products[idx].outOfStock || false;
+            cloudData.products[idx] = { name, cost, price, category, image, outOfStock: existingOut };
             await saveAndSync();
             closeEditModal();
             alert('✅ تم تعديل بيانات المنتج ونقله سحابياً إلى القسم المخصص!');
