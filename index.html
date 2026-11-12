@@ -166,6 +166,11 @@
         }
         .add-btn:hover { background: var(--primary-dark); }
 
+        .out-of-stock-badge {
+            background: #fee2e2; color: #ef4444; text-align: center; font-size: 13px;
+            font-weight: 800; padding: 8px; border-radius: 8px; border: 1px solid #fca5a5;
+        }
+
         .empty-section { color: var(--text-muted); font-size: 13px; text-align: center; padding: 15px; background: #f8fafc; border-radius: 8px; }
 
         .modal-overlay {
@@ -286,7 +291,6 @@
                 </select>
             </div>
             
-            <!-- قائمة القرى والرسوم الثابتة المخصصة -->
             <div class="form-group" id="outsideAreaGroup" style="display: none;">
                 <label>اختر المنطقة الخارجية:</label>
                 <select id="outsideAreaKm" onchange="updateDeliveryFee()">
@@ -525,6 +529,9 @@
                             if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
                             let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                             let safeName = p.name.replace(/'/g, "\\'");
+                            
+                            // التحقق مما إذا كان المنتج غير متوفر بناءً على إعدادات الإدارة
+                            let isOut = p.outOfStock === true;
 
                             cardsHtml += `
                                 <div class="product-card">
@@ -536,12 +543,16 @@
                                         <div class="product-price">${p.price} ج.م</div>
                                     </div>
                                     <div>
-                                        <div class="qty-controls">
-                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                            <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
-                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
-                                        </div>
-                                        <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">إضافة للسلة 🛒</button>
+                                        ${isOut ? `
+                                            <div class="out-of-stock-badge">⛔ غير متوفر حالياً</div>
+                                        ` : `
+                                            <div class="qty-controls">
+                                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
+                                                <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
+                                            </div>
+                                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">إضافة للسلة 🛒</button>
+                                        `}
                                     </div>
                                 </div>
                             `;
@@ -729,7 +740,10 @@
             msg += `\n------------------\n`;
             msg += `📦 المجموع الفرعي: ${subTotal} ج.م\n`;
             msg += `🛵 رسوم التوصيل: ${deliveryFee} ج.م\n`;
-            msg += `💰 *الإجمالي الكلي: ${grandTotal} ج.م*\n`;
+            msg += `💰 *الإجمالي الكلي: ${grandTotal} ج.م*\n\n`;
+            
+            // خانة تأكيد الطلب من العميل مباشرة (نعم / لا)
+            msg += `❓ *هل تؤكد هذا الطلب؟*\n[ ] نعم، أؤكد الطلب\n[ ] لا، أود إلغاء الطلب`;
 
             let saleRecord = {
                 orderId: 'ORD_' + Math.floor(1000 + Math.random() * 9000),
@@ -748,7 +762,7 @@
             cart = [];
             updateCartUI();
             closeModal('checkoutModal');
-            alert('✅ تم إرسال طلبك بنجاح إلى الإدارة عبر الواتساب!');
+            alert('✅ تم إرسال طلبك وفاتورة المشتريات مع خانة التأكيد للإدارة عبر الواتساب!');
         }
 
         function submitCaptainToWhatsApp() {
@@ -787,12 +801,13 @@
             msg += `👤 *الاسم:* ${name}\n`;
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📝 *تفاصيل الطلب:* ${details}\n`;
-            msg += `📍 *العنوان:* ${address}\n`;
+            msg += `📍 *العنوان:* ${address}\n\n`;
+            msg += `❓ *هل تؤكد هذا الطلب الخاص؟*\n[ ] نعم\n[ ] لا`;
 
             let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
             window.open(url, '_blank');
             closeModal('customOrderModal');
-            alert('✅ تم إرسال طلبك الخاص بنجاح للإدارة عبر الواتساب!');
+            alert('✅ تم إرسال طلبك الخاص مع خانة التأكيد للإدارة عبر الواتساب!');
         }
 
         window.onload = function() {
