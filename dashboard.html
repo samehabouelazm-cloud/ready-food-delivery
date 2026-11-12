@@ -196,6 +196,25 @@
             </div>
         </div>
 
+        <!-- بطاقة تقارير المنتجات الأكثر طلباً والأرباح التفصيلية -->
+        <div class="card">
+            <div class="card-title">📈 تقرير المنتجات الأكثر طلباً وأرباحها</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">تحليل ذكي يعرض المنتجات التي تم شراؤها بكثرة وحجم الأرباح التي حققتها للمتجر.</p>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المرتبة</th>
+                            <th>اسم المنتج</th>
+                            <th>عدد مرات الطلب (الكمية المباعة)</th>
+                            <th>إجمالي الأرباح المحققة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topProductsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-title">📦 إضافة منتج جديد إلى القسم المخصص</div>
             <div class="form-grid">
@@ -292,7 +311,6 @@
             if (enteredPass === ADMIN_PASSWORD) {
                 document.getElementById('authOverlay').style.display = 'none';
                 initDashboard();
-                // بدء فحص الطلبات الجديدة كل 10 ثوانٍ بعد تسجيل الدخول
                 setInterval(checkNewOrdersForAlert, 10000);
             } else {
                 alert('❌ كلمة المرور غير صحيحة! حاول مرة أخرى.');
@@ -358,7 +376,6 @@
                     }
 
                     if (!isInitial) {
-                        // التحقق من وصول طلبات جديدة
                         if (fetchedSales.length > lastKnownSalesCount && !isFirstCheck) {
                             playAlertSound();
                             showNewOrderBanner(fetchedSales[fetchedSales.length - 1]);
@@ -378,7 +395,6 @@
             } catch (e) {}
         }
 
-        // دالة الفحص التلقائي للطلبات الجديدة في الخلفية
         async function checkNewOrdersForAlert() {
             await fetchCloudData(false);
         }
@@ -591,6 +607,63 @@
 
             document.getElementById('statYearSales').innerText = yearSales + ' ج.م';
             document.getElementById('statYearProfit').innerText = `الربح: ${yearProfit} ج.م`;
+
+            // تحديث تقرير المنتجات الأكثر طلباً
+            renderTopProductsReport();
+        }
+
+        function renderTopProductsReport() {
+            let tbody = document.getElementById('topProductsTable');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let productStats = {};
+
+            (cloudData.sales || []).forEach(sale => {
+                let itemsText = sale.itemsSummary || "";
+                let parts = itemsText.split(',');
+                parts.forEach(part => {
+                    let match = part.trim().match(/^(.*?)\s*\((\d+)\)$/);
+                    if (match) {
+                        let pName = match[1].trim();
+                        let pQty = parseInt(match[2]) || 1;
+
+                        if (!productStats[pName]) {
+                            productStats[pName] = { count: 0, profit: 0 };
+                        }
+                        productStats[pName].count += pQty;
+                        
+                        let foundProd = (cloudData.products || []).find(p => p.name === pName);
+                        let unitProfit = foundProd ? (foundProd.price - (foundProd.cost || foundProd.price * 0.8)) : 10;
+                        productStats[pName].profit += (unitProfit * pQty);
+                    }
+                });
+            });
+
+            let sortedProducts = Object.keys(productStats).map(name => {
+                return {
+                    name: name,
+                    count: productStats[name].count,
+                    profit: Math.round(productStats[name].profit * 100) / 100
+                };
+            }).sort((a, b) => b.count - a.count);
+
+            if (sortedProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد بيانات كافية لعرض المنتجات الأكثر طلباً حالياً.</td></tr>`;
+                return;
+            }
+
+            sortedProducts.forEach((item, index) => {
+                let rankBadge = index === 0 ? '🥇 الأول' : (index === 1 ? '🥈 الثاني' : (index === 2 ? '🥉 الثالث' : `#${index + 1}`));
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="badge">${rankBadge}</span></td>
+                        <td style="font-weight:700;">${item.name}</td>
+                        <td style="font-weight:800; color:var(--primary);">${item.count} قطعة / طلب</td>
+                        <td style="font-weight:800; color:var(--secondary);">+${item.profit} ج.م</td>
+                    </tr>
+                `;
+            });
         }
 
         function renderSalesLog() {
