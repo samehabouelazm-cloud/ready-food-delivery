@@ -78,7 +78,6 @@
         .actions-cell { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
-        /* أزرار التنقل بين الصفحات */
         .pagination-bar {
             display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 13px; font-weight: 700;
         }
@@ -110,13 +109,11 @@
 </head>
 <body>
 
-    <!-- شريط تفعيل التنبيهات الصوتية -->
     <div id="soundBanner">
         <span>⚠️ تنبيهات الصوت غير مفعلة تلقائياً في المتصفح.</span>
         <button class="btn btn-warning" onclick="enableAudio()" style="padding: 4px 12px; font-size: 12px;">🔊 اضغط هنا لتفعيل صوت الطلبات</button>
     </div>
 
-    <!-- ملف الصوت التنبيهي -->
     <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="authOverlay">
@@ -189,7 +186,7 @@
 
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-                <div class="card-title" style="margin-bottom: 0;">📋 قائمة منتجات المتجر المسجلة</div>
+                <div class="card-title" style="margin-bottom: 0;">📋 قائمة منتجات المتجر المسجلة (مع هامش الربح)</div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                     <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج..." oninput="filterAdminProducts()" style="width: 240px; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
                     <button class="btn btn-success" onclick="exportProductsToExcel()" style="padding: 8px 14px; font-size: 13px;">📊 تصدير المنتجات إلى Excel</button>
@@ -202,8 +199,8 @@
                             <th>الترتيب</th>
                             <th>الصورة</th>
                             <th>اسم المنتج</th>
-                            <th>التكلفة / البيع</th>
-                            <th>حالة التوفر</th>
+                            <th>التكلفة / البيع (وهامش الربح)</th>
+                            <th>حالة التوفر والعرض</th>
                             <th>القسم الفرعي</th>
                             <th>الإجراءات</th>
                         </tr>
@@ -212,7 +209,6 @@
                 </table>
             </div>
             
-            <!-- أزرار التنقل (الأسهم الانتقالية) بين صفحات المنتجات -->
             <div class="pagination-bar">
                 <button class="btn" onclick="prevProductPage()" id="prevPageBtn" style="padding: 6px 14px; font-size: 12px;">⬅️ السابق</button>
                 <span id="pageIndicator" style="color: var(--text-muted);">الصفحة 1 من 1</span>
@@ -221,23 +217,37 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل المنتج -->
-    <div id="editProductModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; justify-content:center; align-items:center;">
-        <div style="background:var(--surface); padding:24px; border-radius:var(--radius-lg); width:100%; max-width:400px; box-shadow:var(--shadow-lg);">
+    <!-- نافذة تعديل المنتج (مع سعر التكلفة وسعر ما قبل البيع والسعر القديم) -->
+    <div id="editProductModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; justify-content:center; align-items:center; padding: 15px;">
+        <div style="background:var(--surface); padding:24px; border-radius:var(--radius-lg); width:100%; max-width:420px; box-shadow:var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
             <h3 style="font-size:18px; font-weight:800; margin-bottom:15px;">✏️ تعديل بيانات المنتج</h3>
             <input type="hidden" id="editProductIndex">
+            
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">اسم المنتج:</label>
-                <input type="text" id="editName" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
+                <input type="text" id="editName" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
             </div>
+
             <div style="margin-bottom:12px;">
-                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر البيع (ج.م):</label>
-                <input type="number" id="editPrice" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
+                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر التكلفة / ما قبل البيع (ج.م):</label>
+                <input type="number" id="editCost" placeholder="مثال: 85" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
             </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر البيع الحالي (ج.م):</label>
+                <input type="number" id="editPrice" placeholder="مثال: 100" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">السعر القديم قبل الخصم (اختياري - للعروض):</label>
+                <input type="number" id="editOldPrice" placeholder="مثال: 120" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+            </div>
+
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">رابط الصورة:</label>
-                <input type="text" id="editImage" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
+                <input type="text" id="editImage" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
             </div>
+
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn btn-success" onclick="saveEditedProduct()" style="flex:1; padding:10px;">حفظ التعديلات 💾</button>
                 <button class="btn btn-danger" onclick="closeEditModal()" style="flex:1; padding:10px;">إلغاء</button>
@@ -255,7 +265,6 @@
         let isFirstCheck = true;
         let soundAllowed = false;
         
-        // متغيرات التنقل (الأسهم الانتقالية) بين صفحات المنتجات
         let currentProductPage = 1;
         const productsPerPage = 15;
 
@@ -383,6 +392,14 @@
             }
         }
 
+        async function toggleDailyOffer(idx) {
+            if (cloudData.products[idx]) {
+                cloudData.products[idx].isOffer = !cloudData.products[idx].isOffer;
+                filterAdminProducts();
+                await saveAndSync();
+            }
+        }
+
         async function deleteProduct(idx) {
             if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
                 cloudData.products.splice(idx, 1);
@@ -391,13 +408,14 @@
             }
         }
 
-        // دوال تعديل المنتج
         function openEditModal(idx) {
             let p = cloudData.products[idx];
             if (!p) return;
             document.getElementById('editProductIndex').value = idx;
             document.getElementById('editName').value = p.name || '';
+            document.getElementById('editCost').value = p.cost || (p.price ? Math.round(p.price * 0.8) : 0);
             document.getElementById('editPrice').value = p.price || 0;
+            document.getElementById('editOldPrice').value = p.oldPrice || '';
             document.getElementById('editImage').value = p.image || '';
             document.getElementById('editProductModal').style.display = 'flex';
         }
@@ -411,26 +429,23 @@
             let p = cloudData.products[idx];
             if (p) {
                 p.name = document.getElementById('editName').value.trim();
+                p.cost = parseFloat(document.getElementById('editCost').value) || 0;
                 p.price = parseFloat(document.getElementById('editPrice').value) || 0;
+                p.oldPrice = parseFloat(document.getElementById('editOldPrice').value) || 0;
                 p.image = document.getElementById('editImage').value.trim();
                 
                 closeEditModal();
                 filterAdminProducts();
                 await saveAndSync();
-                alert('✅ تم تحديث المنتج بنجاح وحفظه في السحابة!');
+                alert('✅ تم تحديث بيانات المنتج وحساب الهامش بنجاح!');
             }
         }
 
-        // دوال التنقل (الأسهم الانتقالية) بين صفحات المنتجات
         function prevProductPage() {
             if (currentProductPage > 1) {
                 currentProductPage--;
                 filterAdminProducts();
             }
-        }
-
-        function nextPage() {
-            // المعالجة داخل دالة filterAdminProducts لتحديد الحد الأقصى
         }
 
         function filterAdminProducts() {
@@ -465,23 +480,36 @@
             paginatedProducts.forEach((p) => {
                 let realIdx = cloudData.products.indexOf(p);
                 let cost = p.cost || (p.price * 0.8);
+                let profitMargin = p.price - cost;
                 let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                 let isOut = p.outOfStock === true;
+                let isOffer = p.isOffer === true;
 
                 htmlRows += `
                     <tr>
                         <td><span class="badge">#${realIdx + 1}</span></td>
                         <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'"></td>
-                        <td style="font-weight:700;">${p.name}</td>
-                        <td>${cost} ج.م / <span style="color:var(--secondary); font-weight:800;">${p.price} ج.م</span></td>
+                        <td style="font-weight:700;">
+                            ${p.name}
+                            ${isOffer ? '<span style="background:#fef3c7; color:#d97706; font-size:10px; padding:2px 6px; border-radius:8px; margin-right:4px;">🔥 عرض يومي</span>' : ''}
+                        </td>
                         <td>
-                            <span style="display:inline-block; padding:3px 8px; border-radius:15px; font-size:11px; font-weight:800; ${isOut ? 'background:#fee2e2; color:#ef4444;' : 'background:#d1fae5; color:#059669;'}">
-                                ${isOut ? '⛔ غير متوفر' : '✅ متوفر'}
-                            </span>
+                            <span style="color:var(--text-muted);">${cost} ج.م</span> / <span style="color:var(--secondary); font-weight:800;">${p.price} ج.م</span>
+                            <br><span style="font-size:11px; color:#0284c7; font-weight:700;">الربح: +${profitMargin} ج.م</span>
+                        </td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <span style="display:inline-block; padding:3px 8px; border-radius:15px; font-size:11px; font-weight:800; width:fit-content; ${isOut ? 'background:#fee2e2; color:#ef4444;' : 'background:#d1fae5; color:#059669;'}">
+                                    ${isOut ? '⛔ غير متوفر' : '✅ متوفر'}
+                                </span>
+                            </div>
                         </td>
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
                             <button class="btn" onclick="openEditModal(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:var(--primary);">✏️ تعديل</button>
+                            <button class="btn" onclick="toggleDailyOffer(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOffer ? '#7c3aed' : '#e2e8f0'}; color:${isOffer ? '#fff' : '#0f172a'};">
+                                ${isOffer ? 'إلغاء العرض' : '🔥 عرض'}
+                            </button>
                             <button class="btn" onclick="toggleOutOfStock(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
                             <button class="btn btn-danger" onclick="deleteProduct(${realIdx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
                         </td>
@@ -505,7 +533,6 @@
                 filterAdminProducts();
             }
         }
-        // ربط زر التالي بالدالة الصحيحة
         document.getElementById('nextPageBtn').onclick = nextPageProduct;
 
         function calculateFinancials() {
@@ -579,9 +606,11 @@
 
         function exportProductsToExcel() {
             if (!cloudData.products || cloudData.products.length === 0) { alert('❌ لا توجد منتجات لتصديرها!'); return; }
-            let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#0284c7;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>الرقم</th><th>اسم المنتج</th><th>التكلفة</th><th>البيع</th><th>الحالة</th><th>القسم</th></tr></thead><tbody>`;
+            let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#0284c7;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>الرقم</th><th>اسم المنتج</th><th>التكلفة</th><th>البيع</th><th>الربح المتوقع</th><th>الحالة</th><th>القسم</th></tr></thead><tbody>`;
             cloudData.products.forEach((p, i) => {
-                excelContent += `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.cost||0}</td><td>${p.price}</td><td>${p.outOfStock?'غير متوفر':'متوفر'}</td><td>${p.category||'عام'}</td></tr>`;
+                let c = p.cost || (p.price * 0.8);
+                let prof = p.price - c;
+                excelContent += `<tr><td>${i+1}</td><td>${p.name}</td><td>${c}</td><td>${p.price}</td><td>${prof}</td><td>${p.outOfStock?'غير متوفر':'متوفر'}</td><td>${p.category||'عام'}</td></tr>`;
             });
             excelContent += `</tbody></table></body></html>`;
             let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
