@@ -58,13 +58,6 @@
         }
         .card-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; background: #f8fafc; outline: none;
-        }
-        .form-group input:focus, .form-group select:focus { border-color: var(--primary); background: #fff; }
-
         .btn {
             background: var(--primary); color: #fff; border: none; padding: 10px 20px;
             border-radius: var(--radius-md); font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;
@@ -103,22 +96,22 @@
         }
         .auth-box input:focus { border-color: var(--primary); background: #fff; }
 
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-            justify-content: center; align-items: center; z-index: 1000; padding: 16px;
+        #soundBanner {
+            background: #fef3c7; color: #92400e; padding: 10px 20px; text-align: center;
+            font-size: 14px; font-weight: 700; display: flex; justify-content: center; align-items: center; gap: 10px;
+            border-bottom: 1px solid #fde68a;
         }
-        .modal-body {
-            background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius-lg);
-            padding: 24px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
-        .modal-header h3 { font-size: 18px; font-weight: 800; color: var(--text-dark); }
-        .close-icon { cursor: pointer; font-size: 20px; color: var(--text-muted); font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- شريط تفعيل التنبيهات الصوتية -->
+    <div id="soundBanner">
+        <span>⚠️ تنبيهات الصوت غير مفعلة تلقائياً في المتصفح.</span>
+        <button class="btn btn-warning" onclick="enableAudio()" style="padding: 4px 12px; font-size: 12px;">🔊 اضغط هنا لتفعيل صوت الطلبات</button>
+    </div>
+
+    <!-- ملف الصوت التنبيهي -->
     <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="authOverlay">
@@ -127,38 +120,6 @@
             <p>الرجاء إدخال كلمة المرور السرية للمتابعة</p>
             <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور..." onkeydown="if(event.key === 'Enter') checkAdminPassword()">
             <button class="btn" style="width: 100%;" onclick="checkAdminPassword()">تسجيل الدخول 🔓</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="editModal">
-        <div class="modal-body">
-            <div class="modal-header">
-                <h3>✏️ تعديل بيانات المنتج ونقله</h3>
-                <span class="close-icon" onclick="closeEditModal()">✕</span>
-            </div>
-            <input type="hidden" id="editIndex">
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label>اسم المنتج:</label>
-                <input type="text" id="editName">
-            </div>
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label>سعر التكلفة:</label>
-                <input type="number" id="editCost">
-            </div>
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label>سعر البيع:</label>
-                <input type="number" id="editPrice">
-            </div>
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label>القسم / الفئة الفرعية:</label>
-                <select id="editCategory"></select>
-            </div>
-            <div class="form-group" style="margin-bottom: 18px;">
-                <label>رابط الصورة (URL):</label>
-                <input type="text" id="editImage" placeholder="ترك فارغاً لظهور الصورة الافتراضية">
-            </div>
-            <button class="btn btn-success" style="width:100%; margin-bottom:8px;" onclick="saveEditedProduct()">💾 حفظ التعديلات ونقل المنتج</button>
-            <button class="btn btn-danger" style="width:100%; background:#64748b;" onclick="closeEditModal()">إلغاء</button>
         </div>
     </div>
 
@@ -197,57 +158,36 @@
         </div>
 
         <div class="card">
-            <div class="card-title">📈 تقرير المنتجات الأكثر طلباً وأرباحها</div>
+            <div class="card-title">💰 سجل الطلبات والمبيعات (مع أزرار الموافقة والرفض)</div>
+            <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+                <p style="font-size: 13px; color: var(--text-muted);">إدارة ومتابعة طلبات العملاء الواردة وتأكيدها أو إلغاؤها.</p>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-success" onclick="exportSalesToExcel()" style="padding: 6px 12px; font-size: 12px;">📊 تصدير المبيعات لـ Excel</button>
+                    <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>المرتبة</th>
-                            <th>اسم المنتج</th>
-                            <th>عدد مرات الطلب</th>
-                            <th>إجمالي الأرباح المحققة</th>
+                            <th>رقم الطلب</th>
+                            <th>التاريخ والوقت</th>
+                            <th>المجموع والربح</th>
+                            <th>تفاصيل المنتجات</th>
+                            <th>حالة الطلب والتحكم</th>
                         </tr>
                     </thead>
-                    <tbody id="topProductsTable"></tbody>
+                    <tbody id="salesLogTable"></tbody>
                 </table>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">📦 إضافة منتج جديد إلى القسم المخصص</div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>اسم المنتج:</label>
-                    <input type="text" id="prodName" placeholder="مثال: زيت عافية ذرة">
-                </div>
-                <div class="form-group">
-                    <label>سعر التكلفة (للشراء):</label>
-                    <input type="number" id="prodCost" placeholder="مثال: 80">
-                </div>
-                <div class="form-group">
-                    <label>سعر البيع (للعميل):</label>
-                    <input type="number" id="prodPrice" placeholder="مثال: 95">
-                </div>
-                <div class="form-group">
-                    <label>القسم / الفئة الفرعية:</label>
-                    <select id="prodCategory"></select>
-                </div>
-                <div class="form-group">
-                    <label>رابط الصورة (URL):</label>
-                    <input type="text" id="prodImage" placeholder="ترك فارغاً لظهور صورة افتراضية">
-                </div>
-            </div>
-            <button class="btn btn-success" onclick="addNewProduct()">☁️ إضافة المنتج ورفعه للقسم سحابياً</button>
         </div>
 
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <div class="card-title" style="margin-bottom: 0;">📋 قائمة منتجات المتجر المسجلة</div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج أو قسم..." oninput="debounceFilter()" style="width: 240px; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
-                    <button class="btn btn-success" onclick="exportProductsToExcel()" style="padding: 8px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-                        📊 تصدير المنتجات إلى Excel
-                    </button>
+                    <input type="text" id="adminSearchInput" placeholder="🔍 ابحث عن أي منتج..." oninput="filterAdminProducts()" style="width: 240px; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                    <button class="btn btn-success" onclick="exportProductsToExcel()" style="padding: 8px 14px; font-size: 13px;">📊 تصدير المنتجات إلى Excel</button>
                 </div>
             </div>
             <div class="table-responsive">
@@ -260,37 +200,10 @@
                             <th>التكلفة / البيع</th>
                             <th>حالة التوفر</th>
                             <th>القسم الفرعي</th>
-                            <th>الإجراءات والتحكم</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="adminProductsTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">💰 سجل المبيعات والأرباح المحققة</div>
-            <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
-                <p style="font-size: 13px; color: var(--text-muted);">يتم تسجيل المبيعات هنا تلقائياً من طلبات العملاء عبر السحابة.</p>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-success" onclick="exportSalesToExcel()" style="padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-                        📊 تصدير المبيعات والأرباح إلى Excel
-                    </button>
-                    <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
-                </div>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>رقم الطلب</th>
-                            <th>التاريخ والوقت</th>
-                            <th>إجمالي المبيعات</th>
-                            <th>صافي الربح</th>
-                            <th>تفاصيل المنتجات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesLogTable"></tbody>
                 </table>
             </div>
         </div>
@@ -301,28 +214,30 @@
         const ADMIN_PASSWORD = "Ss@1234567890";
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
-        const CATEGORIES_LIST = [
-            "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
-            "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
-            "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
-            "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
-            "سوبر ماركت - خل", "سوبر ماركت - صوصات", "سوبر ماركت - مجمدات", "سوبر ماركت - مناديل", "سوبر ماركت - منوعات",
-            "هابي ميلز", "قسم الغربي", "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
-            "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
-            "كريب - قسم الكريب الحلو", "قسم البيتزا", "قسم المدخنات", "قسم الهوت دوج",
-            "قسم النجرسكو", "فطير هابي ميلز - فطير اسكندراني", "فطير هابي ميلز - فطير حلو",
-            "قسم إضافات", "قسم صواني هابي ميلز",
-            "فول وطعمية - الأطباق والساندوتشات", "فول وطعمية - عجينة وقلي", "فول وطعمية - سلطات ومخللات", "فول وطعمية - إضافات",
-            "سمكة مشوية - أسماك طازجة ومشويات", "سمكة مشوية - سي فود وسنجاري", "سمكة مشوية - أرز ووربات وشوربة", "سمكة مشوية - سلطات ومخللات",
-            "إلكترونيات", "وجبات سريعة", "أدوات منزلية", "عام"
-        ];
+        let cloudData = { products: [], sales: [] };
+        let lastKnownSalesCount = 0;
+        let isFirstCheck = true;
+        let soundAllowed = false;
+
+        function enableAudio() {
+            let sound = document.getElementById('alertSound');
+            sound.play().then(() => {
+                sound.pause();
+                sound.currentTime = 0;
+                soundAllowed = true;
+                document.getElementById('soundBanner').style.display = 'none';
+                alert('✅ تم تفعيل صوت التنبيه بنجاح!');
+            }).catch(e => {
+                alert('⚠️ تعذر تشغيل الصوت تلقائياً، يرجى المحاولة مرة أخرى.');
+            });
+        }
 
         function checkAdminPassword() {
             let enteredPass = document.getElementById('adminPasswordInput').value;
             if (enteredPass === ADMIN_PASSWORD) {
                 document.getElementById('authOverlay').style.display = 'none';
                 initDashboard();
-                setInterval(checkOnlyNewOrders, 15000);
+                setInterval(checkOnlyNewOrders, 12000);
             } else {
                 alert('❌ كلمة المرور غير صحيحة!');
                 document.getElementById('adminPasswordInput').value = '';
@@ -330,44 +245,7 @@
             }
         }
 
-        let cloudData = { products: [], sales: [] };
-        let lastKnownSalesCount = 0;
-        let isFirstCheck = true;
-        let searchTimeout = null;
-
-        function populateCategoryDropdowns() {
-            let prodCatSelect = document.getElementById('prodCategory');
-            let editCatSelect = document.getElementById('editCategory');
-            prodCatSelect.innerHTML = '';
-            editCatSelect.innerHTML = '';
-
-            let groups = [
-                { title: "🛒 سوبر ماركت", items: CATEGORIES_LIST.slice(0, 17) },
-                { title: "🍗 هابي ميلز", items: CATEGORIES_LIST.slice(17, 36) },
-                { title: "🍳 فول وطعمية", items: CATEGORIES_LIST.slice(36, 40) },
-                { title: "🐟 سمكة مشوية", items: CATEGORIES_LIST.slice(40, 44) },
-                { title: "📱 إلكترونيات", items: CATEGORIES_LIST.slice(44, 45) },
-                { title: "🍟 وجبات سريعة", items: CATEGORIES_LIST.slice(45, 46) },
-                { title: "🏠 أدوات منزلية", items: CATEGORIES_LIST.slice(46, 47) },
-                { title: "📦 عام", items: CATEGORIES_LIST.slice(47) }
-            ];
-
-            groups.forEach(g => {
-                let optgroup = document.createElement('optgroup');
-                optgroup.label = g.title;
-                g.items.forEach(cat => {
-                    let opt = document.createElement('option');
-                    opt.value = cat;
-                    opt.textContent = cat;
-                    optgroup.appendChild(opt);
-                });
-                prodCatSelect.appendChild(optgroup.cloneNode(true));
-                editCatSelect.appendChild(optgroup);
-            });
-        }
-
         async function initDashboard() {
-            populateCategoryDropdowns();
             await fetchAllData(true);
         }
 
@@ -414,8 +292,12 @@
         }
 
         function playAlertSound() {
+            if (!soundAllowed) return;
             let sound = document.getElementById('alertSound');
-            if (sound) sound.play().catch(e => {});
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => {});
+            }
         }
 
         function showNewOrderBanner(latestSale) {
@@ -426,9 +308,9 @@
                 box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 10000; font-weight: 800;
                 font-size: 16px; text-align: center; border: 2px solid #fff;
             `;
-            banner.innerHTML = `🚨 طلب جديد وصل! (رقم: #${latestSale.orderId} - المجموع: ${latestSale.total} ج.م)`;
+            banner.innerHTML = `🚨 طلب جديد وصل! (رقم: #${latestSale.orderId} | المجموع: ${latestSale.total} ج.م)`;
             document.body.appendChild(banner);
-            setTimeout(() => banner.remove(), 7000);
+            setTimeout(() => banner.remove(), 8000);
         }
 
         async function saveAndSync() {
@@ -443,11 +325,30 @@
             }
         }
 
-        function debounceFilter() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
+        async function updateOrderStatus(orderId, status) {
+            let sale = cloudData.sales.find(s => s.orderId == orderId);
+            if (sale) {
+                sale.status = status;
+                renderSalesLog();
+                await saveAndSync();
+                alert(status === 'مقبول' ? '✅ تم تأكيد وموافقة الطلب بنجاح!' : '❌ تم رفض وإلغاء الطلب.');
+            }
+        }
+
+        async function toggleOutOfStock(idx) {
+            if (cloudData.products[idx]) {
+                cloudData.products[idx].outOfStock = !cloudData.products[idx].outOfStock;
                 filterAdminProducts();
-            }, 150);
+                await saveAndSync();
+            }
+        }
+
+        async function deleteProduct(idx) {
+            if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                cloudData.products.splice(idx, 1);
+                filterAdminProducts();
+                await saveAndSync();
+            }
         }
 
         function filterAdminProducts() {
@@ -465,11 +366,6 @@
                 let catMatch = p.category && p.category.toLowerCase().includes(query);
                 return nameMatch || catMatch;
             });
-
-            if (filteredProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مطابقة للبحث.</td></tr>`;
-                return;
-            }
 
             let htmlRows = '';
             filteredProducts.forEach((p) => {
@@ -492,9 +388,6 @@
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
                             <button class="btn" onclick="toggleOutOfStock(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
-                            <button class="btn" onclick="moveProduct(${realIdx}, -1)" style="padding: 5px 8px; font-size: 11px;" ${realIdx === 0 ? 'disabled style="opacity:0.4;"' : ''}>⬆️</button>
-                            <button class="btn" onclick="moveProduct(${realIdx}, 1)" style="padding: 5px 8px; font-size: 11px;" ${realIdx === cloudData.products.length - 1 ? 'disabled style="opacity:0.4;"' : ''}>⬇️</button>
-                            <button class="btn btn-warning" onclick="openEditModal(${realIdx})" style="padding: 5px 8px; font-size: 11px;">تعديل ✏️</button>
                             <button class="btn btn-danger" onclick="deleteProduct(${realIdx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
                         </td>
                     </tr>
@@ -503,125 +396,20 @@
             tbody.innerHTML = htmlRows;
         }
 
-        async function toggleOutOfStock(idx) {
-            if (cloudData.products[idx]) {
-                cloudData.products[idx].outOfStock = !cloudData.products[idx].outOfStock;
-                filterAdminProducts();
-                await saveAndSync();
-            }
-        }
-
-        async function moveProduct(idx, direction) {
-            let targetIdx = idx + direction;
-            if (targetIdx < 0 || targetIdx >= cloudData.products.length) return;
-            let temp = cloudData.products[idx];
-            cloudData.products[idx] = cloudData.products[targetIdx];
-            cloudData.products[targetIdx] = temp;
-            filterAdminProducts();
-            await saveAndSync();
-        }
-
-        async function addNewProduct() {
-            let name = document.getElementById('prodName').value.trim();
-            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
-            let price = parseFloat(document.getElementById('prodPrice').value) || 0;
-            let category = document.getElementById('prodCategory').value;
-            let image = document.getElementById('prodImage').value.trim() || DEFAULT_IMAGE;
-
-            if (!name || price <= 0) {
-                alert('الرجاء إدخال اسم المنتج وسعر بيع صحيح!');
-                return;
-            }
-
-            cloudData.products.push({ name, cost, price, category, image, outOfStock: false });
-            filterAdminProducts();
-            await saveAndSync();
-            
-            document.getElementById('prodName').value = '';
-            document.getElementById('prodCost').value = '';
-            document.getElementById('prodPrice').value = '';
-            document.getElementById('prodImage').value = '';
-            alert('✅ تم إضافة المنتج بنجاح!');
-        }
-
-        function openEditModal(idx) {
-            let p = cloudData.products[idx];
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('editName').value = p.name || '';
-            document.getElementById('editCost').value = p.cost || '';
-            document.getElementById('editPrice').value = p.price || '';
-            document.getElementById('editCategory').value = p.category || 'سوبر ماركت - الزيت';
-            document.getElementById('editImage').value = p.image || '';
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-
-        async function saveEditedProduct() {
-            let idx = document.getElementById('editIndex').value;
-            let name = document.getElementById('editName').value.trim();
-            let cost = parseFloat(document.getElementById('editCost').value) || 0;
-            let price = parseFloat(document.getElementById('editPrice').value) || 0;
-            let category = document.getElementById('editCategory').value;
-            let image = document.getElementById('editImage').value.trim() || DEFAULT_IMAGE;
-
-            if (!name || price <= 0) {
-                alert('الرجاء إدخال اسم المنتج وسعر بيع صحيح!');
-                return;
-            }
-
-            let existingOut = cloudData.products[idx].outOfStock || false;
-            cloudData.products[idx] = { name, cost, price, category, image, outOfStock: existingOut };
-            filterAdminProducts();
-            closeEditModal();
-            await saveAndSync();
-            alert('✅ تم تعديل المنتج بنجاح!');
-        }
-
-        async function deleteProduct(idx) {
-            if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-                cloudData.products.splice(idx, 1);
-                filterAdminProducts();
-                await saveAndSync();
-            }
-        }
-
         function calculateFinancials() {
             let now = new Date();
             let todayStr = now.toISOString().split('T')[0];
-
-            let daySales = 0, dayProfit = 0;
-            let weekSales = 0, weekProfit = 0;
-            let monthSales = 0, monthProfit = 0;
-            let yearSales = 0, yearProfit = 0;
+            let daySales = 0, dayProfit = 0, weekSales = 0, weekProfit = 0, monthSales = 0, monthProfit = 0, yearSales = 0, yearProfit = 0;
 
             (cloudData.sales || []).forEach(sale => {
+                if (sale.status === 'مرفوض') return;
                 let saleDate = new Date(sale.timestamp);
                 let saleDateStr = saleDate.toISOString().split('T')[0];
 
-                if (saleDateStr === todayStr) {
-                    daySales += sale.total;
-                    dayProfit += sale.profit;
-                }
-
-                let diffTime = Math.abs(now - saleDate);
-                let diffDays = diffTime / (1000 * 60 * 60 * 24);
-                if (diffDays <= 7) {
-                    weekSales += sale.total;
-                    weekProfit += sale.profit;
-                }
-
-                if (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear()) {
-                    monthSales += sale.total;
-                    monthProfit += sale.profit;
-                }
-
-                if (saleDate.getFullYear() === now.getFullYear()) {
-                    yearSales += sale.total;
-                    yearProfit += sale.profit;
-                }
+                if (saleDateStr === todayStr) { daySales += sale.total; dayProfit += sale.profit; }
+                if ((now - saleDate) / (1000 * 60 * 60 * 24) <= 7) { weekSales += sale.total; weekProfit += sale.profit; }
+                if (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear()) { monthSales += sale.total; monthProfit += sale.profit; }
+                if (saleDate.getFullYear() === now.getFullYear()) { yearSales += sale.total; yearProfit += sale.profit; }
             });
 
             document.getElementById('statDaySales').innerText = daySales + ' ج.م';
@@ -632,57 +420,6 @@
             document.getElementById('statMonthProfit').innerText = `الربح: ${monthProfit} ج.م`;
             document.getElementById('statYearSales').innerText = yearSales + ' ج.م';
             document.getElementById('statYearProfit').innerText = `الربح: ${yearProfit} ج.م`;
-
-            renderTopProductsReport();
-        }
-
-        function renderTopProductsReport() {
-            let tbody = document.getElementById('topProductsTable');
-            if (!tbody) return;
-
-            let productStats = {};
-            (cloudData.sales || []).forEach(sale => {
-                let itemsText = sale.itemsSummary || "";
-                let parts = itemsText.split(',');
-                parts.forEach(part => {
-                    let match = part.trim().match(/^(.*?)\s*\((\d+)\)$/);
-                    if (match) {
-                        let pName = match[1].trim();
-                        let pQty = parseInt(match[2]) || 1;
-                        if (!productStats[pName]) productStats[pName] = { count: 0, profit: 0 };
-                        productStats[pName].count += pQty;
-                        
-                        let foundProd = (cloudData.products || []).find(p => p.name === pName);
-                        let unitProfit = foundProd ? (foundProd.price - (foundProd.cost || foundProd.price * 0.8)) : 10;
-                        productStats[pName].profit += (unitProfit * pQty);
-                    }
-                });
-            });
-
-            let sortedProducts = Object.keys(productStats).map(name => ({
-                name: name,
-                count: productStats[name].count,
-                profit: Math.round(productStats[name].profit * 100) / 100
-            })).sort((a, b) => b.count - a.count);
-
-            if (sortedProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد بيانات كافية حالياً.</td></tr>`;
-                return;
-            }
-
-            let htmlRows = '';
-            sortedProducts.forEach((item, index) => {
-                let rankBadge = index === 0 ? '🥇 الأول' : (index === 1 ? '🥈 الثاني' : (index === 2 ? '🥉 الثالث' : `#${index + 1}`));
-                htmlRows += `
-                    <tr>
-                        <td><span class="badge">${rankBadge}</span></td>
-                        <td style="font-weight:700;">${item.name}</td>
-                        <td style="font-weight:800; color:var(--primary);">${item.count} قطعة</td>
-                        <td style="font-weight:800; color:var(--secondary);">+${item.profit} ج.م</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = htmlRows;
         }
 
         function renderSalesLog() {
@@ -695,13 +432,24 @@
             let htmlRows = '';
             cloudData.sales.slice().reverse().forEach(s => {
                 let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
+                let currentStatus = s.status || 'قيد الانتظار';
+                let statusBadgeBg = currentStatus === 'مقبول' ? '#d1fae5; color:#059669;' : (currentStatus === 'مرفوض' ? '#fee2e2; color:#ef4444;' : '#fef3c7; color:#d97706;');
+
                 htmlRows += `
                     <tr>
                         <td><span class="badge">#${s.orderId}</span></td>
                         <td>${dateFormatted}</td>
-                        <td style="font-weight:700;">${s.total} ج.م</td>
-                        <td style="color:var(--secondary); font-weight:800;">+${s.profit} ج.م</td>
+                        <td><b>${s.total} ج.م</b><br><span style="color:var(--secondary); font-size:12px;">ربح: +${s.profit} ج.م</span></td>
                         <td style="font-size:13px; color:var(--text-muted);">${s.itemsSummary}</td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <span style="padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; text-align: center; background: ${statusBadgeBg}">${currentStatus}</span>
+                                <div style="display: flex; gap: 4px;">
+                                    <button class="btn btn-success" onclick="updateOrderStatus(${s.orderId}, 'مقبول')" style="padding: 4px 8px; font-size: 11px; flex: 1;">✅ موافقة</button>
+                                    <button class="btn btn-danger" onclick="updateOrderStatus(${s.orderId}, 'مرفوض')" style="padding: 4px 8px; font-size: 11px; flex: 1;">❌ رفض</button>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -718,147 +466,30 @@
         }
 
         function exportProductsToExcel() {
-            if (!cloudData.products || cloudData.products.length === 0) {
-                alert('❌ لا توجد منتجات لتصديرها!');
-                return;
-            }
-
-            let excelContent = `
-                <html dir="rtl">
-                <head>
-                    <meta charset="UTF-8">
-                    <style>
-                        table { border-collapse: collapse; width: 100%; font-family: 'Tajawal', sans-serif; }
-                        th { background-color: #0284c7; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
-                        td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 13px; }
-                    </style>
-                </head>
-                <body>
-                    <h2 style="text-align: center; font-family: 'Tajawal'; color: #0f172a;">قائمة منتجات المتجر - جاهز Store</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>الرقم</th>
-                                <th>اسم المنتج</th>
-                                <th>سعر التكلفة (ج.م)</th>
-                                <th>سعر البيع (ج.م)</th>
-                                <th>حالة التوفر</th>
-                                <th>القسم الفرعي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            cloudData.products.forEach((p, index) => {
-                let cost = p.cost || (p.price * 0.8);
-                let stockStatus = p.outOfStock ? 'غير متوفر' : 'متوفر';
-                excelContent += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${p.name || ''}</td>
-                        <td>${cost}</td>
-                        <td>${p.price || 0}</td>
-                        <td>${stockStatus}</td>
-                        <td>${p.category || 'عام'}</td>
-                    </tr>
-                `;
+            if (!cloudData.products || cloudData.products.length === 0) { alert('❌ لا توجد منتجات لتصديرها!'); return; }
+            let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#0284c7;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>الرقم</th><th>اسم المنتج</th><th>التكلفة</th><th>البيع</th><th>الحالة</th><th>القسم</th></tr></thead><tbody>`;
+            cloudData.products.forEach((p, i) => {
+                excelContent += `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.cost||0}</td><td>${p.price}</td><td>${p.outOfStock?'غير متوفر':'متوفر'}</td><td>${p.category||'عام'}</td></tr>`;
             });
-
-            excelContent += `
-                        </tbody>
-                    </table>
-                </body>
-                </html>
-            `;
-
+            excelContent += `</tbody></table></body></html>`;
             let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
             let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `Products_Report_${new Date().toISOString().split('T')[0]}.xls`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            let a = document.createElement('a'); a.href = url; a.download = `Products.xls`; a.click();
         }
 
         function exportSalesToExcel() {
-            if (!cloudData.sales || cloudData.sales.length === 0) {
-                alert('❌ لا توجد سجلات مبيعات لتصديرها حالياً!');
-                return;
-            }
-
-            let excelContent = `
-                <html dir="rtl">
-                <head>
-                    <meta charset="UTF-8">
-                    <style>
-                        table { border-collapse: collapse; width: 100%; font-family: 'Tajawal', sans-serif; }
-                        th { background-color: #10b981; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
-                        td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 13px; }
-                    </style>
-                </head>
-                <body>
-                    <h2 style="text-align: center; font-family: 'Tajawal'; color: #0f172a;">تقرير سجل المبيعات والأرباح - جاهز Store</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الطلب</th>
-                                <th>التاريخ والوقت</th>
-                                <th>إجمالي المبيعات (ج.م)</th>
-                                <th>صافي الربح (ج.م)</th>
-                                <th>تفاصيل المنتجات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            let totalSalesSum = 0;
-            let totalProfitSum = 0;
-
+            if (!cloudData.sales || cloudData.sales.length === 0) { alert('❌ لا توجد مبيعات!'); return; }
+            let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#10b981;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>المجموع</th><th>الربح</th><th>الحالة</th><th>المنتجات</th></tr></thead><tbody>`;
             cloudData.sales.forEach(s => {
-                let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
-                totalSalesSum += (s.total || 0);
-                totalProfitSum += (s.profit || 0);
-
-                excelContent += `
-                    <tr>
-                        <td>#${s.orderId || ''}</td>
-                        <td>${dateFormatted}</td>
-                        <td>${s.total || 0}</td>
-                        <td>${s.profit || 0}</td>
-                        <td>${s.itemsSummary || ''}</td>
-                    </tr>
-                `;
+                excelContent += `<tr><td>#${s.orderId}</td><td>${new Date(s.timestamp).toLocaleString('ar-EG')}</td><td>${s.total}</td><td>${s.profit}</td><td>${s.status||'قيد الانتظار'}</td><td>${s.itemsSummary}</td></tr>`;
             });
-
-            excelContent += `
-                        <tr style="background-color: #f1f5f9; font-weight: bold;">
-                            <td colspan="2">الإجمالي الكلي</td>
-                            <td>${totalSalesSum} ج.م</td>
-                            <td style="color: #059669;">+${totalProfitSum} ج.م</td>
-                            <td>-</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </body>
-                </html>
-            `;
-
+            excelContent += `</tbody></table></body></html>`;
             let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
             let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `Sales_And_Profit_Report_${new Date().toISOString().split('T')[0]}.xls`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            let a = document.createElement('a'); a.href = url; a.download = `Sales.xls`; a.click();
         }
 
-        window.onload = () => {
-            document.getElementById('adminPasswordInput').focus();
-        };
+        window.onload = () => { document.getElementById('adminPasswordInput').focus(); };
     </script>
 </body>
 </html>
