@@ -218,7 +218,7 @@
         </div>
     </div>
 
-    <!-- نافذة إضافة منتج جديد -->
+    <!-- نافذة إضافة منتج جديد (مع الأقسام الرئيسية والفرعية الشاملة) -->
     <div id="addProductModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; justify-content:center; align-items:center; padding: 15px;">
         <div style="background:var(--surface); padding:24px; border-radius:var(--radius-lg); width:100%; max-width:420px; box-shadow:var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
             <h3 style="font-size:18px; font-weight:800; margin-bottom:15px;">➕ إضافة منتج جديد للمتجر</h3>
@@ -245,7 +245,66 @@
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">القسم الفرعي:</label>
-                <input type="text" id="addCategory" placeholder="مثال: سمنة وزيوت" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <select id="addCategory" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                    <optgroup label="🛒 قسم السوبر ماركت">
+                        <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
+                        <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
+                        <option value="سوبر ماركت - الشاي والسكر">سوبر ماركت - الشاي والسكر</option>
+                        <option value="سوبر ماركت - الدقيق">سوبر ماركت - الدقيق</option>
+                        <option value="سوبر ماركت - المكرونة">سوبر ماركت - المكرونة</option>
+                        <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
+                        <option value="سوبر ماركت - الشيبسي">سوبر ماركت - الشيبسي</option>
+                        <option value="سوبر ماركت - البسكويت والفطائر">سوبر ماركت - البسكويت والفطائر</option>
+                        <option value="سوبر ماركت - العصائر والمياه">سوبر ماركت - العصائر والمياه</option>
+                        <option value="سوبر ماركت - مياه غازية">سوبر ماركت - مياه غازية</option>
+                        <option value="سوبر ماركت - شيكولاتة ونوتيلا">سوبر ماركت - شيكولاتة ونوتيلا</option>
+                        <option value="سوبر ماركت - عسل وطحينة">سوبر ماركت - عسل وطحينة</option>
+                        <option value="سوبر ماركت - خل">سوبر ماركت - خل</option>
+                        <option value="سوبر ماركت - صوصات">سوبر ماركت - صوصات</option>
+                        <option value="سوبر ماركت - مجمدات">سوبر ماركت - مجمدات</option>
+                        <option value="سوبر ماركت - مناديل">سوبر ماركت - مناديل</option>
+                        <option value="سوبر ماركت - منوعات">سوبر ماركت - منوعات</option>
+                    </optgroup>
+                    <optgroup label="🍗 قسم هابي ميلز (الوجبات والمشويات)">
+                        <option value="هابي ميلز">هابي ميلز</option>
+                        <option value="قسم الغربي">قسم الغربي</option>
+                        <option value="تشيكن تندر">تشيكن تندر</option>
+                        <option value="فرايد تشيكن">فرايد تشيكن</option>
+                        <option value="مشويات">مشويات</option>
+                        <option value="شاورما - قسم الساندوتشات">شاورما - قسم الساندوتشات</option>
+                        <option value="شاورما - فتة">شاورما - فتة</option>
+                        <option value="شاورما - قسم الوجبات">شاورما - قسم الوجبات</option>
+                        <option value="شاورما بالوزن">شاورما بالوزن</option>
+                        <option value="كريب - قسم الكريب الحادق">كريب - قسم الكريب الحادق</option>
+                        <option value="كريب - قسم الكريب الحلو">كريب - قسم الكريب الحلو</option>
+                        <option value="قسم البيتزا">قسم البيتزا</option>
+                        <option value="قسم المدخنات">قسم المدخنات</option>
+                        <option value="قسم الهوت دوج">قسم الهوت دوج</option>
+                        <option value="قسم النجرسكو">قسم النجرسكو</option>
+                        <option value="فطير هابي ميلز - فطير اسكندراني">فطير هابي ميلز - فطير اسكندراني</option>
+                        <option value="فطير هابي ميلز - فطير حلو">فطير هابي ميلز - فطير حلو</option>
+                        <option value="قسم إضافات">قسم إضافات</option>
+                        <option value="قسم صواني هابي ميلز">قسم صواني هابي ميلز</option>
+                    </optgroup>
+                    <optgroup label="🍳 قسم فول وطعمية">
+                        <option value="فول وطعمية - الأطباق والساندوتشات">فول وطعمية - الأطباق والساندوتشات</option>
+                        <option value="فول وطعمية - عجينة وقلي">فول وطعمية - عجينة وقلي</option>
+                        <option value="فول وطعمية - سلطات ومخللات">فول وطعمية - سلطات ومخللات</option>
+                        <option value="فول وطعمية - إضافات">فول وطعمية - إضافات</option>
+                    </optgroup>
+                    <optgroup label="🐟 قسم سمكة مشوية">
+                        <option value="سمكة مشوية - أسماك طازجة ومشويات">سمكة مشوية - أسماك طازجة ومشويات</option>
+                        <option value="سمكة مشوية - سي فود وسنجاري">سمكة مشوية - سي فود وسنجاري</option>
+                        <option value="سمكة مشوية - أرز ووربات وشوربة">سمكة مشوية - أرز ووربات وشوربة</option>
+                        <option value="سمكة مشوية - سلطات ومخللات">سمكة مشوية - سلطات ومخللات</option>
+                    </optgroup>
+                    <optgroup label="📱 الأقسام العامة والأخرى">
+                        <option value="إلكترونيات">إلكترونيات</option>
+                        <option value="وجبات سريعة">وجبات سريعة</option>
+                        <option value="أدوات منزلية">أدوات منزلية</option>
+                        <option value="عام" selected>عام</option>
+                    </optgroup>
+                </select>
             </div>
 
             <div style="margin-bottom:12px;">
@@ -451,7 +510,6 @@
             }
         }
 
-        // دوال إضافة منتج جديد
         function openAddModal() {
             document.getElementById('addName').value = '';
             document.getElementById('addCost').value = '';
@@ -471,7 +529,7 @@
             let cost = parseFloat(document.getElementById('addCost').value) || 0;
             let price = parseFloat(document.getElementById('addPrice').value) || 0;
             let oldPrice = parseFloat(document.getElementById('addOldPrice').value) || 0;
-            let category = document.getElementById('addCategory').value.trim() || 'عام';
+            let category = document.getElementById('addCategory').value;
             let image = document.getElementById('addImage').value.trim();
 
             if (!name || price <= 0) {
@@ -490,7 +548,7 @@
                 isOffer: false
             };
 
-            cloudData.products.unshift(newProd); // إضافة المنتج الجديد في البداية
+            cloudData.products.unshift(newProd);
             closeAddModal();
             filterAdminProducts();
             await saveAndSync();
