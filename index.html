@@ -97,7 +97,6 @@
         }
         .hero-btn:hover { transform: scale(1.05); }
 
-        /* تنسيقات شريط العروض اليومية المتحرك (Slider) */
         .offers-slider-container {
             display: flex;
             gap: 16px;
@@ -245,7 +244,6 @@
             </div>
         </div>
 
-        <!-- قسم العروض اليومية المتحرك (Slider) -->
         <div style="margin: 20px 0; display: none;" id="dailyOffersSection">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark);">🔥 العروض اليومية والخصومات الخاصة</h3>
@@ -372,6 +370,7 @@
         </div>
     </div>
 
+    <!-- نافذة الطلب الخاص المحدثة -->
     <div class="modal-overlay" id="customOrderModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -388,12 +387,33 @@
             </div>
             <div class="form-group">
                 <label>تفاصيل الطلب (اكتب أي أصناف أو منتجات تريدها):</label>
-                <textarea id="customDetails" rows="4" placeholder="مثال: أريد 2 كيلو طماطم، علبة جبنة، وطلب من الصيدلية..."></textarea>
+                <textarea id="customDetails" rows="3" placeholder="مثال: أريد 2 كيلو طماطم، علبة جبنة، وطلب من الصيدلية..."></textarea>
             </div>
+            
             <div class="form-group">
-                <label>العنوان بالتفصيل ببلطيم:</label>
-                <textarea id="customAddress" rows="2" placeholder="الشارع - رقم العقار"></textarea>
+                <label>منطقة التوصيل:</label>
+                <select id="customDeliveryZone" onchange="toggleCustomExternalZones()">
+                    <option value="داخل بلطيم (توصيل 20 ج.م)">📍 داخل بلطيم (توصيل 20 ج.م)</option>
+                    <option value="خارج بلطيم وضواحيها">🌍 خارج بلطيم وضواحيها (رسوم ثابتة لكل منطقة)</option>
+                </select>
             </div>
+
+            <div class="form-group" id="customExternalGroup" style="display: none;">
+                <label>اختر المنطقة الخارجية:</label>
+                <select id="customExternalZoneSelect">
+                    <option value="الشيخ مبارك (توصيل: 50 ج.م)">الشيخ مبارك (توصيل: 50 ج.م)</option>
+                    <option value="مصيف بلطيم (توصيل: 60 ج.م)">مصيف بلطيم (توصيل: 60 ج.م)</option>
+                    <option value="الكوم الأحمر (توصيل: 40 ج.م)">الكوم الأحمر (توصيل: 40 ج.م)</option>
+                    <option value="سوق الثلاثاء (توصيل: 50 ج.م)">سوق الثلاثاء (توصيل: 50 ج.م)</option>
+                    <option value="أبو شعلان (توصيل: 40 ج.م)">أبو شعلان (توصيل: 40 ج.م)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>العنوان بالتفصيل (الشارع / رقم العقار):</label>
+                <textarea id="customAddress" rows="2" placeholder="الشارع - رقم العقار / الدور"></textarea>
+            </div>
+
             <button class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص للإدارة عبر الواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('customOrderModal')">إلغاء</button>
         </div>
@@ -441,6 +461,12 @@
             let group = document.getElementById('outsideAreaGroup');
             group.style.display = (zone === 'outside') ? 'block' : 'none';
             updateDeliveryFee();
+        }
+
+        function toggleCustomExternalZones() {
+            let zone = document.getElementById('customDeliveryZone').value;
+            let group = document.getElementById('customExternalGroup');
+            group.style.display = (zone.includes('خارج بلطيم')) ? 'block' : 'none';
         }
 
         function updateDeliveryFee() { updateCartUI(); }
@@ -865,9 +891,27 @@
             let name = document.getElementById('customName').value.trim();
             let phone = document.getElementById('customPhone').value.trim();
             let details = document.getElementById('customDetails').value.trim();
+            let zoneSelect = document.getElementById('customDeliveryZone').value;
             let address = document.getElementById('customAddress').value.trim();
-            if (!name || !phone || !details) { alert('الرجاء إدخال الاسم ورقم الهاتف وتفاصيل الطلب!'); return; }
-            let msg = `🛍️ *طلب خاص جديد (اطلب أي حاجة)*\n\n👤 الاسم: ${name}\n📞 الجوال: ${phone}\n📝 التفاصيل: ${details}\n📍 العنوان: ${address}`;
+
+            if (!name || !phone || !details || !address) { 
+                alert('الرجاء إدخال الاسم، رقم الهاتف، تفاصيل الطلب، والعنوان بالتفصيل!'); 
+                return; 
+            }
+
+            let finalZone = zoneSelect;
+            if (zoneSelect.includes('خارج بلطيم')) {
+                let extSelect = document.getElementById('customExternalZoneSelect');
+                finalZone = "خارج بلطيم - " + extSelect.value;
+            }
+
+            let msg = `🛍️ *طلب خاص جديد (اطلب أي حاجة)*\n\n`;
+            msg += `👤 الاسم: ${name}\n`;
+            msg += `📞 الجوال: ${phone}\n`;
+            msg += `📍 منطقة التوصيل: ${finalZone}\n`;
+            msg += `🏠 العنوان: ${address}\n\n`;
+            msg += `📝 *تفاصيل الطلب:*\n${details}`;
+
             window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('customOrderModal');
         }
