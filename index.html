@@ -295,10 +295,10 @@
                 <label>اختر المنطقة الخارجية:</label>
                 <select id="outsideAreaKm" onchange="updateDeliveryFee()">
                     <option value="50">الشيخ مبارك (توصيل: 50 ج.م)</option>
-                    <option value="60">أبو شعلان (توصيل: 60 ج.م)</option>
-                    <option value="70">الكوم الأحمر (توصيل: 70 ج.م)</option>
-                    <option value="80">سوق الثلاثاء (توصيل: 80 ج.م)</option>
-                    <option value="120">مصيف بلطيم (توصيل: 120 ج.م)</option>
+                    <option value="40">أبو شعلان (توصيل: 40 ج.م)</option>
+                    <option value="40">الكوم الأحمر (توصيل: 40 ج.م)</option>
+                    <option value="50">سوق الثلاثاء (توصيل: 50 ج.م)</option>
+                    <option value="60">مصيف بلطيم (توصيل: 60 ج.م)</option>
                 </select>
                 <small style="color: var(--text-muted); font-size: 11px;">⚡ يتم اعتماد قيمة التوصيل الثابتة الخاصة بالمنطقة المختارة فوراً.</small>
             </div>
@@ -529,8 +529,6 @@
                             if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
                             let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                             let safeName = p.name.replace(/'/g, "\\'");
-                            
-                            // التحقق مما إذا كان المنتج غير متوفر بناءً على إعدادات الإدارة
                             let isOut = p.outOfStock === true;
 
                             cardsHtml += `
@@ -592,198 +590,192 @@
 
         function toggleMainCat(mainIdx) {
             let card = document.getElementById(`mainCard_${mainIdx}`);
-            card.classList.toggle('active');
-        }
+            let content = document.getElementById(`mainContent_${mainIdx}`);
+            let isActive = card.classList.contains('active');
+            
+            document.querySelectorAll('.main-cat-card').forEach(c => {
+                c.classList.remove('active');
+                let cId = c.id.split('_')[1];
+                document.getElementById(`mainContent_${cId}`).style.display = 'none';
+            });
 
-        function toggleSubCat(mainIdx, subIdx) {
-            let pill = document.getElementById(`pill_${mainIdx}_${subIdx}`);
-            let container = document.getElementById(`subProducts_${mainIdx}_${subIdx}`);
-
-            let isAlreadyActive = pill.classList.contains('active');
-
-            document.querySelectorAll(`#mainContent_${mainIdx} .sub-cat-pill`).forEach(el => el.classList.remove('active'));
-            document.querySelectorAll(`#mainContent_${mainIdx} .sub-cat-products-container`).forEach(el => el.classList.remove('active'));
-
-            if (!isAlreadyActive) {
-                pill.classList.add('active');
-                container.classList.add('active');
+            if (!isActive) {
+                card.classList.add('active');
+                content.style.display = 'block';
             }
         }
 
+        function toggleSubCat(mainIdx, subIdx) {
+            let parentContent = document.getElementById(`mainContent_${mainIdx}`);
+            parentContent.querySelectorAll('.sub-cat-pill').forEach(p => p.classList.remove('active'));
+            parentContent.querySelectorAll('.sub-cat-products-container').forEach(c => c.classList.remove('active'));
+
+            document.getElementById(`pill_${mainIdx}_${subIdx}`).classList.add('active');
+            document.getElementById(`subProducts_${mainIdx}_${subIdx}`).classList.add('active');
+        }
+
         function searchStore() {
-            let query = document.getElementById('searchInput').value.trim();
-            renderAccordionStore(query);
+            let q = document.getElementById('searchInput').value;
+            renderAccordionStore(q);
         }
 
         function changeQty(key, delta) {
             if(!productQuantities[key]) productQuantities[key] = 1;
             productQuantities[key] += delta;
             if(productQuantities[key] < 1) productQuantities[key] = 1;
-            document.getElementById(`qtyVal_${key}`).innerText = productQuantities[key];
+            let el = document.getElementById(`qtyVal_${key}`);
+            if(el) el.innerText = productQuantities[key];
         }
 
         function addToCart(name, price, key) {
             let qty = productQuantities[key] || 1;
+            let foundProd = allProducts.find(p => p.name === name);
+            let cost = foundProd ? (foundProd.cost || (price * 0.8)) : (price * 0.8);
+
             let existing = cart.find(item => item.name === name);
             if (existing) {
                 existing.qty += qty;
             } else {
-                cart.push({ name, price, qty });
+                cart.push({ name, price, cost, qty });
             }
             updateCartUI();
-            alert(`تمت إضافة (${qty}) من ${name} إلى السلة بنجاح! 🛒`);
+            alert(`✅ تم إضافة "${name}" (عدد: ${qty}) إلى السلة بنجاح.`);
         }
 
         function updateCartUI() {
-            let totalCount = 0;
-            let subTotal = 0;
-            cart.forEach(item => {
-                totalCount += item.qty;
-                subTotal += (item.price * item.qty);
-            });
-            
-            document.getElementById('cartCount').innerText = totalCount;
-            let deliveryFee = getDeliveryFee();
-            let grandTotal = subTotal + (totalCount > 0 ? deliveryFee : 0);
+            let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = totalQty;
+        }
 
-            document.getElementById('subTotal').innerText = subTotal + " ج.م";
-            document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + " ج.م";
-            document.getElementById('grandTotal').innerText = grandTotal + " ج.م";
-
+        function openCart() {
             let list = document.getElementById('cartItemsList');
-            list.innerHTML = '';
             if (cart.length === 0) {
-                list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">السلة فارغة حالياً 🛒</div>';
+                list.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px;">سلة التسوق فارغة حالياً.</div>`;
+                document.getElementById('subTotal').innerText = '0 ج.م';
+                document.getElementById('deliveryFeeDisplay').innerText = '0 ج.م';
+                document.getElementById('grandTotal').innerText = '0 ج.م';
+                document.getElementById('cartModal').style.display = 'flex';
                 return;
             }
 
+            let html = '';
+            let sub = 0;
             cart.forEach((item, index) => {
-                list.innerHTML += `
+                let itemTotal = item.price * item.qty;
+                sub += itemTotal;
+                html += `
                     <div class="cart-row">
                         <div>
-                            <div style="font-weight:700; font-size:14px;">${item.name}</div>
+                            <div style="font-weight:700;">${item.name}</div>
                             <div style="font-size:12px; color:var(--text-muted);">${item.price} ج.م × ${item.qty}</div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-weight:800; color:var(--secondary);">${item.price * item.qty} ج.م</span>
-                            <button onclick="removeFromCart(${index})" style="background:#ef4444; color:#fff; border:none; width:24px; height:24px; border-radius:6px; cursor:pointer; font-weight:bold;">×</button>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-weight:800; color:var(--primary);">${itemTotal} ج.م</span>
+                            <button onclick="removeFromCart(${index})" style="background:#fee2e2; color:#ef4444; border:none; width:26px; height:26px; border-radius:6px; cursor:pointer; font-weight:bold;">✕</button>
                         </div>
                     </div>
                 `;
             });
+            list.innerHTML = html;
+
+            let deliveryFee = getDeliveryFee();
+            let grand = sub + deliveryFee;
+
+            document.getElementById('subTotal').innerText = sub + ' ج.م';
+            document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + ' ج.م';
+            document.getElementById('grandTotal').innerText = grand + ' ج.م';
+            document.getElementById('cartModal').style.display = 'flex';
         }
 
         function removeFromCart(index) {
             cart.splice(index, 1);
             updateCartUI();
-        }
-
-        function openCart() {
-            updateCartUI();
-            document.getElementById('cartModal').style.display = 'flex';
-        }
-
-        function openCaptainModal() {
-            document.getElementById('captainModal').style.display = 'flex';
-        }
-
-        function openCustomOrderModal() {
-            document.getElementById('customOrderModal').style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
+            openCart();
         }
 
         function goToCheckout() {
-            if (cart.length === 0) {
-                alert('سلة التسوق فارغة!');
-                return;
-            }
+            if (cart.length === 0) { alert('سلة التسوق فارغة!'); return; }
             closeModal('cartModal');
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
-        function submitOrderToWhatsApp() {
+        function openCaptainModal() { document.getElementById('captainModal').style.display = 'flex'; }
+        function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
-            let zoneSelect = document.getElementById('deliveryZone');
-            let isOutside = zoneSelect.value === 'outside';
-            
-            let areaSelect = document.getElementById('outsideAreaKm');
-            let areaName = isOutside ? areaSelect.options[areaSelect.selectedIndex].text : 'داخل بلطيم (حسب الأقسام)';
-            
-            let deliveryFee = getDeliveryFee();
             let address = document.getElementById('custAddress').value.trim();
+            let zoneSelect = document.getElementById('deliveryZone');
+            let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
             let payMethod = document.getElementById('payMethod').value;
 
             if (!name || !phone || !address) {
-                alert('الرجاء إكمال كافة بيانات العميل والعنوان.');
+                alert('الرجاء إدخال الاسم ورقم الهاتف والعنوان بالتفصيل!');
                 return;
             }
 
-            let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let grandTotal = subTotal + deliveryFee;
+            if (zoneSelect.value === 'outside') {
+                let extSelect = document.getElementById('outsideAreaKm');
+                zoneText = "خارج بلطيم - " + extSelect.options[extSelect.selectedIndex].text;
+            }
 
-            let msg = `🛒 *طلب جديد عبر منصة جاهز (بلطيم)*\n\n`;
-            msg += `👤 *الاسم:* ${name}\n`;
-            msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📍 *المنطقة:* ${areaName}\n`;
-            msg += `🏠 *العنوان:* ${address}\n`;
-            msg += `💳 *الدفع:* ${payMethod}\n\n`;
-            msg += `📋 *المنتجات المطلوبة:*\n`;
+            let sub = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let deliveryFee = getDeliveryFee();
+            let grand = sub + deliveryFee;
+            let profit = cart.reduce((sum, item) => sum + ((item.price - item.cost) * item.qty), 0);
 
-            cart.forEach((item, idx) => {
-                msg += `${idx + 1}. ${item.name} (${item.qty} × ${item.price} ج.م) = ${item.price * item.qty} ج.م\n`;
-            });
+            let itemsSummary = cart.map(i => `${i.name} (${i.qty})`).join(', ');
 
-            msg += `\n------------------\n`;
-            msg += `📦 المجموع الفرعي: ${subTotal} ج.م\n`;
-            msg += `🛵 رسوم التوصيل: ${deliveryFee} ج.م\n`;
-            msg += `💰 *الإجمالي الكلي: ${grandTotal} ج.م*\n\n`;
-            
-            // خانة تأكيد الطلب من العميل مباشرة (نعم / لا)
-            msg += `❓ *هل تؤكد هذا الطلب؟*\n[ ] نعم، أؤكد الطلب\n[ ] لا، أود إلغاء الطلب`;
-
-            let saleRecord = {
-                orderId: 'ORD_' + Math.floor(1000 + Math.random() * 9000),
+            let newSale = {
+                orderId: Math.floor(1000 + Math.random() * 9000),
                 timestamp: new Date().toISOString(),
-                customerName: name,
-                customerPhone: phone,
-                total: grandTotal,
-                profit: subTotal * 0.2,
-                itemsSummary: cart.map(i => `${i.name} (${i.qty})`).join(', ')
+                clientName: name,
+                clientPhone: phone,
+                deliveryZone: zoneText,
+                address: address,
+                paymentMethod: payMethod,
+                itemsSummary: itemsSummary,
+                items: cart,
+                total: grand,
+                profit: profit,
+                status: 'قيد الانتظار'
             };
 
-            syncSaleToCloud(saleRecord);
+            await syncSaleToCloud(newSale);
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
-            window.open(url, '_blank');
+            let msg = `🛒 *طلب جديد عبر متجر جاهز Store*\n\n`;
+            msg += `👤 اسم العميل: ${name}\n`;
+            msg += `📞 رقم الجوال: ${phone}\n`;
+            msg += `📍 منطقة التوصيل: ${zoneText}\n`;
+            msg += `🏠 العنوان: ${address}\n`;
+            msg += `💳 طريقة الدفع: ${payMethod}\n\n`;
+            msg += `📋 *تفاصيل المنتجات المطلوبة:*\n`;
+            cart.forEach(i => {
+                msg += `- ${i.name} (الكمية: ${i.qty}) | السعر: ${i.price * i.qty} ج.م\n`;
+            });
+            msg += `\n📦 المجموع الفرعي: ${sub} ج.م`;
+            msg += `\n🛵 رسوم التوصيل: ${deliveryFee} ج.م`;
+            msg += `\n💰 *الإجمالي النهائي: ${grand} ج.م*`;
+
+            let encodedMsg = encodeURIComponent(msg);
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodedMsg}`, '_blank');
+
             cart = [];
             updateCartUI();
             closeModal('checkoutModal');
-            alert('✅ تم إرسال طلبك وفاتورة المشتريات مع خانة التأكيد للإدارة عبر الواتساب!');
+            alert('✅ تم إرسال الطلب بنجاح وتنبيه الإدارة!');
         }
 
         function submitCaptainToWhatsApp() {
             let name = document.getElementById('capName').value.trim();
             let phone = document.getElementById('capPhone').value.trim();
             let address = document.getElementById('capAddress').value.trim();
-
-            if (!name || !phone || !address) {
-                alert('الرجاء إكمال كافة البيانات المطلوبة.');
-                return;
-            }
-
-            let msg = `🛵 *طلب انضمام ككابتن لتوصيل الطلبات (جاهز)*\n\n`;
-            msg += `👤 *الاسم:* ${name}\n`;
-            msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📍 *المنطقة:* ${address}\n`;
-
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
-            window.open(url, '_blank');
+            if (!name || !phone) { alert('الرجاء إدخال الاسم ورقم الهاتف!'); return; }
+            let msg = `🛵 *طلب انضمام ككابتن توصيل جديد*\n\n👤 الاسم: ${name}\n📞 الجوال: ${phone}\n📍 العنوان: ${address}`;
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('captainModal');
-            alert('✅ تم إرسال طلب الانضمام بنجاح للإدارة عبر الواتساب!');
         }
 
         function submitCustomOrderToWhatsApp() {
@@ -791,28 +783,13 @@
             let phone = document.getElementById('customPhone').value.trim();
             let details = document.getElementById('customDetails').value.trim();
             let address = document.getElementById('customAddress').value.trim();
-
-            if (!name || !phone || !details || !address) {
-                alert('الرجاء إكمال كافة تفاصيل الطلب الخاص.');
-                return;
-            }
-
-            let msg = `🛍️ *طلب خاص جديد عبر منصة جاهز (بلطيم)*\n\n`;
-            msg += `👤 *الاسم:* ${name}\n`;
-            msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📝 *تفاصيل الطلب:* ${details}\n`;
-            msg += `📍 *العنوان:* ${address}\n\n`;
-            msg += `❓ *هل تؤكد هذا الطلب الخاص؟*\n[ ] نعم\n[ ] لا`;
-
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=` + encodeURIComponent(msg);
-            window.open(url, '_blank');
+            if (!name || !phone || !details) { alert('الرجاء إدخال الاسم ورقم الهاتف وتفاصيل الطلب!'); return; }
+            let msg = `🛍️ *طلب خاص جديد (اطلب أي حاجة)*\n\n👤 الاسم: ${name}\n📞 الجوال: ${phone}\n📝 التفاصيل: ${details}\n📍 العنوان: ${address}`;
+            window.open(`https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('customOrderModal');
-            alert('✅ تم إرسال طلبك الخاص مع خانة التأكيد للإدارة عبر الواتساب!');
         }
 
-        window.onload = function() {
-            loadStoreProducts(false);
-        };
+        window.onload = () => { loadStoreProducts(false); };
     </script>
 </body>
 </html>
