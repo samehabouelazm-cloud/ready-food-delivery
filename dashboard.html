@@ -78,6 +78,11 @@
         .actions-cell { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .badge { background: #e0f2fe; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 
+        /* أزرار التنقل بين الصفحات */
+        .pagination-bar {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 13px; font-weight: 700;
+        }
+
         #authOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
@@ -158,7 +163,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">💰 سجل الطلبات والمبيعات (مع أزرار الموافقة والرفض)</div>
+            <div class="card-title">💰 سجل الطلبات والمبيعات</div>
             <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
                 <p style="font-size: 13px; color: var(--text-muted);">إدارة ومتابعة طلبات العملاء الواردة وتأكيدها أو إلغاؤها.</p>
                 <div style="display: flex; gap: 8px;">
@@ -206,6 +211,37 @@
                     <tbody id="adminProductsTable"></tbody>
                 </table>
             </div>
+            
+            <!-- أزرار التنقل (الأسهم الانتقالية) بين صفحات المنتجات -->
+            <div class="pagination-bar">
+                <button class="btn" onclick="prevProductPage()" id="prevPageBtn" style="padding: 6px 14px; font-size: 12px;">⬅️ السابق</button>
+                <span id="pageIndicator" style="color: var(--text-muted);">الصفحة 1 من 1</span>
+                <button class="btn" onclick="nextProductPage()" id="nextPageBtn" style="padding: 6px 14px; font-size: 12px;">التالي ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل المنتج -->
+    <div id="editProductModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; justify-content:center; align-items:center;">
+        <div style="background:var(--surface); padding:24px; border-radius:var(--radius-lg); width:100%; max-width:400px; box-shadow:var(--shadow-lg);">
+            <h3 style="font-size:18px; font-weight:800; margin-bottom:15px;">✏️ تعديل بيانات المنتج</h3>
+            <input type="hidden" id="editProductIndex">
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">اسم المنتج:</label>
+                <input type="text" id="editName" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر البيع (ج.م):</label>
+                <input type="number" id="editPrice" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">رابط الصورة:</label>
+                <input type="text" id="editImage" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-success" onclick="saveEditedProduct()" style="flex:1; padding:10px;">حفظ التعديلات 💾</button>
+                <button class="btn btn-danger" onclick="closeEditModal()" style="flex:1; padding:10px;">إلغاء</button>
+            </div>
         </div>
     </div>
 
@@ -218,6 +254,10 @@
         let lastKnownSalesCount = 0;
         let isFirstCheck = true;
         let soundAllowed = false;
+        
+        // متغيرات التنقل (الأسهم الانتقالية) بين صفحات المنتجات
+        let currentProductPage = 1;
+        const productsPerPage = 15;
 
         function enableAudio() {
             let sound = document.getElementById('alertSound');
@@ -351,6 +391,48 @@
             }
         }
 
+        // دوال تعديل المنتج
+        function openEditModal(idx) {
+            let p = cloudData.products[idx];
+            if (!p) return;
+            document.getElementById('editProductIndex').value = idx;
+            document.getElementById('editName').value = p.name || '';
+            document.getElementById('editPrice').value = p.price || 0;
+            document.getElementById('editImage').value = p.image || '';
+            document.getElementById('editProductModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProductModal').style.display = 'none';
+        }
+
+        async function saveEditedProduct() {
+            let idx = parseInt(document.getElementById('editProductIndex').value);
+            let p = cloudData.products[idx];
+            if (p) {
+                p.name = document.getElementById('editName').value.trim();
+                p.price = parseFloat(document.getElementById('editPrice').value) || 0;
+                p.image = document.getElementById('editImage').value.trim();
+                
+                closeEditModal();
+                filterAdminProducts();
+                await saveAndSync();
+                alert('✅ تم تحديث المنتج بنجاح وحفظه في السحابة!');
+            }
+        }
+
+        // دوال التنقل (الأسهم الانتقالية) بين صفحات المنتجات
+        function prevProductPage() {
+            if (currentProductPage > 1) {
+                currentProductPage--;
+                filterAdminProducts();
+            }
+        }
+
+        function nextPage() {
+            // المعالجة داخل دالة filterAdminProducts لتحديد الحد الأقصى
+        }
+
         function filterAdminProducts() {
             let queryInput = document.getElementById('adminSearchInput');
             let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
@@ -358,6 +440,7 @@
             
             if(!cloudData.products || cloudData.products.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مسجلة.</td></tr>`;
+                document.getElementById('pageIndicator').innerText = `الصفحة 0 من 0`;
                 return;
             }
 
@@ -367,8 +450,19 @@
                 return nameMatch || catMatch;
             });
 
+            let totalPages = Math.ceil(filteredProducts.length / productsPerPage) || 1;
+            if (currentProductPage > totalPages) currentProductPage = totalPages;
+            if (currentProductPage < 1) currentProductPage = 1;
+
+            let startIdx = (currentProductPage - 1) * productsPerPage;
+            let paginatedProducts = filteredProducts.slice(startIdx, startIdx + productsPerPage);
+
+            document.getElementById('pageIndicator').innerText = `الصفحة ${currentProductPage} من ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = currentProductPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentProductPage >= totalPages;
+
             let htmlRows = '';
-            filteredProducts.forEach((p) => {
+            paginatedProducts.forEach((p) => {
                 let realIdx = cloudData.products.indexOf(p);
                 let cost = p.cost || (p.price * 0.8);
                 let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
@@ -387,6 +481,7 @@
                         </td>
                         <td><span class="badge">${p.category || 'عام'}</span></td>
                         <td class="actions-cell">
+                            <button class="btn" onclick="openEditModal(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:var(--primary);">✏️ تعديل</button>
                             <button class="btn" onclick="toggleOutOfStock(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
                             <button class="btn btn-danger" onclick="deleteProduct(${realIdx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
                         </td>
@@ -395,6 +490,23 @@
             });
             tbody.innerHTML = htmlRows;
         }
+
+        function nextPageProduct() {
+            let queryInput = document.getElementById('adminSearchInput');
+            let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+            let filteredProducts = cloudData.products.filter(p => {
+                let nameMatch = p.name && p.name.toLowerCase().includes(query);
+                let catMatch = p.category && p.category.toLowerCase().includes(query);
+                return nameMatch || catMatch;
+            });
+            let totalPages = Math.ceil(filteredProducts.length / productsPerPage) || 1;
+            if (currentProductPage < totalPages) {
+                currentProductPage++;
+                filterAdminProducts();
+            }
+        }
+        // ربط زر التالي بالدالة الصحيحة
+        document.getElementById('nextPageBtn').onclick = nextPageProduct;
 
         function calculateFinancials() {
             let now = new Date();
@@ -480,7 +592,7 @@
         function exportSalesToExcel() {
             if (!cloudData.sales || cloudData.sales.length === 0) { alert('❌ لا توجد مبيعات!'); return; }
             let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#10b981;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>المجموع</th><th>الربح</th><th>الحالة</th><th>المنتجات</th></tr></thead><tbody>`;
-            cloudData.sales.forEach(s => {
+            cloudData.sales.slice().reverse().forEach(s => {
                 excelContent += `<tr><td>#${s.orderId}</td><td>${new Date(s.timestamp).toLocaleString('ar-EG')}</td><td>${s.total}</td><td>${s.profit}</td><td>${s.status||'قيد الانتظار'}</td><td>${s.itemsSummary}</td></tr>`;
             });
             excelContent += `</tbody></table></body></html>`;
