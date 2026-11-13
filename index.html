@@ -97,6 +97,25 @@
         }
         .hero-btn:hover { transform: scale(1.05); }
 
+        /* تنسيقات شريط العروض اليومية المتحرك (Slider) */
+        .offers-slider-container {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) #e2e8f0;
+        }
+        .offers-slider-container::-webkit-scrollbar { height: 6px; }
+        .offers-slider-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .offers-slider-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .offers-slider-container .product-card {
+            min-width: 220px;
+            max-width: 220px;
+            flex-shrink: 0;
+        }
+
         .search-box {
             background: var(--surface); border-radius: var(--radius-md); padding: 10px 16px;
             display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
@@ -224,6 +243,15 @@
                 <p>منتجات السوبرماركت، وجبات هابي ميلز الطازجة، وتوصيل سريع حتى باب المنزل من فرعنا بشارع جمال عبد الناصر ببلطيم.</p>
                 <button class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
             </div>
+        </div>
+
+        <!-- قسم العروض اليومية المتحرك (Slider) -->
+        <div style="margin: 20px 0; display: none;" id="dailyOffersSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark);">🔥 العروض اليومية والخصومات الخاصة</h3>
+                <span style="font-size: 13px; color: var(--text-muted); font-weight: 700;">اسحب للمزيد ➔</span>
+            </div>
+            <div class="offers-slider-container" id="dailyOffersGrid"></div>
         </div>
 
         <div style="margin: 20px 0;">
@@ -463,6 +491,7 @@
                         loaded = true;
                     }
                     if (loaded) {
+                        renderDailyOffers();
                         renderAccordionStore();
                         if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                     }
@@ -470,6 +499,57 @@
             } catch (e) {
                 console.error("فشل التحميل من السحابة");
             }
+        }
+
+        function renderDailyOffers() {
+            let section = document.getElementById('dailyOffersSection');
+            let offersGrid = document.getElementById('dailyOffersGrid');
+            if (!offersGrid || !section) return;
+
+            let offerProducts = allProducts.filter(p => p.isOffer === true && p.outOfStock !== true);
+
+            if (offerProducts.length === 0) {
+                section.style.display = 'none';
+                return;
+            } else {
+                section.style.display = 'block';
+            }
+
+            let html = '';
+            offerProducts.forEach((p, pIdx) => {
+                let uniqueKey = `offer_${pIdx}`;
+                if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
+                let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
+                let safeName = p.name.replace(/'/g, "\\'");
+                
+                let oldPriceHtml = (p.oldPrice && p.oldPrice > p.price) ? 
+                    `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 13px; margin-left: 6px;">${p.oldPrice} ج.م</span>` : '';
+
+                html += `
+                    <div class="product-card" style="border: 2px solid #f59e0b; position: relative;">
+                        <span style="position: absolute; top: 10px; right: 10px; background: #f59e0b; color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; z-index: 2;">عرض خاص 🔥</span>
+                        <div>
+                            <div class="product-img-wrapper">
+                                <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
+                            </div>
+                            <div class="product-title">${p.name}</div>
+                            <div class="product-price" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                                <span style="color: #d97706; font-size: 16px; font-weight: 800;">${p.price} ج.م</span>
+                                ${oldPriceHtml}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
+                                <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
+                            </div>
+                            <button class="add-btn" style="background: #f59e0b;" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">أضف للسلة 🛒</button>
+                        </div>
+                    </div>
+                `;
+            });
+            offersGrid.innerHTML = html;
         }
 
         async function syncSaleToCloud(saleRecord) {
@@ -530,6 +610,8 @@
                             let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                             let safeName = p.name.replace(/'/g, "\\'");
                             let isOut = p.outOfStock === true;
+                            let oldPriceHtml = (p.oldPrice && p.oldPrice > p.price) ? 
+                                `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 13px; margin-right: 4px;">${p.oldPrice} ج.م</span>` : '';
 
                             cardsHtml += `
                                 <div class="product-card">
@@ -538,7 +620,7 @@
                                             <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
                                         </div>
                                         <div class="product-title">${p.name}</div>
-                                        <div class="product-price">${p.price} ج.م</div>
+                                        <div class="product-price">${p.price} ج.م ${oldPriceHtml}</div>
                                     </div>
                                     <div>
                                         ${isOut ? `
@@ -645,24 +727,31 @@
         function updateCartUI() {
             let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
             document.getElementById('cartCount').innerText = totalQty;
+            
+            let sub = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let deliveryFee = cart.length > 0 ? getDeliveryFee() : 0;
+            let grand = sub + deliveryFee;
+
+            let subEl = document.getElementById('subTotal');
+            let feeEl = document.getElementById('deliveryFeeDisplay');
+            let grandEl = document.getElementById('grandTotal');
+            if(subEl) subEl.innerText = sub + ' ج.م';
+            if(feeEl) feeEl.innerText = deliveryFee + ' ج.م';
+            if(grandEl) grandEl.innerText = grand + ' ج.م';
         }
 
         function openCart() {
             let list = document.getElementById('cartItemsList');
             if (cart.length === 0) {
                 list.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px;">سلة التسوق فارغة حالياً.</div>`;
-                document.getElementById('subTotal').innerText = '0 ج.م';
-                document.getElementById('deliveryFeeDisplay').innerText = '0 ج.م';
-                document.getElementById('grandTotal').innerText = '0 ج.م';
+                updateCartUI();
                 document.getElementById('cartModal').style.display = 'flex';
                 return;
             }
 
             let html = '';
-            let sub = 0;
             cart.forEach((item, index) => {
                 let itemTotal = item.price * item.qty;
-                sub += itemTotal;
                 html += `
                     <div class="cart-row">
                         <div>
@@ -677,13 +766,7 @@
                 `;
             });
             list.innerHTML = html;
-
-            let deliveryFee = getDeliveryFee();
-            let grand = sub + deliveryFee;
-
-            document.getElementById('subTotal').innerText = sub + ' ج.م';
-            document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + ' ج.م';
-            document.getElementById('grandTotal').innerText = grand + ' ج.م';
+            updateCartUI();
             document.getElementById('cartModal').style.display = 'flex';
         }
 
