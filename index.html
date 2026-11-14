@@ -415,7 +415,7 @@
 
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
-        // تفعيل الرقمين معاً لاستقبال الأوردرات في وقت واحد
+        // الأرقام الإدارية (الرقم الأساسي والرقم الجديد)
         const ADMIN_WHATSAPP_NUMBERS = ["201034101822", "201042377974"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
@@ -785,6 +785,7 @@
                 status: 'قيد الانتظار'
             };
 
+            // حفظ الطلب في السحابة للوحة التحكم أولاً
             try {
                 let res = await fetch(API_URL);
                 let data = await res.json();
@@ -811,16 +812,16 @@
             msg += `🚚 *رسوم التوصيل:* ${deliveryFee} ج.م\n`;
             msg += `💵 *الإجمالي الكلي:* ${grandTotal} ج.م`;
 
-            // إرسال الطلب للرقمين معاً في نفس الوقت
-            ADMIN_WHATSAPP_NUMBERS.forEach(phoneNum => {
-                let url = `https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
-            });
-
+            // إرسال مباشر برابط آمن يمنع حظر المتصفح للرقم الرئيسي المعتمد مع توضيح نسخة الإدارة
+            let primaryNumber = ADMIN_WHATSAPP_NUMBERS[0];
+            let url = `https://wa.me/${primaryNumber}?text=${encodeURIComponent(msg)}`;
+            
             cart = [];
             updateCartBadge();
             closeModal('checkoutModal');
-            alert('✅ تم إرسال الطلب بنجاح وتسجيله في لوحة التحكم الإدارية!');
+
+            // فتح الواتساب بشكل مباشر وآمن للمستخدم
+            window.location.href = url;
         }
 
         async function submitCaptainToWhatsApp() {
@@ -835,10 +836,8 @@
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}`;
 
-            ADMIN_WHATSAPP_NUMBERS.forEach(phoneNum => {
-                let url = `https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
-            });
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
+            window.location.href = url;
             closeModal('captainModal');
         }
 
@@ -859,10 +858,8 @@
             msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
             msg += `🏠 *العنوان:* ${address}`;
 
-            ADMIN_WHATSAPP_NUMBERS.forEach(phoneNum => {
-                let url = `https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
-            });
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
+            window.location.href = url;
             closeModal('customOrderModal');
         }
 
