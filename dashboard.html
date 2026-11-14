@@ -37,6 +37,14 @@
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
 
+        .whatsapp-control-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #bae6fd; border-radius: var(--radius-lg); padding: 20px;
+            margin-bottom: 25px; box-shadow: var(--shadow-sm);
+        }
+        .whatsapp-control-box h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--primary-dark); }
+        .whatsapp-control-box p { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px;
         }
@@ -69,6 +77,12 @@
         .btn-success:hover { background: #059669; }
         .btn-warning { background: var(--accent); color: #fff; }
         .btn-warning:hover { background: #d97706; }
+
+        .form-control {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 14px; background: #f8fafc; outline: none;
+        }
+        .form-control:focus { border-color: var(--primary); background: #fff; }
 
         .table-responsive { overflow-x: auto; max-height: 500px; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -136,6 +150,19 @@
     </header>
 
     <div class="container">
+        <!-- قسم السيطرة على رقم الواتساب يدوياً -->
+        <div class="whatsapp-control-box">
+            <h3>🎯 لوحة السيطرة على رقم الواتساب للطلبات</h3>
+            <p>حدد الرقم الذي ترسل إليه طلبات العملاء الآن (يمكنك التبديل بين الرقم الجديد والقديم في أي وقت):</p>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <select id="adminActiveWhatsappSelect" class="form-control" style="max-width: 320px; font-weight: bold; background: #fff;">
+                    <option value="201042377974">📱 الرقم الجديد (201042377974)</option>
+                    <option value="201007493081">📱 الرقم القديم (201007493081)</option>
+                </select>
+                <button class="btn btn-success" onclick="updateActiveWhatsApp()" style="padding: 10px 20px;">✅ حفظ وتفعيل الرقم الآن</button>
+            </div>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">📅 مبيعات وأرباح اليوم</div>
@@ -225,27 +252,27 @@
             
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">اسم المنتج:</label>
-                <input type="text" id="addName" placeholder="مثال: سمنة بلدي 1 كجم" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="text" id="addName" placeholder="مثال: سمنة بلدي 1 كجم" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر التكلفة / ما قبل البيع (ج.م):</label>
-                <input type="number" id="addCost" placeholder="مثال: 85" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="number" id="addCost" placeholder="مثال: 85" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر البيع للعميل (ج.م):</label>
-                <input type="number" id="addPrice" placeholder="مثال: 100" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="number" id="addPrice" placeholder="مثال: 100" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">السعر القديم قبل الخصم (اختياري):</label>
-                <input type="number" id="addOldPrice" placeholder="مثال: 120" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="number" id="addOldPrice" placeholder="مثال: 120" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">القسم الفرعي:</label>
-                <select id="addCategory" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <select id="addCategory" class="form-control">
                     <optgroup label="🛒 قسم السوبر ماركت">
                         <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
                         <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
@@ -309,7 +336,7 @@
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">رابط الصورة:</label>
-                <input type="text" id="addImage" placeholder="https://..." style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="text" id="addImage" placeholder="https://..." class="form-control">
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
@@ -327,27 +354,27 @@
             
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">اسم المنتج:</label>
-                <input type="text" id="editName" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="text" id="editName" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر التكلفة / ما قبل البيع (ج.م):</label>
-                <input type="number" id="editCost" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="number" id="editCost" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">سعر البيع الحالي (ج.م):</label>
-                <input type="number" id="editPrice" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="number" id="editPrice" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">السعر القديم قبل الخصم (اختياري):</label>
-                <input type="number" id="editOldPrice" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="number" id="editOldPrice" class="form-control">
             </div>
 
             <div style="margin-bottom:12px;">
                 <label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">رابط الصورة:</label>
-                <input type="text" id="editImage" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; background:#f8fafc; outline:none;">
+                <input type="text" id="editImage" class="form-control">
             </div>
 
             <div style="display:flex; gap:10px; margin-top:20px;">
@@ -360,16 +387,16 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         const ADMIN_PASSWORD = "Ss@1234567890";
-        const ADMIN_WHATSAPP_NUMBERS = ["201034101822", "00201007493081"];
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
-        let cloudData = { products: [], sales: [] };
+        let cloudData = { products: [], sales: [], activeWhatsApp: "201042377974" };
         let lastKnownSalesCount = 0;
         let isFirstCheck = true;
         let soundAllowed = false;
         
         let currentProductPage = 1;
         const productsPerPage = 15;
+        let currentFilteredProducts = [];
 
         function enableAudio() {
             let sound = document.getElementById('alertSound');
@@ -398,10 +425,10 @@
         }
 
         async function initDashboard() {
-            await fetchAllData(true);
+            await fetchAllData();
         }
 
-        async function fetchAllData(isInitial = false) {
+        async function fetchAllData() {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
@@ -409,11 +436,14 @@
                     if (Array.isArray(data)) {
                         cloudData.products = data;
                         cloudData.sales = [];
+                        cloudData.activeWhatsApp = "201042377974";
                     } else if (data && typeof data === 'object') {
                         cloudData.products = Array.isArray(data.products) ? data.products : [];
                         cloudData.sales = Array.isArray(data.sales) ? data.sales : [];
+                        cloudData.activeWhatsApp = data.activeWhatsApp || "201042377974";
                     }
 
+                    document.getElementById('adminActiveWhatsappSelect').value = cloudData.activeWhatsApp;
                     lastKnownSalesCount = cloudData.sales.length;
                     isFirstCheck = false;
 
@@ -422,6 +452,13 @@
                     renderSalesLog();
                 }
             } catch (e) {}
+        }
+
+        async function updateActiveWhatsApp() {
+            let selectedNum = document.getElementById('adminActiveWhatsappSelect').value;
+            cloudData.activeWhatsApp = selectedNum;
+            await saveAndSync();
+            alert('✅ تم تحديث وحفظ رقم الواتساب النشط في السحابة بنجاح!');
         }
 
         async function checkOnlyNewOrders() {
@@ -592,193 +629,216 @@
         function prevProductPage() {
             if (currentProductPage > 1) {
                 currentProductPage--;
-                filterAdminProducts();
+                renderAdminProductsTable();
+            }
+        }
+
+        function nextProductPage() {
+            let maxPages = Math.ceil(currentFilteredProducts.length / productsPerPage) || 1;
+            if (currentProductPage < maxPages) {
+                currentProductPage++;
+                renderAdminProductsTable();
             }
         }
 
         function filterAdminProducts() {
-            let queryInput = document.getElementById('adminSearchInput');
-            let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+            let q = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+            currentFilteredProducts = cloudData.products.filter(p => p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)));
+            currentProductPage = 1;
+            renderAdminProductsTable();
+        }
+
+        function renderAdminProductsTable() {
             let tbody = document.getElementById('adminProductsTable');
-            
-            if(!cloudData.products || cloudData.products.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد منتجات مسجلة.</td></tr>`;
-                document.getElementById('pageIndicator').innerText = `الصفحة 0 من 0`;
+            let start = (currentProductPage - 1) * productsPerPage;
+            let end = start + productsPerPage;
+            let paginated = currentFilteredProducts.slice(start, end);
+
+            let maxPages = Math.ceil(currentFilteredProducts.length / productsPerPage) || 1;
+            document.getElementById('pageIndicator').innerText = `الصفحة ${currentProductPage} من ${maxPages}`;
+            document.getElementById('prevPageBtn').disabled = currentProductPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentProductPage >= maxPages;
+
+            if (paginated.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">لا توجد منتجات تطابق بحثك.</td></tr>`;
                 return;
             }
 
-            let filteredProducts = cloudData.products.filter(p => {
-                let nameMatch = p.name && p.name.toLowerCase().includes(query);
-                let catMatch = p.category && p.category.toLowerCase().includes(query);
-                return nameMatch || catMatch;
-            });
+            let html = '';
+            paginated.forEach((p, idx) => {
+                let globalIdx = cloudData.products.indexOf(p);
+                let img = p.image ? p.image : DEFAULT_IMAGE;
+                let cost = p.cost || (p.price ? Math.round(p.price * 0.8) : 0);
+                let price = p.price || 0;
+                let profitMargin = price - cost;
+                let profitPercentage = cost > 0 ? Math.round((profitMargin / cost) * 100) : 0;
 
-            let totalPages = Math.ceil(filteredProducts.length / productsPerPage) || 1;
-            if (currentProductPage > totalPages) currentProductPage = totalPages;
-            if (currentProductPage < 1) currentProductPage = 1;
-
-            let startIdx = (currentProductPage - 1) * productsPerPage;
-            let paginatedProducts = filteredProducts.slice(startIdx, startIdx + productsPerPage);
-
-            document.getElementById('pageIndicator').innerText = `الصفحة ${currentProductPage} من ${totalPages}`;
-            document.getElementById('prevPageBtn').disabled = currentProductPage <= 1;
-            document.getElementById('nextPageBtn').disabled = currentProductPage >= totalPages;
-
-            let htmlRows = '';
-            paginatedProducts.forEach((p) => {
-                let realIdx = cloudData.products.indexOf(p);
-                let cost = p.cost || (p.price * 0.8);
-                let profitMargin = p.price - cost;
-                let img = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                let isOut = p.outOfStock === true;
-                let isOffer = p.isOffer === true;
-
-                htmlRows += `
+                html += `
                     <tr>
-                        <td><span class="badge">#${realIdx + 1}</span></td>
-                        <td><img src="${img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'"></td>
-                        <td style="font-weight:700;">
-                            ${p.name}
-                            ${isOffer ? '<span style="background:#fef3c7; color:#d97706; font-size:10px; padding:2px 6px; border-radius:8px; margin-right:4px;">🔥 عرض يومي</span>' : ''}
+                        <td style="font-weight:700; color:var(--text-muted);">${start + idx + 1}</td>
+                        <td><img src="${img}" style="width:42px; height:42px; object-fit:cover; border-radius:8px;" onerror="this.src='${DEFAULT_IMAGE}'"></td>
+                        <td style="font-weight:700;">${p.name}</td>
+                        <td>
+                            <div style="font-weight:800; color:var(--text-dark);">${price} ج.م <span style="font-size:11px; color:var(--text-muted);">(التكلفة: ${cost})</span></div>
+                            <div style="font-size:11px; color:var(--secondary); font-weight:700;">الربح: ${profitMargin} ج.م (${profitPercentage}%)</div>
                         </td>
                         <td>
-                            <span style="color:var(--text-muted);">${cost} ج.م</span> / <span style="color:var(--secondary); font-weight:800;">${p.price} ج.م</span>
-                            <br><span style="font-size:11px; color:#0284c7; font-weight:700;">الربح: +${profitMargin} ج.م</span>
+                            <span class="badge" style="background:${p.outOfStock ? '#fee2e2' : '#dcfce7'}; color:${p.outOfStock ? '#ef4444' : '#10b981'};">
+                                ${p.outOfStock ? 'غير متوفر ⛔' : 'متوفر ✅'}
+                            </span>
+                            ${p.isOffer ? '<span class="badge" style="background:#fef3c7; color:#d97706; margin-right:4px;">عرض خاص 🔥</span>' : ''}
                         </td>
+                        <td><span style="font-size:12px; color:var(--text-muted); font-weight:700;">${p.category || 'عام'}</span></td>
                         <td>
-                            <div style="display:flex; flex-direction:column; gap:4px;">
-                                <span style="display:inline-block; padding:3px 8px; border-radius:15px; font-size:11px; font-weight:800; width:fit-content; ${isOut ? 'background:#fee2e2; color:#ef4444;' : 'background:#d1fae5; color:#059669;'}">
-                                    ${isOut ? '⛔ غير متوفر' : '✅ متوفر'}
-                                </span>
+                            <div class="actions-cell">
+                                <button class="btn" onclick="openEditModal(${globalIdx})" style="padding: 5px 10px; font-size: 11px;">✏️ تعديل</button>
+                                <button class="btn btn-warning" onclick="toggleOutOfStock(${globalIdx})" style="padding: 5px 10px; font-size: 11px;">${p.outOfStock ? 'إتاحة' : 'إيقاف'}</button>
+                                <button class="btn" style="padding: 5px 10px; font-size: 11px; background:${p.isOffer ? '#64748b' : '#f59e0b'};" onclick="toggleDailyOffer(${globalIdx})">${p.isOffer ? 'إلغاء العرض' : 'جعلها عرض'}</button>
+                                <button class="btn btn-danger" onclick="deleteProduct(${globalIdx})" style="padding: 5px 10px; font-size: 11px;">🗑️ حذف</button>
                             </div>
-                        </td>
-                        <td><span class="badge">${p.category || 'عام'}</span></td>
-                        <td class="actions-cell">
-                            <button class="btn" onclick="openEditModal(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:var(--primary);">✏️ تعديل</button>
-                            <button class="btn" onclick="toggleDailyOffer(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOffer ? '#7c3aed' : '#e2e8f0'}; color:${isOffer ? '#fff' : '#0f172a'};">
-                                ${isOffer ? 'إلغاء العرض' : '🔥 عرض'}
-                            </button>
-                            <button class="btn" onclick="toggleOutOfStock(${realIdx})" style="padding: 5px 8px; font-size: 11px; background:${isOut ? '#10b981' : '#f59e0b'};">${isOut ? 'تفعيل' : 'إلغاء توفر'}</button>
-                            <button class="btn btn-danger" onclick="deleteProduct(${realIdx})" style="padding: 5px 8px; font-size: 11px;">حذف</button>
                         </td>
                     </tr>
                 `;
             });
-            tbody.innerHTML = htmlRows;
+            tbody.innerHTML = html;
         }
-
-        function nextPageProduct() {
-            let queryInput = document.getElementById('adminSearchInput');
-            let query = queryInput ? queryInput.value.toLowerCase().trim() : '';
-            let filteredProducts = cloudData.products.filter(p => {
-                let nameMatch = p.name && p.name.toLowerCase().includes(query);
-                let catMatch = p.category && p.category.toLowerCase().includes(query);
-                return nameMatch || catMatch;
-            });
-            let totalPages = Math.ceil(filteredProducts.length / productsPerPage) || 1;
-            if (currentProductPage < totalPages) {
-                currentProductPage++;
-                filterAdminProducts();
-            }
-        }
-        document.getElementById('nextPageBtn').onclick = nextPageProduct;
 
         function calculateFinancials() {
             let now = new Date();
-            let todayStr = now.toISOString().split('T')[0];
-            let daySales = 0, dayProfit = 0, weekSales = 0, weekProfit = 0, monthSales = 0, monthProfit = 0, yearSales = 0, yearProfit = 0;
+            let todayStr = now.toDateString();
+            
+            let daySales = 0, dayProfit = 0;
+            let weekSales = 0, weekProfit = 0;
+            let monthSales = 0, monthProfit = 0;
+            let yearSales = 0, yearProfit = 0;
 
-            (cloudData.sales || []).forEach(sale => {
-                if (sale.status === 'مرفوض') return;
-                let saleDate = new Date(sale.timestamp);
-                let saleDateStr = saleDate.toISOString().split('T')[0];
+            cloudData.sales.forEach(s => {
+                let sDate = new Date(s.timestamp);
+                let total = s.total || 0;
+                let profit = s.profit || 0;
 
-                if (saleDateStr === todayStr) { daySales += sale.total; dayProfit += sale.profit; }
-                if ((now - saleDate) / (1000 * 60 * 60 * 24) <= 7) { weekSales += sale.total; weekProfit += sale.profit; }
-                if (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear()) { monthSales += sale.total; monthProfit += sale.profit; }
-                if (saleDate.getFullYear() === now.getFullYear()) { yearSales += sale.total; yearProfit += sale.profit; }
+                if (sDate.toDateString() === todayStr) {
+                    daySales += total;
+                    dayProfit += profit;
+                }
+
+                let diffTime = Math.abs(now - sDate);
+                let diffDays = diffTime / (1000 * 60 * 60 * 24);
+                if (diffDays <= 7) {
+                    weekSales += total;
+                    weekProfit += profit;
+                }
+
+                if (sDate.getMonth() === now.getMonth() && sDate.getFullYear() === now.getFullYear()) {
+                    monthSales += total;
+                    monthProfit += profit;
+                }
+
+                if (sDate.getFullYear() === now.getFullYear()) {
+                    yearSales += total;
+                    yearProfit += profit;
+                }
             });
 
             document.getElementById('statDaySales').innerText = daySales + ' ج.م';
             document.getElementById('statDayProfit').innerText = `الربح: ${dayProfit} ج.م`;
+
             document.getElementById('statWeekSales').innerText = weekSales + ' ج.م';
             document.getElementById('statWeekProfit').innerText = `الربح: ${weekProfit} ج.م`;
+
             document.getElementById('statMonthSales').innerText = monthSales + ' ج.م';
             document.getElementById('statMonthProfit').innerText = `الربح: ${monthProfit} ج.م`;
+
             document.getElementById('statYearSales').innerText = yearSales + ' ج.م';
             document.getElementById('statYearProfit').innerText = `الربح: ${yearProfit} ج.م`;
         }
 
         function renderSalesLog() {
             let tbody = document.getElementById('salesLogTable');
-            if(!cloudData.sales || cloudData.sales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد مبيعات مسجلة حتى الآن.</td></tr>`;
+            if (!cloudData.sales || cloudData.sales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">لا توجد طلبات أو مبيعات مسجلة حتى الآن.</td></tr>`;
                 return;
             }
 
-            let htmlRows = '';
+            let html = '';
             cloudData.sales.slice().reverse().forEach(s => {
-                let dateFormatted = new Date(s.timestamp).toLocaleString('ar-EG');
-                let currentStatus = s.status || 'قيد الانتظار';
-                let statusBadgeBg = currentStatus === 'مقبول' ? '#d1fae5; color:#059669;' : (currentStatus === 'مرفوض' ? '#fee2e2; color:#ef4444;' : '#fef3c7; color:#d97706;');
+                let statusBadge = '';
+                if (s.status === 'مقبول') statusBadge = '<span class="badge" style="background:#dcfce7; color:#10b981;">مقبول ✅</span>';
+                else if (s.status === 'مرفوض') statusBadge = '<span class="badge" style="background:#fee2e2; color:#ef4444;">مرفوض ❌</span>';
+                else statusBadge = '<span class="badge" style="background:#fef3c7; color:#d97706;">قيد الانتظار ⏳</span>';
 
-                htmlRows += `
+                html += `
                     <tr>
-                        <td><span class="badge">#${s.orderId}</span></td>
-                        <td>${dateFormatted}</td>
-                        <td><b>${s.total} ج.م</b><br><span style="color:var(--secondary); font-size:12px;">ربح: +${s.profit} ج.م</span></td>
-                        <td style="font-size:13px; color:var(--text-muted);">${s.itemsSummary}</td>
+                        <td style="font-weight:800;">#${s.orderId}</td>
+                        <td style="font-size:12px; color:var(--text-muted);">${new Date(s.timestamp).toLocaleString('ar-EG')}</td>
                         <td>
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
-                                <span style="padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; text-align: center; background: ${statusBadgeBg}">${currentStatus}</span>
-                                <div style="display: flex; gap: 4px;">
-                                    <button class="btn btn-success" onclick="updateOrderStatus(${s.orderId}, 'مقبول')" style="padding: 4px 8px; font-size: 11px; flex: 1;">✅ موافقة</button>
-                                    <button class="btn btn-danger" onclick="updateOrderStatus(${s.orderId}, 'مرفوض')" style="padding: 4px 8px; font-size: 11px; flex: 1;">❌ رفض</button>
-                                </div>
+                            <div style="font-weight:800; color:var(--secondary);">${s.total} ج.م</div>
+                            <div style="font-size:11px; color:var(--text-muted);">الربح: ${s.profit || 0} ج.م</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:700;">👤 ${s.customerName} (${s.customerPhone})</div>
+                            <div style="font-size:12px; color:var(--text-muted);">📍 ${s.area} - ${s.address}</div>
+                            <div style="font-size:12px; margin-top:4px;">📦 ${s.itemsSummary}</div>
+                        </td>
+                        <td>
+                            <div style="margin-bottom:6px;">${statusBadge}</div>
+                            <div class="actions-cell">
+                                <button class="btn btn-success" onclick="updateOrderStatus(${s.orderId}, 'مقبول')" style="padding:4px 8px; font-size:11px;">قبول</button>
+                                <button class="btn btn-danger" onclick="updateOrderStatus(${s.orderId}, 'مرفوض')" style="padding:4px 8px; font-size:11px;">رفض</button>
                             </div>
                         </td>
                     </tr>
                 `;
             });
-            tbody.innerHTML = htmlRows;
+            tbody.innerHTML = html;
         }
 
         async function clearSalesLog() {
-            if(confirm('هل تريد مسح سجل المبيعات والأرباح بالكامل؟')) {
+            if (confirm('هل أنت متأكد من مسح سجل الطلبات بالكامل؟')) {
                 cloudData.sales = [];
                 renderSalesLog();
                 calculateFinancials();
                 await saveAndSync();
+                alert('✅ تم مسح سجل المبيعات بنجاح.');
             }
         }
 
-        function exportProductsToExcel() {
-            if (!cloudData.products || cloudData.products.length === 0) { alert('❌ لا توجد منتجات لتصديرها!'); return; }
-            let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#0284c7;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>الرقم</th><th>اسم المنتج</th><th>التكلفة</th><th>البيع</th><th>الربح المتوقع</th><th>الحالة</th><th>القسم</th></tr></thead><tbody>`;
-            cloudData.products.forEach((p, i) => {
-                let c = p.cost || (p.price * 0.8);
-                let prof = p.price - c;
-                excelContent += `<tr><td>${i+1}</td><td>${p.name}</td><td>${c}</td><td>${p.price}</td><td>${prof}</td><td>${p.outOfStock?'غير متوفر':'متوفر'}</td><td>${p.category||'عام'}</td></tr>`;
-            });
-            excelContent += `</tbody></table></body></html>`;
-            let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a'); a.href = url; a.download = `Products.xls`; a.click();
-        }
-
         function exportSalesToExcel() {
-            if (!cloudData.sales || cloudData.sales.length === 0) { alert('❌ لا توجد مبيعات!'); return; }
-            let excelContent = `<html dir="rtl"><head><meta charset="UTF-8"><style>table{border-collapse:collapse;width:100%;font-family:'Tajawal';}th{background:#10b981;color:#fff;border:1px solid #ccc;padding:8px;}td{border:1px solid #ccc;padding:8px;text-align:center;}</style></head><body><table><thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>المجموع</th><th>الربح</th><th>الحالة</th><th>المنتجات</th></tr></thead><tbody>`;
-            cloudData.sales.slice().reverse().forEach(s => {
-                excelContent += `<tr><td>#${s.orderId}</td><td>${new Date(s.timestamp).toLocaleString('ar-EG')}</td><td>${s.total}</td><td>${s.profit}</td><td>${s.status||'قيد الانتظار'}</td><td>${s.itemsSummary}</td></tr>`;
+            if (!cloudData.sales || cloudData.sales.length === 0) {
+                alert('⚠️ لا توجد مبيعات لتصديرها!');
+                return;
+            }
+            let csv = '\uFEFFرقم الطلب,التاريخ,اسم العميل,الهاتف,المنطقة,العنوان,المنتجات,الإجمالي,الربح,الحالة\n';
+            cloudData.sales.forEach(s => {
+                csv += `"${s.orderId}","${s.timestamp}","${s.customerName}","${s.customerPhone}","${s.area}","${s.address}","${s.itemsSummary}","${s.total}","${s.profit || 0}","${s.status || 'قيد الانتظار'}"\n`;
             });
-            excelContent += `</tbody></table></body></html>`;
-            let blob = new Blob(['\ufeff' + excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             let url = URL.createObjectURL(blob);
-            let a = document.createElement('a'); a.href = url; a.download = `Sales.xls`; a.click();
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `sales_report_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
         }
 
-        window.onload = () => { document.getElementById('adminPasswordInput').focus(); };
+        function exportProductsToExcel() {
+            if (!cloudData.products || cloudData.products.length === 0) {
+                alert('⚠️ لا توجد منتجات لتصديرها!');
+                return;
+            }
+            let csv = '\uFEFFاسم المنتج,التكلفة,سعر البيع,هامش الربح,القسم,متوفر\n';
+            cloudData.products.forEach(p => {
+                let cost = p.cost || 0;
+                let price = p.price || 0;
+                let profit = price - cost;
+                csv += `"${p.name}","${cost}","${price}","${profit}","${p.category || 'عام'}","${p.outOfStock ? 'لا' : 'نعم'}"\n`;
+            });
+            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `products_report_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
     </script>
 </body>
 </html>
