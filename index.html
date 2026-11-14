@@ -335,7 +335,7 @@
                 </div>
             </div>
 
-            <!-- زر إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) فقط -->
+            <!-- زر إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) -->
             <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) 📱</button>
             <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
@@ -417,7 +417,9 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // الأرقام المتاحة: [0] الرقم الجديد (الصباحي من 7 ص إلى 2 ظهراً)، [1] الرقم القديم (باقي الأوقات)
+        // الرقمين المتاحين: 
+        // [0] الرقم الجديد (201042377974) -> للفترة الصباحية (من 7 صباحاً إلى 2 ظهراً)
+        // [1] الرقم القديم (201007493081) -> لباقي اليوم (من 2 ظهراً وحتى 7 صباح اليوم التالي)
         const ADMIN_WHATSAPP_NUMBERS = ["201042377974", "201007493081"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
@@ -450,15 +452,16 @@
             ]
         };
 
-        // دالة تحديد الرقم تلقائياً بناءً على الوقت (من 7:00 ص إلى 2:00 م للرقم الجديد، والباقي للقديم)
+        // دالة تحديد الرقم تلقائياً حسب الوقت بدقة (الصباحي من 7 ص إلى 2 ظهراً للرقم الجديد، وباقي الوقت للقديم)
         function getActiveWhatsAppNumber() {
             let now = new Date();
             let currentHour = now.getHours(); // من 0 إلى 23
             
+            // الفترة من 7:00 صباحاً وحتى قبل 2:00 ظهراً (الساعة 14) -> الرقم الجديد
             if (currentHour >= 7 && currentHour < 14) {
-                return ADMIN_WHATSAPP_NUMBERS[0]; // الرقم الجديد (الصباحي)
+                return ADMIN_WHATSAPP_NUMBERS[0]; // الرقم الجديد
             } else {
-                return ADMIN_WHATSAPP_NUMBERS[1]; // الرقم القديم (المسائي والليل)
+                return ADMIN_WHATSAPP_NUMBERS[1]; // الرقم القديم (من 2 ظهراً وحتى 7 صباحاً)
             }
         }
 
@@ -830,7 +833,7 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // توجيه الطلب تلقائياً للرقم النشط حسب الوقت
+            // توجيه الطلب تلقائياً للرقم الصحيح حسب الوقت الحالي
             let targetNumber = getActiveWhatsAppNumber();
             let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
