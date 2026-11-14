@@ -331,12 +331,11 @@
                 </select>
                 <div id="paymentInfoBox" class="payment-info-box">
                     يرجى تحويل المبلغ المستحق على رقم فودافون كاش / انستا باي التالي: <br>
-                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;">01042377974</strong>
+                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;">201042377974</strong>
                 </div>
             </div>
 
-            <!-- زر إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) -->
-            <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) 📱</button>
+            <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📱</button>
             <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
     </div>
@@ -417,10 +416,8 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // ضبط الأرقام بدقة:
-        // [0] الرقم القديم (201007493081) -> يعمل من 2 ظهراً وحتى 7 صباح اليوم التالي
-        // [1] الرقم الجديد (201042377974) -> يعمل في الفترة الصباحية من 7 صباحاً إلى 2 ظهراً
-        const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201042377974"]; 
+        // تثبيت الرقم الجديد حصرياً وثابتاً للطلبات
+        const FIXED_WHATSAPP_NUMBER = "201042377974"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -452,20 +449,6 @@
             ]
         };
 
-        // دالة تحديد الرقم تلقائياً بتوقيت مصر المحلي حصرياً
-        function getActiveWhatsAppNumber() {
-            let nowEgypt = new Date().toLocaleString("en-US", {timeZone: "Africa/Cairo"});
-            let egyptHour = new Date(nowEgypt).getHours(); // ساعة مصر المحلية (0 إلى 23)
-            
-            // الفترة الصباحية: من 7 صباحاً وحتى قبل 2 ظهراً (14:00) -> الرقم الجديد [1]
-            if (egyptHour >= 7 && egyptHour < 14) {
-                return ADMIN_WHATSAPP_NUMBERS[1]; // الرقم الجديد
-            } else {
-                // باقي اليوم (من 2 ظهراً وحتى 7 صباحاً) -> الرقم القديم [0]
-                return ADMIN_WHATSAPP_NUMBERS[0]; // الرقم القديم
-            }
-        }
-
         function getDeliveryFee() {
             let areaSelect = document.getElementById('outsideAreaKm');
             return areaSelect ? parseInt(areaSelect.value) || 20 : 20;
@@ -484,24 +467,19 @@
         }
 
         async function loadStoreProducts(showAlert = false) {
-            let loaded = false;
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     let data = await res.json();
                     if (Array.isArray(data)) {
                         allProducts = data;
-                        loaded = true;
                     } else if (data && typeof data === 'object') {
                         allProducts = Array.isArray(data.products) ? data.products : [];
                         allSales = Array.isArray(data.sales) ? data.sales : [];
-                        loaded = true;
                     }
-                    if (loaded) {
-                        renderDailyOffers();
-                        renderAccordionStore();
-                        if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
-                    }
+                    renderDailyOffers();
+                    renderAccordionStore();
+                    if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة!');
                 }
             } catch (e) {
                 console.error("فشل التحميل من السحابة");
@@ -803,7 +781,7 @@
                 status: 'قيد الانتظار'
             };
 
-            // حفظ الطلب في السحابة للوحة التحكم أولاً
+            // حفظ الطلب في السحابة للوحة التحكم
             try {
                 let res = await fetch(API_URL);
                 let data = await res.json();
@@ -814,7 +792,7 @@
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ products: cloudProducts, sales: cloudSales })
+                    body: JSON.stringify({ products: cloudProducts, sales: cloudSales, activeWhatsApp: FIXED_WHATSAPP_NUMBER })
                 });
             } catch(e){}
 
@@ -834,9 +812,8 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // توجيه الطلب تلقائياً للرقم الصحيح حسب توقيت مصر
-            let targetNumber = getActiveWhatsAppNumber();
-            let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+            // إرسال الطلب بشكل ثابت ومباشر للرقم الجديد
+            let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
         }
 
@@ -852,8 +829,7 @@
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}`;
 
-            let targetNumber = getActiveWhatsAppNumber();
-            let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+            let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
             closeModal('captainModal');
         }
@@ -875,8 +851,7 @@
             msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
             msg += `🏠 *العنوان:* ${address}`;
 
-            let targetNumber = getActiveWhatsAppNumber();
-            let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+            let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
             closeModal('customOrderModal');
         }
