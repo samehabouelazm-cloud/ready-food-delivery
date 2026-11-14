@@ -415,7 +415,8 @@
 
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
-        const ADMIN_WHATSAPP_NUMBER = "201034101822"; 
+        // تفعيل الرقمين معاً لاستقبال الأوردرات في وقت واحد
+        const ADMIN_WHATSAPP_NUMBERS = ["201034101822", "201042377974"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -810,8 +811,11 @@
             msg += `🚚 *رسوم التوصيل:* ${deliveryFee} ج.م\n`;
             msg += `💵 *الإجمالي الكلي:* ${grandTotal} ج.م`;
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+            // إرسال الطلب للرقمين معاً في نفس الوقت
+            ADMIN_WHATSAPP_NUMBERS.forEach(phoneNum => {
+                let url = `https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+            });
 
             cart = [];
             updateCartBadge();
@@ -831,8 +835,10 @@
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}`;
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+            ADMIN_WHATSAPP_NUMBERS.forEach(phoneNum => {
+                let url = `https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+            });
             closeModal('captainModal');
         }
 
@@ -853,8 +859,10 @@
             msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
             msg += `🏠 *العنوان:* ${address}`;
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+            ADMIN_WHATSAPP_NUMBERS.forEach(phoneNum => {
+                let url = `https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+            });
             closeModal('customOrderModal');
         }
 
