@@ -335,7 +335,7 @@
                 </div>
             </div>
 
-            <!-- زر إرسال الطلب عبر الواتساب (تلقائي حسب الوقت بتوقيت مصر) -->
+            <!-- زر إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) -->
             <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) 📱</button>
             <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
@@ -417,10 +417,10 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // الأرقام المتاحة: 
-        // [0] الرقم الجديد (201042377974) -> للفترة الصباحية (من 7 صباحاً إلى 2 ظهراً)
-        // [1] الرقم القديم (201007493081) -> لباقي اليوم (من 2 ظهراً وحتى 7 صباح اليوم التالي)
-        const ADMIN_WHATSAPP_NUMBERS = ["201042377974", "201007493081"]; 
+        // ضبط الأرقام بدقة:
+        // [0] الرقم القديم (201007493081) -> يعمل من 2 ظهراً وحتى 7 صباح اليوم التالي
+        // [1] الرقم الجديد (201042377974) -> يعمل في الفترة الصباحية من 7 صباحاً إلى 2 ظهراً
+        const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201042377974"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -452,16 +452,17 @@
             ]
         };
 
-        // دالة تحديد الرقم تلقائياً بتوقيت مصر المحلي بدقة تامة
+        // دالة تحديد الرقم تلقائياً بتوقيت مصر المحلي حصرياً
         function getActiveWhatsAppNumber() {
             let nowEgypt = new Date().toLocaleString("en-US", {timeZone: "Africa/Cairo"});
-            let egyptHour = new Date(nowEgypt).getHours(); // ساعة مصر المحلية من 0 إلى 23
+            let egyptHour = new Date(nowEgypt).getHours(); // ساعة مصر المحلية (0 إلى 23)
             
-            // إذا كانت الساعة بين 7:00 صباحاً وقبل 2:00 ظهراً (14:00) -> الرقم الجديد
+            // الفترة الصباحية: من 7 صباحاً وحتى قبل 2 ظهراً (14:00) -> الرقم الجديد [1]
             if (egyptHour >= 7 && egyptHour < 14) {
-                return ADMIN_WHATSAPP_NUMBERS[0]; // الرقم الجديد (الصباحي)
+                return ADMIN_WHATSAPP_NUMBERS[1]; // الرقم الجديد
             } else {
-                return ADMIN_WHATSAPP_NUMBERS[1]; // الرقم القديم (من 2 ظهراً وحتى 7 صباح اليوم التالي)
+                // باقي اليوم (من 2 ظهراً وحتى 7 صباحاً) -> الرقم القديم [0]
+                return ADMIN_WHATSAPP_NUMBERS[0]; // الرقم القديم
             }
         }
 
@@ -833,7 +834,7 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // توجيه الطلب تلقائياً بناءً على توقيت مصر المحلي بدقة
+            // توجيه الطلب تلقائياً للرقم الصحيح حسب توقيت مصر
             let targetNumber = getActiveWhatsAppNumber();
             let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
