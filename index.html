@@ -415,8 +415,9 @@
 
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
-        // الأرقام الإدارية (الرقم الأساسي والرقم الجديد)
-        const ADMIN_WHATSAPP_NUMBERS = ["201034101822", "201042377974"]; 
+        
+        // الأرقام الإدارية الثلاثة (الرقم الجديد والقممان السابقان) لاستقبال الأوردرات معاً
+        const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201034101822", "201042377974"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -812,16 +813,17 @@
             msg += `🚚 *رسوم التوصيل:* ${deliveryFee} ج.م\n`;
             msg += `💵 *الإجمالي الكلي:* ${grandTotal} ج.م`;
 
-            // إرسال مباشر برابط آمن يمنع حظر المتصفح للرقم الرئيسي المعتمد مع توضيح نسخة الإدارة
-            let primaryNumber = ADMIN_WHATSAPP_NUMBERS[0];
-            let url = `https://wa.me/${primaryNumber}?text=${encodeURIComponent(msg)}`;
-            
             cart = [];
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // فتح الواتساب بشكل مباشر وآمن للمستخدم
-            window.location.href = url;
+            // إرسال الأوردر للأرقام الثلاثة معاً عبر فتح روابط متتالية
+            ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
+                setTimeout(() => {
+                    let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                }, index * 400); // تتابع زمني بسيط لمنع حظر المتصفح للنوافذ المنبثقة
+            });
         }
 
         async function submitCaptainToWhatsApp() {
@@ -836,8 +838,12 @@
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}`;
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
-            window.location.href = url;
+            ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
+                setTimeout(() => {
+                    let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                }, index * 400);
+            });
             closeModal('captainModal');
         }
 
@@ -858,8 +864,12 @@
             msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
             msg += `🏠 *العنوان:* ${address}`;
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
-            window.location.href = url;
+            ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
+                setTimeout(() => {
+                    let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, '_blank');
+                }, index * 400);
+            });
             closeModal('customOrderModal');
         }
 
