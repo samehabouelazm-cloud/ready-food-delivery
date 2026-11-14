@@ -416,8 +416,8 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // الأرقام الإدارية الثلاثة (الرقم الجديد والقممان السابقان) لاستقبال الأوردرات معاً
-        const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201034101822", "201042377974"]; 
+        // الرقمين المفعلين الحاليين للإدارة (تم تحديثهما وإلغاء الرقم القديم)
+        const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201042377974"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -817,12 +817,12 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // إرسال الأوردر للأرقام الثلاثة معاً عبر فتح روابط متتالية
+            // إرسال الأوردر للرقمين المفعلين معاً في نفس الوقت بفاصل زمني بسيط لمنع حظر المتصفح
             ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
                 setTimeout(() => {
                     let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
                     window.open(url, '_blank');
-                }, index * 400); // تتابع زمني بسيط لمنع حظر المتصفح للنوافذ المنبثقة
+                }, index * 400);
             });
         }
 
