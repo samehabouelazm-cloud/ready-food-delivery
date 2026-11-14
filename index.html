@@ -335,10 +335,11 @@
                 </div>
             </div>
 
-            <!-- زر اختيار رقم الإرسال للواتساب لتجنب حظر المتصفح ولضمان إرسال الطلب للرقمين -->
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn-submit" style="background:#25d366; flex:1;" onclick="submitOrderToWhatsApp(0)">إرسال للرقم الأول 📱</button>
-                <button class="btn-submit" style="background:#0284c7; flex:1;" onclick="submitOrderToWhatsApp(1)">إرسال للرقم الثاني 📱</button>
+            <!-- أزرار إرسال الطلب (تلقائي حسب الوقت أو اختيار يدوي) -->
+            <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب (تلقائي حسب الوقت) 📱</button>
+            <div style="display: flex; gap: 10px; margin-top: 8px;">
+                <button class="btn-submit" style="background:#0284c7; flex:1; font-size:13px;" onclick="submitOrderToWhatsApp(0)">إرسال للرقم الجديد 📱</button>
+                <button class="btn-submit" style="background:#d97706; flex:1; font-size:13px;" onclick="submitOrderToWhatsApp(1)">إرسال للرقم القديم 📱</button>
             </div>
             <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
@@ -420,8 +421,8 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // الرقمين المفعلين الحاليين للإدارة
-        const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201042377974"]; 
+        // الأرقام المتاحة: [0] الرقم الجديد (الصباحي)، [1] الرقم القديم (المسائي والليل)
+        const ADMIN_WHATSAPP_NUMBERS = ["201042377974", "201007493081"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -452,6 +453,19 @@
                 "سمكة مشوية - أسماك طازجة ومشويات", "سمكة مشوية - سي فود وسنجاري", "سمكة مشوية - أرز ووربات وشوربة", "سمكة مشوية - سلطات ومخللات"
             ]
         };
+
+        // دالة تحديد الرقم بناءً على الوقت (الصباحي: من 7 ص إلى 2 ظهراً)
+        function getActiveWhatsAppNumber() {
+            let now = new Date();
+            let currentHour = now.getHours(); // من 0 إلى 23
+            
+            // الفترة من 7:00 صباحاً وحتى قبل 2:00 ظهراً (14:00)
+            if (currentHour >= 7 && currentHour < 14) {
+                return ADMIN_WHATSAPP_NUMBERS[0]; // الرقم الجديد
+            } else {
+                return ADMIN_WHATSAPP_NUMBERS[1]; // الرقم القديم
+            }
+        }
 
         function getDeliveryFee() {
             let areaSelect = document.getElementById('outsideAreaKm');
@@ -752,7 +766,7 @@
         function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        async function submitOrderToWhatsApp(targetIndex = 0) {
+        async function submitOrderToWhatsApp(forcedIndex = null) {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let areaSelect = document.getElementById('outsideAreaKm');
@@ -821,8 +835,8 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // توجيه الطلب للرقم المختار عبر أزرار صفحة إتمام الشراء لتفادي حظر المتصفح
-            let targetNumber = ADMIN_WHATSAPP_NUMBERS[targetIndex] || ADMIN_WHATSAPP_NUMBERS[0];
+            // اختيار الرقم: إما المحدد يدوياً أو التلقائي حسب الوقت
+            let targetNumber = (forcedIndex !== null) ? ADMIN_WHATSAPP_NUMBERS[forcedIndex] : getActiveWhatsAppNumber();
             let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
         }
@@ -861,8 +875,11 @@
             msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
             msg += `🏠 *العنوان:* ${address}`;
 
-            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
-            window.location.href = url;
+            let url = `https://wa.me/${ACTIVE_WHATSAPP_NUMBER_BY_TIME_FOR_CUSTOM}?text=${encodeURIComponent(msg)}`;
+            // استخدام الرقم النشط حسب الوقت للطلبات الخاصة أيضاً
+            let targetNumber = getActiveWhatsAppNumber();
+            let customUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+            window.location.href = customUrl;
             closeModal('customOrderModal');
         }
 
