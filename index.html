@@ -331,7 +331,7 @@
                 </select>
                 <div id="paymentInfoBox" class="payment-info-box">
                     يرجى تحويل المبلغ المستحق على رقم فودافون كاش / انستا باي التالي: <br>
-                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;">201042377974</strong>
+                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;">201007493081</strong>
                 </div>
             </div>
 
@@ -416,8 +416,8 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // تثبيت الرقم الجديد حصرياً وثابتاً للطلبات
-        const FIXED_WHATSAPP_NUMBER = "201042377974"; 
+        // تثبيت الرقم القديم حصرياً وثابتاً للطلبات
+        const FIXED_WHATSAPP_NUMBER = "201007493081"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
         let allProducts = [];
@@ -812,7 +812,7 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // إرسال الطلب بشكل ثابت ومباشر للرقم الجديد
+            // إرسال الطلب بشكل ثابت ومباشر للرقم القديم
             let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
         }
