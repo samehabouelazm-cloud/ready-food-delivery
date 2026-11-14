@@ -196,6 +196,11 @@
 
         .btn-submit { background: var(--secondary); color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-cancel { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
+
+        .payment-info-box {
+            background: #fef3c7; border: 1px solid #f59e0b; padding: 10px; border-radius: 8px;
+            font-size: 13px; font-weight: 700; color: #92400e; margin-top: 6px; display: none; text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -315,13 +320,19 @@
                 <label>العنوان بالتفصيل (الشارع / رقم العقار):</label>
                 <textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea>
             </div>
+            
             <div class="form-group">
                 <label>طريقة الدفع:</label>
-                <select id="payMethod">
+                <select id="payMethod" onchange="checkPaymentMethod()">
                     <option value="الدفع نقداً عند الاستلام (Cash on Delivery)">💵 الدفع نقداً عند الاستلام</option>
-                    <option value="محفظة إلكترونية (InstaPay / فودافون كاش)">📱 InstaPay / فودافون كاش</option>
+                    <option value="محفظة فودافون كاش">📱 محفظة فودافون كاش</option>
+                    <option value="انستا باي (InstaPay)">💳 انستا باي (InstaPay)</option>
                     <option value="بطاقة بنكية (فيزا / ماستركارد)">💳 بطاقة بنكية (فيزا / ماستركارد)</option>
                 </select>
+                <div id="paymentInfoBox" class="payment-info-box">
+                    يرجى تحويل المبلغ المستحق على رقم فودافون كاش / انستا باي التالي: <br>
+                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;">002001042377974</strong>
+                </div>
             </div>
 
             <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">تأكيد وإرسال الطلب للواتساب 🚀</button>
@@ -442,6 +453,16 @@
         }
 
         function updateDeliveryFee() { updatecartUI(); }
+
+        function checkPaymentMethod() {
+            let payMethod = document.getElementById('payMethod').value;
+            let infoBox = document.getElementById('paymentInfoBox');
+            if (payMethod.includes('فودافون كاش') || payMethod.includes('انستا باي')) {
+                infoBox.style.display = 'block';
+            } else {
+                infoBox.style.display = 'none';
+            }
+        }
 
         async function loadStoreProducts(showAlert = false) {
             let loaded = false;
