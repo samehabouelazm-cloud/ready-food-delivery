@@ -335,7 +335,11 @@
                 </div>
             </div>
 
-            <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">تأكيد وإرسال الطلب للواتساب 🚀</button>
+            <!-- زر اختيار رقم الإرسال للواتساب لتجنب حظر المتصفح ولضمان إرسال الطلب للرقمين -->
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-submit" style="background:#25d366; flex:1;" onclick="submitOrderToWhatsApp(0)">إرسال للرقم الأول 📱</button>
+                <button class="btn-submit" style="background:#0284c7; flex:1;" onclick="submitOrderToWhatsApp(1)">إرسال للرقم الثاني 📱</button>
+            </div>
             <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
     </div>
@@ -416,7 +420,7 @@
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         
-        // الرقمين المفعلين الحاليين للإدارة (تم تحديثهما وإلغاء الرقم القديم)
+        // الرقمين المفعلين الحاليين للإدارة
         const ADMIN_WHATSAPP_NUMBERS = ["201007493081", "201042377974"]; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
@@ -748,7 +752,7 @@
         function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        async function submitOrderToWhatsApp() {
+        async function submitOrderToWhatsApp(targetIndex = 0) {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let areaSelect = document.getElementById('outsideAreaKm');
@@ -817,13 +821,10 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // إرسال الأوردر للرقمين المفعلين معاً في نفس الوقت بفاصل زمني بسيط لمنع حظر المتصفح
-            ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
-                setTimeout(() => {
-                    let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-                    window.open(url, '_blank');
-                }, index * 400);
-            });
+            // توجيه الطلب للرقم المختار عبر أزرار صفحة إتمام الشراء لتفادي حظر المتصفح
+            let targetNumber = ADMIN_WHATSAPP_NUMBERS[targetIndex] || ADMIN_WHATSAPP_NUMBERS[0];
+            let url = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+            window.location.href = url;
         }
 
         async function submitCaptainToWhatsApp() {
@@ -838,12 +839,8 @@
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📍 *العنوان:* ${address}`;
 
-            ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
-                setTimeout(() => {
-                    let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-                    window.open(url, '_blank');
-                }, index * 400);
-            });
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
+            window.location.href = url;
             closeModal('captainModal');
         }
 
@@ -864,12 +861,8 @@
             msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
             msg += `🏠 *العنوان:* ${address}`;
 
-            ADMIN_WHATSAPP_NUMBERS.forEach((num, index) => {
-                setTimeout(() => {
-                    let url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-                    window.open(url, '_blank');
-                }, index * 400);
-            });
+            let url = `https://wa.me/${ADMIN_WHATSAPP_NUMBERS[0]}?text=${encodeURIComponent(msg)}`;
+            window.location.href = url;
             closeModal('customOrderModal');
         }
 
