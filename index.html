@@ -812,7 +812,6 @@
             updateCartBadge();
             closeModal('checkoutModal');
 
-            // إرسال الطلب بشكل ثابت ومباشر للرقم الجديد
             let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             window.location.href = url;
         }
@@ -842,9 +841,43 @@
             let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
             let address = document.getElementById('customAddress').value.trim();
 
-            if(!name || !phone || !details || !address) { alert('⚠️ يرجى إكمال جميع تفاصيل الطلب والعنوان!'); return; }
+            if(!name || !phone || !details || !address) { 
+                alert('⚠️ يرجى إكمال جميع تفاصيل الطلب والعنوان!'); 
+                return; 
+            }
 
-            let msg = `🛍️ *طلب خاص جديد (اطلب اللي تحتاجه) - جاهز Store* 🛍️\n\n`;
+            let orderId = Math.floor(1000 + Math.random() * 9000);
+            let customSaleItem = {
+                orderId: orderId,
+                timestamp: new Date().toISOString(),
+                customerName: name,
+                customerPhone: phone,
+                area: zoneText,
+                address: address,
+                itemsSummary: `🛍️ [طلب خاص]: ${details}`,
+                total: 0, 
+                profit: 0,
+                status: 'قيد الانتظار'
+            };
+
+            // حفظ الطلب الخاص في السحابة ليظهر في لوحة التحكم الإدارية
+            try {
+                let res = await fetch(API_URL);
+                let data = await res.json();
+                let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
+                let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
+                cloudSales.push(customSaleItem);
+
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ products: cloudProducts, sales: cloudSales, activeWhatsApp: FIXED_WHATSAPP_NUMBER })
+                });
+            } catch(e) {
+                console.error("فشل حفظ الطلب الخاص في السحابة");
+            }
+
+            let msg = `🛍️ *طلب خاص جديد (اطلب اللي تحتاجه) #${orderId} - جاهز Store* 🛍️\n\n`;
             msg += `👤 *الاسم:* ${name}\n`;
             msg += `📞 *الهاتف:* ${phone}\n`;
             msg += `📋 *تفاصيل الطلب:* ${details}\n`;
