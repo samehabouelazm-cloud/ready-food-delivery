@@ -120,12 +120,26 @@
             border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm); overflow: hidden;
         }
         .main-cat-header {
-            padding: 16px 20px; background: linear-gradient(90deg, #f8fafc, #ffffff);
+            padding: 14px 20px; background: linear-gradient(90deg, #f8fafc, #ffffff);
             cursor: pointer; display: flex; justify-content: space-between; align-items: center;
             font-size: 18px; font-weight: 800; color: var(--primary-dark); user-select: none;
             transition: background 0.2s;
         }
         .main-cat-header:hover { background: #e0f2fe; }
+
+        /* تنسيق حاوية الشعار بجوار اسم القسم */
+        .cat-header-title-wrap {
+            display: flex; align-items: center; gap: 14px;
+        }
+        .cat-logo-img {
+            width: 52px; height: 52px; border-radius: 12px; object-fit: cover;
+            border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18);
+            background: #fff; flex-shrink: 0; transition: transform 0.2s ease;
+        }
+        .main-cat-header:hover .cat-logo-img {
+            transform: scale(1.05);
+        }
+
         .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; }
         .main-cat-card.active .main-cat-arrow { transform: rotate(180deg); }
 
@@ -415,8 +429,6 @@
 
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
-        
-        // تثبيت الرقم الجديد حصرياً وثابتاً للطلبات والدفع
         const FIXED_WHATSAPP_NUMBER = "201042377974"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
 
@@ -424,6 +436,11 @@
         let allSales = [];
         let cart = [];
         let productQuantities = {};
+
+        // خريطة شعارات الأقسام (يمكنك تسمية الصورة في المجلد بهذا الاسم)
+        const categoryLogos = {
+            "🛒 قسم السوبر ماركت": "supermarket-logo.png"
+        };
 
         const storeHierarchy = {
             "🛒 قسم السوبر ماركت": [
@@ -555,10 +572,17 @@
                 let isOpen = mainIdx === 0 ? 'active' : '';
                 let contentDisplay = mainIdx === 0 ? 'display: block;' : '';
 
+                let logoHtml = categoryLogos[mainCatName] 
+                    ? `<img src="${categoryLogos[mainCatName]}" alt="${mainCatName}" class="cat-logo-img" onerror="this.style.display='none'">` 
+                    : '';
+
                 html += `
                     <div class="main-cat-card ${isOpen}" id="mainCat_${mainIdx}">
                         <div class="main-cat-header" onclick="toggleMainCat(${mainIdx})">
-                            <span>${mainCatName} (${mainCatProducts.length})</span>
+                            <div class="cat-header-title-wrap">
+                                ${logoHtml}
+                                <span>${mainCatName} (${mainCatProducts.length})</span>
+                            </div>
                             <span class="main-cat-arrow">▼</span>
                         </div>
                         <div class="main-cat-content" style="${contentDisplay}" id="mainContent_${mainIdx}">
@@ -781,7 +805,6 @@
                 status: 'قيد الانتظار'
             };
 
-            // حفظ الطلب في السحابة للوحة التحكم
             try {
                 let res = await fetch(API_URL);
                 let data = await res.json();
@@ -860,7 +883,6 @@
                 status: 'قيد الانتظار'
             };
 
-            // حفظ الطلب الخاص في السحابة ليظهر في لوحة التحكم الإدارية
             try {
                 let res = await fetch(API_URL);
                 let data = await res.json();
