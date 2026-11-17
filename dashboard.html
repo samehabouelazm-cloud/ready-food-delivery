@@ -96,9 +96,9 @@
             </div>
         </div>
 
-        <!-- إدارة كاشيري الأقسام والشفتات -->
+        <!-- إدارة كاشيري الأقسام والشفتات مع تقرير الأرباح -->
         <div class="card">
-            <h3>👥 إدارة كاشيري الأقسام والشفتات (صباحي / مسائي)</h3>
+            <h3>👥 إدارة كاشيري الأقسام والشفتات وتقرير أرباحهم</h3>
             <div class="form-row">
                 <div class="form-group">
                     <label>اسم الكاشير:</label>
@@ -140,22 +140,47 @@
                             <th>الشفت</th>
                             <th>الهاتف</th>
                             <th>المحفظة</th>
+                            <th>مبيعات القسم</th>
                             <th>الإجراء</th>
                         </tr>
                     </thead>
                     <tbody id="cashiersTableBody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري تحميل الكاشير...</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل الكاشير...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- إدارة الكباتن وتصدير البيانات -->
+        <!-- إدارة الكباتن (مع خاصية التعديل والتصدير) -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                 <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن)</h3>
                 <button class="btn btn-export" onclick="exportCaptainsToCSV()">📥 تصدير أسماء وبيانات الكباتن (CSV)</button>
             </div>
+            
+            <input type="hidden" id="editCaptainIndex" value="-1">
+            <div class="form-row" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
+                <div class="form-group">
+                    <label>اسم الكابتن:</label>
+                    <input type="text" id="captainNameInput" placeholder="اسم الكابتن">
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="captainPhoneInput" placeholder="010xxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label>فودافون كاش:</label>
+                    <input type="text" id="captainVodafoneInput" placeholder="رقم فودافون كاش">
+                </div>
+                <div class="form-group">
+                    <label>انستا باي:</label>
+                    <input type="text" id="captainInstaInput" placeholder="حساب انستا باي">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn" id="saveCaptainBtn" onclick="saveCaptainData()" style="width: 100%;">💾 حفظ تعديل الكابتن</button>
+                </div>
+            </div>
+
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
@@ -168,13 +193,13 @@
                         </tr>
                     </thead>
                     <tbody id="captainsTableBody">
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري تحميل الكباتن...</td></tr>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- إدارة المنتجات مع التسعير، السعر القديم، هامش الربح، والأقسام الفرعية -->
+        <!-- إدارة المنتجات والأصناف -->
         <div class="card">
             <h3>📦 إدارة المنتجات والأصناف والأقسام</h3>
             <input type="hidden" id="editIndex" value="-1">
@@ -322,7 +347,6 @@
     </div>
 
     <script>
-        // كلمة المرور الجديدة المحدثة
         const CORRECT_ADMIN_PASSWORD = "Ss@1234567890"; 
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         let allProducts = [];
@@ -330,6 +354,7 @@
         let allCaptains = [];
         let allCashiers = [];
         let activeWhatsAppGlobal = "201042377974";
+        let lastKnownOrdersCount = 0;
 
         function checkAdminPassword() {
             let passInput = document.getElementById('adminPasswordInput').value.trim();
@@ -348,14 +373,54 @@
             document.getElementById('authOverlay').style.display = 'flex';
         }
 
+        // تشغيل صوت تنبيه جرس عالي القوة باستخدام AudioContext
+        function playAlertSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let now = audioCtx.currentTime;
+
+                // رنين أول (نغمة قوية)
+                let osc1 = audioCtx.createOscillator();
+                let gain1 = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(880, now); // تردد مرتفع
+                gain1.gain.setValueAtTime(0.5, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.6);
+
+                // رنين ثاني بعد نصف ثانية لتأكيد التنبيه
+                let osc2 = audioCtx.createOscillator();
+                let gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(1100, now + 0.3);
+                gain2.gain.setValueAtTime(0.5, now + 0.3);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(now + 0.3);
+                osc2.stop(now + 0.9);
+            } catch(e) {}
+        }
+
         async function loadDashboardData() {
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if(res.ok) {
                     let data = await res.json();
                     if(data && typeof data === 'object') {
+                        let newSales = Array.isArray(data.sales) ? data.sales : [];
+                        
+                        // إذا وجدنا طلباً جديداً، نقوم بتشغيل التنبيه الصوتي
+                        if (lastKnownOrdersCount > 0 && newSales.length > lastKnownOrdersCount) {
+                            playAlertSound();
+                        }
+                        lastKnownOrdersCount = newSales.length;
+
                         allProducts = Array.isArray(data.products) ? data.products : [];
-                        allSales = Array.isArray(data.sales) ? data.sales : [];
+                        allSales = newSales;
                         allCaptains = Array.isArray(data.captains) ? data.captains : [];
                         allCashiers = Array.isArray(data.cashiers) ? data.cashiers : [];
                         activeWhatsAppGlobal = data.activeWhatsApp || "201042377974";
@@ -366,6 +431,9 @@
             renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
+
+            // تحديث البيانات تلقائياً كل 10 ثوانٍ مع رصد الأوردرات الجديدة
+            setTimeout(loadDashboardData, 10000);
         }
 
         function getTodayDateString() {
@@ -548,6 +616,54 @@
             }
         }
 
+        // حفظ أو تعديل بيانات الكابتن
+        async function saveCaptainData() {
+            let editIdx = parseInt(document.getElementById('editCaptainIndex').value);
+            let name = document.getElementById('captainNameInput').value.trim();
+            let phone = document.getElementById('captainPhoneInput').value.trim();
+            let vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
+            let instaPay = document.getElementById('captainInstaInput').value.trim();
+
+            if (!name || !phone) {
+                alert('⚠️ يرجى إدخال اسم الكابتن ورقم الهاتف على الأقل!');
+                return;
+            }
+
+            let captainObj = { name, phone, vodafoneCash, instaPay };
+
+            if (editIdx >= 0) {
+                allCaptains[editIdx] = captainObj;
+                alert('✅ تم تعديل بيانات الكابتن بنجاح!');
+            } else {
+                allCaptains.push(captainObj);
+                alert('✅ تم إضافة الكابتن بنجاح!');
+            }
+
+            await saveDataToCloud();
+            renderCaptainsTable();
+            resetCaptainForm();
+        }
+
+        function editCaptain(idx) {
+            let cap = allCaptains[idx];
+            document.getElementById('editCaptainIndex').value = idx;
+            document.getElementById('captainNameInput').value = cap.name;
+            document.getElementById('captainPhoneInput').value = cap.phone;
+            document.getElementById('captainVodafoneInput').value = cap.vodafoneCash || '';
+            document.getElementById('captainInstaInput').value = cap.instaPay || '';
+            document.getElementById('saveCaptainBtn').innerText = '💾 تحديث الكابتن';
+            window.scrollTo({ top: 500, behavior: 'smooth' });
+        }
+
+        function resetCaptainForm() {
+            document.getElementById('editCaptainIndex').value = '-1';
+            document.getElementById('captainNameInput').value = '';
+            document.getElementById('captainPhoneInput').value = '';
+            document.getElementById('captainVodafoneInput').value = '';
+            document.getElementById('captainInstaInput').value = '';
+            document.getElementById('saveCaptainBtn').innerText = '💾 حفظ تعديل الكابتن';
+        }
+
         async function deleteCaptain(idx) {
             if(confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
                 allCaptains.splice(idx, 1);
@@ -620,7 +736,7 @@
 
             document.getElementById('saveProdBtn').innerText = '💾 حفظ التعديلات';
             document.getElementById('cancelEditBtn').style.display = 'inline-block';
-            window.scrollTo({ top: 400, behavior: 'smooth' });
+            window.scrollTo({ top: 800, behavior: 'smooth' });
         }
 
         function resetProductForm() {
@@ -654,16 +770,31 @@
             renderProductsTable();
         }
 
+        // حساب مبيعات كل كاشير ومطابقتها مع قسمه
         function renderCashiersTable() {
             let tbody = document.getElementById('cashiersTableBody');
             if(!tbody) return;
             if(allCashiers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لا يوجد كاشير مسجل حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشير مسجل حالياً.</td></tr>`;
                 return;
             }
             let html = '';
             allCashiers.forEach((c, idx) => {
                 let shiftClass = (c.shift && c.shift.includes('مسائي')) ? 'badge-shift-evening' : 'badge-shift';
+                
+                // حساب مبيعات القسم الخاص بالكاشير
+                let cashierSalesTotal = 0;
+                allSales.forEach(order => {
+                    if (order.items && Array.isArray(order.items)) {
+                        order.items.forEach(item => {
+                            let matchedProd = allProducts.find(p => p.name === item.name);
+                            if (matchedProd && matchedProd.category && c.section && matchedProd.category.includes(c.section.replace(/[^ء-ي]/g, ''))) {
+                                cashierSalesTotal += (item.price * item.qty);
+                            }
+                        });
+                    }
+                });
+
                 html += `
                     <tr>
                         <td><b>${c.name}</b></td>
@@ -671,6 +802,7 @@
                         <td><span class="${shiftClass}">${c.shift || 'صباحي'}</span></td>
                         <td>${c.whatsappPhone}</td>
                         <td>${c.walletAccount || 'غير مسجل'}</td>
+                        <td style="color: var(--secondary); font-weight: bold;">${cashierSalesTotal} ج.م</td>
                         <td>
                             <button onclick="deleteCashier(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
                         </td>
@@ -696,7 +828,8 @@
                         <td>${cap.vodafoneCash || 'غير مسجل'}</td>
                         <td>${cap.instaPay || 'غير مسجل'}</td>
                         <td>
-                            <button onclick="deleteCaptain(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
+                            <button onclick="editCaptain(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:4px;">تعديل</button>
+                            <button onclick="deleteCaptain(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
                         </td>
                     </tr>
                 `;
