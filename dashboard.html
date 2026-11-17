@@ -311,12 +311,12 @@
             </div>
         </div>
 
-        <!-- متابعة الطلبات مع فلتر اليوم وزر الطباعة -->
+        <!-- متابعة الطلبات مع تغيير الحالة، تغيير الكابتن، طباعة الفاتورة، وفلتر اليوم -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <button class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;">🖨️ طباعة التقرير</button>
+                    <button class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;">🖨️ طباعة تقرير المبيعات</button>
                     <label style="font-size: 13px; font-weight: 700;">فلتر العرض:</label>
                     <select id="salesFilterSelect" onchange="renderSalesTable()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
                         <option value="all">📊 كافة الطلبات المسجلة</option>
@@ -331,14 +331,15 @@
                             <th>رقم الطلب</th>
                             <th>التاريخ والوقت</th>
                             <th>العميل</th>
-                            <th>الهاتف</th>
-                            <th>الإجمالي</th>
-                            <th>طريقة الدفع</th>
-                            <th>الحالة</th>
+                            <th>الهاتف والعنوان</th>
+                            <th>الإجمالي وطريقة الدفع</th>
+                            <th>مندوب التوصيل (الكابتن)</th>
+                            <th>حالة الطلب</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
-                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>
+                        <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -373,30 +374,28 @@
             document.getElementById('authOverlay').style.display = 'flex';
         }
 
-        // تشغيل صوت تنبيه جرس عالي القوة باستخدام AudioContext
+        // تشغيل صوت تنبيه جرس عالي القوة
         function playAlertSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let now = audioCtx.currentTime;
 
-                // رنين أول (نغمة قوية)
                 let osc1 = audioCtx.createOscillator();
                 let gain1 = audioCtx.createGain();
                 osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(880, now); // تردد مرتفع
-                gain1.gain.setValueAtTime(0.5, now);
+                osc1.frequency.setValueAtTime(880, now);
+                gain1.gain.setValueAtTime(0.6, now);
                 gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
                 osc1.connect(gain1);
                 gain1.connect(audioCtx.destination);
                 osc1.start(now);
                 osc1.stop(now + 0.6);
 
-                // رنين ثاني بعد نصف ثانية لتأكيد التنبيه
                 let osc2 = audioCtx.createOscillator();
                 let gain2 = audioCtx.createGain();
                 osc2.type = 'sine';
                 osc2.frequency.setValueAtTime(1100, now + 0.3);
-                gain2.gain.setValueAtTime(0.5, now + 0.3);
+                gain2.gain.setValueAtTime(0.6, now + 0.3);
                 gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
                 osc2.connect(gain2);
                 gain2.connect(audioCtx.destination);
@@ -413,7 +412,6 @@
                     if(data && typeof data === 'object') {
                         let newSales = Array.isArray(data.sales) ? data.sales : [];
                         
-                        // إذا وجدنا طلباً جديداً، نقوم بتشغيل التنبيه الصوتي
                         if (lastKnownOrdersCount > 0 && newSales.length > lastKnownOrdersCount) {
                             playAlertSound();
                         }
@@ -432,7 +430,6 @@
             renderProductsTable();
             renderSalesTable();
 
-            // تحديث البيانات تلقائياً كل 10 ثوانٍ مع رصد الأوردرات الجديدة
             setTimeout(loadDashboardData, 10000);
         }
 
@@ -486,6 +483,104 @@
             document.getElementById('statOrdersCount').innerText = ordersCount;
         }
 
+        // تغيير حالة الطلب مباشرة
+        async function updateOrderStatus(orderIndex, newStatus) {
+            if (allSales[orderIndex]) {
+                allSales[orderIndex].status = newStatus;
+                await saveDataToCloud();
+                renderSalesTable();
+            }
+        }
+
+        // تغيير مندوب التوصيل (الكابتن) المسؤول عن الأوردر
+        async function updateOrderCaptain(orderIndex, captainName) {
+            if (allSales[orderIndex]) {
+                allSales[orderIndex].assignedCaptain = captainName;
+                await saveDataToCloud();
+                renderSalesTable();
+                alert(`✅ تم تعيين الكابتن (${captainName || 'بدون مندوب'}) للطلب بنجاح!`);
+            }
+        }
+
+        // طباعة إيصال الطلب الفردي للعميل
+        function printOrderReceipt(orderIndex) {
+            let s = allSales[orderIndex];
+            if (!s) return;
+
+            let printWindow = window.open('', '', 'height=650,width=500');
+            printWindow.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>إيصال طلب رقم #${s.orderId || '---'} - جاهز</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Tajawal', sans-serif; padding: 15px; color: #0f172a; direction: rtl; text-align: right; width: 320px; margin: auto; }
+                        h2 { text-align: center; color: #0369a1; margin-bottom: 2px; font-size: 20px; }
+                        .store-sub { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 12px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 8px; }
+                        .info-row { font-size: 13px; margin-bottom: 6px; display: flex; justify-content: space-between; }
+                        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+                        th, td { border-bottom: 1px solid #cbd5e1; padding: 6px 4px; text-align: right; }
+                        th { background: #f8fafc; font-weight: 800; }
+                        .total-box { border-top: 2px solid #0f172a; margin-top: 10px; padding-top: 8px; font-size: 15px; font-weight: 800; display: flex; justify-content: space-between; }
+                        .footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 8px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>🛒 منصة جاهز</h2>
+                    <div class="store-sub">توصيل الطلبات الفوري لبلطيم</div>
+                    
+                    <div class="info-row"><span><b>رقم الطلب:</b> #${s.orderId || '---'}</span><span><b>التاريخ:</b> ${s.timestamp ? s.timestamp.slice(0, 10) : '---'}</span></div>
+                    <div class="info-row"><span><b>العميل:</b> ${s.customerName}</span><span><b>الهاتف:</b> ${s.customerPhone}</span></div>
+                    <div class="info-row" style="display: block;"><b>العنوان:</b> ${s.customerAddress || '---'}</div>
+                    <div class="info-row"><span><b>طريقة الدفع:</b> ${s.paymentMethod}</span><span><b>الكابتن:</b> ${s.assignedCaptain || 'غير محدد'}</span></div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `);
+
+            if (s.items && Array.isArray(s.items)) {
+                s.items.forEach(item => {
+                    printWindow.document.write(`
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.qty}</td>
+                            <td>${item.price * item.qty} ج.م</td>
+                        </tr>
+                    `);
+                });
+            }
+
+            printWindow.document.write(`
+                        </tbody>
+                    </table>
+
+                    <div class="total-box">
+                        <span>الإجمالي الكلي:</span>
+                        <span style="color: #0284c7;">${s.total} ج.م</span>
+                    </div>
+
+                    <div class="footer-note">
+                        شكراً لتعاملكم مع منصة جاهز!<br>نتمنى لكم طعاماً شهياً وخدمة ممتازة.
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
         function printSalesReport() {
             let targetSales = getFilteredSales();
             let filterType = document.getElementById('salesFilterSelect').value === 'today' ? 'تقرير مبيعات اليوم' : 'تقرير كافة المبيعات المسجلة';
@@ -533,6 +628,7 @@
                                 <th>الهاتف</th>
                                 <th>الإجمالي</th>
                                 <th>طريقة الدفع</th>
+                                <th>الكابتن</th>
                                 <th>الحالة</th>
                             </tr>
                         </thead>
@@ -540,7 +636,7 @@
             `);
 
             if (targetSales.length === 0) {
-                printWindow.document.write(`<tr><td colspan="7" style="text-align:center;">لا توجد طلبات مسجلة في هذا التقرير.</td></tr>`);
+                printWindow.document.write(`<tr><td colspan="8" style="text-align:center;">لا توجد طلبات مسجلة في هذا التقرير.</td></tr>`);
             } else {
                 targetSales.forEach(s => {
                     let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
@@ -553,6 +649,7 @@
                             <td>${s.customerPhone}</td>
                             <td><b>${s.total} ج.م</b></td>
                             <td>${s.paymentMethod}</td>
+                            <td>${s.assignedCaptain || 'غير محدد'}</td>
                             <td>${s.status || 'قيد الانتظار'}</td>
                         </tr>
                     `);
@@ -616,7 +713,6 @@
             }
         }
 
-        // حفظ أو تعديل بيانات الكابتن
         async function saveCaptainData() {
             let editIdx = parseInt(document.getElementById('editCaptainIndex').value);
             let name = document.getElementById('captainNameInput').value.trim();
@@ -770,7 +866,6 @@
             renderProductsTable();
         }
 
-        // حساب مبيعات كل كاشير ومطابقتها مع قسمه
         function renderCashiersTable() {
             let tbody = document.getElementById('cashiersTableBody');
             if(!tbody) return;
@@ -782,7 +877,6 @@
             allCashiers.forEach((c, idx) => {
                 let shiftClass = (c.shift && c.shift.includes('مسائي')) ? 'badge-shift-evening' : 'badge-shift';
                 
-                // حساب مبيعات القسم الخاص بالكاشير
                 let cashierSalesTotal = 0;
                 allSales.forEach(order => {
                     if (order.items && Array.isArray(order.items)) {
@@ -877,24 +971,57 @@
             updateFinancialStats();
 
             if(targetSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مطابقة للفترة المحددة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مطابقة للفترة المحددة.</td></tr>`;
                 return;
             }
 
             let html = '';
-            targetSales.forEach(s => {
+            targetSales.forEach((s, origIdx) => {
                 let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
                 let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
+
+                // إيجاد مؤشر الطلب الحقيقي في المصفوفة العامة لتحديثه بدقة
+                let realIndex = allSales.findIndex(item => item === s);
+
+                // قائمة اختيار الكباتن
+                let captainOptions = `<option value="">-- اختر الكابتن --</option>`;
+                allCaptains.forEach(cap => {
+                    let sel = (s.assignedCaptain === cap.name) ? 'selected' : '';
+                    captainOptions += `<option value="${cap.name}" ${sel}>🛵 ${cap.name}</option>`;
+                });
+
+                // قائمة اختيار حالات الأوردر
+                let statusOptions = `
+                    <option value="قيد الانتظار ⏳" ${s.status === 'قيد الانتظار ⏳' ? 'selected' : ''}>⏳ قيد الانتظار</option>
+                    <option value="جاري التجهيز 🔥" ${s.status === 'جاري التجهيز 🔥' ? 'selected' : ''}>🔥 جاري التجهيز</option>
+                    <option value="خرج للتوصيل 🛵" ${s.status === 'خرج للتوصيل 🛵' ? 'selected' : ''}>🛵 خرج للتوصيل</option>
+                    <option value="تم التسليم ✅" ${s.status === 'تم التسليم ✅' ? 'selected' : ''}>✅ تم التسليم</option>
+                    <option value="ملغي ❌" ${s.status === 'ملغي ❌' ? 'selected' : ''}>❌ ملغي</option>
+                `;
 
                 html += `
                     <tr>
                         <td>#️⃣${s.orderId || '---'}</td>
                         <td style="font-size: 13px; color: var(--text-muted);">${dateStr}<br><b>${timeStr}</b></td>
                         <td><b>${s.customerName}</b></td>
-                        <td>${s.customerPhone}</td>
-                        <td style="color:var(--secondary); font-weight:bold;">${s.total} ج.م</td>
-                        <td>${s.paymentMethod}</td>
-                        <td><span class="badge-shift">${s.status || 'قيد الانتظار'}</span></td>
+                        <td>${s.customerPhone}<br><span style="font-size:12px; color:var(--text-muted);">${s.customerAddress || ''}</span></td>
+                        <td>
+                            <b style="color:var(--secondary);">${s.total} ج.م</b><br>
+                            <span style="font-size:12px; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px;">${s.paymentMethod}</span>
+                        </td>
+                        <td>
+                            <select onchange="updateOrderCaptain(${realIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; background: #fff; outline: none;">
+                                ${captainOptions}
+                            </select>
+                        </td>
+                        <td>
+                            <select onchange="updateOrderStatus(${realIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; background: #fff; outline: none; font-weight: bold;">
+                                ${statusOptions}
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn" onclick="printOrderReceipt(${realIndex})" style="background: var(--primary); padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">🖨️ طباعة الإيصال</button>
+                        </td>
                     </tr>
                 `;
             });
