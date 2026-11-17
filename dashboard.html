@@ -151,10 +151,10 @@
             </div>
         </div>
 
-        <!-- إدارة الكباتن (مع خاصية التعديل والتصدير) -->
+        <!-- إدارة الكباتن وتقرير أرباحهم -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-                <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن)</h3>
+                <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن) وتقرير الأرباح</h3>
                 <button class="btn btn-export" onclick="exportCaptainsToCSV()">📥 تصدير أسماء وبيانات الكباتن (CSV)</button>
             </div>
             
@@ -165,7 +165,7 @@
                     <input type="text" id="captainNameInput" placeholder="اسم الكابتن">
                 </div>
                 <div class="form-group">
-                    <label>رقم الهاتف:</label>
+                    <label>رقم الهاتف / الواتساب:</label>
                     <input type="tel" id="captainPhoneInput" placeholder="010xxxxxxxx">
                 </div>
                 <div class="form-group">
@@ -186,14 +186,16 @@
                     <thead>
                         <tr>
                             <th>اسم الكابتن</th>
-                            <th>رقم الهاتف</th>
-                            <th>فودافون كاش</th>
-                            <th>إنستا باي</th>
+                            <th>الهاتف</th>
+                            <th>فودافون كاش / انستا باي</th>
+                            <th>عدد الأوردرات</th>
+                            <th>إجمالي المبيعات</th>
+                            <th>مستحقات التوصيل (10 ج.م/أوردر)</th>
                             <th>الإجراء</th>
                         </tr>
                     </thead>
                     <tbody id="captainsTableBody">
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -311,7 +313,7 @@
             </div>
         </div>
 
-        <!-- متابعة الطلبات مع تغيير الحالة، تغيير الكابتن، طباعة الفاتورة، وفلتر اليوم -->
+        <!-- متابعة الطلبات مع إشعارات الواتساب، تغيير الحالة، وإسناد الكابتن -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
@@ -332,10 +334,10 @@
                             <th>التاريخ والوقت</th>
                             <th>العميل</th>
                             <th>الهاتف والعنوان</th>
-                            <th>الإجمالي وطريقة الدفع</th>
+                            <th>الإجمالي والدفع</th>
                             <th>مندوب التوصيل (الكابتن)</th>
                             <th>حالة الطلب</th>
-                            <th>الإجراءات</th>
+                            <th>الإجراءات والإشعارات</th>
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
@@ -483,26 +485,51 @@
             document.getElementById('statOrdersCount').innerText = ordersCount;
         }
 
-        // تغيير حالة الطلب مباشرة
+        // تغيير حالة الطلب مع إمكانية إرسال إشعار واتساب للعميل تلقائياً
         async function updateOrderStatus(orderIndex, newStatus) {
             if (allSales[orderIndex]) {
                 allSales[orderIndex].status = newStatus;
                 await saveDataToCloud();
                 renderSalesTable();
+
+                let s = allSales[orderIndex];
+                let sendWa = confirm(`✅ تم تحديث حالة الطلب إلى (${newStatus}).\nهل تريد إرسال إشعار واتساب للعميل (${s.customerName}) الآن؟`);
+                if (sendWa && s.customerPhone) {
+                    let cleanPhone = s.customerPhone.replace(/\D/g, '');
+                    if (cleanPhone.startsWith('0')) cleanPhone = '2' + cleanPhone;
+                    let msg = `مرحباً بك يا ${s.customerName} 🛒\nتحديث من منصة "جاهز": تم تغيير حالة طلبك رقم (#${s.orderId}) إلى: *${newStatus}*.\nشكراً لتعاملكم معنا!`;
+                    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                }
             }
         }
 
-        // تغيير مندوب التوصيل (الكابتن) المسؤول عن الأوردر
+        // تغيير وإسناد الكابتن مع إرسال إشعار واتساب للكابتن الجديد تلقائياً
         async function updateOrderCaptain(orderIndex, captainName) {
             if (allSales[orderIndex]) {
+                let oldCaptain = allSales[orderIndex].assignedCaptain;
                 allSales[orderIndex].assignedCaptain = captainName;
                 await saveDataToCloud();
                 renderSalesTable();
-                alert(`✅ تم تعيين الكابتن (${captainName || 'بدون مندوب'}) للطلب بنجاح!`);
+
+                let s = allSales[orderIndex];
+                alert(`✅ تم إسناد الطلب رقم (#${s.orderId}) للكابتن: (${captainName || 'بدون مندوب'}) بنجاح!`);
+
+                if (captainName) {
+                    let matchedCap = allCaptains.find(c => c.name === captainName);
+                    if (matchedCap && matchedCap.phone) {
+                        let sendWaCap = confirm(`هل تريد إرسال تفاصيل الأوردر واتساب للكابتن (${captainName}) الآن؟`);
+                        if (sendWaCap) {
+                            let cleanCapPhone = matchedCap.phone.replace(/\D/g, '');
+                            if (cleanCapPhone.startsWith('0')) cleanCapPhone = '2' + cleanCapPhone;
+                            let capMsg = `🛵 كابتن ${captainName}، تم إسناد أوردر جديد إليك من منصة "جاهز":\n\n- رقم الطلب: #${s.orderId}\n- العميل: ${s.customerName}\n- الهاتف: ${s.customerPhone}\n- العنوان: ${s.customerAddress || '---'}\n- الإجمالي: ${s.total} ج.م (${s.paymentMethod})\n\nبرجاء التوجه للتجهيز والاستلام. بالتوفيق!`;
+                            window.open(`https://wa.me/${cleanCapPhone}?text=${encodeURIComponent(capMsg)}`, '_blank');
+                        }
+                    }
+                }
             }
         }
 
-        // طباعة إيصال الطلب الفردي للعميل
+        // طباعة إيصال الأوردر للعميل
         function printOrderReceipt(orderIndex) {
             let s = allSales[orderIndex];
             if (!s) return;
@@ -906,21 +933,37 @@
             tbody.innerHTML = html;
         }
 
+        // جدول إدارة الكباتن مع تقرير المبيعات والمستحقات لكل كابتن
         function renderCaptainsTable() {
             let tbody = document.getElementById('captainsTableBody');
             if(!tbody) return;
             if(allCaptains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
                 return;
             }
             let html = '';
             allCaptains.forEach((cap, idx) => {
+                let capOrdersCount = 0;
+                let capSalesTotal = 0;
+
+                allSales.forEach(order => {
+                    if (order.assignedCaptain === cap.name) {
+                        capOrdersCount++;
+                        capSalesTotal += (order.subTotal || order.total || 0);
+                    }
+                });
+
+                let deliveryFeePerOrder = 10; // قيمة خدمة التوصيل المقدرة للكابتن لكل أوردر
+                let capDues = capOrdersCount * deliveryFeePerOrder;
+
                 html += `
                     <tr>
                         <td><b>${cap.name}</b></td>
                         <td>${cap.phone}</td>
-                        <td>${cap.vodafoneCash || 'غير مسجل'}</td>
-                        <td>${cap.instaPay || 'غير مسجل'}</td>
+                        <td style="font-size:13px;">📞 ${cap.vodafoneCash || '---'}<br>💳 ${cap.instaPay || '---'}</td>
+                        <td><span class="badge-shift">${capOrdersCount} أوردر</span></td>
+                        <td style="font-weight:bold;">${capSalesTotal} ج.م</td>
+                        <td style="color: var(--secondary); font-weight: bold; font-size: 15px;">${capDues} ج.م</td>
                         <td>
                             <button onclick="editCaptain(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:4px;">تعديل</button>
                             <button onclick="deleteCaptain(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
@@ -976,21 +1019,17 @@
             }
 
             let html = '';
-            targetSales.forEach((s, origIdx) => {
+            targetSales.forEach((s) => {
                 let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
                 let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
-
-                // إيجاد مؤشر الطلب الحقيقي في المصفوفة العامة لتحديثه بدقة
                 let realIndex = allSales.findIndex(item => item === s);
 
-                // قائمة اختيار الكباتن
                 let captainOptions = `<option value="">-- اختر الكابتن --</option>`;
                 allCaptains.forEach(cap => {
                     let sel = (s.assignedCaptain === cap.name) ? 'selected' : '';
                     captainOptions += `<option value="${cap.name}" ${sel}>🛵 ${cap.name}</option>`;
                 });
 
-                // قائمة اختيار حالات الأوردر
                 let statusOptions = `
                     <option value="قيد الانتظار ⏳" ${s.status === 'قيد الانتظار ⏳' ? 'selected' : ''}>⏳ قيد الانتظار</option>
                     <option value="جاري التجهيز 🔥" ${s.status === 'جاري التجهيز 🔥' ? 'selected' : ''}>🔥 جاري التجهيز</option>
@@ -1020,7 +1059,7 @@
                             </select>
                         </td>
                         <td>
-                            <button class="btn" onclick="printOrderReceipt(${realIndex})" style="background: var(--primary); padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">🖨️ طباعة الإيصال</button>
+                            <button class="btn" onclick="printOrderReceipt(${realIndex})" style="background: var(--primary); padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 4px;">🖨️ طباعة</button>
                         </td>
                     </tr>
                 `;
