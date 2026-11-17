@@ -286,11 +286,12 @@
             </div>
         </div>
 
-        <!-- متابعة الطلبات مع فلتر تاريخ اليوم -->
+        <!-- متابعة الطلبات مع فلتر اليوم وزر الطباعة -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;">🖨️ طباعة التقرير</button>
                     <label style="font-size: 13px; font-weight: 700;">فلتر العرض:</label>
                     <select id="salesFilterSelect" onchange="renderSalesTable()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
                         <option value="all">📊 كافة الطلبات المسجلة</option>
@@ -416,6 +417,93 @@
             document.getElementById('statOrdersCount').innerText = ordersCount;
         }
 
+        function printSalesReport() {
+            let targetSales = getFilteredSales();
+            let filterType = document.getElementById('salesFilterSelect').value === 'today' ? 'تقرير مبيعات اليوم' : 'تقرير كافة المبيعات المسجلة';
+            let totalSalesStr = document.getElementById('statTotalSales').innerText;
+            let totalProfitStr = document.getElementById('statTotalProfit').innerText;
+            let ordersCountStr = document.getElementById('statOrdersCount').innerText;
+
+            let printWindow = window.open('', '', 'height=700,width=900');
+            printWindow.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${filterType} - منصة جاهز</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Tajawal', sans-serif; padding: 20px; color: #0f172a; direction: rtl; text-align: right; }
+                        h2 { text-align: center; color: #0369a1; margin-bottom: 5px; }
+                        .subtitle { text-align: center; font-size: 14px; color: #64748b; margin-bottom: 20px; }
+                        .stats-box { display: flex; justify-content: space-around; background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+                        .stat-item { text-align: center; }
+                        .stat-item span { display: block; font-size: 13px; color: #64748b; }
+                        .stat-item b { font-size: 18px; color: #0f172a; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+                        th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; }
+                        th { background: #0284c7; color: #fff; }
+                        tr:nth-child(even) { background: #f8fafc; }
+                    </style>
+                </head>
+                <body>
+                    <h2>🛒 منصة جاهز - ${filterType}</h2>
+                    <div class="subtitle">تاريخ الإصدار: ${new Date().toLocaleString('ar-EG')}</div>
+                    
+                    <div class="stats-box">
+                        <div class="stat-item"><span>إجمالي المبيعات</span><b>${totalSalesStr}</b></div>
+                        <div class="stat-item"><span>هامش الأرباح</span><b>${totalProfitStr}</b></div>
+                        <div class="stat-item"><span>عدد الطلبات</span><b>${ordersCountStr}</b></div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الطلب</th>
+                                <th>التاريخ والوقت</th>
+                                <th>العميل</th>
+                                <th>الهاتف</th>
+                                <th>الإجمالي</th>
+                                <th>طريقة الدفع</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `);
+
+            if (targetSales.length === 0) {
+                printWindow.document.write(`<tr><td colspan="7" style="text-align:center;">لا توجد طلبات مسجلة في هذا التقرير.</td></tr>`);
+            } else {
+                targetSales.forEach(s => {
+                    let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
+                    let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
+                    printWindow.document.write(`
+                        <tr>
+                            <td>#️⃣${s.orderId || '---'}</td>
+                            <td>${dateStr} - ${timeStr}</td>
+                            <td><b>${s.customerName}</b></td>
+                            <td>${s.customerPhone}</td>
+                            <td><b>${s.total} ج.م</b></td>
+                            <td>${s.paymentMethod}</td>
+                            <td>${s.status || 'قيد الانتظار'}</td>
+                        </tr>
+                    `);
+                });
+            }
+
+            printWindow.document.write(`
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
         async function addCashier() {
             let name = document.getElementById('cashierName').value.trim();
             let phone = document.getElementById('cashierPhone').value.trim();
@@ -453,258 +541,3 @@
 
         async function deleteCashier(idx) {
             if(confirm('هل أنت متأكد من حذف هذا الكاشير؟')) {
-                allCashiers.splice(idx, 1);
-                await saveDataToCloud();
-                renderCashiersTable();
-            }
-        }
-
-        async function deleteCaptain(idx) {
-            if(confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
-                allCaptains.splice(idx, 1);
-                await saveDataToCloud();
-                renderCaptainsTable();
-            }
-        }
-
-        function exportCaptainsToCSV() {
-            if(allCaptains.length === 0) {
-                alert('⚠️ لا توجد بيانات كباتن للتصدير حالياً.');
-                return;
-            }
-            let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي\n";
-            allCaptains.forEach(cap => {
-                csvContent += `"${cap.name}","${cap.phone}","${cap.vodafoneCash || ''}","${cap.instaPay || ''}"\n`;
-            });
-            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `captains_jahiz_${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        async function saveProduct() {
-            let editIdx = parseInt(document.getElementById('editIndex').value);
-            let name = document.getElementById('prodName').value.trim();
-            let price = parseFloat(document.getElementById('prodPrice').value);
-            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
-            let oldPrice = parseFloat(document.getElementById('prodOldPrice').value) || 0;
-            let category = document.getElementById('prodCategory').value;
-            let image = document.getElementById('prodImage').value.trim();
-            let outOfStock = document.getElementById('prodStock').value === 'true';
-            let isOffer = document.getElementById('prodIsOffer').value === 'true';
-
-            if(!name || isNaN(price)) {
-                alert('⚠️ يرجى إدخال اسم المنتج والسعر الصحيح!');
-                return;
-            }
-
-            let productData = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
-
-            if(editIdx >= 0) {
-                allProducts[editIdx] = productData;
-                alert('✅ تم تعديل المنتج بنجاح!');
-            } else {
-                allProducts.push(productData);
-                alert('✅ تم إضافة المنتج بنجاح!');
-            }
-
-            await saveDataToCloud();
-            renderProductsTable();
-            resetProductForm();
-        }
-
-        function editProduct(idx) {
-            let p = allProducts[idx];
-            document.getElementById('editIndex').value = idx;
-            document.getElementById('prodName').value = p.name;
-            document.getElementById('prodPrice').value = p.price;
-            document.getElementById('prodCost').value = p.cost || '';
-            document.getElementById('prodOldPrice').value = p.oldPrice || '';
-            document.getElementById('prodCategory').value = p.category || 'هابي ميلز';
-            document.getElementById('prodImage').value = p.image || '';
-            document.getElementById('prodStock').value = p.outOfStock ? 'true' : 'false';
-            document.getElementById('prodIsOffer').value = p.isOffer ? 'true' : 'false';
-
-            document.getElementById('saveProdBtn').innerText = '💾 حفظ التعديلات';
-            document.getElementById('cancelEditBtn').style.display = 'inline-block';
-            window.scrollTo({ top: 400, behavior: 'smooth' });
-        }
-
-        function resetProductForm() {
-            document.getElementById('editIndex').value = '-1';
-            document.getElementById('prodName').value = '';
-            document.getElementById('prodPrice').value = '';
-            document.getElementById('prodCost').value = '';
-            document.getElementById('prodOldPrice').value = '';
-            document.getElementById('prodImage').value = '';
-            document.getElementById('prodStock').value = 'false';
-            document.getElementById('prodIsOffer').value = 'false';
-            document.getElementById('saveProdBtn').innerText = '➕ إضافة منتج جديد';
-            document.getElementById('cancelEditBtn').style.display = 'none';
-        }
-
-        async function deleteProduct(idx) {
-            if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-                allProducts.splice(idx, 1);
-                await saveDataToCloud();
-                renderProductsTable();
-            }
-        }
-
-        async function moveProduct(idx, direction) {
-            let newIdx = idx + direction;
-            if (newIdx < 0 || newIdx >= allProducts.length) return;
-            let temp = allProducts[idx];
-            allProducts[idx] = allProducts[newIdx];
-            allProducts[newIdx] = temp;
-            await saveDataToCloud();
-            renderProductsTable();
-        }
-
-        function renderCashiersTable() {
-            let tbody = document.getElementById('cashiersTableBody');
-            if(!tbody) return;
-            if(allCashiers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لا يوجد كاشير مسجل حالياً.</td></tr>`;
-                return;
-            }
-            let html = '';
-            allCashiers.forEach((c, idx) => {
-                let shiftClass = (c.shift && c.shift.includes('مسائي')) ? 'badge-shift-evening' : 'badge-shift';
-                html += `
-                    <tr>
-                        <td><b>${c.name}</b></td>
-                        <td>${c.section}</td>
-                        <td><span class="${shiftClass}">${c.shift || 'صباحي'}</span></td>
-                        <td>${c.whatsappPhone}</td>
-                        <td>${c.walletAccount || 'غير مسجل'}</td>
-                        <td>
-                            <button onclick="deleteCashier(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function renderCaptainsTable() {
-            let tbody = document.getElementById('captainsTableBody');
-            if(!tbody) return;
-            if(allCaptains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
-                return;
-            }
-            let html = '';
-            allCaptains.forEach((cap, idx) => {
-                html += `
-                    <tr>
-                        <td><b>${cap.name}</b></td>
-                        <td>${cap.phone}</td>
-                        <td>${cap.vodafoneCash || 'غير مسجل'}</td>
-                        <td>${cap.instaPay || 'غير مسجل'}</td>
-                        <td>
-                            <button onclick="deleteCaptain(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function renderProductsTable() {
-            let tbody = document.getElementById('productsTableBody');
-            if(!tbody) return;
-            if(allProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
-                return;
-            }
-            let html = '';
-            allProducts.forEach((p, idx) => {
-                let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:bold;">نفذت 🔴</span>' : '<span style="color:#10b981; font-weight:bold;">متوفر 🟢</span>';
-                let profit = (p.cost && p.price > p.cost) ? (p.price - p.cost) + ' ج.م' : '---';
-                html += `
-                    <tr>
-                        <td style="white-space:nowrap;">
-                            <button onclick="moveProduct(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">⬆️</button>
-                            <button onclick="moveProduct(${idx}, 1)" ${idx === allProducts.length - 1 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; margin-right:4px;">⬇️</button>
-                        </td>
-                        <td><b>${p.name}</b> ${p.isOffer ? '🔥' : ''}</td>
-                        <td style="color:var(--secondary); font-weight:bold;">${p.price} ج.م</td>
-                        <td style="color:#d97706; font-weight:bold;">${profit}</td>
-                        <td>${p.category || 'عام'}</td>
-                        <td>${stockBadge}</td>
-                        <td>
-                            <button onclick="editProduct(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:4px;">تعديل</button>
-                            <button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function renderSalesTable() {
-            let tbody = document.getElementById('salesTableBody');
-            if(!tbody) return;
-
-            let targetSales = getFilteredSales();
-            updateFinancialStats();
-
-            if(targetSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مطابقة للفترة المحددة.</td></tr>`;
-                return;
-            }
-
-            let html = '';
-            targetSales.forEach(s => {
-                let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
-                let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
-
-                html += `
-                    <tr>
-                        <td>#️⃣${s.orderId || '---'}</td>
-                        <td style="font-size: 13px; color: var(--text-muted);">${dateStr}<br><b>${timeStr}</b></td>
-                        <td><b>${s.customerName}</b></td>
-                        <td>${s.customerPhone}</td>
-                        <td style="color:var(--secondary); font-weight:bold;">${s.total} ج.م</td>
-                        <td>${s.paymentMethod}</td>
-                        <td><span class="badge-shift">${s.status || 'قيد الانتظار'}</span></td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        async function saveDataToCloud() {
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        products: allProducts,
-                        sales: allSales,
-                        captains: allCaptains,
-                        cashiers: allCashiers,
-                        activeWhatsApp: activeWhatsAppGlobal
-                    })
-                });
-            } catch(e) {
-                alert('⚠️ حدث خطأ أثناء الحفظ بالسحابة.');
-            }
-        }
-
-        window.onload = function() {
-            if (sessionStorage.getItem('admin_authenticated') === 'true') {
-                document.getElementById('authOverlay').style.display = 'none';
-                loadDashboardData();
-            } else {
-                document.getElementById('authOverlay').style.display = 'flex';
-            }
-        };
-    </script>
-</body>
-</html>
