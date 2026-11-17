@@ -80,6 +80,22 @@
 
     <div class="container">
         
+        <!-- قسم الإحصائيات والتقارير المالية اليومية -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px;">🛒 إجمالي مبيعات الطلبات</div>
+                <div id="statTotalSales" style="font-size: 26px; font-weight: 800;">0 ج.م</div>
+            </div>
+            <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #10b981, #059669); color: #fff;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px;">💰 هامش الأرباح المقدر</div>
+                <div id="statTotalProfit" style="font-size: 26px; font-weight: 800;">0 ج.م</div>
+            </div>
+            <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px;">📦 عدد الطلبات المسجلة</div>
+                <div id="statOrdersCount" style="font-size: 26px; font-weight: 800;">0</div>
+            </div>
+        </div>
+
         <!-- إدارة كاشيري الأقسام والشفتات -->
         <div class="card">
             <h3>👥 إدارة كاشيري الأقسام والشفتات (صباحي / مسائي)</h3>
@@ -338,6 +354,35 @@
             renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
+            updateFinancialStats();
+        }
+
+        function updateFinancialStats() {
+            let totalSales = 0;
+            let totalProfit = 0;
+            let ordersCount = allSales.length;
+
+            allSales.forEach(order => {
+                let orderSubTotal = order.subTotal || order.total || 0;
+                totalSales += orderSubTotal;
+
+                let orderProfit = 0;
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        let matchedProd = allProducts.find(p => p.name === item.name);
+                        let itemCost = (matchedProd && matchedProd.cost) ? matchedProd.cost : (item.price * 0.8);
+                        let itemProfit = (item.price - itemCost) * item.qty;
+                        orderProfit += itemProfit > 0 ? itemProfit : 0;
+                    });
+                } else {
+                    orderProfit = orderSubTotal * 0.2;
+                }
+                totalProfit += orderProfit;
+            });
+
+            document.getElementById('statTotalSales').innerText = totalSales.toLocaleString() + ' ج.م';
+            document.getElementById('statTotalProfit').innerText = Math.round(totalProfit).toLocaleString() + ' ج.م';
+            document.getElementById('statOrdersCount').innerText = ordersCount;
         }
 
         async function addCashier() {
@@ -479,7 +524,6 @@
             }
         }
 
-        // تحريك المنتج لأعلى أو لأسفل في القائمة
         async function moveProduct(idx, direction) {
             let newIdx = idx + direction;
             if (newIdx < 0 || newIdx >= allProducts.length) return;
