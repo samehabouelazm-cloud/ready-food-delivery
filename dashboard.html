@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - لوحة التحكم الشاملة والإدارة</title>
+    <title>جاهز - لوحة التحكم الشاملة للإدارة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -133,6 +133,27 @@
             </div>
         </div>
 
+        <!-- إدارة الكباتن (مناديب التوصيل) -->
+        <div class="card">
+            <h3>🛵 إدارة مناديب التوصيل (الكباتن)</h3>
+            <div style="overflow-x: auto; margin-top: 10px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم الكابتن</th>
+                            <th>رقم الهاتف</th>
+                            <th>فودافون كاش</th>
+                            <th>إنستا باي</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="captainsTableBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري تحميل الكباتن...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- إدارة المنتجات -->
         <div class="card">
             <h3>📦 إدارة المنتجات والأصناف</h3>
@@ -211,7 +232,7 @@
     </div>
 
     <script>
-        const CORRECT_ADMIN_PASSWORD = "ready2026"; // كلمة المرور الخاصة بك
+        const CORRECT_ADMIN_PASSWORD = "ready2026"; 
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         let allProducts = [];
         let allSales = [];
@@ -219,7 +240,6 @@
         let allCashiers = [];
         let activeWhatsAppGlobal = "201042377974";
 
-        // التحقق من كلمة المرور عند فتح الصفحة أو الجلسة
         function checkAdminPassword() {
             let passInput = document.getElementById('adminPasswordInput').value.trim();
             if (passInput === CORRECT_ADMIN_PASSWORD) {
@@ -227,7 +247,7 @@
                 sessionStorage.setItem('admin_authenticated', 'true');
                 loadDashboardData();
             } else {
-                alert('❌ كلمة المرور غير صحيحة! يجدر الانتباه لمحاولات الدخول.');
+                alert('❌ كلمة المرور غير صحيحة!');
                 document.getElementById('adminPasswordInput').value = '';
             }
         }
@@ -247,6 +267,7 @@
                 }
             } catch(e) {}
             renderCashiersTable();
+            renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
         }
@@ -291,6 +312,14 @@
                 allCashiers.splice(idx, 1);
                 await saveDataToCloud();
                 renderCashiersTable();
+            }
+        }
+
+        async function deleteCaptain(idx) {
+            if(confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
+                allCaptains.splice(idx, 1);
+                await saveDataToCloud();
+                renderCaptainsTable();
             }
         }
 
@@ -341,6 +370,30 @@
                         <td>${c.walletAccount || 'غير مسجل'}</td>
                         <td>
                             <button onclick="deleteCashier(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderCaptainsTable() {
+            let tbody = document.getElementById('captainsTableBody');
+            if(!tbody) return;
+            if(allCaptains.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً. يمكنهم التسجيل عبر زر "انضم ككابتن" في صفحة المتجر.</td></tr>`;
+                return;
+            }
+            let html = '';
+            allCaptains.forEach((cap, idx) => {
+                html += `
+                    <tr>
+                        <td><b>${cap.name}</b></td>
+                        <td>${cap.phone}</td>
+                        <td>${cap.vodafoneCash || 'غير مسجل'}</td>
+                        <td>${cap.instaPay || 'غير مسجل'}</td>
+                        <td>
+                            <button onclick="deleteCaptain(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
                         </td>
                     </tr>
                 `;
@@ -412,7 +465,6 @@
             }
         }
 
-        // فحص ما إذا كان المدير قد سجل دخول مسبقاً في الجلسة الحالية
         window.onload = function() {
             if (sessionStorage.getItem('admin_authenticated') === 'true') {
                 document.getElementById('authOverlay').style.display = 'none';
