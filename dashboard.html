@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - لوحة التحكم الشاملة للإدارة</title>
+    <title>جاهز - لوحة التحكم الشاملة والإدارة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -35,13 +35,14 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; outline: none; background: #f8fafc; }
         .btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .btn:hover { background: var(--primary-dark); }
+        .btn-export { background: var(--secondary); margin-bottom: 15px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-export:hover { background: #059669; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         th, td { padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; font-weight: 800; color: var(--text-muted); }
         .badge-shift { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; display: inline-block; }
         .badge-shift-evening { background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; display: inline-block; }
         
-        /* شاشة حماية كلمة المرور */
         #authOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
@@ -58,7 +59,6 @@
 </head>
 <body>
 
-    <!-- نافذة تسجيل الدخول وحماية الصفحة -->
     <div id="authOverlay">
         <div class="auth-box">
             <h3>🔒 دخول لوحة الإدارة المحمية</h3>
@@ -72,7 +72,8 @@
         <div class="brand">
             <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة</h2>
         </div>
-        <div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
             <a href="index.html" style="background:#0284c7; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">العودة لصفحة المتجر 🛒</a>
         </div>
     </header>
@@ -133,10 +134,13 @@
             </div>
         </div>
 
-        <!-- إدارة الكباتن (مناديب التوصيل) -->
+        <!-- إدارة الكباتن وتصدير البيانات -->
         <div class="card">
-            <h3>🛵 إدارة مناديب التوصيل (الكباتن)</h3>
-            <div style="overflow-x: auto; margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن)</h3>
+                <button class="btn btn-export" onclick="exportCaptainsToCSV()">📥 تصدير أسماء وبيانات الكباتن (CSV)</button>
+            </div>
+            <div style="overflow-x: auto;">
                 <table>
                     <thead>
                         <tr>
@@ -154,54 +158,70 @@
             </div>
         </div>
 
-        <!-- إدارة المنتجات -->
+        <!-- إدارة المنتجات مع السعر القديم وهامش الربح والتعديل -->
         <div class="card">
-            <h3>📦 إدارة المنتجات والأصناف</h3>
+            <h3>📦 إدارة المنتجات والأصناف (تعديل، سعر سابق، وهامش الربح)</h3>
+            <input type="hidden" id="editIndex" value="-1">
             <div class="form-row">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
                     <input type="text" id="prodName" placeholder="اسم المنتج">
                 </div>
                 <div class="form-group">
-                    <label>السعر (ج.م):</label>
-                    <input type="number" id="prodPrice" placeholder="السعر">
+                    <label>سعر البيع الحالي (ج.م):</label>
+                    <input type="number" id="prodPrice" placeholder="السعر الحالي">
+                </div>
+                <div class="form-group">
+                    <label>السعر القديم / قبل البيع (اختياري للشطب):</label>
+                    <input type="number" id="prodOldPrice" placeholder="السعر قبل الخصم">
                 </div>
                 <div class="form-group">
                     <label>القسم:</label>
                     <select id="prodCategory">
-                        <optgroup label="السوبر ماركت">
-                            <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
-                            <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
-                            <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
-                            <option value="سوبر ماركت - المكرونة">سوبر ماركت - المكرونة</option>
-                        </optgroup>
-                        <optgroup label="هابي ميلز">
-                            <option value="هابي ميلز">هابي ميلز</option>
-                            <option value="فرايد تشيكن">فرايد تشيكن</option>
-                            <option value="مشويات">مشويات</option>
-                            <option value="قسم البيتزا">قسم البيتزا</option>
-                        </optgroup>
+                        <option value="هابي ميلز">هابي ميلز</option>
+                        <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
+                        <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
+                        <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
+                        <option value="فول وطعمية - الأطباق والساندوتشات">فول وطعمية</option>
+                        <option value="سمكة مشوية - أسماك طازجة ومشويات">سمكة مشوية</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>رابط الصورة:</label>
                     <input type="text" id="prodImage" placeholder="https://...">
                 </div>
+                <div class="form-group">
+                    <label>حالة المنتج:</label>
+                    <select id="prodStock">
+                        <option value="false">🟢 متوفر</option>
+                        <option value="true">🔴 نفذت الكمية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>عرض خاص؟ (في العروض اليومية):</label>
+                    <select id="prodIsOffer">
+                        <option value="false">عادي</option>
+                        <option value="true">🔥 عرض خاص</option>
+                    </select>
+                </div>
             </div>
-            <button class="btn" onclick="addProduct()">➕ إضافة منتج جديد</button>
+            <button class="btn" id="saveProdBtn" onclick="saveProduct()">➕ إضافة منتج جديد</button>
+            <button class="btn" id="cancelEditBtn" onclick="resetProductForm()" style="background:#64748b; display:none; margin-right: 8px;">إلغاء التعديل</button>
 
             <div style="overflow-x: auto; margin-top: 15px;">
                 <table>
                     <thead>
                         <tr>
                             <th>المنتج</th>
-                            <th>السعر</th>
+                            <th>السعر الحالي</th>
+                            <th>السعر القديم</th>
                             <th>القسم</th>
-                            <th>الإجراء</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -218,7 +238,7 @@
                             <th>العميل</th>
                             <th>الهاتف</th>
                             <th>الإجمالي</th>
-                            <th>الطريقة</th>
+                            <th>طريقة الدفع</th>
                             <th>الحالة</th>
                         </tr>
                     </thead>
@@ -250,6 +270,11 @@
                 alert('❌ كلمة المرور غير صحيحة!');
                 document.getElementById('adminPasswordInput').value = '';
             }
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem('admin_authenticated');
+            document.getElementById('authOverlay').style.display = 'flex';
         }
 
         async function loadDashboardData() {
@@ -323,24 +348,83 @@
             }
         }
 
-        async function addProduct() {
+        // تصدير أسماء وبيانات الكباتن بصيغة CSV
+        function exportCaptainsToCSV() {
+            if(allCaptains.length === 0) {
+                alert('⚠️ لا توجد بيانات كباتن للتصدير حالياً.');
+                return;
+            }
+            let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي\n";
+            allCaptains.forEach(cap => {
+                csvContent += `"${cap.name}","${cap.phone}","${cap.vodafoneCash || ''}","${cap.instaPay || ''}"\n`;
+            });
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `captains_jahiz_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // حفظ أو تعديل المنتج
+        async function saveProduct() {
+            let editIdx = parseInt(document.getElementById('editIndex').value);
             let name = document.getElementById('prodName').value.trim();
             let price = parseFloat(document.getElementById('prodPrice').value);
+            let oldPrice = parseFloat(document.getElementById('prodOldPrice').value) || 0;
             let category = document.getElementById('prodCategory').value;
             let image = document.getElementById('prodImage').value.trim();
+            let outOfStock = document.getElementById('prodStock').value === 'true';
+            let isOffer = document.getElementById('prodIsOffer').value === 'true';
 
             if(!name || isNaN(price)) {
                 alert('⚠️ يرجى إدخال اسم المنتج والسعر الصحيح!');
                 return;
             }
 
-            allProducts.push({ name, price, category, image, outOfStock: false, isOffer: false });
+            let productData = { name, price, oldPrice, category, image, outOfStock, isOffer };
+
+            if(editIdx >= 0) {
+                allProducts[editIdx] = productData;
+                alert('✅ تم تعديل المنتج بنجاح!');
+            } else {
+                allProducts.push(productData);
+                alert('✅ تم إضافة المنتج بنجاح!');
+            }
+
             await saveDataToCloud();
             renderProductsTable();
-            alert('✅ تم إضافة المنتج بنجاح!');
+            resetProductForm();
+        }
+
+        function editProduct(idx) {
+            let p = allProducts[idx];
+            document.getElementById('editIndex').value = idx;
+            document.getElementById('prodName').value = p.name;
+            document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodOldPrice').value = p.oldPrice || '';
+            document.getElementById('prodCategory').value = p.category || 'هابي ميلز';
+            document.getElementById('prodImage').value = p.image || '';
+            document.getElementById('prodStock').value = p.outOfStock ? 'true' : 'false';
+            document.getElementById('prodIsOffer').value = p.isOffer ? 'true' : 'false';
+
+            document.getElementById('saveProdBtn').innerText = '💾 حفظ التعديلات';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            window.scrollTo({ top: 400, behavior: 'smooth' });
+        }
+
+        function resetProductForm() {
+            document.getElementById('editIndex').value = '-1';
             document.getElementById('prodName').value = '';
             document.getElementById('prodPrice').value = '';
+            document.getElementById('prodOldPrice').value = '';
             document.getElementById('prodImage').value = '';
+            document.getElementById('prodStock').value = 'false';
+            document.getElementById('prodIsOffer').value = 'false';
+            document.getElementById('saveProdBtn').innerText = '➕ إضافة منتج جديد';
+            document.getElementById('cancelEditBtn').style.display = 'none';
         }
 
         async function deleteProduct(idx) {
@@ -381,7 +465,7 @@
             let tbody = document.getElementById('captainsTableBody');
             if(!tbody) return;
             if(allCaptains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً. يمكنهم التسجيل عبر زر "انضم ككابتن" في صفحة المتجر.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
                 return;
             }
             let html = '';
@@ -405,17 +489,22 @@
             let tbody = document.getElementById('productsTableBody');
             if(!tbody) return;
             if(allProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
                 return;
             }
             let html = '';
             allProducts.forEach((p, idx) => {
+                let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:bold;">نفذت 🔴</span>' : '<span style="color:#10b981; font-weight:bold;">متوفر 🟢</span>';
+                let oldPriceTxt = (p.oldPrice && p.oldPrice > p.price) ? `${p.oldPrice} ج.م` : '---';
                 html += `
                     <tr>
-                        <td><b>${p.name}</b></td>
-                        <td>${p.price} ج.م</td>
+                        <td><b>${p.name}</b> ${p.isOffer ? '🔥' : ''}</td>
+                        <td style="color:var(--secondary); font-weight:bold;">${p.price} ج.م</td>
+                        <td>${oldPriceTxt}</td>
                         <td>${p.category || 'عام'}</td>
+                        <td>${stockBadge}</td>
                         <td>
+                            <button onclick="editProduct(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:6px;">تعديل</button>
                             <button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
                         </td>
                     </tr>
