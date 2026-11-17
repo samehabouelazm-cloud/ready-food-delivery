@@ -286,14 +286,24 @@
             </div>
         </div>
 
-        <!-- متابعة الطلبات -->
+        <!-- متابعة الطلبات مع فلتر تاريخ اليوم -->
         <div class="card">
-            <h3>📋 متابعة الطلبات والمبيعات</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <label style="font-size: 13px; font-weight: 700;">فلتر العرض:</label>
+                    <select id="salesFilterSelect" onchange="renderSalesTable()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                        <option value="all">📊 كافة الطلبات المسجلة</option>
+                        <option value="today">📅 طلبات اليوم فقط</option>
+                    </select>
+                </div>
+            </div>
             <div style="overflow-x: auto;">
                 <table>
                     <thead>
                         <tr>
                             <th>رقم الطلب</th>
+                            <th>التاريخ والوقت</th>
                             <th>العميل</th>
                             <th>الهاتف</th>
                             <th>الإجمالي</th>
@@ -302,7 +312,7 @@
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -354,15 +364,36 @@
             renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
-            updateFinancialStats();
+        }
+
+        function getTodayDateString() {
+            let d = new Date();
+            let year = d.getFullYear();
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getFilteredSales() {
+            let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect').value : 'all';
+            let todayStr = getTodayDateString();
+
+            if (filterVal === 'today') {
+                return allSales.filter(s => {
+                    if (!s.timestamp) return false;
+                    return s.timestamp.startsWith(todayStr);
+                });
+            }
+            return allSales;
         }
 
         function updateFinancialStats() {
+            let targetSales = getFilteredSales();
             let totalSales = 0;
             let totalProfit = 0;
-            let ordersCount = allSales.length;
+            let ordersCount = targetSales.length;
 
-            allSales.forEach(order => {
+            targetSales.forEach(order => {
                 let orderSubTotal = order.subTotal || order.total || 0;
                 totalSales += orderSubTotal;
 
@@ -619,15 +650,24 @@
         function renderSalesTable() {
             let tbody = document.getElementById('salesTableBody');
             if(!tbody) return;
-            if(allSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حتى الآن.</td></tr>`;
+
+            let targetSales = getFilteredSales();
+            updateFinancialStats();
+
+            if(targetSales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مطابقة للفترة المحددة.</td></tr>`;
                 return;
             }
+
             let html = '';
-            allSales.forEach(s => {
+            targetSales.forEach(s => {
+                let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
+                let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
+
                 html += `
                     <tr>
                         <td>#️⃣${s.orderId || '---'}</td>
+                        <td style="font-size: 13px; color: var(--text-muted);">${dateStr}<br><b>${timeStr}</b></td>
                         <td><b>${s.customerName}</b></td>
                         <td>${s.customerPhone}</td>
                         <td style="color:var(--secondary); font-weight:bold;">${s.total} ج.م</td>
