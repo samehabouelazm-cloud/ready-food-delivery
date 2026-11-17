@@ -158,9 +158,9 @@
             </div>
         </div>
 
-        <!-- إدارة المنتجات مع السعر القديم وهامش الربح والتعديل -->
+        <!-- إدارة المنتجات مع التسعير، السعر القديم، هامش الربح، والأقسام الفرعية -->
         <div class="card">
-            <h3>📦 إدارة المنتجات والأصناف (تعديل، سعر سابق، وهامش الربح)</h3>
+            <h3>📦 إدارة المنتجات والأصناف والأقسام</h3>
             <input type="hidden" id="editIndex" value="-1">
             <div class="form-row">
                 <div class="form-group">
@@ -169,21 +169,63 @@
                 </div>
                 <div class="form-group">
                     <label>سعر البيع الحالي (ج.م):</label>
-                    <input type="number" id="prodPrice" placeholder="السعر الحالي">
+                    <input type="number" id="prodPrice" placeholder="السعر للعميل">
+                </div>
+                <div class="form-group">
+                    <label>تكلفة المنتج (لحساب هامش الربح):</label>
+                    <input type="number" id="prodCost" placeholder="التكلفة">
                 </div>
                 <div class="form-group">
                     <label>السعر القديم / قبل البيع (اختياري للشطب):</label>
                     <input type="number" id="prodOldPrice" placeholder="السعر قبل الخصم">
                 </div>
                 <div class="form-group">
-                    <label>القسم:</label>
+                    <label>القسم الفرعي والرئيسي:</label>
                     <select id="prodCategory">
-                        <option value="هابي ميلز">هابي ميلز</option>
-                        <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
-                        <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
-                        <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
-                        <option value="فول وطعمية - الأطباق والساندوتشات">فول وطعمية</option>
-                        <option value="سمكة مشوية - أسماك طازجة ومشويات">سمكة مشوية</option>
+                        <optgroup label="🛒 قسم السوبر ماركت">
+                            <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
+                            <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
+                            <option value="سوبر ماركت - الشاي والسكر">سوبر ماركت - الشاي والسكر</option>
+                            <option value="سوبر ماركت - الدقيق">سوبر ماركت - الدقيق</option>
+                            <option value="سوبر ماركت - المكرونة">سوبر ماركت - المكرونة</option>
+                            <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
+                            <option value="سوبر ماركت - الشيبسي">سوبر ماركت - الشيبسي</option>
+                            <option value="سوبر ماركت - البسكويت والفطائر">سوبر ماركت - البسكويت والفطائر</option>
+                            <option value="سوبر ماركت - العصائر والمياه">سوبر ماركت - العصائر والمياه</option>
+                            <option value="سوبر ماركت - مياه غازية">سوبر ماركت - مياه غازية</option>
+                            <option value="سوبر ماركت - شيكولاتة ونوتيلا">سوبر ماركت - شيكولاتة ونوتيلا</option>
+                            <option value="سوبر ماركت - عسل وطحينة">سوبر ماركت - عسل وطحينة</option>
+                            <option value="سوبر ماركت - خل">سوبر ماركت - خل</option>
+                            <option value="سوبر ماركت - صوصات">سوبر ماركت - صوصات</option>
+                            <option value="سوبر ماركت - مجمدات">سوبر ماركت - مجمدات</option>
+                            <option value="سوبر ماركت - مناديل">سوبر ماركت - مناديل</option>
+                            <option value="سوبر ماركت - منوعات">سوبر ماركت - منوعات</option>
+                        </optgroup>
+                        <optgroup label="🍗 قسم هابي ميلز">
+                            <option value="هابي ميلز">هابي ميلز</option>
+                            <option value="قسم الغربي">قسم الغربي</option>
+                            <option value="تشيكن تندر">تشيكن تندر</option>
+                            <option value="فرايد تشيكن">فرايد تشيكن</option>
+                            <option value="مشويات">مشويات</option>
+                            <option value="شاورما - قسم الساندوتشات">شاورما - ساندوتشات</option>
+                            <option value="شاورما - فتة">شاورما - فتة</option>
+                            <option value="شاورما - قسم الوجبات">شاورما - وجبات</option>
+                            <option value="كريب - قسم الكريب الحادق">كريب حادق</option>
+                            <option value="كريب - قسم الكريب الحلو">كريب حلو</option>
+                            <option value="قسم البيتزا">قسم البيتزا</option>
+                            <option value="فطير هابي ميلز - فطير اسكندراني">فطير اسكندراني</option>
+                            <option value="فطير هابي ميلز - فطير حلو">فطير حلو</option>
+                        </optgroup>
+                        <optgroup label="🍳 قسم فول وطعمية">
+                            <option value="فول وطعمية - الأطباق والساندوتشات">أطباق وساندوتشات فول وطعمية</option>
+                            <option value="فول وطعمية - عجينة وقلي">عجينة وقلي</option>
+                            <option value="فول وطعمية - سلطات ومخللات">سلطات ومخللات</option>
+                        </optgroup>
+                        <optgroup label="🐟 قسم سمكة مشوية">
+                            <option value="سمكة مشوية - أسماك طازجة ومشويات">أسماك طازجة ومشويات</option>
+                            <option value="سمكة مشوية - سي فود وسنجاري">سي فود وسنجاري</option>
+                            <option value="سمكة مشوية - أرز ووربات وشوربة">أرز وشوربة</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="form-group">
@@ -212,16 +254,17 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>الترتيب</th>
                             <th>المنتج</th>
                             <th>السعر الحالي</th>
-                            <th>السعر القديم</th>
+                            <th>هامش الربح</th>
                             <th>القسم</th>
                             <th>الحالة</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -348,7 +391,6 @@
             }
         }
 
-        // تصدير أسماء وبيانات الكباتن بصيغة CSV
         function exportCaptainsToCSV() {
             if(allCaptains.length === 0) {
                 alert('⚠️ لا توجد بيانات كباتن للتصدير حالياً.');
@@ -368,11 +410,11 @@
             document.body.removeChild(a);
         }
 
-        // حفظ أو تعديل المنتج
         async function saveProduct() {
             let editIdx = parseInt(document.getElementById('editIndex').value);
             let name = document.getElementById('prodName').value.trim();
             let price = parseFloat(document.getElementById('prodPrice').value);
+            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
             let oldPrice = parseFloat(document.getElementById('prodOldPrice').value) || 0;
             let category = document.getElementById('prodCategory').value;
             let image = document.getElementById('prodImage').value.trim();
@@ -384,7 +426,7 @@
                 return;
             }
 
-            let productData = { name, price, oldPrice, category, image, outOfStock, isOffer };
+            let productData = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
 
             if(editIdx >= 0) {
                 allProducts[editIdx] = productData;
@@ -404,6 +446,7 @@
             document.getElementById('editIndex').value = idx;
             document.getElementById('prodName').value = p.name;
             document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodCost').value = p.cost || '';
             document.getElementById('prodOldPrice').value = p.oldPrice || '';
             document.getElementById('prodCategory').value = p.category || 'هابي ميلز';
             document.getElementById('prodImage').value = p.image || '';
@@ -419,6 +462,7 @@
             document.getElementById('editIndex').value = '-1';
             document.getElementById('prodName').value = '';
             document.getElementById('prodPrice').value = '';
+            document.getElementById('prodCost').value = '';
             document.getElementById('prodOldPrice').value = '';
             document.getElementById('prodImage').value = '';
             document.getElementById('prodStock').value = 'false';
@@ -433,6 +477,17 @@
                 await saveDataToCloud();
                 renderProductsTable();
             }
+        }
+
+        // تحريك المنتج لأعلى أو لأسفل في القائمة
+        async function moveProduct(idx, direction) {
+            let newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= allProducts.length) return;
+            let temp = allProducts[idx];
+            allProducts[idx] = allProducts[newIdx];
+            allProducts[newIdx] = temp;
+            await saveDataToCloud();
+            renderProductsTable();
         }
 
         function renderCashiersTable() {
@@ -489,23 +544,27 @@
             let tbody = document.getElementById('productsTableBody');
             if(!tbody) return;
             if(allProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
                 return;
             }
             let html = '';
             allProducts.forEach((p, idx) => {
                 let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:bold;">نفذت 🔴</span>' : '<span style="color:#10b981; font-weight:bold;">متوفر 🟢</span>';
-                let oldPriceTxt = (p.oldPrice && p.oldPrice > p.price) ? `${p.oldPrice} ج.م` : '---';
+                let profit = (p.cost && p.price > p.cost) ? (p.price - p.cost) + ' ج.م' : '---';
                 html += `
                     <tr>
+                        <td style="white-space:nowrap;">
+                            <button onclick="moveProduct(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">⬆️</button>
+                            <button onclick="moveProduct(${idx}, 1)" ${idx === allProducts.length - 1 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; margin-right:4px;">⬇️</button>
+                        </td>
                         <td><b>${p.name}</b> ${p.isOffer ? '🔥' : ''}</td>
                         <td style="color:var(--secondary); font-weight:bold;">${p.price} ج.م</td>
-                        <td>${oldPriceTxt}</td>
+                        <td style="color:#d97706; font-weight:bold;">${profit}</td>
                         <td>${p.category || 'عام'}</td>
                         <td>${stockBadge}</td>
                         <td>
-                            <button onclick="editProduct(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:6px;">تعديل</button>
-                            <button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
+                            <button onclick="editProduct(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:4px;">تعديل</button>
+                            <button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
                         </td>
                     </tr>
                 `;
