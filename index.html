@@ -127,17 +127,13 @@
         }
         .main-cat-header:hover { background: #e0f2fe; }
 
-        .cat-header-title-wrap {
-            display: flex; align-items: center; gap: 14px;
-        }
+        .cat-header-title-wrap { display: flex; align-items: center; gap: 14px; }
         .cat-logo-img {
             width: 52px; height: 52px; border-radius: 12px; object-fit: cover;
             border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18);
             background: #fff; flex-shrink: 0; transition: transform 0.2s ease;
         }
-        .main-cat-header:hover .cat-logo-img {
-            transform: scale(1.05);
-        }
+        .main-cat-header:hover .cat-logo-img { transform: scale(1.05); }
 
         .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; }
         .main-cat-card.active .main-cat-arrow { transform: rotate(180deg); }
@@ -349,7 +345,7 @@
                 </select>
                 <div id="paymentInfoBox" class="payment-info-box">
                     يرجى تحويل المبلغ المستحق على رقم فودافون كاش / انستا باي التالي: <br>
-                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;">201042377974</strong>
+                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;" id="dynamicWalletNumber">201042377974</strong>
                 </div>
             </div>
 
@@ -452,12 +448,10 @@
         let allProducts = [];
         let allSales = [];
         let allCaptains = [];
+        let allCashiers = [];
+        let activeWhatsAppGlobal = FIXED_WHATSAPP_NUMBER;
         let cart = [];
         let productQuantities = {};
-
-        const categoryLogos = {
-            "🛒 قسم السوبر ماركت": "supermarket-logo.png"
-        };
 
         const storeHierarchy = {
             "🛒 قسم السوبر ماركت": [
@@ -497,6 +491,21 @@
         function checkPaymentMethod() {
             let payMethod = document.getElementById('payMethod').value;
             let infoBox = document.getElementById('paymentInfoBox');
+            let walletSpan = document.getElementById('dynamicWalletNumber');
+            
+            // التحقق من وجود منتجات هابي ميلز في السلة لعرض رقم كاشير القسم إن وجد
+            let targetWallet = FIXED_WHATSAPP_NUMBER;
+            let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
+            
+            if (hasHappyMeals && allCashiers.length > 0) {
+                let cashier = allCashiers.find(c => c.section === 'هابي ميلز');
+                if (cashier && cashier.walletAccount) {
+                    targetWallet = cashier.walletAccount;
+                }
+            }
+
+            if (walletSpan) walletSpan.innerText = targetWallet;
+
             if (payMethod.includes('فودافون كاش') || payMethod.includes('انستا باي')) {
                 infoBox.style.display = 'block';
             } else {
@@ -515,6 +524,8 @@
                         allProducts = Array.isArray(data.products) ? data.products : [];
                         allSales = Array.isArray(data.sales) ? data.sales : [];
                         allCaptains = Array.isArray(data.captains) ? data.captains : [];
+                        allCashiers = Array.isArray(data.cashiers) ? data.cashiers : [];
+                        activeWhatsAppGlobal = data.activeWhatsApp || FIXED_WHATSAPP_NUMBER;
                     }
                     renderDailyOffers();
                     renderAccordionStore();
@@ -565,10 +576,10 @@
                         <div>
                             <div class="qty-controls">
                                 <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                <span class="qty-val" id="qty_${uniqueKey}">${productQuantities[uniqueKey]}</span>
                                 <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
                             </div>
-                            <button class="add-btn" style="background: #f59e0b;" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">أضف للسلة 🛒</button>
+                            <button class="add-btn" style="background: #f59e0b;" onclick="addToCart('${safeName}', ${p.price}, '${p.category || 'عام'}', '${uniqueKey}')">أضف للسلة 🛒</button>
                         </div>
                     </div>
                 `;
@@ -576,167 +587,40 @@
             offersGrid.innerHTML = html;
         }
 
-        function renderAccordionStore() {
-            let container = document.getElementById('accordionContainer');
-            if(!container) return;
-
-            let html = '';
-            let mainIdx = 0;
-
-            for (const [mainCatName, subCats] of Object.entries(storeHierarchy)) {
-                let mainCatProducts = allProducts.filter(p => {
-                    let c = p.category ? p.category.trim() : 'عام';
-                    return subCats.includes(c);
-                });
-
-                if (mainCatProducts.length === 0) continue;
-
-                let isOpen = mainIdx === 0 ? 'active' : '';
-                let contentDisplay = mainIdx === 0 ? 'display: block;' : '';
-
-                let logoHtml = categoryLogos[mainCatName] 
-                    ? `<img src="${categoryLogos[mainCatName]}" alt="${mainCatName}" class="cat-logo-img" onerror="this.style.display='none'">` 
-                    : '';
-
-                html += `
-                    <div class="main-cat-card ${isOpen}" id="mainCat_${mainIdx}">
-                        <div class="main-cat-header" onclick="toggleMainCat(${mainIdx})">
-                            <div class="cat-header-title-wrap">
-                                ${logoHtml}
-                                <span>${mainCatName} (${mainCatProducts.length})</span>
-                            </div>
-                            <span class="main-cat-arrow">▼</span>
-                        </div>
-                        <div class="main-cat-content" style="${contentDisplay}" id="mainContent_${mainIdx}">
-                `;
-
-                let activeSubCats = [];
-                subCats.forEach(sub => {
-                    if (allProducts.some(p => (p.category ? p.category.trim() : 'عام') === sub)) {
-                        activeSubCats.push(sub);
-                    }
-                });
-
-                if (activeSubCats.length > 1) {
-                    html += `<div class="sub-cats-grid">`;
-                    activeSubCats.forEach((sub, sIdx) => {
-                        let isSubActive = sIdx === 0 ? 'active' : '';
-                        html += `<button class="sub-cat-pill ${isSubActive}" onclick="switchSubCat(this, '${mainIdx}', '${sub}')">📁 ${sub}</button>`;
-                    });
-                    html += `</div>`;
-                }
-
-                activeSubCats.forEach((sub, sIdx) => {
-                    let isSubContainerActive = sIdx === 0 ? 'active' : '';
-                    let subProducts = allProducts.filter(p => (p.category ? p.category.trim() : 'عام') === sub);
-
-                    html += `<div class="sub-cat-products-container ${isSubContainerActive}" data-sub="${sub}">`;
-                    if (subProducts.length === 0) {
-                        html += `<div class="empty-section">لا توجد منتجات في هذا القسم حالياً.</div>`;
-                    } else {
-                        html += `<div class="products-grid">`;
-                        subProducts.forEach((p, pIdx) => {
-                            let uniqueKey = `p_${mainIdx}_${sIdx}_${pIdx}`;
-                            if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
-                            let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                            let safeName = p.name.replace(/'/g, "\\'");
-                            let isOut = p.outOfStock === true;
-
-                            html += `
-                                <div class="product-card">
-                                    <div>
-                                        <div class="product-img-wrapper">
-                                            <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
-                                        </div>
-                                        <div class="product-title">${p.name}</div>
-                                        <div class="product-price">${p.price} ج.م</div>
-                                    </div>
-                                    <div>
-                                        ${isOut ? 
-                                            `<div style="background:#fee2e2; color:#ef4444; text-align:center; font-size:12px; font-weight:800; padding:8px; border-radius:8px;">غير متوفر حالياً ⛔</div>` :
-                                            `
-                                            <div class="qty-controls">
-                                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                                <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
-                                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
-                                            </div>
-                                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">أضف للسلة 🛒</button>
-                                            `
-                                        }
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        html += `</div>`;
-                    }
-                    html += `</div>`;
-                });
-
-                html += `</div></div>`;
-                mainIdx++;
-            }
-
-            container.innerHTML = html || `<div style="text-align:center; padding:40px; color:var(--text-muted);">لا توجد أقسام أو منتجات مسجلة حالياً.</div>`;
-        }
-
-        function toggleMainCat(idx) {
-            let card = document.getElementById(`mainCat_${idx}`);
-            let content = document.getElementById(`mainContent_${idx}`);
-            if(card.classList.contains('active')) {
-                card.classList.remove('active');
-                content.style.display = 'none';
-            } else {
-                card.classList.add('active');
-                content.style.display = 'block';
-            }
-        }
-
-        function switchSubCat(btn, mainIdx, subName) {
-            let parentContent = document.getElementById(`mainContent_${mainIdx}`);
-            parentContent.querySelectorAll('.sub-cat-pill').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-
-            parentContent.querySelectorAll('.sub-cat-products-container').forEach(container => {
-                if(container.getAttribute('data-sub') === subName) {
-                    container.classList.add('active');
-                } else {
-                    container.classList.remove('active');
-                }
-            });
-        }
-
         function changeQty(key, delta) {
             if(!productQuantities[key]) productQuantities[key] = 1;
             productQuantities[key] += delta;
             if(productQuantities[key] < 1) productQuantities[key] = 1;
-            let el = document.getElementById(`qtyVal_${key}`);
+            let el = document.getElementById(`qty_${key}`);
             if(el) el.innerText = productQuantities[key];
         }
 
-        function addToCart(name, price, key) {
+        function addToCart(name, price, category, key) {
             let qty = productQuantities[key] || 1;
             let existing = cart.find(item => item.name === name);
-            if (existing) {
+            if(existing) {
                 existing.qty += qty;
             } else {
-                cart.push({ name: name, price: price, qty: qty });
+                cart.push({ name, price, category, qty });
             }
-            updateCartBadge();
-            alert(`✅ تمت إضافة (${qty}) من "${name}" إلى السلة بنجاح!`);
+            updateCartCount();
+            alert(`✅ تم إضافة (${qty}) من "${name}" إلى السلة بنجاح!`);
         }
 
-        function updateCartBadge() {
-            let total = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCount').innerText = total;
+        function updateCartCount() {
+            let totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = totalCount;
         }
 
         function openCart() {
-            let list = document.getElementById('cartItemsList');
-            if (cart.length === 0) {
-                list.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">سلة التسوق فارغة حالياً.</p>`;
+            let listEl = document.getElementById('cartItemsList');
+            if(!listEl) return;
+
+            if(cart.length === 0) {
+                listEl.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-weight:700;">سلة التسوق فارغة حالياً.</div>`;
                 document.getElementById('subTotal').innerText = '0 ج.م';
-                document.getElementById('deliveryFeeDisplay').innerText = '0 ج.م';
                 document.getElementById('grandTotal').innerText = '0 ج.م';
+                document.getElementById('deliveryFeeDisplay').innerText = getDeliveryFee() + ' ج.م';
                 document.getElementById('cartModal').style.display = 'flex';
                 return;
             }
@@ -752,188 +636,189 @@
                             <div style="font-weight:700; font-size:14px;">${item.name}</div>
                             <div style="font-size:12px; color:var(--text-muted);">${item.price} ج.م × ${item.qty}</div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-weight:800; color:var(--secondary);">${itemTotal} ج.م</span>
-                            <button onclick="removeFromCart(${idx})" style="background:#fee2e2; color:#ef4444; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <b style="color:var(--secondary); font-size:14px;">${itemTotal} ج.م</b>
+                            <button onclick="removeFromCart(${idx})" style="background:#ef4444; color:#fff; border:none; width:24px; height:24px; border-radius:50%; cursor:pointer; font-weight:bold;">×</button>
                         </div>
                     </div>
                 `;
             });
 
-            list.innerHTML = html;
-            let delivery = getDeliveryFee();
-            let grand = subTotal + delivery;
+            let deliveryFee = getDeliveryFee();
+            let grandTotal = subTotal + deliveryFee;
 
+            listEl.innerHTML = html;
             document.getElementById('subTotal').innerText = subTotal + ' ج.م';
-            document.getElementById('deliveryFeeDisplay').innerText = delivery + ' ج.م';
-            document.getElementById('grandTotal').innerText = grand + ' ج.م';
+            document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + ' ج.م';
+            document.getElementById('grandTotal').innerText = grandTotal + ' ج.م';
             document.getElementById('cartModal').style.display = 'flex';
         }
 
         function removeFromCart(idx) {
             cart.splice(idx, 1);
-            updateCartBadge();
+            updateCartCount();
             openCart();
         }
 
         function goToCheckout() {
-            if (cart.length === 0) {
+            if(cart.length === 0) {
                 alert('⚠️ سلة التسوق فارغة!');
                 return;
             }
             closeModal('cartModal');
+            checkPaymentMethod();
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
-        function openCaptainModal() { document.getElementById('captainModal').style.display = 'flex'; }
-        function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
 
+        function openCaptainModal() {
+            document.getElementById('captainModal').style.display = 'flex';
+        }
+
+        function openCustomOrderModal() {
+            document.getElementById('customOrderModal').style.display = 'flex';
+        }
+
+        // --- دالة إرسال الطلب عبر الواتساب مع الربط الذكي لكاشير القسم ---
         async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
-            let areaSelect = document.getElementById('outsideAreaKm');
-            let areaText = areaSelect.options[areaSelect.selectedIndex].text;
-            let deliveryFee = parseInt(areaSelect.value) || 20;
             let address = document.getElementById('custAddress').value.trim();
-            let pay = document.getElementById('payMethod').value;
+            let areaSelect = document.getElementById('outsideAreaKm');
+            let areaName = areaSelect.options[areaSelect.selectedIndex].text;
+            let deliveryFee = parseInt(areaSelect.value) || 20;
+            let payMethod = document.getElementById('payMethod').value;
 
             if(!name || !phone || !address) {
-                alert('⚠️ يرجى إكمال جميع بيانات الاستلام والعنوان!');
+                alert('⚠️ يرجى إكمال اسمك، رقم الهاتف، وعنوان التوصيل بالتفصيل!');
                 return;
             }
 
             let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let profitTotal = cart.reduce((sum, item) => {
-                let pObj = allProducts.find(p => p.name === item.name);
-                let cost = pObj ? (pObj.cost || (item.price * 0.8)) : (item.price * 0.8);
-                return sum + ((item.price - cost) * item.qty);
-            }, 0);
-
             let grandTotal = subTotal + deliveryFee;
-            let orderId = Math.floor(1000 + Math.random() * 9000);
             let itemsSummary = cart.map(i => `${i.name} (×${i.qty})`).join(', ');
-            let isCashOrder = pay.includes('نقداً');
 
-            let newSale = {
-                orderId: orderId,
+            // التحقق مما إذا كان الطلب يتبع قسم "هابي ميلز" لتوجيهه للكاشير المسؤول
+            let targetWhatsApp = activeWhatsAppGlobal;
+            let assignedCashierName = "الإدارة العامة";
+            let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
+
+            if (hasHappyMeals && allCashiers.length > 0) {
+                let cashier = allCashiers.find(c => c.section === 'هابي ميلز');
+                if (cashier && cashier.whatsappPhone) {
+                    targetWhatsApp = cashier.whatsappPhone;
+                    assignedCashierName = cashier.name;
+                }
+            }
+
+            let orderObj = {
+                orderId: Date.now().toString().slice(-6),
                 timestamp: new Date().toISOString(),
                 customerName: name,
                 customerPhone: phone,
-                area: areaText,
+                area: areaName,
                 address: address,
+                paymentMethod: payMethod,
+                items: cart,
                 itemsSummary: itemsSummary,
                 subTotal: subTotal,
                 deliveryFee: deliveryFee,
                 total: grandTotal,
-                profit: profitTotal,
-                paymentMethod: pay,
-                isCashOrder: isCashOrder,
-                assignedCaptainId: null,
-                assignedCaptainName: 'غير معين',
-                isSettled: !isCashOrder,
-                status: 'قيد الانتظار'
+                profit: Math.round(subTotal * 0.2), // ربط تقديري للتقرير
+                status: 'قيد الانتظار',
+                assignedCaptainId: '',
+                assignedCaptainName: '',
+                isCashOrder: payMethod.includes('نقداً'),
+                isSettled: false
             };
 
+            // حفظ الطلب سحابياً في لوحة التحكم
             try {
-                let res = await fetch(API_URL);
-                let data = await res.json();
-                let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
-                let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
-                let cloudCaptains = (data && Array.isArray(data.captains)) ? data.captains : allCaptains;
-                cloudSales.push(newSale);
-
+                allSales.push(orderObj);
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        products: cloudProducts, 
-                        sales: cloudSales, 
-                        captains: cloudCaptains,
-                        activeWhatsApp: FIXED_WHATSAPP_NUMBER 
+                    body: JSON.stringify({
+                        products: allProducts,
+                        sales: allSales,
+                        captains: allCaptains,
+                        cashiers: allCashiers,
+                        activeWhatsApp: activeWhatsAppGlobal
                     })
                 });
-            } catch(e){}
+            } catch(e) {}
 
-            let msg = `🛒 *طلب جديد #${orderId} - جاهز Store* 🛒\n\n`;
-            msg += `👤 *الاسم:* ${name}\n`;
-            msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📍 *منطقة التوصيل:* ${areaText}\n`;
-            msg += `🏠 *العنوان:* ${address}\n`;
-            msg += `💳 *طريقة الدفع:* ${pay}\n\n`;
-            msg += `📦 *المنتجات المطلوبة:*\n`;
-            cart.forEach(i => { msg += `- ${i.name} (${i.qty} قطعة) : ${i.price * i.qty} ج.م\n`; });
-            msg += `\n💰 *المجموع الفرعي:* ${subTotal} ج.م\n`;
-            msg += `🚚 *رسوم التوصيل:* ${deliveryFee} ج.م\n`;
-            msg += `💵 *الإجمالي الكلي:* ${grandTotal} ج.م`;
+            let itemsMsg = cart.map(i => `• ${i.name} (عدد ${i.qty}) -> ${i.price * i.qty} ج.م`).join('\n');
+            let msg = `🛒 *طلب جديد عبر منصة جاهز* #️⃣${orderObj.orderId}\n\n` +
+                      `👤 *العميل:* ${name}\n` +
+                      `📞 *الهاتف:* ${phone}\n` +
+                      `📍 *المنطقة:* ${areaName}\n` +
+                      `🏠 *العنوان:* ${address}\n\n` +
+                      `📋 *تفاصيل الأصناف (موجه إلى الكاشير: ${assignedCashierName}):*\n${itemsMsg}\n\n` +
+                      `💰 *المجموع الفرعي:* ${subTotal} ج.م\n` +
+                      `🛵 *التوصيل:* ${deliveryFee} ج.م\n` +
+                      `💎 *الإجمالي الكلي:* *${grandTotal} ج.م*\n` +
+                      `💳 *طريقة الدفع:* ${payMethod}\n\n` +
+                      `شكراً لاختياركم جاهز! 🚀`;
+
+            let cleanPhone = targetWhatsApp.startsWith('0') ? '2' + targetWhatsApp : targetWhatsApp;
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 
             cart = [];
-            updateCartBadge();
+            updateCartCount();
             closeModal('checkoutModal');
-
-            let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.location.href = url;
+            alert('✅ تم إرسال طلبك بنجاح وتسجيله في النظام!');
         }
 
         async function submitCaptainToWhatsApp() {
             let name = document.getElementById('capName').value.trim();
             let phone = document.getElementById('capPhone').value.trim();
-            let vodafoneCash = document.getElementById('capVodafoneCash').value.trim();
-            let instaPay = document.getElementById('capInstaPay').value.trim() || 'غير مسجل';
+            let vodafone = document.getElementById('capVodafoneCash').value.trim();
+            let insta = document.getElementById('capInstaPay').value.trim();
             let address = document.getElementById('capAddress').value.trim();
 
-            if(!name || !phone || !vodafoneCash || !address) { 
-                alert('⚠️ يرجى إدخال الاسم، الهاتف، رقم فودافون كاش، والعنوان!'); 
-                return; 
+            if(!name || !phone || !vodafone) {
+                alert('⚠️ يرجى إدخال اسمك، رقم الموبايل، ورقم فودافون كاش الخاص بتسوية العهدة!');
+                return;
             }
 
-            let captainId = "CAP-" + Math.floor(100 + Math.random() * 900);
-            let newCaptain = {
-                id: captainId,
+            let newCaptainObj = {
+                id: 'CAP-' + (allCaptains.length + 1),
                 name: name,
                 phone: phone,
-                vodafoneCash: vodafoneCash,
-                instaPay: instaPay,
-                address: address,
-                cashInHand: 0,
-                status: 'بانتظار التفعيل',
-                joinedAt: new Date().toISOString()
+                vodafoneCash: vodafone,
+                instaPay: insta || '',
+                cashInHand: 0
             };
 
             try {
-                let res = await fetch(API_URL);
-                let data = await res.json();
-                let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
-                let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
-                let cloudCaptains = (data && Array.isArray(data.captains)) ? data.captains : [];
-                
-                cloudCaptains.push(newCaptain);
-
+                allCaptains.push(newCaptainObj);
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        products: cloudProducts, 
-                        sales: cloudSales, 
-                        captains: cloudCaptains,
-                        activeWhatsApp: FIXED_WHATSAPP_NUMBER 
+                    body: JSON.stringify({
+                        products: allProducts,
+                        sales: allSales,
+                        captains: allCaptains,
+                        cashiers: allCashiers,
+                        activeWhatsApp: activeWhatsAppGlobal
                     })
                 });
-            } catch(e) {
-                console.error("خطأ في حفظ بيانات الكابتن");
-            }
+            } catch(e) {}
 
-            let msg = `🛵 *طلب انضمام كابتن وتفعيل محفظة - جاهز Store* 🛵\n\n`;
-            msg += `🆔 *كود الكابتن:* ${captainId}\n`;
-            msg += `👤 *الاسم:* ${name}\n`;
-            msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📱 *محفظة فودافون كاش:* ${vodafoneCash}\n`;
-            msg += `💳 *إنستا باي:* ${instaPay}\n`;
-            msg += `📍 *العنوان:* ${address}`;
+            let msg = `🛵 *طلب انضمام كابتن توصيل جديد - جاهز*\n\n` +
+                      `👤 *الاسم:* ${name}\n` +
+                      `📞 *الهاتف:* ${phone}\n` +
+                      `📱 *فودافون كاش (للعهد):* ${vodafone}\n` +
+                      `💳 *إنستا باي:* ${insta || 'غير مسجل'}\n` +
+                      `📍 *العنوان:* ${address}`;
 
-            let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.location.href = url;
+            window.open(`https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('captainModal');
+            alert('✅ تم تسجيل بياناتك بنجاح وإرسالها للإدارة عبر الواتساب!');
         }
 
         async function submitCustomOrderToWhatsApp() {
@@ -941,90 +826,156 @@
             let phone = document.getElementById('customPhone').value.trim();
             let details = document.getElementById('customDetails').value.trim();
             let zoneSelect = document.getElementById('customExternalZoneSelect');
-            let zoneText = zoneSelect.options[zoneSelect.selectedIndex].text;
+            let zoneName = zoneSelect.value;
             let address = document.getElementById('customAddress').value.trim();
 
-            if(!name || !phone || !details || !address) { 
-                alert('⚠️ يرجى إكمال جميع تفاصيل الطلب والعنوان!'); 
-                return; 
+            if(!name || !phone || !details) {
+                alert('⚠️ يرجى إدخال اسمك، رقم الهاتف، وتفاصيل الطلب الخاص!');
+                return;
             }
 
-            let orderId = Math.floor(1000 + Math.random() * 9000);
-            let customSaleItem = {
-                orderId: orderId,
-                timestamp: new Date().toISOString(),
-                customerName: name,
-                customerPhone: phone,
-                area: zoneText,
-                address: address,
-                itemsSummary: `🛍️ [طلب خاص]: ${details}`,
-                total: 0, 
-                profit: 0,
-                paymentMethod: 'الدفع نقداً عند الاستلام (Cash on Delivery)',
-                isCashOrder: true,
-                assignedCaptainId: null,
-                assignedCaptainName: 'غير معين',
-                isSettled: false,
-                status: 'قيد الانتظار'
-            };
+            let msg = `🛍️ *طلب خاص جديد من العميل*:\n\n` +
+                      `👤 *الاسم:* ${name}\n` +
+                      `📞 *الهاتف:* ${phone}\n` +
+                      `📍 *المنطقة:* ${zoneName}\n` +
+                      `🏠 *العنوان:* ${address}\n\n` +
+                      `📝 *تفاصيل الطلب المطلوبة:*\n${details}`;
 
-            try {
-                let res = await fetch(API_URL);
-                let data = await res.json();
-                let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
-                let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
-                let cloudCaptains = (data && Array.isArray(data.captains)) ? data.captains : allCaptains;
-                cloudSales.push(customSaleItem);
-
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        products: cloudProducts, 
-                        sales: cloudSales, 
-                        captains: cloudCaptains,
-                        activeWhatsApp: FIXED_WHATSAPP_NUMBER 
-                    })
-                });
-            } catch(e) {
-                console.error("فشل حفظ الطلب الخاص في السحابة");
-            }
-
-            let msg = `🛍️ *طلب خاص جديد (اطلب اللي تحتاجه) #${orderId} - جاهز Store* 🛍️\n\n`;
-            msg += `👤 *الاسم:* ${name}\n`;
-            msg += `📞 *الهاتف:* ${phone}\n`;
-            msg += `📋 *تفاصيل الطلب:* ${details}\n`;
-            msg += `📍 *منطقة التوصيل:* ${zoneText}\n`;
-            msg += `🏠 *العنوان:* ${address}`;
-
-            let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.location.href = url;
+            window.open(`https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             closeModal('customOrderModal');
+            alert('✅ تم إرسال طلبك الخاص بنجاح!');
+        }
+
+        function renderAccordionStore() {
+            let container = document.getElementById('accordionContainer');
+            if(!container) return;
+
+            let html = '';
+            Object.keys(storeHierarchy).forEach((mainCatName, mIdx) => {
+                let subCats = storeHierarchy[mainCatName];
+                let logoUrl = categoryLogos[mainCatName] || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=100";
+                
+                let subPillsHtml = '';
+                let subProductsContainersHtml = '';
+
+                subCats.forEach((subCatName, sIdx) => {
+                    let matchingProducts = allProducts.filter(p => {
+                        let pCat = (p.category || 'عام').trim();
+                        return pCat === subCatName.trim() || pCat.toLowerCase() === subCatName.toLowerCase();
+                    });
+
+                    let activeClass = (sIdx === 0) ? 'active' : '';
+                    subPillsHtml += `<button class="sub-cat-pill ${activeClass}" onclick="switchSubCategory(event, 'sub_grid_${mIdx}_${sIdx}')">${subCatName} (${matchingProducts.length})</button>`;
+
+                    let productsGridHtml = '';
+                    if(matchingProducts.length === 0) {
+                        productsGridHtml = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">لا توجد منتجات مسجلة في هذا القسم حالياً.</div>`;
+                    } else {
+                        productsGridHtml = `<div class="products-grid">`;
+                        matchingProducts.forEach((p, pIdx) => {
+                            let uniqueKey = `p_${mIdx}_${sIdx}_${pIdx}`;
+                            if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
+                            let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
+                            let safeName = p.name.replace(/'/g, "\\'");
+                            let stockBadge = p.outOfStock ? `<span style="position:absolute; top:10px; right:10px; background:#ef4444; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:10px;">نفذت ⛔</span>` : '';
+                            let oldPriceHtml = (p.oldPrice && p.oldPrice > p.price) ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 13px; margin-left: 6px;">${p.oldPrice} ج.م</span>` : '';
+
+                            productsGridHtml += `
+                                <div class="product-card" style="position:relative;">
+                                    ${stockBadge}
+                                    <div>
+                                        <div class="product-img-wrapper">
+                                            <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
+                                        </div>
+                                        <div class="product-title">${p.name}</div>
+                                        <div class="product-price">
+                                            <span style="color:var(--secondary);">${p.price} ج.م</span>
+                                            ${oldPriceHtml}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="qty-controls">
+                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
+                                            <span class="qty-val" id="qty_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
+                                        </div>
+                                        <button class="add-btn" ${p.outOfStock ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''} onclick="addToCart('${safeName}', ${p.price}, '${p.category || 'عام'}', '${uniqueKey}')">أضف للسلة 🛒</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        productsGridHtml += `</div>`;
+                    }
+
+                    subProductsContainersHtml += `
+                        <div class="sub-cat-products-container ${activeClass}" id="sub_grid_${mIdx}_${sIdx}">
+                            ${productsGridHtml}
+                        </div>
+                    `;
+                });
+
+                let isOpen = (mIdx === 0) ? 'active' : '';
+                html += `
+                    <div class="main-cat-card ${isOpen}">
+                        <div class="main-cat-header" onclick="toggleAccordion(this)">
+                            <div class="cat-header-title-wrap">
+                                <img src="${logoUrl}" class="cat-logo-img" onerror="this.src='${DEFAULT_IMAGE}'">
+                                <span>${mainCatName}</span>
+                            </div>
+                            <span class="main-cat-arrow">▼</span>
+                        </div>
+                        <div class="main-cat-content">
+                            <div class="sub-cats-grid">
+                                ${subPillsHtml}
+                            </div>
+                            ${subProductsContainersHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleAccordion(headerEl) {
+            let card = headerEl.parentElement;
+            card.classList.toggle('active');
+        }
+
+        function switchSubCategory(event, gridId) {
+            event.stopPropagation();
+            let parentCard = event.target.closest('.main-cat-content');
+            parentCard.querySelectorAll('.sub-cat-pill').forEach(btn => btn.classList.remove('active'));
+            parentCard.querySelectorAll('.sub-cat-products-container').forEach(div => div.classList.remove('active'));
+
+            event.target.classList.add('active');
+            let targetGrid = document.getElementById(gridId);
+            if(targetGrid) targetGrid.classList.add('active');
         }
 
         function searchStore() {
-            let q = document.getElementById('searchInput').value.toLowerCase().trim();
-            if(!q) {
+            let query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if(!query) {
                 renderAccordionStore();
                 return;
             }
-            let container = document.getElementById('accordionContainer');
-            let matched = allProducts.filter(p => p.name.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)));
 
-            if(matched.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">عذراً، لم نجد أي منتجات تطابق بحثك "${q}".</div>`;
+            let filtered = allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.category && p.category.toLowerCase().includes(query)));
+            let container = document.getElementById('accordionContainer');
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">لا توجد منتجات مطابقة لبحثك.</div>`;
                 return;
             }
 
-            let html = `<div class="main-cat-card active"><div class="main-cat-header"><span>نتائج البحث عن: "${q}" (${matched.length})</span></div><div class="main-cat-content" style="display:block;"><div class="products-grid">`;
-            matched.forEach((p, pIdx) => {
+            let gridHtml = `<div class="products-grid">`;
+            filtered.forEach((p, pIdx) => {
                 let uniqueKey = `search_${pIdx}`;
                 if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
                 let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
                 let safeName = p.name.replace(/'/g, "\\'");
-                let isOut = p.outOfStock === true;
 
-                html += `
+                gridHtml += `
                     <div class="product-card">
                         <div>
                             <div class="product-img-wrapper"><img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'"></div>
@@ -1032,22 +983,23 @@
                             <div class="product-price">${p.price} ج.م</div>
                         </div>
                         <div>
-                            ${isOut ? `<div style="background:#fee2e2; color:#ef4444; text-align:center; font-size:12px; font-weight:800; padding:8px; border-radius:8px;">غير متوفر حالياً ⛔</div>` : `
                             <div class="qty-controls">
                                 <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                <span class="qty-val" id="qtyVal_${uniqueKey}">${productQuantities[uniqueKey]}</span>
+                                <span class="qty-val" id="qty_${uniqueKey}">${productQuantities[uniqueKey]}</span>
                                 <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
                             </div>
-                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${uniqueKey}')">أضف للسلة 🛒</button>`}
+                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${p.category || 'عام'}', '${uniqueKey}')">أضف للسلة 🛒</button>
                         </div>
                     </div>
                 `;
             });
-            html += `</div></div></div>`;
-            container.innerHTML = html;
+            gridHtml += `</div>`;
+            container.innerHTML = `<div style="background:#fff; padding:20px; border-radius:16px;"><h3>نتائج البحث عن: "${query}"</h3><br>${gridHtml}</div>`;
         }
 
-        window.onload = () => { loadStoreProducts(); };
+        window.onload = function() {
+            loadStoreProducts();
+        };
     </script>
 </body>
 </html>
