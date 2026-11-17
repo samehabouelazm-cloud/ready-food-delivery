@@ -62,8 +62,8 @@
     <div id="authOverlay">
         <div class="auth-box">
             <h3>🔒 دخول لوحة الإدارة المحمية</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">يرجى إدخال كلمة المرور الخاصة بالإدارة للمتابعة:</p>
-            <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور السرية" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">يرجى إدخال كلمة المرور الجديدة للمتابعة:</p>
+            <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور الجديدة" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
             <button onclick="checkAdminPassword()">دخول آمن 🔓</button>
         </div>
     </div>
@@ -372,7 +372,8 @@
     </div>
 
     <script>
-        const CORRECT_ADMIN_PASSWORD = "Ss@1234567890"; 
+        // كلمة المرور الجديدة المحدثة
+        const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890"; 
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         let allProducts = [];
         let allSales = [];
@@ -466,7 +467,7 @@
         }
 
         function getFilteredSales() {
-            let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect'].value : 'all';
+            let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect').value : 'all';
             let todayStr = getTodayDateString();
 
             if (filterVal === 'today') {
