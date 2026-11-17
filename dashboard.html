@@ -96,9 +96,9 @@
             </div>
         </div>
 
-        <!-- إدارة كاشيري الأقسام والشفتات مع تقرير الأرباح -->
+        <!-- إدارة كاشيري الأقسام والشفتات مع حاسبة العهدة النقدية -->
         <div class="card">
-            <h3>👥 إدارة كاشيري الأقسام والشفتات وتقرير أرباحهم</h3>
+            <h3>👥 إدارة كاشيري الأقسام وشفتات العمل</h3>
             <div class="form-row">
                 <div class="form-group">
                     <label>اسم الكاشير:</label>
@@ -149,13 +149,35 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- حاسبة إجمالية لعهد ودرج الكاشير -->
+            <div style="margin-top: 20px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1;">
+                <h4 style="margin-bottom: 10px; color: var(--primary-dark);">🧮 حاسبة عهدة ونقدية الكاشير (إغلاق الشفت)</h4>
+                <div class="form-row" style="margin-bottom: 8px;">
+                    <div class="form-group">
+                        <label>إجمالي نقدية الدرج (الكاش):</label>
+                        <input type="number" id="drawerCash" placeholder="0" oninput="calculateDrawerTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>إجمالي فودافون كاش / انستا باي:</label>
+                        <input type="number" id="drawerWallets" placeholder="0" oninput="calculateDrawerTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>العهدَة البداية (الفرعية):</label>
+                        <input type="number" id="drawerStartFloat" placeholder="0" oninput="calculateDrawerTotal()">
+                    </div>
+                </div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--secondary); margin-top: 8px;">
+                    💰 إجمالي محصلات الدرج الفعلية: <span id="drawerFinalTotal">0</span> ج.م
+                </div>
+            </div>
         </div>
 
-        <!-- إدارة الكباتن وتقرير أرباحهم -->
+        <!-- إدارة الكباتن وتقرير أرباحهم مع زر تصدير Excel (CSV) -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                 <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن) وتقرير الأرباح</h3>
-                <button class="btn btn-export" onclick="exportCaptainsToCSV()">📥 تصدير أسماء وبيانات الكباتن (CSV)</button>
+                <button class="btn btn-export" onclick="exportCaptainsReportToExcel()">📥 تصدير تقرير أرباح الكباتن (Excel/CSV)</button>
             </div>
             
             <input type="hidden" id="editCaptainIndex" value="-1">
@@ -444,7 +466,7 @@
         }
 
         function getFilteredSales() {
-            let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect').value : 'all';
+            let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect'].value : 'all';
             let todayStr = getTodayDateString();
 
             if (filterVal === 'today') {
@@ -485,7 +507,46 @@
             document.getElementById('statOrdersCount').innerText = ordersCount;
         }
 
-        // تغيير حالة الطلب مع إمكانية إرسال إشعار واتساب للعميل تلقائياً
+        // حاسبة الدرج النقدي للكاشير
+        function calculateDrawerTotal() {
+            let cash = parseFloat(document.getElementById('drawerCash').value) || 0;
+            let wallets = parseFloat(document.getElementById('drawerWallets').value) || 0;
+            let floatMoney = parseFloat(document.getElementById('drawerStartFloat').value) || 0;
+            let finalTotal = (cash + wallets) - floatMoney;
+            document.getElementById('drawerFinalTotal').innerText = finalTotal >= 0 ? finalTotal.toLocaleString() : '0';
+        }
+
+        // تصدير تقرير أرباح ومستحقات الكباتن إلى ملف Excel (CSV)
+        function exportCaptainsReportToExcel() {
+            if (allCaptains.length === 0) {
+                alert('⚠️ لا توجد بيانات كباتن لتصديرها حالياً.');
+                return;
+            }
+
+            let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي,عدد الأوردرات,إجمالي المبيعات,مستحقات التوصيل\n";
+            allCaptains.forEach(cap => {
+                let capOrdersCount = 0;
+                let capSalesTotal = 0;
+                allSales.forEach(order => {
+                    if (order.assignedCaptain === cap.name) {
+                        capOrdersCount++;
+                        capSalesTotal += (order.subTotal || order.total || 0);
+                    }
+                });
+                let capDues = capOrdersCount * 10;
+                csvContent += `"${cap.name}","${cap.phone}","${cap.vodafoneCash || ''}","${cap.instaPay || ''}","${capOrdersCount}","${capSalesTotal} ج.م","${capDues} ج.م"\n`;
+            });
+
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `captains_profit_report_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         async function updateOrderStatus(orderIndex, newStatus) {
             if (allSales[orderIndex]) {
                 allSales[orderIndex].status = newStatus;
@@ -503,10 +564,8 @@
             }
         }
 
-        // تغيير وإسناد الكابتن مع إرسال إشعار واتساب للكابتن الجديد تلقائياً
         async function updateOrderCaptain(orderIndex, captainName) {
             if (allSales[orderIndex]) {
-                let oldCaptain = allSales[orderIndex].assignedCaptain;
                 allSales[orderIndex].assignedCaptain = captainName;
                 await saveDataToCloud();
                 renderSalesTable();
@@ -529,7 +588,6 @@
             }
         }
 
-        // طباعة إيصال الأوردر للعميل
         function printOrderReceipt(orderIndex) {
             let s = allSales[orderIndex];
             if (!s) return;
@@ -933,7 +991,6 @@
             tbody.innerHTML = html;
         }
 
-        // جدول إدارة الكباتن مع تقرير المبيعات والمستحقات لكل كابتن
         function renderCaptainsTable() {
             let tbody = document.getElementById('captainsTableBody');
             if(!tbody) return;
@@ -953,7 +1010,7 @@
                     }
                 });
 
-                let deliveryFeePerOrder = 10; // قيمة خدمة التوصيل المقدرة للكابتن لكل أوردر
+                let deliveryFeePerOrder = 10;
                 let capDues = capOrdersCount * deliveryFeePerOrder;
 
                 html += `
