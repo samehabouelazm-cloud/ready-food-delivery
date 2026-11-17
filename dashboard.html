@@ -162,6 +162,7 @@
             </div>
         </div>
 
+        <!-- الإحصائيات العامة -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">📅 مبيعات وأرباح اليوم</div>
@@ -188,7 +189,7 @@
         <!-- قسم إدارة المناديب وعهد الكاش -->
         <div class="card">
             <div class="card-title">🛵 إدارة مناديب التوصيل ومحافظ عهدة الكاش</div>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">متابعة المبالغ النقدية (Cash in Hand) مع كل كابتن ومحافظ فودافون كاش وإنستا باي.</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">متابعة المبالغ النقدية (Cash in Hand) المعلقة مع كل كابتن ومحافظ فودافون كاش وإنستا باي.</p>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -197,12 +198,31 @@
                             <th>اسم الكابتن</th>
                             <th>رقم الهاتف</th>
                             <th>فودافون كاش / إنستا باي</th>
-                            <th>العهدَة النقدية المعلقة</th>
+                            <th>العُهدة النقدية المعلقة</th>
                             <th>حالة الحساب</th>
                             <th>إجراءات التسوية</th>
                         </tr>
                     </thead>
                     <tbody id="adminCaptainsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- قسم تقرير عهد ومحصلات المناديب الشهرية -->
+        <div class="card">
+            <div class="card-title">📊 تقرير العهد النقدية المحصلة لكل كابتن (خلال الشهر الحالي)</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">إجمالي الأوردرات والمبالغ النقدية التي حصلها كل كابتن من الطلبات المقبولة خلال الشهر الحالي.</p>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم الكابتن</th>
+                            <th>رقم الهاتف</th>
+                            <th>عدد الأوردرات المنفذة</th>
+                            <th>إجمالي المبلغ المحصل (ج.م)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminCaptainMonthlyReportTable"></tbody>
                 </table>
             </div>
         </div>
@@ -213,7 +233,6 @@
             <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
                 <p style="font-size: 13px; color: var(--text-muted);">إدارة طلبات العملاء، تعيين الكابتن، وتتبع تحصيل الكاش.</p>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-success" onclick="exportSalesToExcel()" style="padding: 6px 12px; font-size: 12px;">📊 تصدير المبيعات لـ Excel</button>
                     <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
                 </div>
             </div>
@@ -268,7 +287,7 @@
         </div>
     </div>
 
-    <!-- نوافذ الإضافة والتعديل -->
+    <!-- نافذة إضافة منتج جديد -->
     <div id="addProductModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; justify-content:center; align-items:center; padding: 15px;">
         <div style="background:var(--surface); padding:24px; border-radius:var(--radius-lg); width:100%; max-width:420px; box-shadow:var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
             <h3 style="font-size:18px; font-weight:800; margin-bottom:15px;">➕ إضافة منتج جديد</h3>
@@ -342,8 +361,37 @@
                     calculateFinancials();
                     renderSalesLog();
                     renderCaptainsTable();
+                    renderCaptainMonthlyReport();
                 }
             } catch (e) {}
+        }
+
+        async function checkOnlyNewOrders() {
+            try {
+                let res = await fetch(API_URL + "?t=" + new Date().getTime());
+                if (res.ok) {
+                    let data = await res.json();
+                    let currentSales = (data && Array.isArray(data.sales)) ? data.sales : [];
+                    if (currentSales.length > lastKnownSalesCount && !isFirstCheck) {
+                        if (soundAllowed) {
+                            let sound = document.getElementById('alertSound');
+                            if (sound) { sound.currentTime = 0; sound.play().catch(e => {}); }
+                        }
+                        cloudData.sales = currentSales;
+                        lastKnownSalesCount = currentSales.length;
+                        calculateFinancials();
+                        renderSalesLog();
+                        renderCaptainMonthlyReport();
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function updateActiveWhatsApp() {
+            let selectedNum = document.getElementById('adminActiveWhatsappSelect').value;
+            cloudData.activeWhatsApp = selectedNum;
+            await saveAndSync();
+            alert('✅ تم تحديث وحفظ رقم الواتساب النشط في السحابة بنجاح!');
         }
 
         async function saveAndSync() {
@@ -368,7 +416,9 @@
             let html = '';
             cloudData.captains.forEach((cap, idx) => {
                 let cashInHand = cap.cashInHand || 0;
-                let statusBadge = cashInHand > 500 ? `<span style="background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:10px; font-weight:800;">تجاوز الحد (معلق) ⚠️</span>` : `<span style="background:#e6f4ea; color:#137333; padding:2px 8px; border-radius:10px; font-weight:800;">منتظم ✅</span>`;
+                let statusBadge = cashInHand > 500 
+                    ? `<span style="background:#fee2e2; color:#ef4444; padding:2px 8px; border-radius:10px; font-weight:800;">تجاوز الحد (معلق) ⚠️</span>` 
+                    : `<span style="background:#e6f4ea; color:#137333; padding:2px 8px; border-radius:10px; font-weight:800;">منتظم ✅</span>`;
 
                 html += `
                     <tr>
@@ -376,7 +426,7 @@
                         <td>${cap.name}</td>
                         <td>${cap.phone}</td>
                         <td>
-                            <div>📱 فودافون: <b>${cap.vodafoneCash}</b></div>
+                            <div>📱 فودافون: <b>${cap.vodafoneCash || 'غير مسجل'}</b></div>
                             <div style="font-size:12px; color:var(--text-muted);">💳 إنستا باي: ${cap.instaPay || 'غير مسجل'}</div>
                         </td>
                         <td><b style="color:${cashInHand > 0 ? '#dc2626' : '#10b981'}; font-size:16px;">${cashInHand} ج.م</b></td>
@@ -390,6 +440,67 @@
                     </tr>
                 `;
             });
+            tbody.innerHTML = html;
+        }
+
+        function renderCaptainMonthlyReport() {
+            let tbody = document.getElementById('adminCaptainMonthlyReportTable');
+            if(!tbody) return;
+
+            if(!cloudData.captains || cloudData.captains.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">لا توجد بيانات مناديب لعرض التقرير.</td></tr>`;
+                return;
+            }
+
+            let now = new Date();
+            let currentMonth = now.getMonth();
+            let currentYear = now.getFullYear();
+
+            let reportMap = {};
+            cloudData.captains.forEach(c => {
+                reportMap[c.id] = {
+                    name: c.name,
+                    phone: c.phone,
+                    ordersCount: 0,
+                    totalCollected: 0
+                };
+            });
+
+            cloudData.sales.forEach(s => {
+                if (s.status !== 'مقبول') return;
+                let sDate = new Date(s.timestamp);
+
+                if (sDate.getMonth() === currentMonth && sDate.getFullYear() === currentYear) {
+                    let capId = s.assignedCaptainId;
+                    if (capId && reportMap[capId]) {
+                        reportMap[capId].ordersCount += 1;
+                        reportMap[capId].totalCollected += (s.total || 0);
+                    }
+                }
+            });
+
+            let html = '';
+            let grandTotalCollected = 0;
+
+            Object.values(reportMap).forEach(data => {
+                grandTotalCollected += data.totalCollected;
+                html += `
+                    <tr>
+                        <td><b>${data.name}</b></td>
+                        <td>${data.phone}</td>
+                        <td><span class="badge" style="background:#e0f2fe; color:#0284c7;">${data.ordersCount} أوردر</span></td>
+                        <td><b style="color:var(--secondary); font-size:15px;">${data.totalCollected} ج.م</b></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                <tr style="background:#f8fafc; font-weight:800; border-top:2px solid #cbd5e1;">
+                    <td colspan="3" style="text-align: left;">إجمالي التحصيلات الشهرية لكافة المناديب:</td>
+                    <td><span style="color:var(--primary-dark); font-size:16px;">${grandTotalCollected} ج.م</span></td>
+                </tr>
+            `;
+
             tbody.innerHTML = html;
         }
 
@@ -430,18 +541,25 @@
                     cap.cashInHand = (cap.cashInHand || 0) + sale.total;
                     sale.assignedCaptainId = cap.id;
                     sale.assignedCaptainName = cap.name;
+                } else {
+                    sale.assignedCaptainId = '';
+                    sale.assignedCaptainName = '';
                 }
             } else {
                 if(cap) {
                     sale.assignedCaptainId = cap.id;
                     sale.assignedCaptainName = cap.name;
+                } else {
+                    sale.assignedCaptainId = '';
+                    sale.assignedCaptainName = '';
                 }
             }
 
             await saveAndSync();
             renderSalesLog();
             renderCaptainsTable();
-            alert('✅ تم تعيين الكابتن وتحديث عهدة الكاش بدقة!');
+            renderCaptainMonthlyReport();
+            alert('✅ تم تعيين الكابتن وتحديث عهدة الكاش والتقارير بدقة!');
         }
 
         function renderSalesLog() {
@@ -591,6 +709,7 @@
                 sale.status = status;
                 renderSalesLog();
                 calculateFinancials();
+                renderCaptainMonthlyReport();
                 await saveAndSync();
                 alert('✅ تم تحديث حالة الطلب بنجاح!');
             }
@@ -640,6 +759,7 @@
                 cloudData.sales = [];
                 renderSalesLog();
                 calculateFinancials();
+                renderCaptainMonthlyReport();
                 await saveAndSync();
             }
         }
