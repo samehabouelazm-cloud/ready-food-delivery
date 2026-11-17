@@ -64,7 +64,7 @@
             background: var(--surface); border-radius: var(--radius-lg); padding: 20px;
             box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; margin-bottom: 25px;
         }
-        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: space-between; }
 
         .btn {
             background: var(--primary); color: #fff; border: none; padding: 10px 20px;
@@ -188,7 +188,13 @@
 
         <!-- قسم إدارة المناديب وعهد الكاش -->
         <div class="card">
-            <div class="card-title">🛵 إدارة مناديب التوصيل ومحافظ عهدة الكاش</div>
+            <div class="card-title">
+                <span>🛵 إدارة مناديب التوصيل ومحافظ عهدة الكاش</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-success" onclick="openAddCaptainModal()" style="padding: 6px 12px; font-size: 12px;">➕ إضافة كابتن جديد</button>
+                    <button class="btn" onclick="exportCaptainsToExcel()" style="padding: 6px 12px; font-size: 12px; background: var(--primary);">📊 تصدير المناديب لـ Excel</button>
+                </div>
+            </div>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">متابعة المبالغ النقدية (Cash in Hand) المعلقة مع كل كابتن ومحافظ فودافون كاش وإنستا باي.</p>
             <div class="table-responsive">
                 <table>
@@ -210,7 +216,10 @@
 
         <!-- قسم تقرير عهد ومحصلات المناديب الشهرية -->
         <div class="card">
-            <div class="card-title">📊 تقرير العهد النقدية المحصلة لكل كابتن (خلال الشهر الحالي)</div>
+            <div class="card-title">
+                <span>📊 تقرير العهد النقدية المحصلة لكل كابتن (خلال الشهر الحالي)</span>
+                <button class="btn btn-success" onclick="exportMonthlyReportToExcel()" style="padding: 6px 12px; font-size: 12px;">📊 تصدير التقرير لـ Excel</button>
+            </div>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">إجمالي الأوردرات والمبالغ النقدية التي حصلها كل كابتن من الطلبات المقبولة خلال الشهر الحالي.</p>
             <div class="table-responsive">
                 <table>
@@ -229,13 +238,11 @@
 
         <!-- سجل الطلبات -->
         <div class="card">
-            <div class="card-title">💰 سجل الطلبات والمبيعات وإسناد المناديب</div>
-            <div style="margin-bottom: 12px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
-                <p style="font-size: 13px; color: var(--text-muted);">إدارة طلبات العملاء، تعيين الكابتن، وتتبع تحصيل الكاش.</p>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
-                </div>
+            <div class="card-title">
+                <span>💰 سجل الطلبات والمبيعات وإسناد المناديب</span>
+                <button class="btn btn-danger" onclick="clearSalesLog()" style="padding: 6px 12px; font-size: 12px;">مسح السجل</button>
             </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">إدارة طلبات العملاء، تعيين الكابتن، وتتبع تحصيل الكاش.</p>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -299,6 +306,22 @@
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn btn-success" onclick="saveNewProduct()" style="flex:1; padding:10px;">إضافة 💾</button>
                 <button class="btn btn-danger" onclick="closeAddModal()" style="flex:1; padding:10px;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة كابتن جديد -->
+    <div id="addCaptainModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; justify-content:center; align-items:center; padding: 15px;">
+        <div style="background:var(--surface); padding:24px; border-radius:var(--radius-lg); width:100%; max-width:420px; box-shadow:var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
+            <h3 style="font-size:18px; font-weight:800; margin-bottom:15px;">🛵 تسجيل كابتن توصيل جديد</h3>
+            <div style="margin-bottom:12px;"><label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">كود الكابتن (اختياري):</label><input type="text" id="capIdInput" placeholder="مثال: CAP-04" class="form-control"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">اسم الكابتن:</label><input type="text" id="capNameInput" placeholder="أدخل اسم الكابتن" class="form-control"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">رقم الهاتف / الواتساب:</label><input type="tel" id="capPhoneInput" placeholder="010xxxxxxxx" class="form-control"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">رقم فودافون كاش:</label><input type="tel" id="capVodafoneInput" placeholder="010xxxxxxxx" class="form-control"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px; font-weight:700; display:block; margin-bottom:4px;">حساب إنستا باي (InstaPay):</label><input type="text" id="capInstaInput" placeholder="username@instapay" class="form-control"></div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-success" onclick="saveNewCaptain()" style="flex:1; padding:10px;">حفظ الكابتن 💾</button>
+                <button class="btn btn-danger" onclick="closeAddCaptainModal()" style="flex:1; padding:10px;">إلغاء</button>
             </div>
         </div>
     </div>
@@ -404,12 +427,55 @@
             } catch (e) {}
         }
 
+        // --- إدارة ونوافذ المناديب ---
+        function openAddCaptainModal() {
+            document.getElementById('capIdInput').value = 'CAP-' + (cloudData.captains.length + 1);
+            document.getElementById('capNameInput').value = '';
+            document.getElementById('capPhoneInput').value = '';
+            document.getElementById('capVodafoneInput').value = '';
+            document.getElementById('capInstaInput').value = '';
+            document.getElementById('addCaptainModal').style.display = 'flex';
+        }
+
+        function closeAddCaptainModal() {
+            document.getElementById('addCaptainModal').style.display = 'none';
+        }
+
+        async function saveNewCaptain() {
+            let id = document.getElementById('capIdInput').value.trim() || ('CAP-' + (cloudData.captains.length + 1));
+            let name = document.getElementById('capNameInput').value.trim();
+            let phone = document.getElementById('capPhoneInput').value.trim();
+            let vodafoneCash = document.getElementById('capVodafoneInput').value.trim();
+            let instaPay = document.getElementById('capInstaInput').value.trim();
+
+            if (!name || !phone) {
+                alert('⚠️ يرجى إدخال اسم الكابتن ورقم الهاتف على الأقل!');
+                return;
+            }
+
+            let newCap = {
+                id: id,
+                name: name,
+                phone: phone,
+                vodafoneCash: vodafoneCash || phone,
+                instaPay: instaPay || '',
+                cashInHand: 0
+            };
+
+            cloudData.captains.push(newCap);
+            closeAddCaptainModal();
+            renderCaptainsTable();
+            renderCaptainMonthlyReport();
+            await saveAndSync();
+            alert('✅ تم تسجيل الكابتن الجديد بنجاح وحفظه سحابياً!');
+        }
+
         function renderCaptainsTable() {
             let tbody = document.getElementById('adminCaptainsTable');
             if(!tbody) return;
 
             if(!cloudData.captains || cloudData.captains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد مناديب مسجلين حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">لا يوجد مناديب مسجلين حالياً. اضغط على "إضافة كابتن جديد" لإضافة أول كابتن.</td></tr>`;
                 return;
             }
 
@@ -502,6 +568,67 @@
             `;
 
             tbody.innerHTML = html;
+        }
+
+        // --- ميزة التصدير لملف Excel (CSV) ---
+        function exportCaptainsToExcel() {
+            if (!cloudData.captains || cloudData.captains.length === 0) {
+                alert('⚠️ لا توجد بيانات مناديب لتصديرها.');
+                return;
+            }
+
+            let csvContent = "\uFEFFكود الكابتن,اسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي,العهدة المعلقة (ج.م)\n";
+            cloudData.captains.forEach(c => {
+                csvContent += `"${c.id || ''}","${c.name}","${c.phone}","${c.vodafoneCash || ''}","${c.instaPay || ''}",${c.cashInHand || 0}\n`;
+            });
+
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'captains_report_' + new Date().toISOString().slice(0,10) + '.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function exportMonthlyReportToExcel() {
+            if (!cloudData.captains || cloudData.captains.length === 0) {
+                alert('⚠️ لا توجد بيانات لتصدير التقرير.');
+                return;
+            }
+
+            let now = new Date();
+            let currentMonth = now.getMonth();
+            let currentYear = now.getFullYear();
+
+            let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,عدد الأوردرات المنفذة,إجمالي المبلغ المحصل (ج.م)\n";
+            
+            cloudData.captains.forEach(c => {
+                let ordersCount = 0;
+                let totalCollected = 0;
+
+                cloudData.sales.forEach(s => {
+                    if (s.status === 'مقبول' && s.assignedCaptainId === c.id) {
+                        let sDate = new Date(s.timestamp);
+                        if (sDate.getMonth() === currentMonth && sDate.getFullYear() === currentYear) {
+                            ordersCount++;
+                            totalCollected += (s.total || 0);
+                        }
+                    }
+                });
+
+                csvContent += `"${c.name}","${c.phone}",${ordersCount},${totalCollected}\n`;
+            });
+
+            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'monthly_captains_revenue_' + new Date().toISOString().slice(0,10) + '.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         async function settleCaptainCash(idx) {
