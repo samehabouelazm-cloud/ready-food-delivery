@@ -453,6 +453,14 @@
         let cart = [];
         let productQuantities = {};
 
+        // خريطة شعارات الأقسام (تم إدراج رابط لوجو السوبرماركت هنا)
+        const categoryLogos = {
+            "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
+            "🍗 قسم هابي ميلز (الوجبات والمشويات)": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=100",
+            "🍳 قسم فول وطعمية": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=100",
+            "🐟 قسم سمكة مشوية": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=100"
+        };
+
         const storeHierarchy = {
             "🛒 قسم السوبر ماركت": [
                 "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
@@ -512,10 +520,8 @@
             }
         }
 
-        // دالة التحميل المحسنة بمهلة زمنية (Timeout) وذاكرة محلية لمنع التعليق نهائياً
         async function loadStoreProducts(showAlert = false) {
             try {
-                // جلب البيانات من الذاكرة المحلية أولاً لكي تفتح الصفحة فوراً ودون أي انتظار
                 let cached = localStorage.getItem('cached_store_data');
                 if (cached) {
                     try {
@@ -531,7 +537,6 @@
                     } catch(er) {}
                 }
 
-                // محاولة جلب أحدث بيانات من السحابة بمهلة أقصاها 4 ثوانٍ
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 4000);
 
@@ -550,7 +555,6 @@
                         activeWhatsAppGlobal = data.activeWhatsApp || FIXED_WHATSAPP_NUMBER;
                     }
 
-                    // تحديث التخزين المحلي بالبيانات الجديدة
                     localStorage.setItem('cached_store_data', JSON.stringify({ 
                         products: allProducts, 
                         cashiers: allCashiers,
@@ -558,11 +562,8 @@
                         activeWhatsApp: activeWhatsAppGlobal
                     }));
                 }
-            } catch (e) {
-                console.warn("تنبيه: تعذر الاتصال السريع بالسحابة، يتم الاعتماد على البيانات المحلية.");
-            }
+            } catch (e) {}
 
-            // إذا ظلت القائمة فارغة تماماً، ضع منتجات افتراضية سريعة
             if (!allProducts || allProducts.length === 0) {
                 allProducts = [
                     { name: "وجبة هابي ميلز برجر دجاج", price: 120, category: "هابي ميلز", outOfStock: false, isOffer: true },
@@ -889,7 +890,8 @@
             let html = '';
             Object.keys(storeHierarchy).forEach((mainCatName, mIdx) => {
                 let subCats = storeHierarchy[mainCatName];
-                let logoUrl = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=100";
+                // جلب اللوجو المخصص لكل قسم من خريطة categoryLogos
+                let logoUrl = categoryLogos[mainCatName] || DEFAULT_IMAGE;
                 
                 let subPillsHtml = '';
                 let subProductsContainersHtml = '';
