@@ -127,7 +127,6 @@
         }
         .main-cat-header:hover { background: #e0f2fe; }
 
-        /* تنسيق حاوية الشعار بجوار اسم القسم */
         .cat-header-title-wrap {
             display: flex; align-items: center; gap: 14px;
         }
@@ -215,6 +214,10 @@
             background: #fef3c7; border: 1px solid #f59e0b; padding: 10px; border-radius: 8px;
             font-size: 13px; font-weight: 700; color: #92400e; margin-top: 6px; display: none; text-align: center;
         }
+        .wallet-notice {
+            background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1;
+            padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 12px; line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -273,7 +276,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- سلة التسوق -->
     <div class="modal-overlay" id="cartModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -293,6 +296,7 @@
         </div>
     </div>
 
+    <!-- إتمام الطلب -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -354,11 +358,15 @@
         </div>
     </div>
 
+    <!-- تسجيل الكابتن وربط المحفظة المالية -->
     <div class="modal-overlay" id="captainModal">
         <div class="modal-body">
             <div class="modal-header">
                 <h3>🛵 انضم إلى فريق مناديب جاهز</h3>
                 <span class="close-icon" onclick="closeModal('captainModal')">✕</span>
+            </div>
+            <div class="wallet-notice">
+                🔒 لحماية المعاملات المالية وتسوية أوردرات الدفع النقدي (الكاش)، يرجى إدخال بيانات محفظتك الإلكترونية لتسوية العهد اليومية مع الإدارة.
             </div>
             <div class="form-group">
                 <label>الاسم الكامل:</label>
@@ -369,14 +377,23 @@
                 <input type="tel" id="capPhone" placeholder="010xxxxxxx">
             </div>
             <div class="form-group">
+                <label>رقم محفظة فودافون كاش (إلزامي لتسوية عهدة الكاش):</label>
+                <input type="tel" id="capVodafoneCash" placeholder="010xxxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>عنوان إنستا باي (InstaPay IPN - اختياري):</label>
+                <input type="text" id="capInstaPay" placeholder="example@instapay">
+            </div>
+            <div class="form-group">
                 <label>العنوان / المنطقة ببلطيم:</label>
                 <textarea id="capAddress" rows="2" placeholder="الحي - المنطقة"></textarea>
             </div>
-            <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">إرسال طلب الانضمام للواتساب 🚀</button>
+            <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">تسجيل وربط المحفظة عبر الواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
         </div>
     </div>
 
+    <!-- طلب خاص -->
     <div class="modal-overlay" id="customOrderModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -410,7 +427,7 @@
                         <option value="مصيف بلطيم النرجس (توصيل: 90 ج.م)">مصيف بلطيم النرجس (توصيل: 90 ج.م)</option>
                         <option value="مصيف بلطيم الزهراء (توصيل: 90 ج.م)">مصيف بلطيم الزهراء (توصيل: 90 ج.م)</option>
                         <option value="مصيف بلطيم الأمل (توصيل: 100 ج.م)">مصيف بلطيم الأمل (توصيل: 100 ج.م)</option>
-                        <option value="مصيف بلطيم الفيروز (توصيل: 100 ج.م)">مصيف بلطيم الفيروز (100 ج.م)</option>
+                        <option value="مصيف بلطيم الفيروز (توصيل: 100 ج.م)">مصيف بلطيم الفيروز (توصيل: 100 ج.م)</option>
                         <option value="البرج وحتى النفق (توصيل: 100 ج.م)">البرج وحتى النفق (توصيل: 100 ج.م)</option>
                         <option value="البرج لنهايته (توصيل: 120 ج.م)">البرج لنهايته (توصيل: 120 ج.م)</option>
                     </optgroup>
@@ -434,10 +451,10 @@
 
         let allProducts = [];
         let allSales = [];
+        let allCaptains = [];
         let cart = [];
         let productQuantities = {};
 
-        // خريطة شعارات الأقسام (يمكنك تسمية الصورة في المجلد بهذا الاسم)
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "supermarket-logo.png"
         };
@@ -471,7 +488,11 @@
             return areaSelect ? parseInt(areaSelect.value) || 20 : 20;
         }
 
-        function updateDeliveryFee() { updatecartUI(); }
+        function updateDeliveryFee() { 
+            if (document.getElementById('cartModal').style.display === 'flex') {
+                openCart(); 
+            }
+        }
 
         function checkPaymentMethod() {
             let payMethod = document.getElementById('payMethod').value;
@@ -493,6 +514,7 @@
                     } else if (data && typeof data === 'object') {
                         allProducts = Array.isArray(data.products) ? data.products : [];
                         allSales = Array.isArray(data.sales) ? data.sales : [];
+                        allCaptains = Array.isArray(data.captains) ? data.captains : [];
                     }
                     renderDailyOffers();
                     renderAccordionStore();
@@ -791,6 +813,7 @@
             let grandTotal = subTotal + deliveryFee;
             let orderId = Math.floor(1000 + Math.random() * 9000);
             let itemsSummary = cart.map(i => `${i.name} (×${i.qty})`).join(', ');
+            let isCashOrder = pay.includes('نقداً');
 
             let newSale = {
                 orderId: orderId,
@@ -800,8 +823,15 @@
                 area: areaText,
                 address: address,
                 itemsSummary: itemsSummary,
+                subTotal: subTotal,
+                deliveryFee: deliveryFee,
                 total: grandTotal,
                 profit: profitTotal,
+                paymentMethod: pay,
+                isCashOrder: isCashOrder,
+                assignedCaptainId: null,
+                assignedCaptainName: 'غير معين',
+                isSettled: !isCashOrder,
                 status: 'قيد الانتظار'
             };
 
@@ -810,12 +840,18 @@
                 let data = await res.json();
                 let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
                 let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
+                let cloudCaptains = (data && Array.isArray(data.captains)) ? data.captains : allCaptains;
                 cloudSales.push(newSale);
 
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ products: cloudProducts, sales: cloudSales, activeWhatsApp: FIXED_WHATSAPP_NUMBER })
+                    body: JSON.stringify({ 
+                        products: cloudProducts, 
+                        sales: cloudSales, 
+                        captains: cloudCaptains,
+                        activeWhatsApp: FIXED_WHATSAPP_NUMBER 
+                    })
                 });
             } catch(e){}
 
@@ -842,13 +878,57 @@
         async function submitCaptainToWhatsApp() {
             let name = document.getElementById('capName').value.trim();
             let phone = document.getElementById('capPhone').value.trim();
+            let vodafoneCash = document.getElementById('capVodafoneCash').value.trim();
+            let instaPay = document.getElementById('capInstaPay').value.trim() || 'غير مسجل';
             let address = document.getElementById('capAddress').value.trim();
 
-            if(!name || !phone || !address) { alert('⚠️ يرجى إكمال جميع بيانات الانضمام!'); return; }
+            if(!name || !phone || !vodafoneCash || !address) { 
+                alert('⚠️ يرجى إدخال الاسم، الهاتف، رقم فودافون كاش، والعنوان!'); 
+                return; 
+            }
 
-            let msg = `🛵 *طلب انضمام ككابتن توصيل - جاهز Store* 🛵\n\n`;
+            let captainId = "CAP-" + Math.floor(100 + Math.random() * 900);
+            let newCaptain = {
+                id: captainId,
+                name: name,
+                phone: phone,
+                vodafoneCash: vodafoneCash,
+                instaPay: instaPay,
+                address: address,
+                cashInHand: 0,
+                status: 'بانتظار التفعيل',
+                joinedAt: new Date().toISOString()
+            };
+
+            try {
+                let res = await fetch(API_URL);
+                let data = await res.json();
+                let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
+                let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
+                let cloudCaptains = (data && Array.isArray(data.captains)) ? data.captains : [];
+                
+                cloudCaptains.push(newCaptain);
+
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        products: cloudProducts, 
+                        sales: cloudSales, 
+                        captains: cloudCaptains,
+                        activeWhatsApp: FIXED_WHATSAPP_NUMBER 
+                    })
+                });
+            } catch(e) {
+                console.error("خطأ في حفظ بيانات الكابتن");
+            }
+
+            let msg = `🛵 *طلب انضمام كابتن وتفعيل محفظة - جاهز Store* 🛵\n\n`;
+            msg += `🆔 *كود الكابتن:* ${captainId}\n`;
             msg += `👤 *الاسم:* ${name}\n`;
             msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📱 *محفظة فودافون كاش:* ${vodafoneCash}\n`;
+            msg += `💳 *إنستا باي:* ${instaPay}\n`;
             msg += `📍 *العنوان:* ${address}`;
 
             let url = `https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
@@ -880,6 +960,11 @@
                 itemsSummary: `🛍️ [طلب خاص]: ${details}`,
                 total: 0, 
                 profit: 0,
+                paymentMethod: 'الدفع نقداً عند الاستلام (Cash on Delivery)',
+                isCashOrder: true,
+                assignedCaptainId: null,
+                assignedCaptainName: 'غير معين',
+                isSettled: false,
                 status: 'قيد الانتظار'
             };
 
@@ -888,12 +973,18 @@
                 let data = await res.json();
                 let cloudProducts = Array.isArray(data) ? data : (data.products || allProducts);
                 let cloudSales = (data && Array.isArray(data.sales)) ? data.sales : allSales;
+                let cloudCaptains = (data && Array.isArray(data.captains)) ? data.captains : allCaptains;
                 cloudSales.push(customSaleItem);
 
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ products: cloudProducts, sales: cloudSales, activeWhatsApp: FIXED_WHATSAPP_NUMBER })
+                    body: JSON.stringify({ 
+                        products: cloudProducts, 
+                        sales: cloudSales, 
+                        captains: cloudCaptains,
+                        activeWhatsApp: FIXED_WHATSAPP_NUMBER 
+                    })
                 });
             } catch(e) {
                 console.error("فشل حفظ الطلب الخاص في السحابة");
