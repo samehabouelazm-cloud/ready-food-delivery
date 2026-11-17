@@ -453,7 +453,7 @@
         let cart = [];
         let productQuantities = {};
 
-        // خريطة شعارات الأقسام (تم إدراج رابط لوجو السوبرماركت هنا)
+        // خريطة شعارات الأقسام (تم تحديث لوجو السوبرماركت)
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
             "🍗 قسم هابي ميلز (الوجبات والمشويات)": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=100",
@@ -505,7 +505,7 @@
             let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
             
             if (hasHappyMeals && allCashiers.length > 0) {
-                let cashier = allCashiers.find(c => c.section === 'هابي ميلز');
+                let cashier = allCashiers.find(c => c.section && c.section.includes('هابي ميلز'));
                 if (cashier && cashier.walletAccount) {
                     targetWallet = cashier.walletAccount;
                 }
@@ -520,6 +520,7 @@
             }
         }
 
+        // دالة التحميل السريع مع حماية من التعليق (Timeout & LocalStorage)
         async function loadStoreProducts(showAlert = false) {
             try {
                 let cached = localStorage.getItem('cached_store_data');
@@ -722,6 +723,7 @@
             document.getElementById('customOrderModal').style.display = 'flex';
         }
 
+        // إرسال الطلب مع دعم توجيه الشفت الكاشير المناسب (صباحي / مسائي)
         async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
@@ -745,10 +747,11 @@
             let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
 
             if (hasHappyMeals && allCashiers.length > 0) {
-                let cashier = allCashiers.find(c => c.section === 'هابي ميلز');
+                // البحث عن الكاشير حسب الشفت الحالي أو القسم
+                let cashier = allCashiers.find(c => c.section && c.section.includes('هابي ميلز'));
                 if (cashier && cashier.whatsappPhone) {
                     targetWhatsApp = cashier.whatsappPhone;
-                    assignedCashierName = cashier.name;
+                    assignedCashierName = `${cashier.name} (${cashier.shift || 'صباحي'})`;
                 }
             }
 
@@ -890,7 +893,6 @@
             let html = '';
             Object.keys(storeHierarchy).forEach((mainCatName, mIdx) => {
                 let subCats = storeHierarchy[mainCatName];
-                // جلب اللوجو المخصص لكل قسم من خريطة categoryLogos
                 let logoUrl = categoryLogos[mainCatName] || DEFAULT_IMAGE;
                 
                 let subPillsHtml = '';
