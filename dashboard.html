@@ -83,7 +83,7 @@
 
     <header class="header">
         <div class="brand">
-            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة (منتجاتك الأصلية)</h2>
+            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة (الوضع فائق السرعة)</h2>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <button onclick="forceRefreshData()" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">⚡ تحديث فوري سريع</button>
@@ -94,7 +94,7 @@
 
     <div class="container">
         
-        <!-- لوحة مؤشرات الأداء الحصرية للإدارة -->
+        <!-- لوحة مؤشرات الأداء الحصرية للإدارة (KPI Dashboard) -->
         <div class="kpi-dashboard">
             <div class="kpi-card">
                 <div class="kpi-icon">📦</div>
@@ -269,9 +269,9 @@
             </div>
         </div>
 
-        <!-- إدارة المنتجات والأصناف الأصلية -->
+        <!-- إدارة المنتجات والأصناف -->
         <div class="card">
-            <h3>📦 إدارة المنتجات والأصناف والأقسام الأصلية</h3>
+            <h3>📦 إدارة المنتجات والأصناف والأقسام</h3>
             <input type="hidden" id="editIndex" value="-1">
             <div class="form-row">
                 <div class="form-group">
@@ -421,12 +421,12 @@
         const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890"; 
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
 
-        // المنتجات الأصلية الكاملة والمستعادة بدقة تامة
-        const ORIGINAL_PRODUCTS_RESTORED = [
+        // قائمة المنتجات الأصلية الكاملة والمستعادة بالكامل
+        let allProducts = [
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
             { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
             { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, category: "سوبر ماركت - السمن", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
-            { name: "سكر الأبيض الممتاز 1 كجم", price: 35, cost: 30, oldPrice: 40, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c5db3cb?w=500", outOfStock: false, isOffer: false },
+            { name: "سكر الأبيض الممتلز 1 كجم", price: 35, cost: 30, oldPrice: 40, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c5db3cb?w=500", outOfStock: false, isOffer: false },
             { name: "شاي العروسة 250 جم", price: 60, cost: 50, oldPrice: 70, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500", outOfStock: false, isOffer: false },
             { name: "مكرونة الملكة / حبة و نص 400 جم", price: 22, cost: 18, oldPrice: 25, category: "سوبر ماركت - المكرونة", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=500", outOfStock: false, isOffer: true },
             { name: "جبنة براميلي إسطنبولي 500 جم", price: 55, cost: 45, oldPrice: 65, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=500", outOfStock: false, isOffer: false },
@@ -452,7 +452,6 @@
             { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, category: "سمكة مشوية - أرز ووربات وشوربة", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
         ];
 
-        let allProducts = [...ORIGINAL_PRODUCTS_RESTORED];
         let allSales = [];
         let allCaptains = [
             { name: "كابتن أحمد محمد", phone: "01012345678", vodafoneCash: "01012345678", instaPay: "ahmed@instapay" },
@@ -471,7 +470,11 @@
         window.onload = function() {
             if (sessionStorage.getItem('admin_authenticated') === 'true') {
                 document.getElementById('authOverlay').style.display = 'none';
+                
+                // تحميل فوري محلي لتجنب أي تعليق أو بطء
                 loadFromLocalStorageFast();
+                
+                // جلب البيانات الحديثة في الخلفية بصمت
                 loadDashboardData();
             }
         }
@@ -481,9 +484,7 @@
             if (cached) {
                 try {
                     let data = JSON.parse(cached);
-                    if (Array.isArray(data.products) && data.products.length > 0) {
-                        allProducts = data.products;
-                    }
+                    if (data.products) allProducts = data.products;
                     if (data.sales) allSales = data.sales;
                     if (data.captains) allCaptains = data.captains;
                     if (data.cashiers) allCashiers = data.cashiers;
@@ -518,6 +519,7 @@
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 let now = audioCtx.currentTime;
+
                 let osc1 = audioCtx.createOscillator();
                 let gain1 = audioCtx.createGain();
                 osc1.type = 'sine';
@@ -538,24 +540,25 @@
                     let data = await res.json();
                     if(data && typeof data === 'object') {
                         let newSales = Array.isArray(data.sales) ? data.sales : [];
+                        
                         if (lastKnownOrdersCount > 0 && newSales.length > lastKnownOrdersCount) {
                             playAlertSound();
                         }
                         lastKnownOrdersCount = newSales.length;
 
-                        // إذا كانت السحابة تحتوي على منتجات، نعتمدها، وإذا كانت فارغة نفرض منتجاتك الأصلية فوراً ونحفظها
                         if (Array.isArray(data.products) && data.products.length > 0) {
                             allProducts = data.products;
-                        } else {
-                            allProducts = [...ORIGINAL_PRODUCTS_RESTORED];
-                            await saveDataToCloud();
                         }
-
                         allSales = newSales;
-                        if (Array.isArray(data.captains) && data.captains.length > 0) allCaptains = data.captains;
-                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) allCashiers = data.cashiers;
+                        if (Array.isArray(data.captains) && data.captains.length > 0) {
+                            allCaptains = data.captains;
+                        }
+                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) {
+                            allCashiers = data.cashiers;
+                        }
                         activeWhatsAppGlobal = data.activeWhatsApp || "201042377974";
 
+                        // حفظ فوري محلي لتسريع الفتح المستقبلي
                         localStorage.setItem('gahiz_admin_cache', JSON.stringify({
                             products: allProducts,
                             sales: allSales,
@@ -574,12 +577,13 @@
         }
 
         async function forceRefreshData() {
-            alert('⚡ جاري مزامنة منتجاتك الأصلية والبيانات الفورية...');
+            alert('⚡ جاري جلب أحدث البيانات من السيرفر...');
             await loadDashboardData();
-            alert('✅ تم استرجاع ومزامنة المنتجات بنجاح تام!');
+            alert('✅ تم التحديث بنجاح!');
         }
 
         async function saveDataToCloud() {
+            // حفظ فوري في التذاكر المحلية أولاً لسرعة الإستجابة الفورية
             localStorage.setItem('gahiz_admin_cache', JSON.stringify({
                 products: allProducts,
                 sales: allSales,
@@ -612,8 +616,10 @@
             let totalCustElem = document.getElementById('kpiTotalCustomers');
 
             if (totalOrdersElem) totalOrdersElem.innerText = allSales.length;
+            
             let totalRevenue = allSales.reduce((sum, order) => sum + (order.total || order.subTotal || 0), 0);
             if (totalRevElem) totalRevElem.innerText = totalRevenue + ' ج.م';
+
             let uniqueCustomers = new Set(allSales.map(o => o.customerPhone)).size;
             if (totalCustElem) totalCustElem.innerText = uniqueCustomers > 0 ? uniqueCustomers : allProducts.length * 3;
         }
@@ -629,8 +635,12 @@
         function getFilteredSales() {
             let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect').value : 'all';
             let todayStr = getTodayDateString();
+
             if (filterVal === 'today') {
-                return allSales.filter(s => s.timestamp && s.timestamp.startsWith(todayStr));
+                return allSales.filter(s => {
+                    if (!s.timestamp) return false;
+                    return s.timestamp.startsWith(todayStr);
+                });
             }
             return allSales;
         }
@@ -638,11 +648,14 @@
         function updateFinancialStats() {
             updateAdminKPIs();
             let targetSales = getFilteredSales();
-            let totalSales = 0, totalProfit = 0, ordersCount = targetSales.length;
+            let totalSales = 0;
+            let totalProfit = 0;
+            let ordersCount = targetSales.length;
 
             targetSales.forEach(order => {
                 let orderSubTotal = order.subTotal || order.total || 0;
                 totalSales += orderSubTotal;
+
                 let orderProfit = 0;
                 if (order.items && Array.isArray(order.items)) {
                     order.items.forEach(item => {
@@ -671,10 +684,15 @@
         }
 
         function exportCaptainsReportToExcel() {
-            if (allCaptains.length === 0) { alert('⚠️ لا توجد بيانات كباتن.'); return; }
+            if (allCaptains.length === 0) {
+                alert('⚠️ لا توجد بيانات كباتن لتصديرها حالياً.');
+                return;
+            }
+
             let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي,عدد الأوردرات,إجمالي المبيعات,مستحقات التوصيل\n";
             allCaptains.forEach(cap => {
-                let capOrdersCount = 0, capSalesTotal = 0;
+                let capOrdersCount = 0;
+                let capSalesTotal = 0;
                 allSales.forEach(order => {
                     if (order.assignedCaptain === cap.name) {
                         capOrdersCount++;
@@ -684,6 +702,7 @@
                 let capDues = capOrdersCount * 10;
                 csvContent += `"${cap.name}","${cap.phone}","${cap.vodafoneCash || ''}","${cap.instaPay || ''}","${capOrdersCount}","${capSalesTotal} ج.م","${capDues} ج.م"\n`;
             });
+
             let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             let url = URL.createObjectURL(blob);
             let a = document.createElement('a');
@@ -711,7 +730,7 @@
         }
 
         async function deleteOrder(orderIndex) {
-            if (confirm('⚠️ هل أنت متأكد من حذف هذا الأوردر؟')) {
+            if (confirm('⚠️ هل أنت متأكد من حذف هذا الأوردر من السجل؟')) {
                 allSales.splice(orderIndex, 1);
                 await saveDataToCloud();
                 renderSalesTable();
@@ -722,23 +741,29 @@
             updateFinancialStats();
             let targetSales = getFilteredSales();
             let tbody = document.getElementById('salesTableBody');
+            
             if (targetSales.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>`;
                 return;
             }
+
             let html = '';
-            targetSales.forEach((s) => {
+            targetSales.forEach((s, idx) => {
                 let actualIndex = allSales.findIndex(item => item.orderId === s.orderId);
                 let dateFormatted = s.timestamp ? s.timestamp.replace('T', ' ').substring(0, 16) : '---';
                 let itemsList = '';
                 if (s.items && Array.isArray(s.items)) {
-                    s.items.forEach(i => { itemsList += `• ${i.name} (×${i.qty})<br>`; });
+                    s.items.forEach(i => {
+                        itemsList += `• ${i.name} (×${i.qty})<br>`;
+                    });
                 }
+
                 let captainsOptions = `<option value="">-- اختر الكابتن --</option>`;
                 allCaptains.forEach(c => {
                     let sel = (s.assignedCaptain === c.name) ? 'selected' : '';
                     captainsOptions += `<option value="${c.name}" ${sel}>🛵 ${c.name}</option>`;
                 });
+
                 html += `
                     <tr>
                         <td><b>#${s.orderId || '---'}</b></td>
@@ -781,14 +806,16 @@
             let section = document.getElementById('cashierSection').value;
             let shift = document.getElementById('cashierShift').value;
             let wallet = document.getElementById('cashierWallet').value.trim();
+
             if (!name) { alert('⚠️ يرجى إدخال اسم الكاشير.'); return; }
+
             allCashiers.push({ name, phone, section, shift, walletAccount: wallet });
             await saveDataToCloud();
             renderCashiersTable();
             document.getElementById('cashierName').value = '';
             document.getElementById('cashierPhone').value = '';
             document.getElementById('cashierWallet').value = '';
-            alert('✅ تمت إضافة الكاشير بنجاح!');
+            alert('✅ تمت إضافة الكاشير والشفت بنجاح!');
         }
 
         async function deleteCashier(idx) {
@@ -800,7 +827,7 @@
         function renderCashiersTable() {
             let tbody = document.getElementById('cashiersTableBody');
             if (allCashiers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشيرين مسجلين.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشيرين مسجلين حالياً.</td></tr>`;
                 return;
             }
             let html = '';
@@ -836,12 +863,15 @@
             let phone = document.getElementById('captainPhoneInput').value.trim();
             let vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
             let instaPay = document.getElementById('captainInstaInput').value.trim();
+
             if (!name) { alert('⚠️ يرجى إدخال اسم الكابتن.'); return; }
+
             if (idx >= 0) {
                 allCaptains[idx] = { ...allCaptains[idx], name, phone, vodafoneCash, instaPay };
             } else {
                 allCaptains.push({ name, phone, vodafoneCash, instaPay, address: '' });
             }
+
             await saveDataToCloud();
             renderCaptainsTable();
             resetCaptainForm();
@@ -878,12 +908,13 @@
         function renderCaptainsTable() {
             let tbody = document.getElementById('captainsTableBody');
             if (allCaptains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
                 return;
             }
             let html = '';
             allCaptains.forEach((c, idx) => {
-                let capOrdersCount = 0, capSalesTotal = 0;
+                let capOrdersCount = 0;
+                let capSalesTotal = 0;
                 allSales.forEach(order => {
                     if (order.assignedCaptain === c.name) {
                         capOrdersCount++;
@@ -921,6 +952,7 @@
             let isOffer = document.getElementById('prodIsOffer').value === 'true';
 
             if (!name || price <= 0) { alert('⚠️ يرجى إدخال اسم المنتج وسعر صحيح.'); return; }
+
             let productObj = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
             if (idx >= 0) {
                 allProducts[idx] = productObj;
@@ -931,7 +963,7 @@
             await saveDataToCloud();
             renderProductsTable();
             resetProductForm();
-            alert('✅ تم حفظ المنتج واسترجاع القائمة بنجاح!');
+            alert('✅ تم حفظ المنتج بنجاح!');
         }
 
         function editProduct(idx) {
@@ -974,7 +1006,7 @@
         function renderProductsTable() {
             let tbody = document.getElementById('productsTableBody');
             if (allProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة حالياً.</td></tr>`;
                 return;
             }
             let html = '';
