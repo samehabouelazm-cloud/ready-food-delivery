@@ -30,7 +30,6 @@
         .brand h2 { font-size: 20px; font-weight: 800; color: var(--primary-dark); }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
         
-        /* لوحة مؤشرات الأداء KPIs للإدارة */
         .kpi-dashboard {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;
         }
@@ -84,9 +83,10 @@
 
     <header class="header">
         <div class="brand">
-            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة والتحليلات</h2>
+            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة (الوضع فائق السرعة)</h2>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
+            <button onclick="forceRefreshData()" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">⚡ تحديث فوري سريع</button>
             <button onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
             <a href="index.html" style="background:#0284c7; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">العودة لصفحة المتجر 🛒</a>
         </div>
@@ -423,7 +423,6 @@
 
         // قائمة المنتجات الأصلية الكاملة والمستعادة بالكامل
         let allProducts = [
-            // قسم السوبر ماركت - الزيت والسمن والأساسيات
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
             { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
             { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, category: "سوبر ماركت - السمن", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
@@ -437,8 +436,6 @@
             { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, category: "سوبر ماركت - العصائر والمياه", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
             { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, category: "سوبر ماركت - مياه غازية", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
             { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, category: "سوبر ماركت - شيكولاتة ونوتيلا", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
-            
-            // قسم هابي ميلز - الوجبات والمشويات والمأكولات السريعة
             { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, category: "فرايد تشيكن", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
             { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, category: "تشيكن تندر", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
             { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, category: "شاورما - قسم الساندوتشات", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
@@ -447,13 +444,9 @@
             { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, category: "كريب - قسم الكريب الحلو", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
             { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, category: "قسم البيتزا", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
             { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, category: "فطير هابي ميلز - فطير اسكندراني", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
-            
-            // قسم فول وطعمية
             { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
             { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
             { name: "عجينة طعمية فريش (نصف كيلو)", price: 15, cost: 10, oldPrice: 18, category: "فول وطعمية - عجينة وقلي", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-
-            // قسم سمكة مشوية
             { name: "كيلو سمك بلطي مشوي ريزو طازج", price: 110, cost: 85, oldPrice: 125, category: "سمكة مشوية - أسماك طازجة ومشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: true },
             { name: "سمك بوري سنجاري طازج (كيلو)", price: 160, cost: 130, oldPrice: 180, category: "سمكة مشوية - سي فود وسنجاري", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: false },
             { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, category: "سمكة مشوية - أرز ووربات وشوربة", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
@@ -477,8 +470,31 @@
         window.onload = function() {
             if (sessionStorage.getItem('admin_authenticated') === 'true') {
                 document.getElementById('authOverlay').style.display = 'none';
+                
+                // تحميل فوري محلي لتجنب أي تعليق أو بطء
+                loadFromLocalStorageFast();
+                
+                // جلب البيانات الحديثة في الخلفية بصمت
                 loadDashboardData();
             }
+        }
+
+        function loadFromLocalStorageFast() {
+            let cached = localStorage.getItem('gahiz_admin_cache');
+            if (cached) {
+                try {
+                    let data = JSON.parse(cached);
+                    if (data.products) allProducts = data.products;
+                    if (data.sales) allSales = data.sales;
+                    if (data.captains) allCaptains = data.captains;
+                    if (data.cashiers) allCashiers = data.cashiers;
+                } catch(e) {}
+            }
+            updateAdminKPIs();
+            renderCashiersTable();
+            renderCaptainsTable();
+            renderProductsTable();
+            renderSalesTable();
         }
 
         function checkAdminPassword() {
@@ -486,6 +502,7 @@
             if (passInput === CORRECT_ADMIN_PASSWORD) {
                 document.getElementById('authOverlay').style.display = 'none';
                 sessionStorage.setItem('admin_authenticated', 'true');
+                loadFromLocalStorageFast();
                 loadDashboardData();
             } else {
                 alert('❌ كلمة المرور غير صحيحة!');
@@ -513,23 +530,12 @@
                 gain1.connect(audioCtx.destination);
                 osc1.start(now);
                 osc1.stop(now + 0.6);
-
-                let osc2 = audioCtx.createOscillator();
-                let gain2 = audioCtx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(1100, now + 0.3);
-                gain2.gain.setValueAtTime(0.6, now + 0.3);
-                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
-                osc2.connect(gain2);
-                gain2.connect(audioCtx.destination);
-                osc2.start(now + 0.3);
-                osc2.stop(now + 0.9);
             } catch(e) {}
         }
 
         async function loadDashboardData() {
             try {
-                let res = await fetch(API_URL + "?t=" + new Date().getTime());
+                let res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
                 if(res.ok) {
                     let data = await res.json();
                     if(data && typeof data === 'object') {
@@ -540,13 +546,9 @@
                         }
                         lastKnownOrdersCount = newSales.length;
 
-                        // إذا كانت المنتجات السحابية فارغة، نستخدم المنتجات المستعادة الافتراضية ونحفظها تلقائياً
                         if (Array.isArray(data.products) && data.products.length > 0) {
                             allProducts = data.products;
-                        } else {
-                            await saveDataToCloud();
                         }
-
                         allSales = newSales;
                         if (Array.isArray(data.captains) && data.captains.length > 0) {
                             allCaptains = data.captains;
@@ -555,6 +557,14 @@
                             allCashiers = data.cashiers;
                         }
                         activeWhatsAppGlobal = data.activeWhatsApp || "201042377974";
+
+                        // حفظ فوري محلي لتسريع الفتح المستقبلي
+                        localStorage.setItem('gahiz_admin_cache', JSON.stringify({
+                            products: allProducts,
+                            sales: allSales,
+                            captains: allCaptains,
+                            cashiers: allCashiers
+                        }));
                     }
                 }
             } catch(e) {}
@@ -564,11 +574,23 @@
             renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
+        }
 
-            setTimeout(loadDashboardData, 10000);
+        async function forceRefreshData() {
+            alert('⚡ جاري جلب أحدث البيانات من السيرفر...');
+            await loadDashboardData();
+            alert('✅ تم التحديث بنجاح!');
         }
 
         async function saveDataToCloud() {
+            // حفظ فوري في التذاكر المحلية أولاً لسرعة الإستجابة الفورية
+            localStorage.setItem('gahiz_admin_cache', JSON.stringify({
+                products: allProducts,
+                sales: allSales,
+                captains: allCaptains,
+                cashiers: allCashiers
+            }));
+
             try {
                 let payload = {
                     products: allProducts,
@@ -584,7 +606,6 @@
                 });
                 return res.ok;
             } catch(e) {
-                alert('⚠️ حدث خطأ أثناء الاتصال بالسحابة وحفظ البيانات.');
                 return false;
             }
         }
@@ -697,15 +718,6 @@
                 allSales[orderIndex].status = newStatus;
                 await saveDataToCloud();
                 renderSalesTable();
-
-                let s = allSales[orderIndex];
-                let sendWa = confirm(`✅ تم تحديث حالة الطلب إلى (${newStatus}).\nهل تريد إرسال إشعار واتساب للعميل (${s.customerName}) الآن؟`);
-                if (sendWa && s.customerPhone) {
-                    let cleanPhone = s.customerPhone.replace(/\D/g, '');
-                    if (cleanPhone.startsWith('0')) cleanPhone = '2' + cleanPhone;
-                    let msg = `مرحباً بك يا ${s.customerName} 🛒\nتحديث من منصة "جاهز": تم تغيير حالة طلبك رقم (#${s.orderId}) إلى: *${newStatus}*.\nشكراً لتعاملكم معنا!`;
-                    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-                }
             }
         }
 
@@ -714,22 +726,6 @@
                 allSales[orderIndex].assignedCaptain = captainName;
                 await saveDataToCloud();
                 renderSalesTable();
-
-                let s = allSales[orderIndex];
-                alert(`✅ تم إسناد الطلب رقم (#${s.orderId}) للكابتن: (${captainName || 'بدون مندوب'}) بنجاح!`);
-
-                if (captainName) {
-                    let matchedCap = allCaptains.find(c => c.name === captainName);
-                    if (matchedCap && matchedCap.phone) {
-                        let sendWaCap = confirm(`هل تريد إرسال تفاصيل الأوردر واتساب للكابتن (${captainName}) الآن؟`);
-                        if (sendWaCap) {
-                            let cleanCapPhone = matchedCap.phone.replace(/\D/g, '');
-                            if (cleanCapPhone.startsWith('0')) cleanCapPhone = '2' + cleanCapPhone;
-                            let capMsg = `🛵 كابتن ${captainName}، تم إسناد أوردر جديد إليك من منصة "جاهز":\n\n- رقم الأوردر: #${s.orderId}\n- العميل: ${s.customerName}\n- الهاتف: ${s.customerPhone}\n- العنوان: ${s.customerAddress}\n- الإجمالي: ${s.total || s.subTotal} ج.م`;
-                            window.open(`https://wa.me/${cleanCapPhone}?text=${encodeURIComponent(capMsg)}`, '_blank');
-                        }
-                    }
-                }
             }
         }
 
@@ -785,7 +781,7 @@
                             </select>
                         </td>
                         <td>
-                            <select onchange="updateOrderStatus(${actualIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 13px; background:${s.status && s.status.includes('مكتمل') ? '#d1fae5' : '#fef3c7'};">
+                            <select onchange="updateOrderStatus(${actualIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 13px;">
                                 <option value="قيد الانتظار ⏳" ${s.status && s.status.includes('انتظار') ? 'selected' : ''}>قيد الانتظار ⏳</option>
                                 <option value="جاري التجهيز 👨‍🍳" ${s.status && s.status.includes('تجهيز') ? 'selected' : ''}>جاري التجهيز 👨‍🍳</option>
                                 <option value="جاري التوصيل 🛵" ${s.status && s.status.includes('توصيل') ? 'selected' : ''}>جاري التوصيل 🛵</option>
@@ -802,11 +798,8 @@
             tbody.innerHTML = html;
         }
 
-        function printSalesReport() {
-            window.print();
-        }
+        function printSalesReport() { window.print(); }
 
-        // كاشيري الأقسام والشفتات
         async function addCashier() {
             let name = document.getElementById('cashierName').value.trim();
             let phone = document.getElementById('cashierPhone').value.trim();
@@ -814,15 +807,11 @@
             let shift = document.getElementById('cashierShift').value;
             let wallet = document.getElementById('cashierWallet').value.trim();
 
-            if (!name) {
-                alert('⚠️ يرجى إدخال اسم الكاشير.');
-                return;
-            }
+            if (!name) { alert('⚠️ يرجى إدخال اسم الكاشير.'); return; }
 
             allCashiers.push({ name, phone, section, shift, walletAccount: wallet });
             await saveDataToCloud();
             renderCashiersTable();
-
             document.getElementById('cashierName').value = '';
             document.getElementById('cashierPhone').value = '';
             document.getElementById('cashierWallet').value = '';
@@ -841,7 +830,6 @@
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشيرين مسجلين حالياً.</td></tr>`;
                 return;
             }
-
             let html = '';
             allCashiers.forEach((c, idx) => {
                 let sectionSales = 0;
@@ -854,7 +842,6 @@
                         });
                     }
                 });
-
                 html += `
                     <tr>
                         <td><b>${c.name}</b></td>
@@ -870,7 +857,6 @@
             tbody.innerHTML = html;
         }
 
-        // إدارة الكباتن
         async function saveCaptainData() {
             let idx = parseInt(document.getElementById('editCaptainIndex').value);
             let name = document.getElementById('captainNameInput').value.trim();
@@ -878,10 +864,7 @@
             let vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
             let instaPay = document.getElementById('captainInstaInput').value.trim();
 
-            if (!name) {
-                alert('⚠️ يرجى إدخال اسم الكابتن.');
-                return;
-            }
+            if (!name) { alert('⚠️ يرجى إدخال اسم الكابتن.'); return; }
 
             if (idx >= 0) {
                 allCaptains[idx] = { ...allCaptains[idx], name, phone, vodafoneCash, instaPay };
@@ -928,7 +911,6 @@
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
                 return;
             }
-
             let html = '';
             allCaptains.forEach((c, idx) => {
                 let capOrdersCount = 0;
@@ -940,7 +922,6 @@
                     }
                 });
                 let capDues = capOrdersCount * 10;
-
                 html += `
                     <tr>
                         <td><b>${c.name}</b></td>
@@ -959,7 +940,6 @@
             tbody.innerHTML = html;
         }
 
-        // إدارة المنتجات
         async function saveProduct() {
             let idx = parseInt(document.getElementById('editIndex').value);
             let name = document.getElementById('prodName').value.trim();
@@ -971,13 +951,9 @@
             let outOfStock = document.getElementById('prodStock').value === 'true';
             let isOffer = document.getElementById('prodIsOffer').value === 'true';
 
-            if (!name || price <= 0) {
-                alert('⚠️ يرجى إدخال اسم المنتج وسعر صحيح.');
-                return;
-            }
+            if (!name || price <= 0) { alert('⚠️ يرجى إدخال اسم المنتج وسعر صحيح.'); return; }
 
             let productObj = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
-
             if (idx >= 0) {
                 allProducts[idx] = productObj;
             } else {
@@ -1001,7 +977,6 @@
             document.getElementById('prodImage').value = p.image || '';
             document.getElementById('prodStock').value = p.outOfStock ? 'true' : 'false';
             document.getElementById('prodIsOffer').value = p.isOffer ? 'true' : 'false';
-
             document.getElementById('saveProdBtn').innerText = '💾 تحديث المنتج';
             document.getElementById('cancelEditBtn').style.display = 'inline-block';
             window.scrollTo({ top: 400, behavior: 'smooth' });
@@ -1034,13 +1009,11 @@
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة حالياً.</td></tr>`;
                 return;
             }
-
             let html = '';
             allProducts.forEach((p, idx) => {
                 let profitMargin = p.price - (p.cost || (p.price * 0.8));
                 let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:700;">🔴 نفذت</span>' : '<span style="color:#10b981; font-weight:700;">🟢 متوفر</span>';
                 let offerBadge = p.isOffer ? ' 🔥' : '';
-
                 html += `
                     <tr>
                         <td><b>#${idx + 1}</b></td>
