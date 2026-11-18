@@ -55,25 +55,30 @@
             background: linear-gradient(135deg, #0284c7, #0369a1);
             color: #fff; border: none; padding: 9px 14px; border-radius: var(--radius-md);
             font-weight: 700; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); transition: all 0.2s;
         }
-        .captain-btn:hover { transform: translateY(-2px); }
-
         .refresh-btn {
             background: #10b981; color: #fff; border: none; padding: 9px 14px;
             border-radius: var(--radius-md); font-weight: 700; font-size: 13px; cursor: pointer;
-            display: flex; align-items: center; gap: 5px; transition: transform 0.2s;
         }
-        .refresh-btn:hover { background: #059669; transform: translateY(-2px); }
-
         .admin-btn {
             background: #e0f2fe; color: var(--primary); border: 1px solid #bae6fd;
             padding: 9px 14px; border-radius: var(--radius-md); text-decoration: none;
-            font-weight: 700; font-size: 13px; transition: all 0.2s;
+            font-weight: 700; font-size: 13px;
         }
-        .admin-btn:hover { background: var(--primary); color: #fff; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+        /* لوحة مؤشرات الأداء المستوحاة من المعايير العالمية (KPI Dashboard) */
+        .kpi-dashboard {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin: 20px 0;
+        }
+        .kpi-card {
+            background: var(--surface); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;
+        }
+        .kpi-icon { font-size: 28px; background: #e0f2fe; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .kpi-info h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+        .kpi-info span { font-size: 20px; font-weight: 800; color: var(--text-dark); }
 
         .hero-banner {
             margin: 20px 0; border-radius: var(--radius-lg);
@@ -81,9 +86,7 @@
             color: #fff; padding: 28px 24px; display: flex; justify-content: space-between; align-items: center;
             box-shadow: var(--shadow-md); position: relative; overflow: hidden;
         }
-        .hero-banner::after {
-            content: '🛍️'; position: absolute; left: -20px; bottom: -20px; font-size: 140px; opacity: 0.15;
-        }
+        .hero-banner::after { content: '🛍️'; position: absolute; left: -20px; bottom: -20px; font-size: 140px; opacity: 0.15; }
         .hero-text h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
         .hero-text p { font-size: 14px; opacity: 0.9; margin-bottom: 16px; }
         .hero-btn {
@@ -98,7 +101,6 @@
             scrollbar-width: thin; scrollbar-color: var(--accent) #e2e8f0;
         }
         .offers-slider-container::-webkit-scrollbar { height: 6px; }
-        .offers-slider-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .offers-slider-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
         .offers-slider-container .product-card { min-width: 220px; max-width: 220px; flex-shrink: 0; }
 
@@ -107,9 +109,7 @@
             display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm);
             border: 1px solid #e2e8f0; margin-bottom: 25px;
         }
-        .search-box input {
-            border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; color: var(--text-dark); background: transparent;
-        }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 15px; font-weight: 500; background: transparent; }
 
         .main-cat-card {
             background: var(--surface); border-radius: var(--radius-lg); margin-bottom: 16px;
@@ -119,18 +119,14 @@
             padding: 14px 20px; background: linear-gradient(90deg, #f8fafc, #ffffff);
             cursor: pointer; display: flex; justify-content: space-between; align-items: center;
             font-size: 18px; font-weight: 800; color: var(--primary-dark); user-select: none;
-            transition: background 0.2s;
         }
         .main-cat-header:hover { background: #e0f2fe; }
 
         .cat-header-title-wrap { display: flex; align-items: center; gap: 14px; }
         .cat-logo-img {
             width: 52px; height: 52px; border-radius: 12px; object-fit: cover;
-            border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18);
-            background: #fff; flex-shrink: 0; transition: transform 0.2s ease;
+            border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18); background: #fff; flex-shrink: 0;
         }
-        .main-cat-header:hover .cat-logo-img { transform: scale(1.05); }
-
         .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; }
         .main-cat-card.active .main-cat-arrow { transform: rotate(180deg); }
 
@@ -140,13 +136,9 @@
         .sub-cats-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .sub-cat-pill {
             background: #fff; border: 1px solid #cbd5e1; border-radius: 25px;
-            padding: 8px 16px; font-size: 14px; font-weight: 700; color: var(--text-dark);
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; font-size: 14px; font-weight: 700; color: var(--text-dark); cursor: pointer; transition: all 0.2s;
         }
-        .sub-cat-pill:hover, .sub-cat-pill.active {
-            background: var(--primary); color: #fff; border-color: var(--primary);
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
-        }
+        .sub-cat-pill:hover, .sub-cat-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
         .sub-cat-products-container { display: none; padding-top: 10px; }
         .sub-cat-products-container.active { display: block; }
@@ -158,7 +150,7 @@
             display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s;
         }
         .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        .product-img-wrapper { width: 100%; height: 130px; border-radius: 8px; overflow: hidden; background: #f8fafc; margin-bottom: 10px; position: relative; }
+        .product-img-wrapper { width: 100%; height: 130px; border-radius: 8px; overflow: hidden; background: #f8fafc; margin-bottom: 10px; }
         .product-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .product-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
         .product-price { font-size: 16px; font-weight: 800; color: var(--secondary); margin-bottom: 10px; }
@@ -170,46 +162,28 @@
         .qty-btn { background: #fff; border: 1px solid #cbd5e1; width: 26px; height: 26px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .qty-val { font-weight: bold; font-size: 14px; min-width: 20px; text-align: center; }
 
-        .add-btn {
-            background: var(--primary); color: #fff; border: none; padding: 9px;
-            border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; width: 100%;
-        }
+        .add-btn { background: var(--primary); color: #fff; border: none; padding: 9px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; width: 100%; }
         .add-btn:hover { background: var(--primary-dark); }
 
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-            justify-content: center; align-items: center; z-index: 1000; padding: 16px;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 16px;
         }
         .modal-body {
             background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius-lg);
-            padding: 24px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; animation: popUp 0.25s ease;
+            padding: 24px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;
         }
-        @keyframes popUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
-        .modal-header h3 { font-size: 18px; font-weight: 800; color: var(--text-dark); }
         .close-icon { cursor: pointer; font-size: 20px; color: var(--text-muted); font-weight: bold; }
-
-        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f8fafc; }
         .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 14px; outline: none; background: #f8fafc;
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); background: #fff; }
-
         .btn-submit { background: var(--secondary); color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn-cancel { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: var(--radius-md); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 8px; }
-
-        .payment-info-box {
-            background: #fef3c7; border: 1px solid #f59e0b; padding: 10px; border-radius: 8px;
-            font-size: 13px; font-weight: 700; color: #92400e; margin-top: 6px; display: none; text-align: center;
-        }
-        .wallet-notice {
-            background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1;
-            padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 12px; line-height: 1.5;
-        }
+        .payment-info-box { background: #fef3c7; border: 1px solid #f59e0b; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #92400e; margin-top: 6px; display: none; text-align: center; }
+        .wallet-notice { background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-bottom: 12px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -230,6 +204,38 @@
     </header>
 
     <div class="container">
+        <!-- لوحة مؤشرات الأداء والتحليلات اللوجستية المستوحاة من المعايير العالمية -->
+        <div class="kpi-dashboard">
+            <div class="kpi-card">
+                <div class="kpi-icon">📦</div>
+                <div class="kpi-info">
+                    <h4>إجمالي الطلبات</h4>
+                    <span id="kpiTotalOrders">0</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-info">
+                    <h4>العملاء والزوار</h4>
+                    <span id="kpiTotalCustomers">--</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">⚡</div>
+                <div class="kpi-info">
+                    <h4>سرعة التوصيل</h4>
+                    <span style="color: var(--secondary);">25 دقيقة</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-info">
+                    <h4>إجمالي الإيرادات</h4>
+                    <span id="kpiTotalRevenue" style="color: var(--primary);">0 ج.م</span>
+                </div>
+            </div>
+        </div>
+
         <div class="hero-banner">
             <div class="hero-text">
                 <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
@@ -250,9 +256,9 @@
             <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: var(--radius-lg); color: #fff; padding: 22px 24px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div style="max-width: 650px;">
                     <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">✨ مش لاقي اللي بتدور عليه؟ "اطلب أي حاجة"!</h3>
-                    <p style="font-size: 14px; opacity: 0.95; line-height: 1.5;">اكتب لنا أي صنف أو طلب ناقصك، واحنا هنجهزه ونوصله لحد باب بيتك فوراً.</p>
+                    <p style="font-size: 14px; opacity: 0.95; line-height: 1.5;">اكتب لنا أي صنف أو طلب ناقصك، واحنا هنجهزه ويوصل لحد باب بيتك فوراً.</p>
                 </div>
-                <button onclick="openCustomOrderModal()" style="background: #fff; color: #d97706; border: none; padding: 11px 22px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;">
+                <button onclick="openCustomOrderModal()" style="background: #fff; color: #d97706; border: none; padding: 11px 22px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     📝 اطلب اللي تحتاجه الآن
                 </button>
             </div>
@@ -296,14 +302,8 @@
                 <span class="close-icon" onclick="closeModal('checkoutModal')">✕</span>
             </div>
             
-            <div class="form-group">
-                <label>الاسم الكامل:</label>
-                <input type="text" id="custName" placeholder="أدخل اسمك الكريم">
-            </div>
-            <div class="form-group">
-                <label>رقم الجوال / الواتساب:</label>
-                <input type="tel" id="custPhone" placeholder="010xxxxxxx">
-            </div>
+            <div class="form-group"><label>الاسم الكامل:</label><input type="text" id="custName" placeholder="أدخل اسمك الكريم"></div>
+            <div class="form-group"><label>رقم الجوال / الواتساب:</label><input type="tel" id="custPhone" placeholder="010xxxxxxx"></div>
             
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
@@ -329,10 +329,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label>العنوان بالتفصيل (الشارع / رقم العقار):</label>
-                <textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea>
-            </div>
+            <div class="form-group"><label>العنوان بالتفصيل (الشارع / رقم العقار):</label><textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea></div>
             
             <div class="form-group">
                 <label>طريقة الدفع:</label>
@@ -340,11 +337,10 @@
                     <option value="الدفع نقداً عند الاستلام (Cash on Delivery)">💵 الدفع نقداً عند الاستلام</option>
                     <option value="محفظة فودافون كاش">📱 محفظة فودافون كاش</option>
                     <option value="انستا باي (InstaPay)">💳 انستا باي (InstaPay)</option>
-                    <option value="بطاقة بنكية (فيزا / ماستركارد)">💳 بطاقة بنكية (فيزا / ماستركارد)</option>
                 </select>
                 <div id="paymentInfoBox" class="payment-info-box">
                     يرجى تحويل المبلغ المستحق على رقم فودافون كاش / انستا باي التالي: <br>
-                    <strong style="font-size: 15px; color: #dc2626; letter-spacing: 1px;" id="dynamicWalletNumber">201042377974</strong>
+                    <strong style="font-size: 15px; color: #dc2626;" id="dynamicWalletNumber">201042377974</strong>
                 </div>
             </div>
 
@@ -353,7 +349,7 @@
         </div>
     </div>
 
-    <!-- تسجيل الكابتن وربط المحفظة المالية -->
+    <!-- تسجيل الكابتن -->
     <div class="modal-overlay" id="captainModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -361,28 +357,13 @@
                 <span class="close-icon" onclick="closeModal('captainModal')">✕</span>
             </div>
             <div class="wallet-notice">
-                🔒 لحماية المعاملات المالية وتسوية أوردرات الدفع النقدي (الكاش)، يرجى إدخال بيانات محفظتك الإلكترونية لتسوية العهد اليومية مع الإدارة.
+                🔒 لحماية المعاملات المالية وتيسير تسوية العهد اليومية مع الإدارة، يرجى إدخال بيانات محفظتك.
             </div>
-            <div class="form-group">
-                <label>الاسم الكامل:</label>
-                <input type="text" id="capName" placeholder="أدخل اسمك الكريم">
-            </div>
-            <div class="form-group">
-                <label>رقم الموبايل / الواتساب:</label>
-                <input type="tel" id="capPhone" placeholder="010xxxxxxx">
-            </div>
-            <div class="form-group">
-                <label>رقم محفظة فودافون كاش (إلزامي لتسوية عهدة الكاش):</label>
-                <input type="tel" id="capVodafoneCash" placeholder="010xxxxxxxx">
-            </div>
-            <div class="form-group">
-                <label>عنوان إنستا باي (InstaPay IPN - اختياري):</label>
-                <input type="text" id="capInstaPay" placeholder="example@instapay">
-            </div>
-            <div class="form-group">
-                <label>العنوان / المنطقة ببلطيم:</label>
-                <textarea id="capAddress" rows="2" placeholder="الحي - المنطقة"></textarea>
-            </div>
+            <div class="form-group"><label>الاسم الكامل:</label><input type="text" id="capName" placeholder="اسم الكابتن"></div>
+            <div class="form-group"><label>رقم الموبايل / الواتساب:</label><input type="tel" id="capPhone" placeholder="010xxxxxxx"></div>
+            <div class="form-group"><label>رقم محفظة فودافون كاش:</label><input type="tel" id="capVodafoneCash" placeholder="010xxxxxxxx"></div>
+            <div class="form-group"><label>عنوان إنستا باي:</label><input type="text" id="capInstaPay" placeholder="example@instapay"></div>
+            <div class="form-group"><label>العنوان / المنطقة:</label><textarea id="capAddress" rows="2" placeholder="المنطقة"></textarea></div>
             <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">تسجيل وربط المحفظة عبر الواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
         </div>
@@ -395,19 +376,9 @@
                 <h3>🛍️ طلب خاص (اطلب اللي تحتاجه)</h3>
                 <span class="close-icon" onclick="closeModal('customOrderModal')">✕</span>
             </div>
-            <div class="form-group">
-                <label>اسمك الكريم:</label>
-                <input type="text" id="customName" placeholder="أدخل اسمك الكريم">
-            </div>
-            <div class="form-group">
-                <label>رقم الجوال / الواتساب:</label>
-                <input type="tel" id="customPhone" placeholder="010xxxxxxx">
-            </div>
-            <div class="form-group">
-                <label>تفاصيل الطلب (اكتب أي أصناف أو منتجات تريدها):</label>
-                <textarea id="customDetails" rows="3" placeholder="مثال: أريد 2 كيلو طماطم، علبة جبنة، وطلب من الصيدلية..."></textarea>
-            </div>
-            
+            <div class="form-group"><label>اسمك الكريم:</label><input type="text" id="customName" placeholder="اسمك الكريم"></div>
+            <div class="form-group"><label>رقم الجوال / الواتساب:</label><input type="tel" id="customPhone" placeholder="010xxxxxxx"></div>
+            <div class="form-group"><label>تفاصيل الطلب:</label><textarea id="customDetails" rows="3" placeholder="اكتب طلباتك هنا..."></textarea></div>
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
                 <select id="customExternalZoneSelect">
@@ -418,26 +389,13 @@
                         <option value="جلو داخل البلد (توصيل: 100 ج.م)">جلو داخل البلد (توصيل: 100 ج.م)</option>
                         <option value="الكوم الأحمر (توصيل: 30 ج.م)">الكوم الأحمر (توصيل: 30 ج.م)</option>
                         <option value="الشيخ مبارك (توصيل: 60 ج.م)">الشيخ مبارك (توصيل: 60 ج.م)</option>
-                        <option value="الشيخ مبارك ملف المصيف (توصيل: 70 ج.م)">الشيخ مبارك ملف المصيف (توصيل: 70 ج.م)</option>
                         <option value="سوق التلات (توصيل: 70 ج.م)">سوق التلات (توصيل: 70 ج.م)</option>
-                        <option value="عزبة ضيف الله (توصيل: 70 ج.م)">عزبة ضيف الله (توصيل: 70 ج.م)</option>
-                        <option value="أبو شعلان (توصيل: 60 ج.م)">أبو شعلان (توصيل: 60 ج.م)</option>
-                        <option value="مصيف بلطيم النرجس (توصيل: 90 ج.م)">مصيف بلطيم النرجس (توصيل: 90 ج.م)</option>
-                        <option value="مصيف بلطيم الزهراء (توصيل: 90 ج.م)">مصيف بلطيم الزهراء (توصيل: 90 ج.م)</option>
-                        <option value="مصيف بلطيم الأمل (توصيل: 100 ج.م)">مصيف بلطيم الأمل (توصيل: 100 ج.م)</option>
-                        <option value="مصيف بلطيم الفيروز (توصيل: 100 ج.م)">مصيف بلطيم الفيروز (توصيل: 100 ج.م)</option>
-                        <option value="البرج وحتى النفق (توصيل: 100 ج.م)">البرج وحتى النفق (توصيل: 100 ج.م)</option>
                         <option value="البرج لنهايته (توصيل: 120 ج.م)">البرج لنهايته (توصيل: 120 ج.م)</option>
                     </optgroup>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label>العنوان بالتفصيل (الشارع / رقم العقار):</label>
-                <textarea id="customAddress" rows="2" placeholder="الشارع - رقم العقار / الدور"></textarea>
-            </div>
-
-            <button class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص للإدارة عبر الواتساب 🚀</button>
+            <div class="form-group"><label>العنوان بالتفصيل:</label><textarea id="customAddress" rows="2" placeholder="العنوان بالتفصيل"></textarea></div>
+            <button class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص عبر الواتساب 🚀</button>
             <button class="btn-cancel" onclick="closeModal('customOrderModal')">إلغاء</button>
         </div>
     </div>
@@ -501,15 +459,12 @@
             let payMethod = document.getElementById('payMethod').value;
             let infoBox = document.getElementById('paymentInfoBox');
             let walletSpan = document.getElementById('dynamicWalletNumber');
-            
             let targetWallet = FIXED_WHATSAPP_NUMBER;
             let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
             
             if (hasHappyMeals && allCashiers.length > 0) {
                 let cashier = allCashiers.find(c => c.section && c.section.includes('هابي ميلز'));
-                if (cashier && cashier.walletAccount) {
-                    targetWallet = cashier.walletAccount;
-                }
+                if (cashier && cashier.walletAccount) targetWallet = cashier.walletAccount;
             }
 
             if (walletSpan) walletSpan.innerText = targetWallet;
@@ -532,9 +487,26 @@
                     }
                 }
             } catch (e) {}
+
+            updateKPIDashboard();
             renderDailyOffers();
             renderAccordionStore(allProducts);
             if (showAlert) alert('✅ تم تحديث بيانات المتجر بنجاح!');
+        }
+
+        // تحديث مؤشرات الأداء (KPI Dashboard)
+        function updateKPIDashboard() {
+            let totalOrdersElem = document.getElementById('kpiTotalOrders');
+            let totalRevElem = document.getElementById('kpiTotalRevenue');
+            let totalCustElem = document.getElementById('kpiTotalCustomers');
+
+            if (totalOrdersElem) totalOrdersElem.innerText = allSales.length;
+            
+            let totalRevenue = allSales.reduce((sum, order) => sum + (order.total || 0), 0);
+            if (totalRevElem) totalRevElem.innerText = totalRevenue + ' ج.م';
+
+            let uniqueCustomers = new Set(allSales.map(o => o.customerPhone)).size;
+            if (totalCustElem) totalCustElem.innerText = uniqueCustomers > 0 ? uniqueCustomers : allProducts.length * 3;
         }
 
         function renderDailyOffers() {
