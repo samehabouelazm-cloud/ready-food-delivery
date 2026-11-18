@@ -21,18 +21,14 @@
             --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
             --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
 
         .header { 
             position: sticky; top: 0; z-index: 100;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(12px);
-            padding: 14px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: var(--shadow-sm);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px);
+            padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm); border-bottom: 1px solid rgba(226, 232, 240, 0.8);
             flex-wrap: wrap; gap: 10px;
         }
         .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
@@ -264,7 +260,7 @@
 
         <div class="search-box">
             <span style="color: var(--text-muted); font-size: 18px;">🔍</span>
-            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر..." oninput="searchStore()">
+            <input type="text" id="searchInput" placeholder="ابحث في كافة أرجاء المتجر بالاسم أو الصنف..." oninput="searchStoreProducts()">
         </div>
 
         <div id="accordionContainer">
@@ -292,7 +288,7 @@
         </div>
     </div>
 
-    <!-- إتمام الطلب -->
+    <!-- إتمام الطلب وتحديد منطقة التوصيل -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal-body">
             <div class="modal-header">
@@ -312,8 +308,11 @@
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
                 <select id="outsideAreaKm" onchange="updateDeliveryFee()">
-                    <option value="20">داخل بلطيم (توصيل: 20 جنيه)</option>
-                    <optgroup label="أماكن توصيل خارج بلطيم">
+                    <option value="20">داخل مدينة بلطيم (توصيل: 20 جنيه)</option>
+                    <optgroup label="🌐 أماكن توصيل خارج بلطيم">
+                        <option value="80">الشرفا (توصيل: 80 جنيه)</option>
+                        <option value="80">جلو بداية البلد (توصيل: 80 جنيه)</option>
+                        <option value="100">جلو داخل البلد (توصيل: 100 جنيه)</option>
                         <option value="30">الكوم الأحمر (توصيل: 30 ج.م)</option>
                         <option value="60">الشيخ مبارك (توصيل: 60 ج.م)</option>
                         <option value="70">الشيخ مبارك ملف المصيف (توصيل: 70 ج.م)</option>
@@ -414,6 +413,9 @@
                 <select id="customExternalZoneSelect">
                     <option value="داخل بلطيم (توصيل: 20 جنيه)">داخل بلطيم (توصيل: 20 جنيه)</option>
                     <optgroup label="أماكن توصيل خارج بلطيم">
+                        <option value="الشرفا (توصيل: 80 ج.م)">الشرفا (توصيل: 80 ج.م)</option>
+                        <option value="جلو بداية البلد (توصيل: 80 ج.م)">جلو بداية البلد (توصيل: 80 ج.م)</option>
+                        <option value="جلو داخل البلد (توصيل: 100 ج.م)">جلو داخل البلد (توصيل: 100 ج.م)</option>
                         <option value="الكوم الأحمر (توصيل: 30 ج.م)">الكوم الأحمر (توصيل: 30 ج.م)</option>
                         <option value="الشيخ مبارك (توصيل: 60 ج.م)">الشيخ مبارك (توصيل: 60 ج.م)</option>
                         <option value="الشيخ مبارك ملف المصيف (توصيل: 70 ج.م)">الشيخ مبارك ملف المصيف (توصيل: 70 ج.م)</option>
@@ -453,7 +455,6 @@
         let cart = [];
         let productQuantities = {};
 
-        // خريطة شعارات الأقسام (تم تحديث لوجو السوبرماركت)
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
             "🍗 قسم هابي ميلز (الوجبات والمشويات)": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=100",
@@ -512,38 +513,12 @@
             }
 
             if (walletSpan) walletSpan.innerText = targetWallet;
-
-            if (payMethod.includes('فودافون كاش') || payMethod.includes('انستا باي')) {
-                infoBox.style.display = 'block';
-            } else {
-                infoBox.style.display = 'none';
-            }
+            infoBox.style.display = payMethod.includes('فودافون كاش') || payMethod.includes('انستا باي') ? 'block' : 'none';
         }
 
-        // دالة التحميل السريع مع حماية من التعليق (Timeout & LocalStorage)
         async function loadStoreProducts(showAlert = false) {
             try {
-                let cached = localStorage.getItem('cached_store_data');
-                if (cached) {
-                    try {
-                        let parsed = JSON.parse(cached);
-                        allProducts = parsed.products || [];
-                        allCashiers = parsed.cashiers || [];
-                        allCaptains = parsed.captains || [];
-                        activeWhatsAppGlobal = parsed.activeWhatsApp || FIXED_WHATSAPP_NUMBER;
-                        if (allProducts.length > 0) {
-                            renderDailyOffers();
-                            renderAccordionStore();
-                        }
-                    } catch(er) {}
-                }
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-                let res = await fetch(API_URL + "?t=" + new Date().getTime(), { signal: controller.signal });
-                clearTimeout(timeoutId);
-
+                let res = await fetch(API_URL + "?t=" + new Date().getTime());
                 if (res.ok) {
                     let data = await res.json();
                     if (Array.isArray(data)) {
@@ -555,310 +530,368 @@
                         allCashiers = Array.isArray(data.cashiers) ? data.cashiers : [];
                         activeWhatsAppGlobal = data.activeWhatsApp || FIXED_WHATSAPP_NUMBER;
                     }
-
-                    localStorage.setItem('cached_store_data', JSON.stringify({ 
-                        products: allProducts, 
-                        cashiers: allCashiers,
-                        captains: allCaptains,
-                        activeWhatsApp: activeWhatsAppGlobal
-                    }));
                 }
             } catch (e) {}
-
-            if (!allProducts || allProducts.length === 0) {
-                allProducts = [
-                    { name: "وجبة هابي ميلز برجر دجاج", price: 120, category: "هابي ميلز", outOfStock: false, isOffer: true },
-                    { name: "زيت عافية ذرة 800 مل", price: 95, category: "سوبر ماركت - الزيت", outOfStock: false, isOffer: true }
-                ];
-            }
-
             renderDailyOffers();
-            renderAccordionStore();
-            if(showAlert) alert('✅ تم تحديث المنتجات بنجاح من السحابة وعرضها فوراً!');
+            renderAccordionStore(allProducts);
+            if (showAlert) alert('✅ تم تحديث بيانات المتجر بنجاح!');
         }
 
         function renderDailyOffers() {
             let section = document.getElementById('dailyOffersSection');
-            let offersGrid = document.getElementById('dailyOffersGrid');
-            if (!offersGrid || !section) return;
+            let grid = document.getElementById('dailyOffersGrid');
+            let offers = allProducts.filter(p => p.isOffer === true && !p.outOfStock);
 
-            let offerProducts = allProducts.filter(p => p.isOffer === true && p.outOfStock !== true);
-
-            if (offerProducts.length === 0) {
+            if (offers.length === 0) {
                 section.style.display = 'none';
                 return;
-            } else {
-                section.style.display = 'block';
             }
 
+            section.style.display = 'block';
             let html = '';
-            offerProducts.forEach((p, pIdx) => {
-                let uniqueKey = `offer_${pIdx}`;
-                if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
-                let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                let safeName = p.name.replace(/'/g, "\\'");
-                
-                let oldPriceHtml = (p.oldPrice && p.oldPrice > p.price) ? 
-                    `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 13px; margin-left: 6px;">${p.oldPrice} ج.م</span>` : '';
+            offers.forEach(p => {
+                let realIndex = allProducts.findIndex(item => item.name === p.name);
+                let oldPriceHtml = p.oldPrice ? `<span style="text-decoration:line-through; color:var(--text-muted); font-size:12px; margin-right:5px;">${p.oldPrice} ج.م</span>` : '';
+                let qty = productQuantities[realIndex] || 1;
 
                 html += `
-                    <div class="product-card" style="border: 2px solid #f59e0b; position: relative;">
-                        <span style="position: absolute; top: 10px; right: 10px; background: #f59e0b; color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 10px; z-index: 2;">عرض خاص 🔥</span>
+                    <div class="product-card">
+                        <div class="product-img-wrapper"><img src="${p.image || DEFAULT_IMAGE}" alt="${p.name}"></div>
                         <div>
-                            <div class="product-img-wrapper">
-                                <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
-                            </div>
-                            <div class="product-title">${p.name}</div>
-                            <div class="product-price" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                                <span style="color: #d97706; font-size: 16px; font-weight: 800;">${p.price} ج.م</span>
-                                ${oldPriceHtml}
-                            </div>
+                            <div class="product-title">${p.name} 🔥</div>
+                            <div class="product-price">${p.price} ج.م ${oldPriceHtml}</div>
                         </div>
                         <div>
                             <div class="qty-controls">
-                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                <span class="qty-val" id="qty_${uniqueKey}">${productQuantities[uniqueKey]}</span>
-                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
+                                <button class="qty-btn" onclick="changeQty(${realIndex}, -1)">-</button>
+                                <span class="qty-val" id="qty_${realIndex}">${qty}</span>
+                                <button class="qty-btn" onclick="changeQty(${realIndex}, 1)">+</button>
                             </div>
-                            <button class="add-btn" style="background: #f59e0b;" onclick="addToCart('${safeName}', ${p.price}, '${p.category || 'عام'}', '${uniqueKey}')">أضف للسلة 🛒</button>
+                            <button class="add-btn" onclick="addToCartFromStore(${realIndex})">🛒 إضافة</button>
                         </div>
                     </div>
                 `;
             });
-            offersGrid.innerHTML = html;
+            grid.innerHTML = html;
         }
 
-        function changeQty(key, delta) {
-            if(!productQuantities[key]) productQuantities[key] = 1;
-            productQuantities[key] += delta;
-            if(productQuantities[key] < 1) productQuantities[key] = 1;
-            let el = document.getElementById(`qty_${key}`);
-            if(el) el.innerText = productQuantities[key];
+        function renderAccordionStore(productsToRender) {
+            let container = document.getElementById('accordionContainer');
+            let html = '';
+
+            for (let mainCat in storeHierarchy) {
+                let subCats = storeHierarchy[mainCat];
+                let logoUrl = categoryLogos[mainCat] || DEFAULT_IMAGE;
+
+                html += `
+                    <div class="main-cat-card active" id="mainCard_${mainCat}">
+                        <div class="main-cat-header" onclick="toggleMainCategory('${mainCat}')">
+                            <div class="cat-header-title-wrap">
+                                <img src="${logoUrl}" class="cat-logo-img" alt="${mainCat}">
+                                <span>${mainCat}</span>
+                            </div>
+                            <span class="main-cat-arrow">▼</span>
+                        </div>
+                        <div class="main-cat-content" id="mainContent_${mainCat}" style="display: block;">
+                            <div class="sub-cats-grid">
+                `;
+
+                subCats.forEach((subCat, subIdx) => {
+                    let activeClass = subIdx === 0 ? 'active' : '';
+                    html += `<div class="sub-cat-pill ${activeClass}" onclick="switchSubCategory('${mainCat}', '${subCat}', this)">${subCat}</div>`;
+                });
+
+                html += `</div>`;
+
+                subCats.forEach((subCat, subIdx) => {
+                    let displayClass = subIdx === 0 ? 'active' : '';
+                    let subProducts = productsToRender.filter(p => p.category === subCat || (!p.category && subCat === 'عام'));
+
+                    html += `<div class="sub-cat-products-container ${displayClass}" id="subContainer_${mainCat}_${subCat}">`;
+                    if (subProducts.length === 0) {
+                        html += `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:14px;">لا توجد منتجات مسجلة في هذا القسم حالياً.</div>`;
+                    } else {
+                        html += `<div class="products-grid">`;
+                        subProducts.forEach(p => {
+                            let realIndex = allProducts.findIndex(item => item === p);
+                            let oldPriceHtml = p.oldPrice ? `<span style="text-decoration:line-through; color:var(--text-muted); font-size:12px; margin-right:5px;">${p.oldPrice} ج.م</span>` : '';
+                            let qty = productQuantities[realIndex] || 1;
+                            let stockBtn = p.outOfStock ? `<button class="add-btn" style="background:#ef4444;" disabled>🔴 نفذت الكمية</button>` : `<button class="add-btn" onclick="addToCartFromStore(${realIndex})">🛒 إضافة للسلة</button>`;
+
+                            html += `
+                                <div class="product-card">
+                                    <div class="product-img-wrapper"><img src="${p.image || DEFAULT_IMAGE}" alt="${p.name}"></div>
+                                    <div>
+                                        <div class="product-title">${p.name} ${p.isOffer ? '🔥' : ''}</div>
+                                        <div class="product-price">${p.price} ج.م ${oldPriceHtml}</div>
+                                    </div>
+                                    <div>
+                                        ${!p.outOfStock ? `
+                                        <div class="qty-controls">
+                                            <button class="qty-btn" onclick="changeQty(${realIndex}, -1)">-</button>
+                                            <span class="qty-val" id="qty_${realIndex}">${qty}</span>
+                                            <button class="qty-btn" onclick="changeQty(${realIndex}, 1)">+</button>
+                                        </div>` : ''}
+                                        ${stockBtn}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                });
+
+                html += `</div></div>`;
+            }
+
+            container.innerHTML = html;
         }
 
-        function addToCart(name, price, category, key) {
-            let qty = productQuantities[key] || 1;
-            let existing = cart.find(item => item.name === name);
-            if(existing) {
+        function toggleMainCategory(mainCat) {
+            let card = document.getElementById(`mainCard_${mainCat}`);
+            let content = document.getElementById(`mainContent_${mainCat}`);
+            if (card.classList.contains('active')) {
+                card.classList.remove('active');
+                content.style.display = 'none';
+            } else {
+                card.classList.add('active');
+                content.style.display = 'block';
+            }
+        }
+
+        function switchSubCategory(mainCat, subCat, element) {
+            let parentCard = document.getElementById(`mainCard_${mainCat}`);
+            parentCard.querySelectorAll('.sub-cat-pill').forEach(p => p.classList.remove('active'));
+            element.classList.add('active');
+
+            parentCard.querySelectorAll('.sub-cat-products-container').forEach(c => c.classList.remove('active'));
+            let targetSubContainer = document.getElementById(`subContainer_${mainCat}_${subCat}`);
+            if (targetSubContainer) targetSubContainer.classList.add('active');
+        }
+
+        function changeQty(index, change) {
+            if (!productQuantities[index]) productQuantities[index] = 1;
+            productQuantities[index] += change;
+            if (productQuantities[index] < 1) productQuantities[index] = 1;
+            let valSpan = document.getElementById(`qty_${index}`);
+            if (valSpan) valSpan.innerText = productQuantities[index];
+        }
+
+        function addToCartFromStore(index) {
+            let p = allProducts[index];
+            if (!p || p.outOfStock) return;
+            let qty = productQuantities[index] || 1;
+
+            let existing = cart.find(item => item.name === p.name);
+            if (existing) {
                 existing.qty += qty;
             } else {
-                cart.push({ name, price, category, qty });
+                cart.push({ name: p.name, price: p.price, qty: qty, category: p.category });
             }
-            updateCartCount();
-            alert(`✅ تم إضافة (${qty}) من "${name}" إلى السلة بنجاح!`);
+
+            productQuantities[index] = 1;
+            let valSpan = document.getElementById(`qty_${index}`);
+            if (valSpan) valSpan.innerText = 1;
+
+            updateCartBadge();
+            alert(`✅ تمت إضافة (${qty}) من (${p.name}) إلى السلة بنجاح!`);
         }
 
-        function updateCartCount() {
+        function updateCartBadge() {
             let totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCount').innerText = totalCount;
+            let badge = document.getElementById('cartCount');
+            if (badge) badge.innerText = totalCount;
         }
 
         function openCart() {
-            let listEl = document.getElementById('cartItemsList');
-            if(!listEl) return;
-
-            if(cart.length === 0) {
-                listEl.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-weight:700;">سلة التسوق فارغة حالياً.</div>`;
-                document.getElementById('subTotal').innerText = '0 ج.م';
-                document.getElementById('grandTotal').innerText = '0 ج.م';
-                document.getElementById('deliveryFeeDisplay').innerText = getDeliveryFee() + ' ج.م';
-                document.getElementById('cartModal').style.display = 'flex';
-                return;
+            let list = document.getElementById('cartItemsList');
+            if (cart.length === 0) {
+                list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">السلة فارغة حالياً 🛒</div>`;
+            } else {
+                let html = '';
+                cart.forEach((item, idx) => {
+                    html += `
+                        <div class="cart-row">
+                            <div><b>${item.name}</b><br><span style="font-size:12px; color:var(--text-muted);">${item.price} ج.م × ${item.qty}</span></div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <b style="color:var(--secondary);">${item.price * item.qty} ج.م</b>
+                                <button onclick="removeFromCart(${idx})" style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;">حذف</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
             }
 
-            let html = '';
-            let subTotal = 0;
-            cart.forEach((item, idx) => {
-                let itemTotal = item.price * item.qty;
-                subTotal += itemTotal;
-                html += `
-                    <div class="cart-row">
-                        <div>
-                            <div style="font-weight:700; font-size:14px;">${item.name}</div>
-                            <div style="font-size:12px; color:var(--text-muted);">${item.price} ج.م × ${item.qty}</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <b style="color:var(--secondary); font-size:14px;">${itemTotal} ج.م</b>
-                            <button onclick="removeFromCart(${idx})" style="background:#ef4444; color:#fff; border:none; width:24px; height:24px; border-radius:50%; cursor:pointer; font-weight:bold;">×</button>
-                        </div>
-                    </div>
-                `;
-            });
-
+            let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             let deliveryFee = getDeliveryFee();
-            let grandTotal = subTotal + deliveryFee;
+            let grandTotal = subTotal + (cart.length > 0 ? deliveryFee : 0);
 
-            listEl.innerHTML = html;
             document.getElementById('subTotal').innerText = subTotal + ' ج.م';
             document.getElementById('deliveryFeeDisplay').innerText = deliveryFee + ' ج.م';
             document.getElementById('grandTotal').innerText = grandTotal + ' ج.م';
+
             document.getElementById('cartModal').style.display = 'flex';
         }
 
         function removeFromCart(idx) {
             cart.splice(idx, 1);
-            updateCartCount();
+            updateCartBadge();
             openCart();
         }
 
         function goToCheckout() {
-            if(cart.length === 0) {
-                alert('⚠️ سلة التسوق فارغة!');
+            if (cart.length === 0) {
+                alert('⚠️ السلة فارغة!');
                 return;
             }
             closeModal('cartModal');
-            checkPaymentMethod();
             document.getElementById('checkoutModal').style.display = 'flex';
+            checkPaymentMethod();
         }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
-        function openCaptainModal() {
-            document.getElementById('captainModal').style.display = 'flex';
+        function openCaptainModal() { document.getElementById('captainModal').style.display = 'flex'; }
+        function openCustomOrderModal() { document.getElementById('customOrderModal').style.display = 'flex'; }
+
+        // ميزة البحث الفوري الذكي للمنتجات
+        function searchStoreProducts() {
+            let query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                renderAccordionStore(allProducts);
+                return;
+            }
+            let filteredProducts = allProducts.filter(p => 
+                (p.name && p.name.toLowerCase().includes(query)) || 
+                (p.category && p.category.toLowerCase().includes(query))
+            );
+            renderAccordionStore(filteredProducts);
         }
 
-        function openCustomOrderModal() {
-            document.getElementById('customOrderModal').style.display = 'flex';
-        }
-
-        // إرسال الطلب مع دعم توجيه الشفت الكاشير المناسب (صباحي / مسائي)
         async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
             let address = document.getElementById('custAddress').value.trim();
             let areaSelect = document.getElementById('outsideAreaKm');
-            let areaName = areaSelect.options[areaSelect.selectedIndex].text;
+            let areaText = areaSelect.options[areaSelect.selectedIndex].text;
             let deliveryFee = parseInt(areaSelect.value) || 20;
             let payMethod = document.getElementById('payMethod').value;
 
-            if(!name || !phone || !address) {
-                alert('⚠️ يرجى إكمال اسمك، رقم الهاتف، وعنوان التوصيل بالتفصيل!');
+            if (!name || !phone || !address) {
+                alert('⚠️ يرجى إكمال اسم العميل، رقم الهاتف، وعنوان التوصيل بدقة!');
                 return;
             }
 
             let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             let grandTotal = subTotal + deliveryFee;
-            let itemsSummary = cart.map(i => `${i.name} (×${i.qty})`).join(', ');
-
-            let targetWhatsApp = activeWhatsAppGlobal;
-            let assignedCashierName = "الإدارة العامة";
-            let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
-
-            if (hasHappyMeals && allCashiers.length > 0) {
-                // البحث عن الكاشير حسب الشفت الحالي أو القسم
-                let cashier = allCashiers.find(c => c.section && c.section.includes('هابي ميلز'));
-                if (cashier && cashier.whatsappPhone) {
-                    targetWhatsApp = cashier.whatsappPhone;
-                    assignedCashierName = `${cashier.name} (${cashier.shift || 'صباحي'})`;
-                }
-            }
+            let orderId = Math.floor(1000 + Math.random() * 9000);
 
             let orderObj = {
-                orderId: Date.now().toString().slice(-6),
-                timestamp: new Date().toISOString(),
+                orderId: orderId,
                 customerName: name,
                 customerPhone: phone,
-                area: areaName,
-                address: address,
-                paymentMethod: payMethod,
+                customerAddress: `${address} (${areaText})`,
                 items: cart,
-                itemsSummary: itemsSummary,
                 subTotal: subTotal,
                 deliveryFee: deliveryFee,
                 total: grandTotal,
-                profit: Math.round(subTotal * 0.2),
-                status: 'قيد الانتظار',
-                assignedCaptainId: '',
-                assignedCaptainName: '',
-                isCashOrder: payMethod.includes('نقداً'),
-                isSettled: false
+                paymentMethod: payMethod,
+                status: 'قيد الانتظار ⏳',
+                assignedCaptain: '',
+                timestamp: new Date().toISOString()
             };
 
             try {
-                allSales.push(orderObj);
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        products: allProducts,
-                        sales: allSales,
-                        captains: allCaptains,
-                        cashiers: allCashiers,
-                        activeWhatsApp: activeWhatsAppGlobal
-                    })
-                });
+                let res = await fetch(API_URL);
+                if (res.ok) {
+                    let data = await res.json();
+                    let salesList = Array.isArray(data.sales) ? data.sales : [];
+                    salesList.unshift(orderObj);
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            products: data.products || allProducts,
+                            sales: salesList,
+                            captains: data.captains || allCaptains,
+                            cashiers: data.cashiers || allCashiers,
+                            activeWhatsApp: activeWhatsAppGlobal
+                        })
+                    });
+                }
             } catch(e) {}
 
-            let itemsMsg = cart.map(i => `• ${i.name} (عدد ${i.qty}) -> ${i.price * i.qty} ج.م`).join('\n');
-            let msg = `🛒 *طلب جديد عبر منصة جاهز* #️⃣${orderObj.orderId}\n\n` +
-                      `👤 *العميل:* ${name}\n` +
-                      `📞 *الهاتف:* ${phone}\n` +
-                      `📍 *المنطقة:* ${areaName}\n` +
-                      `🏠 *العنوان:* ${address}\n\n` +
-                      `📋 *تفاصيل الأصناف (موجه إلى الكاشير: ${assignedCashierName}):*\n${itemsMsg}\n\n` +
-                      `💰 *المجموع الفرعي:* ${subTotal} ج.م\n` +
-                      `🛵 *التوصيل:* ${deliveryFee} ج.م\n` +
-                      `💎 *الإجمالي الكلي:* *${grandTotal} ج.م*\n` +
-                      `💳 *طريقة الدفع:* ${payMethod}\n\n` +
-                      `شكراً لاختياركم جاهز! 🚀`;
+            let msg = `🛒 *طلب جديد عبر منصة جاهز* (#${orderId})\n\n`;
+            msg += `👤 *العميل:* ${name}\n`;
+            msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📍 *العنوان:* ${address} - ${areaText}\n\n`;
+            msg += `📦 *الأصناف المطلوبة:*\n`;
+            cart.forEach(i => { msg += `- ${i.name} (×${i.qty}) : ${i.price * i.qty} ج.م\n`; });
+            msg += `\n💰 *المجموع الفرعي:* ${subTotal} ج.م`;
+            msg += `\n🛵 *التوصيل:* ${deliveryFee} ج.م`;
+            msg += `\n🌟 *الإجمالي الكلي:* ${grandTotal} ج.م`;
+            msg += `\n💳 *طريقة الدفع:* ${payMethod}`;
 
-            let cleanPhone = targetWhatsApp.startsWith('0') ? '2' + targetWhatsApp : targetWhatsApp;
-            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+            let cleanWa = activeWhatsAppGlobal.replace(/\D/g, '');
+            if (cleanWa.startsWith('0')) cleanWa = '2' + cleanWa;
 
+            window.open(`https://wa.me/${cleanWa}?text=${encodeURIComponent(msg)}`, '_blank');
+            alert('✅ تم إرسال الطلب بنجاح عبر الواتساب وتسجيله في لوحة الإدارة!');
             cart = [];
-            updateCartCount();
+            updateCartBadge();
             closeModal('checkoutModal');
-            alert('✅ تم إرسال طلبك بنجاح وتسجيله في النظام!');
         }
 
         async function submitCaptainToWhatsApp() {
             let name = document.getElementById('capName').value.trim();
             let phone = document.getElementById('capPhone').value.trim();
-            let vodafone = document.getElementById('capVodafoneCash').value.trim();
-            let insta = document.getElementById('capInstaPay').value.trim();
+            let vodafoneCash = document.getElementById('capVodafoneCash').value.trim();
+            let instaPay = document.getElementById('capInstaPay').value.trim();
             let address = document.getElementById('capAddress').value.trim();
 
-            if(!name || !phone || !vodafone) {
-                alert('⚠️ يرجى إدخال اسمك، رقم الموبايل، ورقم فودافون كاش الخاص بتسوية العهدة!');
+            if (!name || !phone || !vodafoneCash) {
+                alert('⚠️ يرجى إدخال الاسم، رقم الموبايل، ورقم محفظة فودافون كاش على الأقل!');
                 return;
             }
 
-            let newCaptainObj = {
-                id: 'CAP-' + (allCaptains.length + 1),
-                name: name,
-                phone: phone,
-                vodafoneCash: vodafone,
-                instaPay: insta || '',
-                cashInHand: 0
-            };
-
+            let captainObj = { name, phone, vodafoneCash, instaPay, address };
             try {
-                allCaptains.push(newCaptainObj);
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        products: allProducts,
-                        sales: allSales,
-                        captains: allCaptains,
-                        cashiers: allCashiers,
-                        activeWhatsApp: activeWhatsAppGlobal
-                    })
-                });
+                let res = await fetch(API_URL);
+                if (res.ok) {
+                    let data = await res.json();
+                    let captainsList = Array.isArray(data.captains) ? data.captains : [];
+                    captainsList.push(captainObj);
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            products: data.products || allProducts,
+                            sales: data.sales || allSales,
+                            captains: captainsList,
+                            cashiers: data.cashiers || allCashiers,
+                            activeWhatsApp: activeWhatsAppGlobal
+                        })
+                    });
+                }
             } catch(e) {}
 
-            let msg = `🛵 *طلب انضمام كابتن توصيل جديد - جاهز*\n\n` +
-                      `👤 *الاسم:* ${name}\n` +
-                      `📞 *الهاتف:* ${phone}\n` +
-                      `📱 *فودافون كاش (للعهد):* ${vodafone}\n` +
-                      `💳 *إنستا باي:* ${insta || 'غير مسجل'}\n` +
-                      `📍 *العنوان:* ${address}`;
+            let msg = `🛵 *تسجيل كابتن توصيل جديد (منصة جاهز)*\n\n`;
+            msg += `👤 *الاسم:* ${name}\n`;
+            msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📱 *فودافون كاش:* ${vodafoneCash}\n`;
+            msg += `💳 *انستا باي:* ${instaPay || '---'}\n`;
+            msg += `📍 *العنوان:* ${address || '---'}`;
 
-            window.open(`https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+            let cleanWa = activeWhatsAppGlobal.replace(/\D/g, '');
+            if (cleanWa.startsWith('0')) cleanWa = '2' + cleanWa;
+
+            window.open(`https://wa.me/${cleanWa}?text=${encodeURIComponent(msg)}`, '_blank');
+            alert('✅ تم إرسال طلب الانضمام ككابتن بنجاح!');
             closeModal('captainModal');
-            alert('✅ تم تسجيل بياناتك بنجاح وإرسالها للإدارة عبر الواتساب!');
         }
 
         async function submitCustomOrderToWhatsApp() {
@@ -866,181 +899,30 @@
             let phone = document.getElementById('customPhone').value.trim();
             let details = document.getElementById('customDetails').value.trim();
             let zoneSelect = document.getElementById('customExternalZoneSelect');
-            let zoneName = zoneSelect.value;
+            let zoneText = zoneSelect.value;
             let address = document.getElementById('customAddress').value.trim();
 
-            if(!name || !phone || !details) {
-                alert('⚠️ يرجى إدخال اسمك، رقم الهاتف، وتفاصيل الطلب الخاص!');
+            if (!name || !phone || !details) {
+                alert('⚠️ يرجى إدخال اسمك، هاتفك، وتفاصيل الطلب!');
                 return;
             }
 
-            let msg = `🛍️ *طلب خاص جديد من العميل*:\n\n` +
-                      `👤 *الاسم:* ${name}\n` +
-                      `📞 *الهاتف:* ${phone}\n` +
-                      `📍 *المنطقة:* ${zoneName}\n` +
-                      `🏠 *العنوان:* ${address}\n\n` +
-                      `📝 *تفاصيل الطلب المطلوبة:*\n${details}`;
+            let msg = `🛍️ *طلب خاص جديد (اطلب اللي تحتاجه)*\n\n`;
+            msg += `👤 *الاسم:* ${name}\n`;
+            msg += `📞 *الهاتف:* ${phone}\n`;
+            msg += `📝 *التفاصيل:* ${details}\n`;
+            msg += `📍 *المنطقة:* ${zoneText}\n`;
+            msg += `🏠 *العنوان:* ${address || '---'}`;
 
-            window.open(`https://wa.me/${FIXED_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+            let cleanWa = activeWhatsAppGlobal.replace(/\D/g, '');
+            if (cleanWa.startsWith('0')) cleanWa = '2' + cleanWa;
+
+            window.open(`https://wa.me/${cleanWa}?text=${encodeURIComponent(msg)}`, '_blank');
+            alert('✅ تم إرسال طلبك الخاص بنجاح للإدارة عبر الواتساب!');
             closeModal('customOrderModal');
-            alert('✅ تم إرسال طلبك الخاص بنجاح!');
         }
 
-        function renderAccordionStore() {
-            let container = document.getElementById('accordionContainer');
-            if(!container) return;
-
-            let html = '';
-            Object.keys(storeHierarchy).forEach((mainCatName, mIdx) => {
-                let subCats = storeHierarchy[mainCatName];
-                let logoUrl = categoryLogos[mainCatName] || DEFAULT_IMAGE;
-                
-                let subPillsHtml = '';
-                let subProductsContainersHtml = '';
-
-                subCats.forEach((subCatName, sIdx) => {
-                    let matchingProducts = allProducts.filter(p => {
-                        let pCat = (p.category || 'عام').trim();
-                        return pCat === subCatName.trim() || pCat.toLowerCase() === subCatName.toLowerCase();
-                    });
-
-                    let activeClass = (sIdx === 0) ? 'active' : '';
-                    subPillsHtml += `<button class="sub-cat-pill ${activeClass}" onclick="switchSubCategory(event, 'sub_grid_${mIdx}_${sIdx}')">${subCatName} (${matchingProducts.length})</button>`;
-
-                    let productsGridHtml = '';
-                    if(matchingProducts.length === 0) {
-                        productsGridHtml = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">لا توجد منتجات مسجلة في هذا القسم حالياً.</div>`;
-                    } else {
-                        productsGridHtml = `<div class="products-grid">`;
-                        matchingProducts.forEach((p, pIdx) => {
-                            let uniqueKey = `p_${mIdx}_${sIdx}_${pIdx}`;
-                            if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
-                            let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                            let safeName = p.name.replace(/'/g, "\\'");
-                            let stockBadge = p.outOfStock ? `<span style="position:absolute; top:10px; right:10px; background:#ef4444; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:10px;">نفذت ⛔</span>` : '';
-                            let oldPriceHtml = (p.oldPrice && p.oldPrice > p.price) ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 13px; margin-left: 6px;">${p.oldPrice} ج.م</span>` : '';
-
-                            productsGridHtml += `
-                                <div class="product-card" style="position:relative;">
-                                    ${stockBadge}
-                                    <div>
-                                        <div class="product-img-wrapper">
-                                            <img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'">
-                                        </div>
-                                        <div class="product-title">${p.name}</div>
-                                        <div class="product-price">
-                                            <span style="color:var(--secondary);">${p.price} ج.م</span>
-                                            ${oldPriceHtml}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="qty-controls">
-                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                            <span class="qty-val" id="qty_${uniqueKey}">${productQuantities[uniqueKey]}</span>
-                                            <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
-                                        </div>
-                                        <button class="add-btn" ${p.outOfStock ? 'disabled style="background:#94a3b8; cursor:not-allowed;"' : ''} onclick="addToCart('${safeName}', ${p.price}, '${p.category || 'عام'}', '${uniqueKey}')">أضف للسلة 🛒</button>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        productsGridHtml += `</div>`;
-                    }
-
-                    subProductsContainersHtml += `
-                        <div class="sub-cat-products-container ${activeClass}" id="sub_grid_${mIdx}_${sIdx}">
-                            ${productsGridHtml}
-                        </div>
-                    `;
-                });
-
-                let isOpen = (mIdx === 0) ? 'active' : '';
-                html += `
-                    <div class="main-cat-card ${isOpen}">
-                        <div class="main-cat-header" onclick="toggleAccordion(this)">
-                            <div class="cat-header-title-wrap">
-                                <img src="${logoUrl}" class="cat-logo-img" onerror="this.src='${DEFAULT_IMAGE}'">
-                                <span>${mainCatName}</span>
-                            </div>
-                            <span class="main-cat-arrow">▼</span>
-                        </div>
-                        <div class="main-cat-content">
-                            <div class="sub-cats-grid">
-                                ${subPillsHtml}
-                            </div>
-                            ${subProductsContainersHtml}
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        function toggleAccordion(headerEl) {
-            let card = headerEl.parentElement;
-            card.classList.toggle('active');
-        }
-
-        function switchSubCategory(event, gridId) {
-            event.stopPropagation();
-            let parentCard = event.target.closest('.main-cat-content');
-            parentCard.querySelectorAll('.sub-cat-pill').forEach(btn => btn.classList.remove('active'));
-            parentCard.querySelectorAll('.sub-cat-products-container').forEach(div => div.classList.remove('active'));
-
-            event.target.classList.add('active');
-            let targetGrid = document.getElementById(gridId);
-            if(targetGrid) targetGrid.classList.add('active');
-        }
-
-        function searchStore() {
-            let query = document.getElementById('searchInput').value.toLowerCase().trim();
-            let container = document.getElementById('accordionContainer');
-
-            if(!query) {
-                renderAccordionStore();
-                return;
-            }
-
-            let filtered = allProducts.filter(p => p.name.toLowerCase().includes(query) || (p.category && p.category.toLowerCase().includes(query)));
-
-            if(filtered.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">لا توجد منتجات مطابقة لبحثك.</div>`;
-                return;
-            }
-
-            let gridHtml = `<div class="products-grid">`;
-            filtered.forEach((p, pIdx) => {
-                let uniqueKey = `search_${pIdx}`;
-                if(!productQuantities[uniqueKey]) productQuantities[uniqueKey] = 1;
-                let imgSrc = (p.image && p.image.trim() !== '') ? p.image : DEFAULT_IMAGE;
-                let safeName = p.name.replace(/'/g, "\\'");
-
-                gridHtml += `
-                    <div class="product-card">
-                        <div>
-                            <div class="product-img-wrapper"><img src="${imgSrc}" loading="lazy" onerror="this.src='${DEFAULT_IMAGE}'"></div>
-                            <div class="product-title">${p.name}</div>
-                            <div class="product-price">${p.price} ج.م</div>
-                        </div>
-                        <div>
-                            <div class="qty-controls">
-                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', -1)">-</button>
-                                <span class="qty-val" id="qty_${uniqueKey}">${productQuantities[uniqueKey]}</span>
-                                <button class="qty-btn" onclick="changeQty('${uniqueKey}', 1)">+</button>
-                            </div>
-                            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price}, '${p.category || 'عام'}', '${uniqueKey}')">أضف للسلة 🛒</button>
-                        </div>
-                    </div>
-                `;
-            });
-            gridHtml += `</div>`;
-            container.innerHTML = `<div style="background:#fff; padding:20px; border-radius:16px;"><h3>نتائج البحث عن: "${query}"</h3><br>${gridHtml}</div>`;
-        }
-
-        window.onload = function() {
-            loadStoreProducts();
-        };
+        window.onload = () => loadStoreProducts();
     </script>
 </body>
 </html>
