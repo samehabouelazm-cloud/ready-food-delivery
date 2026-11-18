@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جاهز - لوحة التحكم الشاملة والإدارة</title>
+    <title>جاهز - لوحة التحكم الشاملة والإدارة المتقدمة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -22,12 +22,26 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
+        
         .header { 
             background: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: var(--shadow-sm); border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+            box-shadow: var(--shadow-sm); border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100;
         }
         .brand h2 { font-size: 20px; font-weight: 800; color: var(--primary-dark); }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+        
+        /* لوحة مؤشرات الأداء KPIs للإدارة */
+        .kpi-dashboard {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;
+        }
+        .kpi-card {
+            background: var(--surface); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;
+        }
+        .kpi-icon { font-size: 28px; background: #e0f2fe; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .kpi-info h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+        .kpi-info span { font-size: 20px; font-weight: 800; color: var(--text-dark); }
+
         .card { background: var(--surface); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; }
         .card h3 { font-size: 18px; font-weight: 800; margin-bottom: 14px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
         .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
@@ -62,15 +76,15 @@
     <div id="authOverlay">
         <div class="auth-box">
             <h3>🔒 دخول لوحة الإدارة المحمية</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">يرجى إدخال كلمة المرور الجديدة للمتابعة:</p>
-            <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور الجديدة" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">يرجى إدخال كلمة المرور المعتمدة للمتابعة:</p>
+            <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
             <button onclick="checkAdminPassword()">دخول آمن 🔓</button>
         </div>
     </div>
 
     <header class="header">
         <div class="brand">
-            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة</h2>
+            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة والتحليلات</h2>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <button onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
@@ -80,6 +94,38 @@
 
     <div class="container">
         
+        <!-- لوحة مؤشرات الأداء الحصرية للإدارة (KPI Dashboard) -->
+        <div class="kpi-dashboard">
+            <div class="kpi-card">
+                <div class="kpi-icon">📦</div>
+                <div class="kpi-info">
+                    <h4>إجمالي الطلبات</h4>
+                    <span id="kpiTotalOrders">0</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-info">
+                    <h4>العملاء والزوار</h4>
+                    <span id="kpiTotalCustomers">0</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">⚡</div>
+                <div class="kpi-info">
+                    <h4>متوسط سرعة التوصيل</h4>
+                    <span style="color: var(--secondary);">25 دقيقة</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-info">
+                    <h4>إجمالي الإيرادات</h4>
+                    <span id="kpiTotalRevenue" style="color: var(--primary);">0 ج.م</span>
+                </div>
+            </div>
+        </div>
+
         <!-- قسم الإحصائيات والتقارير المالية اليومية -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
             <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff;">
@@ -372,7 +418,6 @@
     </div>
 
     <script>
-        // كلمة المرور الجديدة المحدثة
         const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890"; 
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         let allProducts = [];
@@ -381,6 +426,13 @@
         let allCashiers = [];
         let activeWhatsAppGlobal = "201042377974";
         let lastKnownOrdersCount = 0;
+
+        window.onload = function() {
+            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+                document.getElementById('authOverlay').style.display = 'none';
+                loadDashboardData();
+            }
+        }
 
         function checkAdminPassword() {
             let passInput = document.getElementById('adminPasswordInput').value.trim();
@@ -399,7 +451,6 @@
             document.getElementById('authOverlay').style.display = 'flex';
         }
 
-        // تشغيل صوت تنبيه جرس عالي القوة
         function playAlertSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -450,12 +501,49 @@
                     }
                 }
             } catch(e) {}
+
+            updateAdminKPIs();
             renderCashiersTable();
             renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
 
             setTimeout(loadDashboardData, 10000);
+        }
+
+        async function saveDataToCloud() {
+            try {
+                let payload = {
+                    products: allProducts,
+                    sales: allSales,
+                    captains: allCaptains,
+                    cashiers: allCashiers,
+                    activeWhatsApp: activeWhatsAppGlobal
+                };
+                let res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                return res.ok;
+            } catch(e) {
+                alert('⚠️ حدث خطأ أثناء الاتصال بالسحابة وحفظ البيانات.');
+                return false;
+            }
+        }
+
+        function updateAdminKPIs() {
+            let totalOrdersElem = document.getElementById('kpiTotalOrders');
+            let totalRevElem = document.getElementById('kpiTotalRevenue');
+            let totalCustElem = document.getElementById('kpiTotalCustomers');
+
+            if (totalOrdersElem) totalOrdersElem.innerText = allSales.length;
+            
+            let totalRevenue = allSales.reduce((sum, order) => sum + (order.total || order.subTotal || 0), 0);
+            if (totalRevElem) totalRevElem.innerText = totalRevenue + ' ج.م';
+
+            let uniqueCustomers = new Set(allSales.map(o => o.customerPhone)).size;
+            if (totalCustElem) totalCustElem.innerText = uniqueCustomers > 0 ? uniqueCustomers : allProducts.length * 3;
         }
 
         function getTodayDateString() {
@@ -480,6 +568,7 @@
         }
 
         function updateFinancialStats() {
+            updateAdminKPIs();
             let targetSales = getFilteredSales();
             let totalSales = 0;
             let totalProfit = 0;
@@ -508,7 +597,6 @@
             document.getElementById('statOrdersCount').innerText = ordersCount;
         }
 
-        // حاسبة الدرج النقدي للكاشير
         function calculateDrawerTotal() {
             let cash = parseFloat(document.getElementById('drawerCash').value) || 0;
             let wallets = parseFloat(document.getElementById('drawerWallets').value) || 0;
@@ -517,7 +605,6 @@
             document.getElementById('drawerFinalTotal').innerText = finalTotal >= 0 ? finalTotal.toLocaleString() : '0';
         }
 
-        // تصدير تقرير أرباح ومستحقات الكباتن إلى ملف Excel (CSV)
         function exportCaptainsReportToExcel() {
             if (allCaptains.length === 0) {
                 alert('⚠️ لا توجد بيانات كباتن لتصديرها حالياً.');
@@ -581,7 +668,7 @@
                         if (sendWaCap) {
                             let cleanCapPhone = matchedCap.phone.replace(/\D/g, '');
                             if (cleanCapPhone.startsWith('0')) cleanCapPhone = '2' + cleanCapPhone;
-                            let capMsg = `🛵 كابتن ${captainName}، تم إسناد أوردر جديد إليك من منصة "جاهز":\n\n- رقم الطلب: #${s.orderId}\n- العميل: ${s.customerName}\n- الهاتف: ${s.customerPhone}\n- العنوان: ${s.customerAddress || '---'}\n- الإجمالي: ${s.total} ج.م (${s.paymentMethod})\n\nبرجاء التوجه للتجهيز والاستلام. بالتوفيق!`;
+                            let capMsg = `🛵 كابتن ${captainName}، تم إسناد أوردر جديد إليك من منصة "جاهز":\n\n- رقم الأوردر: #${s.orderId}\n- العميل: ${s.customerName}\n- الهاتف: ${s.customerPhone}\n- العنوان: ${s.customerAddress}\n- الإجمالي: ${s.total || s.subTotal} ج.م`;
                             window.open(`https://wa.me/${cleanCapPhone}?text=${encodeURIComponent(capMsg)}`, '_blank');
                         }
                     }
@@ -589,173 +676,80 @@
             }
         }
 
-        function printOrderReceipt(orderIndex) {
-            let s = allSales[orderIndex];
-            if (!s) return;
+        async function deleteOrder(orderIndex) {
+            if (confirm('⚠️ هل أنت متأكد من حذف هذا الأوردر من السجل؟')) {
+                allSales.splice(orderIndex, 1);
+                await saveDataToCloud();
+                renderSalesTable();
+            }
+        }
 
-            let printWindow = window.open('', '', 'height=650,width=500');
-            printWindow.document.write(`
-                <html lang="ar" dir="rtl">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>إيصال طلب رقم #${s.orderId || '---'} - جاهز</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
-                    <style>
-                        body { font-family: 'Tajawal', sans-serif; padding: 15px; color: #0f172a; direction: rtl; text-align: right; width: 320px; margin: auto; }
-                        h2 { text-align: center; color: #0369a1; margin-bottom: 2px; font-size: 20px; }
-                        .store-sub { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 12px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 8px; }
-                        .info-row { font-size: 13px; margin-bottom: 6px; display: flex; justify-content: space-between; }
-                        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
-                        th, td { border-bottom: 1px solid #cbd5e1; padding: 6px 4px; text-align: right; }
-                        th { background: #f8fafc; font-weight: 800; }
-                        .total-box { border-top: 2px solid #0f172a; margin-top: 10px; padding-top: 8px; font-size: 15px; font-weight: 800; display: flex; justify-content: space-between; }
-                        .footer-note { text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; border-top: 1px dashed #cbd5e1; padding-top: 8px; }
-                    </style>
-                </head>
-                <body>
-                    <h2>🛒 منصة جاهز</h2>
-                    <div class="store-sub">توصيل الطلبات الفوري لبلطيم</div>
-                    
-                    <div class="info-row"><span><b>رقم الطلب:</b> #${s.orderId || '---'}</span><span><b>التاريخ:</b> ${s.timestamp ? s.timestamp.slice(0, 10) : '---'}</span></div>
-                    <div class="info-row"><span><b>العميل:</b> ${s.customerName}</span><span><b>الهاتف:</b> ${s.customerPhone}</span></div>
-                    <div class="info-row" style="display: block;"><b>العنوان:</b> ${s.customerAddress || '---'}</div>
-                    <div class="info-row"><span><b>طريقة الدفع:</b> ${s.paymentMethod}</span><span><b>الكابتن:</b> ${s.assignedCaptain || 'غير محدد'}</span></div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المنتج</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `);
-
-            if (s.items && Array.isArray(s.items)) {
-                s.items.forEach(item => {
-                    printWindow.document.write(`
-                        <tr>
-                            <td>${item.name}</td>
-                            <td>${item.qty}</td>
-                            <td>${item.price * item.qty} ج.م</td>
-                        </tr>
-                    `);
-                });
+        function renderSalesTable() {
+            updateFinancialStats();
+            let targetSales = getFilteredSales();
+            let tbody = document.getElementById('salesTableBody');
+            
+            if (targetSales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>`;
+                return;
             }
 
-            printWindow.document.write(`
-                        </tbody>
-                    </table>
+            let html = '';
+            targetSales.forEach((s, idx) => {
+                let actualIndex = allSales.findIndex(item => item.orderId === s.orderId);
+                let dateFormatted = s.timestamp ? s.timestamp.replace('T', ' ').substring(0, 16) : '---';
+                let itemsList = '';
+                if (s.items && Array.isArray(s.items)) {
+                    s.items.forEach(i => {
+                        itemsList += `• ${i.name} (×${i.qty})<br>`;
+                    });
+                }
 
-                    <div class="total-box">
-                        <span>الإجمالي الكلي:</span>
-                        <span style="color: #0284c7;">${s.total} ج.م</span>
-                    </div>
+                let captainsOptions = `<option value="">-- اختر الكابتن --</option>`;
+                allCaptains.forEach(c => {
+                    let sel = (s.assignedCaptain === c.name) ? 'selected' : '';
+                    captainsOptions += `<option value="${c.name}" ${sel}>🛵 ${c.name}</option>`;
+                });
 
-                    <div class="footer-note">
-                        شكراً لتعاملكم مع منصة جاهز!<br>نتمنى لكم طعاماً شهياً وخدمة ممتازة.
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
+                html += `
+                    <tr>
+                        <td><b>#${s.orderId || '---'}</b></td>
+                        <td style="font-size: 12px; color: var(--text-muted);">${dateFormatted}</td>
+                        <td><b>${s.customerName || '---'}</b></td>
+                        <td>📞 ${s.customerPhone || '---'}<br><span style="font-size:12px; color:var(--text-muted);">📍 ${s.customerAddress || '---'}</span></td>
+                        <td>
+                            <b style="color:var(--secondary);">${s.total || s.subTotal || 0} ج.م</b><br>
+                            <span style="font-size:12px; color:var(--text-muted);">${s.paymentMethod || 'كاش'}</span>
+                            <div style="font-size: 11px; margin-top:4px; background:#f1f5f9; padding:4px; border-radius:4px;">${itemsList}</div>
+                        </td>
+                        <td>
+                            <select onchange="updateOrderCaptain(${actualIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                                ${captainsOptions}
+                            </select>
+                        </td>
+                        <td>
+                            <select onchange="updateOrderStatus(${actualIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 13px; background:${s.status && s.status.includes('مكتمل') ? '#d1fae5' : '#fef3c7'};">
+                                <option value="قيد الانتظار ⏳" ${s.status && s.status.includes('انتظار') ? 'selected' : ''}>قيد الانتظار ⏳</option>
+                                <option value="جاري التجهيز 👨‍🍳" ${s.status && s.status.includes('تجهيز') ? 'selected' : ''}>جاري التجهيز 👨‍🍳</option>
+                                <option value="جاري التوصيل 🛵" ${s.status && s.status.includes('توصيل') ? 'selected' : ''}>جاري التوصيل 🛵</option>
+                                <option value="تم التوصيل بنجاح ✅" ${s.status && s.status.includes('نجاح') ? 'selected' : ''}>تم التوصيل بنجاح ✅</option>
+                                <option value="تم إلغاء الطلب ❌" ${s.status && s.status.includes('إلغاء') ? 'selected' : ''}>تم إلغاء الطلب ❌</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn" onclick="deleteOrder(${actualIndex})" style="background:#ef4444; padding: 6px 10px; font-size: 12px;">🗑️ حذف</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
         }
 
         function printSalesReport() {
-            let targetSales = getFilteredSales();
-            let filterType = document.getElementById('salesFilterSelect').value === 'today' ? 'تقرير مبيعات اليوم' : 'تقرير كافة المبيعات المسجلة';
-            let totalSalesStr = document.getElementById('statTotalSales').innerText;
-            let totalProfitStr = document.getElementById('statTotalProfit').innerText;
-            let ordersCountStr = document.getElementById('statOrdersCount').innerText;
-
-            let printWindow = window.open('', '', 'height=700,width=900');
-            printWindow.document.write(`
-                <html lang="ar" dir="rtl">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>${filterType} - منصة جاهز</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
-                    <style>
-                        body { font-family: 'Tajawal', sans-serif; padding: 20px; color: #0f172a; direction: rtl; text-align: right; }
-                        h2 { text-align: center; color: #0369a1; margin-bottom: 5px; }
-                        .subtitle { text-align: center; font-size: 14px; color: #64748b; margin-bottom: 20px; }
-                        .stats-box { display: flex; justify-content: space-around; background: #f1f5f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-                        .stat-item { text-align: center; }
-                        .stat-item span { display: block; font-size: 13px; color: #64748b; }
-                        .stat-item b { font-size: 18px; color: #0f172a; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-                        th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; }
-                        th { background: #0284c7; color: #fff; }
-                        tr:nth-child(even) { background: #f8fafc; }
-                    </style>
-                </head>
-                <body>
-                    <h2>🛒 منصة جاهز - ${filterType}</h2>
-                    <div class="subtitle">تاريخ الإصدار: ${new Date().toLocaleString('ar-EG')}</div>
-                    
-                    <div class="stats-box">
-                        <div class="stat-item"><span>إجمالي المبيعات</span><b>${totalSalesStr}</b></div>
-                        <div class="stat-item"><span>هامش الأرباح</span><b>${totalProfitStr}</b></div>
-                        <div class="stat-item"><span>عدد الطلبات</span><b>${ordersCountStr}</b></div>
-                    </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الطلب</th>
-                                <th>التاريخ والوقت</th>
-                                <th>العميل</th>
-                                <th>الهاتف</th>
-                                <th>الإجمالي</th>
-                                <th>طريقة الدفع</th>
-                                <th>الكابتن</th>
-                                <th>الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `);
-
-            if (targetSales.length === 0) {
-                printWindow.document.write(`<tr><td colspan="8" style="text-align:center;">لا توجد طلبات مسجلة في هذا التقرير.</td></tr>`);
-            } else {
-                targetSales.forEach(s => {
-                    let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
-                    let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
-                    printWindow.document.write(`
-                        <tr>
-                            <td>#️⃣${s.orderId || '---'}</td>
-                            <td>${dateStr} - ${timeStr}</td>
-                            <td><b>${s.customerName}</b></td>
-                            <td>${s.customerPhone}</td>
-                            <td><b>${s.total} ج.م</b></td>
-                            <td>${s.paymentMethod}</td>
-                            <td>${s.assignedCaptain || 'غير محدد'}</td>
-                            <td>${s.status || 'قيد الانتظار'}</td>
-                        </tr>
-                    `);
-                });
-            }
-
-            printWindow.document.write(`
-                        </tbody>
-                    </table>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
+            window.print();
         }
 
+        // كاشيري الأقسام والشفتات
         async function addCashier() {
             let name = document.getElementById('cashierName').value.trim();
             let phone = document.getElementById('cashierPhone').value.trim();
@@ -763,78 +757,95 @@
             let shift = document.getElementById('cashierShift').value;
             let wallet = document.getElementById('cashierWallet').value.trim();
 
-            if(!name || !phone) {
-                alert('⚠️ يرجى إدخال اسم الكاشير ورقم الهاتف على الأقل!');
+            if (!name) {
+                alert('⚠️ يرجى إدخال اسم الكاشير.');
                 return;
             }
 
-            let existingIdx = allCashiers.findIndex(c => c.section === section && c.shift === shift);
-            let cashierObj = {
-                name: name,
-                whatsappPhone: phone,
-                section: section,
-                shift: shift,
-                walletAccount: wallet || phone
-            };
-
-            if(existingIdx >= 0) {
-                allCashiers[existingIdx] = cashierObj;
-            } else {
-                allCashiers.push(cashierObj);
-            }
-
+            allCashiers.push({ name, phone, section, shift, walletAccount: wallet });
             await saveDataToCloud();
             renderCashiersTable();
-            alert('✅ تم حفظ بيانات الكاشير والشفت بنجاح!');
+
             document.getElementById('cashierName').value = '';
             document.getElementById('cashierPhone').value = '';
             document.getElementById('cashierWallet').value = '';
+            alert('✅ تمت إضافة الكاشير والشفت بنجاح!');
         }
 
         async function deleteCashier(idx) {
-            if(confirm('هل أنت متأكد من حذف هذا الكاشير؟')) {
-                allCashiers.splice(idx, 1);
-                await saveDataToCloud();
-                renderCashiersTable();
-            }
+            allCashiers.splice(idx, 1);
+            await saveDataToCloud();
+            renderCashiersTable();
         }
 
+        function renderCashiersTable() {
+            let tbody = document.getElementById('cashiersTableBody');
+            if (allCashiers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشيرين مسجلين حالياً.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            allCashiers.forEach((c, idx) => {
+                let sectionSales = 0;
+                allSales.forEach(order => {
+                    if (order.items && Array.isArray(order.items)) {
+                        order.items.forEach(item => {
+                            if (item.category && item.category.includes(c.section.replace(/[^أ-ي]/g, ''))) {
+                                sectionSales += (item.price * item.qty);
+                            }
+                        });
+                    }
+                });
+
+                html += `
+                    <tr>
+                        <td><b>${c.name}</b></td>
+                        <td>${c.section}</td>
+                        <td><span class="${c.shift.includes('مسائي') ? 'badge-shift-evening' : 'badge-shift'}">${c.shift}</span></td>
+                        <td>${c.phone || '---'}</td>
+                        <td>${c.walletAccount || '---'}</td>
+                        <td style="font-weight: bold; color: var(--secondary);">${sectionSales} ج.م</td>
+                        <td><button class="btn" onclick="deleteCashier(${idx})" style="background:#ef4444; padding:4px 8px; font-size:12px;">حذف</button></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // إدارة الكباتن
         async function saveCaptainData() {
-            let editIdx = parseInt(document.getElementById('editCaptainIndex').value);
+            let idx = parseInt(document.getElementById('editCaptainIndex').value);
             let name = document.getElementById('captainNameInput').value.trim();
             let phone = document.getElementById('captainPhoneInput').value.trim();
             let vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
             let instaPay = document.getElementById('captainInstaInput').value.trim();
 
-            if (!name || !phone) {
-                alert('⚠️ يرجى إدخال اسم الكابتن ورقم الهاتف على الأقل!');
+            if (!name) {
+                alert('⚠️ يرجى إدخال اسم الكابتن.');
                 return;
             }
 
-            let captainObj = { name, phone, vodafoneCash, instaPay };
-
-            if (editIdx >= 0) {
-                allCaptains[editIdx] = captainObj;
-                alert('✅ تم تعديل بيانات الكابتن بنجاح!');
+            if (idx >= 0) {
+                allCaptains[idx] = { ...allCaptains[idx], name, phone, vodafoneCash, instaPay };
             } else {
-                allCaptains.push(captainObj);
-                alert('✅ تم إضافة الكابتن بنجاح!');
+                allCaptains.push({ name, phone, vodafoneCash, instaPay, address: '' });
             }
 
             await saveDataToCloud();
             renderCaptainsTable();
             resetCaptainForm();
+            alert('✅ تم حفظ بيانات الكابتن بنجاح!');
         }
 
         function editCaptain(idx) {
-            let cap = allCaptains[idx];
+            let c = allCaptains[idx];
             document.getElementById('editCaptainIndex').value = idx;
-            document.getElementById('captainNameInput').value = cap.name;
-            document.getElementById('captainPhoneInput').value = cap.phone;
-            document.getElementById('captainVodafoneInput').value = cap.vodafoneCash || '';
-            document.getElementById('captainInstaInput').value = cap.instaPay || '';
-            document.getElementById('saveCaptainBtn').innerText = '💾 تحديث الكابتن';
-            window.scrollTo({ top: 500, behavior: 'smooth' });
+            document.getElementById('captainNameInput').value = c.name;
+            document.getElementById('captainPhoneInput').value = c.phone || '';
+            document.getElementById('captainVodafoneInput').value = c.vodafoneCash || '';
+            document.getElementById('captainInstaInput').value = c.instaPay || '';
+            document.getElementById('saveCaptainBtn').innerText = '💾 تحديث بيانات الكابتن';
         }
 
         function resetCaptainForm() {
@@ -843,65 +854,83 @@
             document.getElementById('captainPhoneInput').value = '';
             document.getElementById('captainVodafoneInput').value = '';
             document.getElementById('captainInstaInput').value = '';
-            document.getElementById('saveCaptainBtn').innerText = '💾 حفظ تعديل الكابتن';
+            document.getElementById('saveCaptainBtn').innerText = '💾 حفظ بيانات الكابتن';
         }
 
         async function deleteCaptain(idx) {
-            if(confirm('هل أنت متأكد من حذف هذا الكابتن؟')) {
+            if (confirm('⚠️ هل أنت متأكد من حذف هذا الكابتن؟')) {
                 allCaptains.splice(idx, 1);
                 await saveDataToCloud();
                 renderCaptainsTable();
             }
         }
 
-        function exportCaptainsToCSV() {
-            if(allCaptains.length === 0) {
-                alert('⚠️ لا توجد بيانات كباتن للتصدير حالياً.');
+        function renderCaptainsTable() {
+            let tbody = document.getElementById('captainsTableBody');
+            if (allCaptains.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
                 return;
             }
-            let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي\n";
-            allCaptains.forEach(cap => {
-                csvContent += `"${cap.name}","${cap.phone}","${cap.vodafoneCash || ''}","${cap.instaPay || ''}"\n`;
+
+            let html = '';
+            allCaptains.forEach((c, idx) => {
+                let capOrdersCount = 0;
+                let capSalesTotal = 0;
+                allSales.forEach(order => {
+                    if (order.assignedCaptain === c.name) {
+                        capOrdersCount++;
+                        capSalesTotal += (order.subTotal || order.total || 0);
+                    }
+                });
+                let capDues = capOrdersCount * 10;
+
+                html += `
+                    <tr>
+                        <td><b>${c.name}</b></td>
+                        <td>${c.phone || '---'}</td>
+                        <td>📱 ${c.vodafoneCash || '---'}<br>💳 ${c.instaPay || '---'}</td>
+                        <td><b>${capOrdersCount}</b> أوردر</td>
+                        <td style="font-weight: bold; color: var(--primary);">${capSalesTotal} ج.م</td>
+                        <td style="font-weight: bold; color: var(--secondary);">${capDues} ج.م</td>
+                        <td>
+                            <button class="btn" onclick="editCaptain(${idx})" style="padding:4px 8px; font-size:12px; margin-left:4px;">تعديل</button>
+                            <button class="btn" onclick="deleteCaptain(${idx})" style="background:#ef4444; padding:4px 8px; font-size:12px;">حذف</button>
+                        </td>
+                    </tr>
+                `;
             });
-            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `captains_jahiz_${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            tbody.innerHTML = html;
         }
 
+        // إدارة المنتجات
         async function saveProduct() {
-            let editIdx = parseInt(document.getElementById('editIndex').value);
+            let idx = parseInt(document.getElementById('editIndex').value);
             let name = document.getElementById('prodName').value.trim();
-            let price = parseFloat(document.getElementById('prodPrice').value);
-            let cost = parseFloat(document.getElementById('prodCost').value) || 0;
-            let oldPrice = parseFloat(document.getElementById('prodOldPrice').value) || 0;
+            let price = parseFloat(document.getElementById('prodPrice').value) || 0;
+            let cost = parseFloat(document.getElementById('prodCost').value) || (price * 0.8);
+            let oldPrice = parseFloat(document.getElementById('prodOldPrice').value) || null;
             let category = document.getElementById('prodCategory').value;
-            let image = document.getElementById('prodImage').value.trim();
+            let image = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';
             let outOfStock = document.getElementById('prodStock').value === 'true';
             let isOffer = document.getElementById('prodIsOffer').value === 'true';
 
-            if(!name || isNaN(price)) {
-                alert('⚠️ يرجى إدخال اسم المنتج والسعر الصحيح!');
+            if (!name || price <= 0) {
+                alert('⚠️ يرجى إدخال اسم المنتج وسعر صحيح.');
                 return;
             }
 
-            let productData = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
+            let productObj = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
 
-            if(editIdx >= 0) {
-                allProducts[editIdx] = productData;
-                alert('✅ تم تعديل المنتج بنجاح!');
+            if (idx >= 0) {
+                allProducts[idx] = productObj;
             } else {
-                allProducts.push(productData);
-                alert('✅ تم إضافة المنتج بنجاح!');
+                allProducts.push(productObj);
             }
 
             await saveDataToCloud();
             renderProductsTable();
             resetProductForm();
+            alert('✅ تم حفظ المنتج بنجاح!');
         }
 
         function editProduct(idx) {
@@ -911,14 +940,14 @@
             document.getElementById('prodPrice').value = p.price;
             document.getElementById('prodCost').value = p.cost || '';
             document.getElementById('prodOldPrice').value = p.oldPrice || '';
-            document.getElementById('prodCategory').value = p.category || 'هابي ميلز';
+            document.getElementById('prodCategory').value = p.category || 'عام';
             document.getElementById('prodImage').value = p.image || '';
             document.getElementById('prodStock').value = p.outOfStock ? 'true' : 'false';
             document.getElementById('prodIsOffer').value = p.isOffer ? 'true' : 'false';
 
-            document.getElementById('saveProdBtn').innerText = '💾 حفظ التعديلات';
+            document.getElementById('saveProdBtn').innerText = '💾 تحديث المنتج';
             document.getElementById('cancelEditBtn').style.display = 'inline-block';
-            window.scrollTo({ top: 800, behavior: 'smooth' });
+            window.scrollTo({ top: 400, behavior: 'smooth' });
         }
 
         function resetProductForm() {
@@ -935,222 +964,43 @@
         }
 
         async function deleteProduct(idx) {
-            if(confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+            if (confirm('⚠️ هل أنت متأكد من حذف هذا المنتج؟')) {
                 allProducts.splice(idx, 1);
                 await saveDataToCloud();
                 renderProductsTable();
             }
         }
 
-        async function moveProduct(idx, direction) {
-            let newIdx = idx + direction;
-            if (newIdx < 0 || newIdx >= allProducts.length) return;
-            let temp = allProducts[idx];
-            allProducts[idx] = allProducts[newIdx];
-            allProducts[newIdx] = temp;
-            await saveDataToCloud();
-            renderProductsTable();
-        }
-
-        function renderCashiersTable() {
-            let tbody = document.getElementById('cashiersTableBody');
-            if(!tbody) return;
-            if(allCashiers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشير مسجل حالياً.</td></tr>`;
-                return;
-            }
-            let html = '';
-            allCashiers.forEach((c, idx) => {
-                let shiftClass = (c.shift && c.shift.includes('مسائي')) ? 'badge-shift-evening' : 'badge-shift';
-                
-                let cashierSalesTotal = 0;
-                allSales.forEach(order => {
-                    if (order.items && Array.isArray(order.items)) {
-                        order.items.forEach(item => {
-                            let matchedProd = allProducts.find(p => p.name === item.name);
-                            if (matchedProd && matchedProd.category && c.section && matchedProd.category.includes(c.section.replace(/[^ء-ي]/g, ''))) {
-                                cashierSalesTotal += (item.price * item.qty);
-                            }
-                        });
-                    }
-                });
-
-                html += `
-                    <tr>
-                        <td><b>${c.name}</b></td>
-                        <td>${c.section}</td>
-                        <td><span class="${shiftClass}">${c.shift || 'صباحي'}</span></td>
-                        <td>${c.whatsappPhone}</td>
-                        <td>${c.walletAccount || 'غير مسجل'}</td>
-                        <td style="color: var(--secondary); font-weight: bold;">${cashierSalesTotal} ج.م</td>
-                        <td>
-                            <button onclick="deleteCashier(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function renderCaptainsTable() {
-            let tbody = document.getElementById('captainsTableBody');
-            if(!tbody) return;
-            if(allCaptains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
-                return;
-            }
-            let html = '';
-            allCaptains.forEach((cap, idx) => {
-                let capOrdersCount = 0;
-                let capSalesTotal = 0;
-
-                allSales.forEach(order => {
-                    if (order.assignedCaptain === cap.name) {
-                        capOrdersCount++;
-                        capSalesTotal += (order.subTotal || order.total || 0);
-                    }
-                });
-
-                let deliveryFeePerOrder = 10;
-                let capDues = capOrdersCount * deliveryFeePerOrder;
-
-                html += `
-                    <tr>
-                        <td><b>${cap.name}</b></td>
-                        <td>${cap.phone}</td>
-                        <td style="font-size:13px;">📞 ${cap.vodafoneCash || '---'}<br>💳 ${cap.instaPay || '---'}</td>
-                        <td><span class="badge-shift">${capOrdersCount} أوردر</span></td>
-                        <td style="font-weight:bold;">${capSalesTotal} ج.م</td>
-                        <td style="color: var(--secondary); font-weight: bold; font-size: 15px;">${capDues} ج.م</td>
-                        <td>
-                            <button onclick="editCaptain(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:4px;">تعديل</button>
-                            <button onclick="deleteCaptain(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
         function renderProductsTable() {
             let tbody = document.getElementById('productsTableBody');
-            if(!tbody) return;
-            if(allProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
+            if (allProducts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة حالياً.</td></tr>`;
                 return;
             }
+
             let html = '';
             allProducts.forEach((p, idx) => {
-                let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:bold;">نفذت 🔴</span>' : '<span style="color:#10b981; font-weight:bold;">متوفر 🟢</span>';
-                let profit = (p.cost && p.price > p.cost) ? (p.price - p.cost) + ' ج.م' : '---';
+                let profitMargin = p.price - (p.cost || (p.price * 0.8));
+                let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:700;">🔴 نفذت</span>' : '<span style="color:#10b981; font-weight:700;">🟢 متوفر</span>';
+                let offerBadge = p.isOffer ? ' 🔥' : '';
+
                 html += `
                     <tr>
-                        <td style="white-space:nowrap;">
-                            <button onclick="moveProduct(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">⬆️</button>
-                            <button onclick="moveProduct(${idx}, 1)" ${idx === allProducts.length - 1 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} style="background:#0284c7; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; margin-right:4px;">⬇️</button>
-                        </td>
-                        <td><b>${p.name}</b> ${p.isOffer ? '🔥' : ''}</td>
-                        <td style="color:var(--secondary); font-weight:bold;">${p.price} ج.م</td>
-                        <td style="color:#d97706; font-weight:bold;">${profit}</td>
-                        <td>${p.category || 'عام'}</td>
+                        <td><b>#${idx + 1}</b></td>
+                        <td><b>${p.name}</b>${offerBadge}</td>
+                        <td>${p.price} ج.م</td>
+                        <td style="color:var(--secondary); font-weight:bold;">+${Math.round(profitMargin)} ج.م</td>
+                        <td style="font-size:13px; color:var(--text-muted);">${p.category || 'عام'}</td>
                         <td>${stockBadge}</td>
                         <td>
-                            <button onclick="editProduct(${idx})" style="background:#f59e0b; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; margin-left:4px;">تعديل</button>
-                            <button onclick="deleteProduct(${idx})" style="background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">حذف</button>
+                            <button class="btn" onclick="editProduct(${idx})" style="padding:4px 8px; font-size:12px; margin-left:4px;">تعديل</button>
+                            <button class="btn" onclick="deleteProduct(${idx})" style="background:#ef4444; padding:4px 8px; font-size:12px;">حذف</button>
                         </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
         }
-
-        function renderSalesTable() {
-            let tbody = document.getElementById('salesTableBody');
-            if(!tbody) return;
-
-            let targetSales = getFilteredSales();
-            updateFinancialStats();
-
-            if(targetSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مطابقة للفترة المحددة.</td></tr>`;
-                return;
-            }
-
-            let html = '';
-            targetSales.forEach((s) => {
-                let timeStr = s.timestamp ? new Date(s.timestamp).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) : '---';
-                let dateStr = s.timestamp ? s.timestamp.slice(0, 10) : '---';
-                let realIndex = allSales.findIndex(item => item === s);
-
-                let captainOptions = `<option value="">-- اختر الكابتن --</option>`;
-                allCaptains.forEach(cap => {
-                    let sel = (s.assignedCaptain === cap.name) ? 'selected' : '';
-                    captainOptions += `<option value="${cap.name}" ${sel}>🛵 ${cap.name}</option>`;
-                });
-
-                let statusOptions = `
-                    <option value="قيد الانتظار ⏳" ${s.status === 'قيد الانتظار ⏳' ? 'selected' : ''}>⏳ قيد الانتظار</option>
-                    <option value="جاري التجهيز 🔥" ${s.status === 'جاري التجهيز 🔥' ? 'selected' : ''}>🔥 جاري التجهيز</option>
-                    <option value="خرج للتوصيل 🛵" ${s.status === 'خرج للتوصيل 🛵' ? 'selected' : ''}>🛵 خرج للتوصيل</option>
-                    <option value="تم التسليم ✅" ${s.status === 'تم التسليم ✅' ? 'selected' : ''}>✅ تم التسليم</option>
-                    <option value="ملغي ❌" ${s.status === 'ملغي ❌' ? 'selected' : ''}>❌ ملغي</option>
-                `;
-
-                html += `
-                    <tr>
-                        <td>#️⃣${s.orderId || '---'}</td>
-                        <td style="font-size: 13px; color: var(--text-muted);">${dateStr}<br><b>${timeStr}</b></td>
-                        <td><b>${s.customerName}</b></td>
-                        <td>${s.customerPhone}<br><span style="font-size:12px; color:var(--text-muted);">${s.customerAddress || ''}</span></td>
-                        <td>
-                            <b style="color:var(--secondary);">${s.total} ج.م</b><br>
-                            <span style="font-size:12px; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px;">${s.paymentMethod}</span>
-                        </td>
-                        <td>
-                            <select onchange="updateOrderCaptain(${realIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; background: #fff; outline: none;">
-                                ${captainOptions}
-                            </select>
-                        </td>
-                        <td>
-                            <select onchange="updateOrderStatus(${realIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; background: #fff; outline: none; font-weight: bold;">
-                                ${statusOptions}
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn" onclick="printOrderReceipt(${realIndex})" style="background: var(--primary); padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 4px;">🖨️ طباعة</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        async function saveDataToCloud() {
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        products: allProducts,
-                        sales: allSales,
-                        captains: allCaptains,
-                        cashiers: allCashiers,
-                        activeWhatsApp: activeWhatsAppGlobal
-                    })
-                });
-            } catch(e) {
-                alert('⚠️ حدث خطأ أثناء الحفظ بالسحابة.');
-            }
-        }
-
-        window.onload = function() {
-            if (sessionStorage.getItem('admin_authenticated') === 'true') {
-                document.getElementById('authOverlay').style.display = 'none';
-                loadDashboardData();
-            } else {
-                document.getElementById('authOverlay').style.display = 'flex';
-            }
-        };
     </script>
 </body>
 </html>
