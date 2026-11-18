@@ -263,7 +263,7 @@
                         </tr>
                     </thead>
                     <tbody id="captainsTableBody">
-                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل الكباتن...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -422,8 +422,17 @@
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         let allProducts = [];
         let allSales = [];
-        let allCaptains = [];
-        let allCashiers = [];
+        let allCaptains = [
+            { name: "كابتن أحمد محمد", phone: "01012345678", vodafoneCash: "01012345678", instaPay: "ahmed@instapay" },
+            { name: "كابتن محمود إبراهيم", phone: "01098765432", vodafoneCash: "01098765432", instaPay: "mahmoud@instapay" },
+            { name: "كابتن مصطفى علي", phone: "01122334455", vodafoneCash: "01122334455", instaPay: "mostafa@instapay" }
+        ];
+        let allCashiers = [
+            { name: "محمد السيد (سوبر ماركت)", phone: "01011112222", section: "🛒 قسم السوبر ماركت", shift: "🌅 شفت صباحي", walletAccount: "01011112222" },
+            { name: "إسلام محمود (هابي ميلز)", phone: "01033334444", section: "🍗 قسم هابي ميلز", shift: "🌙 شفت مسائي", walletAccount: "01033334444" },
+            { name: "محمود حسن (فول وطعمية)", phone: "01055556666", section: "🍳 قسم فول وطعمية", shift: "🌅 شفت صباحي", walletAccount: "01055556666" },
+            { name: "أحمد سمير (سمكة مشوية)", phone: "01077778888", section: "🐟 قسم سمكة مشوية", shift: "🌙 شفت مسائي", walletAccount: "01077778888" }
+        ];
         let activeWhatsAppGlobal = "201042377974";
         let lastKnownOrdersCount = 0;
 
@@ -495,8 +504,12 @@
 
                         allProducts = Array.isArray(data.products) ? data.products : [];
                         allSales = newSales;
-                        allCaptains = Array.isArray(data.captains) ? data.captains : [];
-                        allCashiers = Array.isArray(data.cashiers) ? data.cashiers : [];
+                        if (Array.isArray(data.captains) && data.captains.length > 0) {
+                            allCaptains = data.captains;
+                        }
+                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) {
+                            allCashiers = data.cashiers;
+                        }
                         activeWhatsAppGlobal = data.activeWhatsApp || "201042377974";
                     }
                 }
