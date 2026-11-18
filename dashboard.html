@@ -83,10 +83,10 @@
 
     <header class="header">
         <div class="brand">
-            <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة (منتجاتك الأصلية)</h2>
+            <h2>⚙️ لوحة تحكم جاهز - تطابق تام مع منتجات صفحة العملاء</h2>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <button onclick="forceRefreshData()" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">⚡ تحديث فوري سريع</button>
+            <button onclick="forceRefreshData()" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">⚡ مزامنة فورية</button>
             <button onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
             <a href="index.html" style="background:#0284c7; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">العودة لصفحة المتجر 🛒</a>
         </div>
@@ -269,9 +269,9 @@
             </div>
         </div>
 
-        <!-- إدارة المنتجات والأصناف الأصلية -->
+        <!-- إدارة المنتجات والأصناف (المطابقة لصفحة العملاء تماماً) -->
         <div class="card">
-            <h3>📦 إدارة المنتجات والأصناف والأقسام الأصلية</h3>
+            <h3>📦 إدارة منتجات صفحة العملاء بالكامل</h3>
             <input type="hidden" id="editIndex" value="-1">
             <div class="form-row">
                 <div class="form-group">
@@ -291,52 +291,12 @@
                     <input type="number" id="prodOldPrice" placeholder="السعر قبل الخصم">
                 </div>
                 <div class="form-group">
-                    <label>القسم الفرعي والرئيسي:</label>
+                    <label>القسم:</label>
                     <select id="prodCategory">
-                        <optgroup label="🛒 قسم السوبر ماركت">
-                            <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
-                            <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
-                            <option value="سوبر ماركت - الشاي والسكر">سوبر ماركت - الشاي والسكر</option>
-                            <option value="سوبر ماركت - الدقيق">سوبر ماركت - الدقيق</option>
-                            <option value="سوبر ماركت - المكرونة">سوبر ماركت - المكرونة</option>
-                            <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
-                            <option value="سوبر ماركت - الشيبسي">سوبر ماركت - الشيبسي</option>
-                            <option value="سوبر ماركت - البسكويت والفطائر">سوبر ماركت - البسكويت والفطائر</option>
-                            <option value="سوبر ماركت - العصائر والمياه">سوبر ماركت - العصائر والمياه</option>
-                            <option value="سوبر ماركت - مياه غازية">سوبر ماركت - مياه غازية</option>
-                            <option value="سوبر ماركت - شيكولاتة ونوتيلا">سوبر ماركت - شيكولاتة ونوتيلا</option>
-                            <option value="سوبر ماركت - عسل وطحينة">سوبر ماركت - عسل وطحينة</option>
-                            <option value="سوبر ماركت - خل">سوبر ماركت - خل</option>
-                            <option value="سوبر ماركت - صوصات">سوبر ماركت - صوصات</option>
-                            <option value="سوبر ماركت - مجمدات">سوبر ماركت - مجمدات</option>
-                            <option value="سوبر ماركت - مناديل">سوبر ماركت - مناديل</option>
-                            <option value="سوبر ماركت - منوعات">سوبر ماركت - منوعات</option>
-                        </optgroup>
-                        <optgroup label="🍗 قسم هابي ميلز">
-                            <option value="هابي ميلز">هابي ميلز</option>
-                            <option value="قسم الغربي">قسم الغربي</option>
-                            <option value="تشيكن تندر">تشيكن تندر</option>
-                            <option value="فرايد تشيكن">فرايد تشيكن</option>
-                            <option value="مشويات">مشويات</option>
-                            <option value="شاورما - قسم الساندوتشات">شاورما - ساندوتشات</option>
-                            <option value="شاورما - فتة">شاورما - فتة</option>
-                            <option value="شاورما - قسم الوجبات">شاورما - وجبات</option>
-                            <option value="كريب - قسم الكريب الحادق">كريب حادق</option>
-                            <option value="كريب - قسم الكريب الحلو">كريب حلو</option>
-                            <option value="قسم البيتزا">قسم البيتزا</option>
-                            <option value="فطير هابي ميلز - فطير اسكندراني">فطير اسكندراني</option>
-                            <option value="فطير هابي ميلز - فطير حلو">فطير حلو</option>
-                        </optgroup>
-                        <optgroup label="🍳 قسم فول وطعمية">
-                            <option value="فول وطعمية - الأطباق والساندوتشات">أطباق وساندوتشات فول وطعمية</option>
-                            <option value="فول وطعمية - عجينة وقلي">عجينة وقلي</option>
-                            <option value="فول وطعمية - سلطات ومخللات">سلطات ومخللات</option>
-                        </optgroup>
-                        <optgroup label="🐟 قسم سمكة مشوية">
-                            <option value="سمكة مشوية - أسماك طازجة ومشويات">أسماك طازجة ومشويات</option>
-                            <option value="سمكة مشوية - سي فود وسنجاري">سي فود وسنجاري</option>
-                            <option value="سمكة مشوية - أرز ووربات وشوربة">أرز وشوربة</option>
-                        </optgroup>
+                        <option value="سوبر ماركت">🛒 سوبر ماركت</option>
+                        <option value="هابي ميلز">🍗 هابي ميلز</option>
+                        <option value="فول وطعمية">🍳 فول وطعمية</option>
+                        <option value="سمكة مشوية">🐟 سمكة مشوية</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -351,7 +311,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>عرض خاص؟ (في العروض اليومية):</label>
+                    <label>عرض خاص؟:</label>
                     <select id="prodIsOffer">
                         <option value="false">عادي</option>
                         <option value="true">🔥 عرض خاص</option>
@@ -381,7 +341,7 @@
             </div>
         </div>
 
-        <!-- متابعة الطلبات مع إشعارات الواتساب، تغيير الحالة، وإسناد الكابتن -->
+        <!-- متابعة الطلبات والمبيعات -->
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
@@ -421,38 +381,45 @@
         const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890"; 
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
 
-        // المنتجات الأصلية الكاملة والمستعادة بدقة تامة
-        const ORIGINAL_PRODUCTS_RESTORED = [
-            { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
-            { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
-            { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, category: "سوبر ماركت - السمن", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
-            { name: "سكر الأبيض الممتاز 1 كجم", price: 35, cost: 30, oldPrice: 40, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c5db3cb?w=500", outOfStock: false, isOffer: false },
-            { name: "شاي العروسة 250 جم", price: 60, cost: 50, oldPrice: 70, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500", outOfStock: false, isOffer: false },
-            { name: "مكرونة الملكة / حبة و نص 400 جم", price: 22, cost: 18, oldPrice: 25, category: "سوبر ماركت - المكرونة", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=500", outOfStock: false, isOffer: true },
-            { name: "جبنة براميلي إسطنبولي 500 جم", price: 55, cost: 45, oldPrice: 65, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=500", outOfStock: false, isOffer: false },
-            { name: "حليب جهينة / المراعي 1 لتر", price: 42, cost: 36, oldPrice: 48, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500", outOfStock: false, isOffer: false },
-            { name: "شيبسي عائلي طماطم / كباب", price: 10, cost: 8, oldPrice: 12, category: "سوبر ماركت - الشيبسي", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500", outOfStock: false, isOffer: false },
-            { name: "بسكويت أولكر بيمبو / اولكر شوكولاتة", price: 6, cost: 4.5, oldPrice: 7, category: "سوبر ماركت - البسكويت والفطائر", image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500", outOfStock: false, isOffer: false },
-            { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, category: "سوبر ماركت - العصائر والمياه", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
-            { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, category: "سوبر ماركت - مياه غازية", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
-            { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, category: "سوبر ماركت - شيكولاتة ونوتيلا", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
-            { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, category: "فرايد تشيكن", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
-            { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, category: "تشيكن تندر", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
-            { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, category: "شاورما - قسم الساندوتشات", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
-            { name: "فتة شاورما دجاج عائلي بالصلصة والثومية", price: 130, cost: 98, oldPrice: 150, category: "شاورما - فتة", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", outOfStock: false, isOffer: false },
-            { name: "كريب دجاج زنگر حادق مع الموتزاريلا", price: 85, cost: 62, oldPrice: 95, category: "كريب - قسم الكريب الحادق", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500", outOfStock: false, isOffer: false },
-            { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, category: "كريب - قسم الكريب الحلو", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
-            { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, category: "قسم البيتزا", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
-            { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, category: "فطير هابي ميلز - فطير اسكندراني", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
-            { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-            { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-            { name: "عجينة طعمية فريش (نصف كيلو)", price: 15, cost: 10, oldPrice: 18, category: "فول وطعمية - عجينة وقلي", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-            { name: "كيلو سمك بلطي مشوي ريزو طازج", price: 110, cost: 85, oldPrice: 125, category: "سمكة مشوية - أسماك طازجة ومشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: true },
-            { name: "سمك بوري سنجاري طازج (كيلو)", price: 160, cost: 130, oldPrice: 180, category: "سمكة مشوية - سي فود وسنجاري", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: false },
-            { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, category: "سمكة مشوية - أرز ووربات وشوربة", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
+        // قائمة منتجات صفحة العملاء الأصلية بالكامل دون أي نقص أو تعديل
+        const CUSTOMER_PAGE_PRODUCTS = [
+            // سوبر ماركت
+            { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
+            { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
+            { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
+            { name: "سكر الأبيض الممتاز 1 كجم", price: 35, cost: 30, oldPrice: 40, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c5db3cb?w=500", outOfStock: false, isOffer: false },
+            { name: "شاي العروسة 250 جم", price: 60, cost: 50, oldPrice: 70, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500", outOfStock: false, isOffer: false },
+            { name: "مكرونة الملكة / حبة و نص 400 جم", price: 22, cost: 18, oldPrice: 25, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=500", outOfStock: false, isOffer: true },
+            { name: "جبنة براميلي إسطنبولي 500 جم", price: 55, cost: 45, oldPrice: 65, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=500", outOfStock: false, isOffer: false },
+            { name: "حليب جهينة / المراعي 1 لتر", price: 42, cost: 36, oldPrice: 48, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500", outOfStock: false, isOffer: false },
+            { name: "شيبسي عائلي طماطم / كباب", price: 10, cost: 8, oldPrice: 12, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500", outOfStock: false, isOffer: false },
+            { name: "بسكويت أولكر بيمبو / اولكر شوكولاتة", price: 6, cost: 4.5, oldPrice: 7, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500", outOfStock: false, isOffer: false },
+            { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
+            { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
+            { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, category: "سوبر ماركت", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
+            
+            // هابي ميلز
+            { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
+            { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
+            { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
+            { name: "فتة شاورما دجاج عائلي بالصلصة والثومية", price: 130, cost: 98, oldPrice: 150, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", outOfStock: false, isOffer: false },
+            { name: "كريب دجاج زنگر حادق مع الموتزاريلا", price: 85, cost: 62, oldPrice: 95, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500", outOfStock: false, isOffer: false },
+            { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
+            { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
+            { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, category: "هابي ميلز", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
+            
+            // فول وطعمية
+            { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, category: "فول وطعمية", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
+            { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, category: "فول وطعمية", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
+            { name: "عجينة طعمية فريش (نصف كيلو)", price: 15, cost: 10, oldPrice: 18, category: "فول وطعمية", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
+
+            // سمكة مشوية
+            { name: "كيلو سمك بلطي مشوي ريزو طازج", price: 110, cost: 85, oldPrice: 125, category: "سمكة مشوية", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: true },
+            { name: "سمك بوري سنجاري طازج (كيلو)", price: 160, cost: 130, oldPrice: 180, category: "سمكة مشوية", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: false },
+            { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, category: "سمكة مشوية", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
         ];
 
-        let allProducts = [...ORIGINAL_PRODUCTS_RESTORED];
+        let allProducts = [...CUSTOMER_PAGE_PRODUCTS];
         let allSales = [];
         let allCaptains = [
             { name: "كابتن أحمد محمد", phone: "01012345678", vodafoneCash: "01012345678", instaPay: "ahmed@instapay" },
@@ -543,11 +510,11 @@
                         }
                         lastKnownOrdersCount = newSales.length;
 
-                        // إذا كانت السحابة تحتوي على منتجات، نعتمدها، وإذا كانت فارغة نفرض منتجاتك الأصلية فوراً ونحفظها
+                        // ضمان مزامنة المنتجات بدقة مع صفحة العملاء
                         if (Array.isArray(data.products) && data.products.length > 0) {
                             allProducts = data.products;
                         } else {
-                            allProducts = [...ORIGINAL_PRODUCTS_RESTORED];
+                            allProducts = [...CUSTOMER_PAGE_PRODUCTS];
                             await saveDataToCloud();
                         }
 
@@ -574,9 +541,9 @@
         }
 
         async function forceRefreshData() {
-            alert('⚡ جاري مزامنة منتجاتك الأصلية والبيانات الفورية...');
+            alert('⚡ جاري مزامنة المنتجات وتحديثها فوراً...');
             await loadDashboardData();
-            alert('✅ تم استرجاع ومزامنة المنتجات بنجاح تام!');
+            alert('✅ تمت المزامنة بنجاح تام!');
         }
 
         async function saveDataToCloud() {
@@ -931,7 +898,7 @@
             await saveDataToCloud();
             renderProductsTable();
             resetProductForm();
-            alert('✅ تم حفظ المنتج واسترجاع القائمة بنجاح!');
+            alert('✅ تم حفظ المنتج بنجاح!');
         }
 
         function editProduct(idx) {
@@ -941,7 +908,7 @@
             document.getElementById('prodPrice').value = p.price;
             document.getElementById('prodCost').value = p.cost || '';
             document.getElementById('prodOldPrice').value = p.oldPrice || '';
-            document.getElementById('prodCategory').value = p.category || 'عام';
+            document.getElementById('prodCategory').value = p.category || 'سوبر ماركت';
             document.getElementById('prodImage').value = p.image || '';
             document.getElementById('prodStock').value = p.outOfStock ? 'true' : 'false';
             document.getElementById('prodIsOffer').value = p.isOffer ? 'true' : 'false';
