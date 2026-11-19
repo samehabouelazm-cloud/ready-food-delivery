@@ -1,5 +1,4 @@
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -12,64 +11,459 @@
             --primary-dark: #0369a1;
             --secondary: #10b981;
             --accent: #f59e0b;
+            --danger: #ef4444;
             --bg-light: #f1f5f9;
             --surface: #ffffff;
             --text-dark: #0f172a;
             --text-muted: #64748b;
+            --border-color: #e2e8f0;
             --radius-lg: 16px;
             --radius-md: 12px;
+            --radius-sm: 8px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
-        
-        .header { 
-            background: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: var(--shadow-sm); border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100;
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
         }
-        .brand h2 { font-size: 20px; font-weight: 800; color: var(--primary-dark); }
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
-        
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            padding-bottom: 48px;
+            direction: rtl;
+            text-align: right;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            padding: 15px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand h2 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .container {
+            max-width: 1220px;
+            margin: 22px auto;
+            padding: 0 16px;
+        }
+
         /* لوحة مؤشرات الأداء KPIs للإدارة */
         .kpi-dashboard {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+            gap: 15px;
+            margin-bottom: 22px;
         }
-        .kpi-card {
-            background: var(--surface); border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-sm);
-            border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 15px;
-        }
-        .kpi-icon { font-size: 28px; background: #e0f2fe; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-        .kpi-info h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
-        .kpi-info span { font-size: 20px; font-weight: 800; color: var(--text-dark); }
 
-        .card { background: var(--surface); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; }
-        .card h3 { font-size: 18px; font-weight: 800; margin-bottom: 14px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-dark); }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; outline: none; background: #f8fafc; }
-        .btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .btn:hover { background: var(--primary-dark); }
-        .btn-export { background: var(--secondary); margin-bottom: 15px; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-export:hover { background: #059669; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f8fafc; font-weight: 800; color: var(--text-muted); }
-        .badge-shift { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; display: inline-block; }
-        .badge-shift-evening { background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; display: inline-block; }
-        
+        .kpi-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-icon {
+            font-size: 28px;
+            background: #e0f2fe;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .kpi-info h4 {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .kpi-info span {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .stat-banner {
+            margin-bottom: 0;
+            color: #fff;
+            border: none;
+        }
+
+        .stat-banner.sales {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+        }
+
+        .stat-banner.profit {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-banner.orders {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-banner-label {
+            font-size: 14px;
+            opacity: 0.92;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .stat-banner-value {
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            outline: none;
+            background: #f8fafc;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn:active {
+            transform: scale(0.99);
+        }
+
+        .btn-export {
+            background: var(--secondary);
+            margin-bottom: 0;
+        }
+
+        .btn-export:hover {
+            background: #059669;
+        }
+
+        .btn-secondary-muted {
+            background: #64748b;
+            margin-right: 8px;
+        }
+
+        .btn-secondary-muted:hover {
+            background: #475569;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-sm:hover {
+            opacity: 0.9;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 800;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge-shift {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .badge-shift-evening {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .drawer-box {
+            margin-top: 20px;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid #cbd5e1;
+        }
+
+        .drawer-box h4 {
+            margin-bottom: 12px;
+            color: var(--primary-dark);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .drawer-total {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-top: 8px;
+        }
+
+        .captain-form-box {
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 14px;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #cbd5e1;
+            font-size: 13px;
+            background: #f8fafc;
+            outline: none;
+            font-weight: 700;
+        }
+
         #authOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 16px;
         }
+
         .auth-box {
-            background: #fff; padding: 30px; border-radius: var(--radius-lg); width: 100%; max-width: 400px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); text-align: center;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            text-align: center;
         }
-        .auth-box h3 { margin-bottom: 15px; font-size: 20px; color: var(--primary-dark); }
-        .auth-box input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; font-size: 16px; text-align: center; outline: none; }
-        .auth-box button { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; }
+
+        .auth-box h3 {
+            margin-bottom: 12px;
+            font-size: 20px;
+            color: var(--primary-dark);
+            font-weight: 800;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-sm);
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .auth-box button:hover {
+            background: var(--primary-dark);
+        }
+
+        @media print {
+            #authOverlay,
+            .header,
+            .btn,
+            .btn-sm,
+            .filter-controls,
+            .captain-form-box,
+            .drawer-box .form-row {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+                padding-bottom: 0;
+            }
+            .card,
+            .kpi-card {
+                box-shadow: none;
+                border: 1px solid #cbd5e1;
+                break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
@@ -87,14 +481,15 @@
         <div class="brand">
             <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة والتحليلات</h2>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="header-actions">
+            <button onclick="syncAllData(true)" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">🔄 مزامنة</button>
             <button onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
             <a href="index.html" style="background:#0284c7; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">العودة لصفحة المتجر 🛒</a>
         </div>
     </header>
 
     <div class="container">
-        
+
         <!-- لوحة مؤشرات الأداء الحصرية للإدارة (KPI Dashboard) -->
         <div class="kpi-dashboard">
             <div class="kpi-card">
@@ -128,18 +523,18 @@
         </div>
 
         <!-- قسم الإحصائيات والتقارير المالية اليومية -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
-            <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff;">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px;">🛒 إجمالي مبيعات الطلبات</div>
-                <div id="statTotalSales" style="font-size: 26px; font-weight: 800;">0 ج.م</div>
+        <div class="stats-grid">
+            <div class="card stat-banner sales">
+                <div class="stat-banner-label">🛒 إجمالي مبيعات الطلبات</div>
+                <div id="statTotalSales" class="stat-banner-value">0 ج.م</div>
             </div>
-            <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #10b981, #059669); color: #fff;">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px;">💰 هامش الأرباح المقدر</div>
-                <div id="statTotalProfit" style="font-size: 26px; font-weight: 800;">0 ج.م</div>
+            <div class="card stat-banner profit">
+                <div class="stat-banner-label">💰 هامش الأرباح المقدر</div>
+                <div id="statTotalProfit" class="stat-banner-value">0 ج.م</div>
             </div>
-            <div class="card" style="margin-bottom: 0; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px;">📦 عدد الطلبات المسجلة</div>
-                <div id="statOrdersCount" style="font-size: 26px; font-weight: 800;">0</div>
+            <div class="card stat-banner orders">
+                <div class="stat-banner-label">📦 عدد الطلبات المسجلة</div>
+                <div id="statOrdersCount" class="stat-banner-value">0</div>
             </div>
         </div>
 
@@ -178,7 +573,7 @@
             </div>
             <button class="btn" onclick="addCashier()">➕ إضافة أو تحديث الكاشير والشفت</button>
 
-            <div style="overflow-x: auto; margin-top: 15px;">
+            <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -198,8 +593,8 @@
             </div>
 
             <!-- حاسبة إجمالية لعهد ودرج الكاشير -->
-            <div style="margin-top: 20px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1;">
-                <h4 style="margin-bottom: 10px; color: var(--primary-dark);">🧮 حاسبة عهدة ونقدية الكاشير (إغلاق الشفت)</h4>
+            <div class="drawer-box">
+                <h4>🧮 حاسبة عهدة ونقدية الكاشير (إغلاق الشفت)</h4>
                 <div class="form-row" style="margin-bottom: 8px;">
                     <div class="form-group">
                         <label>إجمالي نقدية الدرج (الكاش):</label>
@@ -214,7 +609,7 @@
                         <input type="number" id="drawerStartFloat" placeholder="0" oninput="calculateDrawerTotal()">
                     </div>
                 </div>
-                <div style="font-size: 15px; font-weight: 800; color: var(--secondary); margin-top: 8px;">
+                <div class="drawer-total">
                     💰 إجمالي محصلات الدرج الفعلية: <span id="drawerFinalTotal">0</span> ج.م
                 </div>
             </div>
@@ -222,13 +617,13 @@
 
         <!-- إدارة الكباتن وتقرير أرباحهم مع زر تصدير Excel (CSV) -->
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+            <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن) وتقرير الأرباح</h3>
                 <button class="btn btn-export" onclick="exportCaptainsReportToExcel()">📥 تصدير تقرير أرباح الكباتن (Excel/CSV)</button>
             </div>
-            
+
             <input type="hidden" id="editCaptainIndex" value="-1">
-            <div class="form-row" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
+            <div class="form-row captain-form-box">
                 <div class="form-group">
                     <label>اسم الكابتن:</label>
                     <input type="text" id="captainNameInput" placeholder="اسم الكابتن">
@@ -246,11 +641,11 @@
                     <input type="text" id="captainInstaInput" placeholder="حساب انستا باي">
                 </div>
                 <div class="form-group" style="display: flex; align-items: flex-end;">
-                    <button class="btn" id="saveCaptainBtn" onclick="saveCaptainData()" style="width: 100%;">💾 حفظ تعديل الكابتن</button>
+                    <button class="btn" id="saveCaptainBtn" onclick="saveCaptainData()" style="width: 100%;">💾 حفظ بيانات الكابتن</button>
                 </div>
             </div>
 
-            <div style="overflow-x: auto;">
+            <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -360,9 +755,9 @@
                 </div>
             </div>
             <button class="btn" id="saveProdBtn" onclick="saveProduct()">➕ إضافة منتج جديد</button>
-            <button class="btn" id="cancelEditBtn" onclick="resetProductForm()" style="background:#64748b; display:none; margin-right: 8px;">إلغاء التعديل</button>
+            <button class="btn btn-secondary-muted" id="cancelEditBtn" onclick="resetProductForm()" style="display:none;">إلغاء التعديل</button>
 
-            <div style="overflow-x: auto; margin-top: 15px;">
+            <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -384,18 +779,18 @@
 
         <!-- متابعة الطلبات مع إشعارات الواتساب، تغيير الحالة، وإسناد الكابتن -->
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+            <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <button class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;">🖨️ طباعة تقرير المبيعات</button>
-                    <label style="font-size: 13px; font-weight: 700;">فلتر العرض:</label>
-                    <select id="salesFilterSelect" onchange="renderSalesTable()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; background: #f8fafc; outline: none;">
+                <div class="filter-controls">
+                    <button class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px;">🖨️ طباعة تقرير المبيعات</button>
+                    <label for="salesFilterSelect" style="font-size: 13px; font-weight: 700;">فلتر العرض:</label>
+                    <select id="salesFilterSelect" class="filter-select" onchange="renderSalesTable()">
                         <option value="all">📊 كافة الطلبات المسجلة</option>
                         <option value="today">📅 طلبات اليوم فقط</option>
                     </select>
                 </div>
             </div>
-            <div style="overflow-x: auto;">
+            <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -419,12 +814,12 @@
     </div>
 
     <script>
-        const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890"; 
+        const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890";
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
+        const DEFAULT_PROD_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
+        const AUTH_SESSION_KEY = "gahiz_admin_auth_v1";
 
-        // قائمة المنتجات الأصلية الكاملة والمستعادة بالكامل
         let allProducts = [
-            // قسم السوبر ماركت - الزيت والسمن والأساسيات
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
             { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
             { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, category: "سوبر ماركت - السمن", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
@@ -438,8 +833,6 @@
             { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, category: "سوبر ماركت - العصائر والمياه", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
             { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, category: "سوبر ماركت - مياه غازية", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
             { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, category: "سوبر ماركت - شيكولاتة ونوتيلا", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
-            
-            // قسم هابي ميلز - الوجبات والمشويات والمأكولات السريعة
             { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, category: "فرايد تشيكن", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
             { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, category: "تشيكن تندر", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
             { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, category: "شاورما - قسم الساندوتشات", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
@@ -448,13 +841,9 @@
             { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, category: "كريب - قسم الكريب الحلو", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
             { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, category: "قسم البيتزا", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
             { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, category: "فطير هابي ميلز - فطير اسكندراني", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
-            
-            // قسم فول وطعمية
             { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
             { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
             { name: "عجينة طعمية فريش (نصف كيلو)", price: 15, cost: 10, oldPrice: 18, category: "فول وطعمية - عجينة وقلي", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-
-            // قسم سمكة مشوية
             { name: "كيلو سمك بلطي مشوي ريزو طازج", price: 110, cost: 85, oldPrice: 125, category: "سمكة مشوية - أسماك طازجة ومشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: true },
             { name: "سمك بوري سنجاري طازج (كيلو)", price: 160, cost: 130, oldPrice: 180, category: "سمكة مشوية - سي فود وسنجاري", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: false },
             { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, category: "سمكة مشوية - أرز ووربات وشوربة", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
@@ -470,595 +859,513 @@
             { name: "محمد السيد (سوبر ماركت)", phone: "01011112222", section: "🛒 قسم السوبر ماركت", shift: "🌅 شفت صباحي", walletAccount: "01011112222" },
             { name: "إسلام محمود (هابي ميلز)", phone: "01033334444", section: "🍗 قسم هابي ميلز", shift: "🌙 شفت مسائي", walletAccount: "01033334444" },
             { name: "محمود حسن (فول وطعمية)", phone: "01055556666", section: "🍳 قسم فول وطعمية", shift: "🌅 شفت صباحي", walletAccount: "01055556666" },
-            { name: "أحمد سمير (سمكة مشوية)", phone: "01077778888", section: "🐟 قسم سمكة مشوية", shift: "🌙 شفت مسائي", walletAccount: "01077778888" }
+            { name: "سعيد علي (سمكة مشوية)", phone: "01077778888", section: "🐟 قسم سمكة مشوية", shift: "🌙 شفت مسائي", walletAccount: "01077778888" }
         ];
-        let activeWhatsAppGlobal = "201042377974";
-        let lastKnownOrdersCount = 0;
 
-        window.onload = function() {
-            if (sessionStorage.getItem('admin_authenticated') === 'true') {
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem(AUTH_SESSION_KEY) === "1") {
                 document.getElementById('authOverlay').style.display = 'none';
-                loadDashboardData();
             }
-        }
+            renderAllSections();
+            syncAllData(false);
+        });
 
         function checkAdminPassword() {
-            let passInput = document.getElementById('adminPasswordInput').value.trim();
-            if (passInput === CORRECT_ADMIN_PASSWORD) {
+            const input = document.getElementById('adminPasswordInput').value;
+            if (input === CORRECT_ADMIN_PASSWORD) {
+                sessionStorage.setItem(AUTH_SESSION_KEY, "1");
                 document.getElementById('authOverlay').style.display = 'none';
-                sessionStorage.setItem('admin_authenticated', 'true');
-                loadDashboardData();
+                syncAllData(false);
             } else {
                 alert('❌ كلمة المرور غير صحيحة!');
-                document.getElementById('adminPasswordInput').value = '';
             }
         }
 
         function logoutAdmin() {
-            sessionStorage.removeItem('admin_authenticated');
+            sessionStorage.removeItem(AUTH_SESSION_KEY);
+            document.getElementById('adminPasswordInput').value = '';
             document.getElementById('authOverlay').style.display = 'flex';
         }
 
-        function playAlertSound() {
+        async function syncAllData(showAlert = false) {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                let now = audioCtx.currentTime;
-
-                let osc1 = audioCtx.createOscillator();
-                let gain1 = audioCtx.createGain();
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(880, now);
-                gain1.gain.setValueAtTime(0.6, now);
-                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-                osc1.connect(gain1);
-                gain1.connect(audioCtx.destination);
-                osc1.start(now);
-                osc1.stop(now + 0.6);
-
-                let osc2 = audioCtx.createOscillator();
-                let gain2 = audioCtx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(1100, now + 0.3);
-                gain2.gain.setValueAtTime(0.6, now + 0.3);
-                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
-                osc2.connect(gain2);
-                gain2.connect(audioCtx.destination);
-                osc2.start(now + 0.3);
-                osc2.stop(now + 0.9);
-            } catch(e) {}
+                const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        allProducts = data;
+                    } else if (data && typeof data === 'object') {
+                        if (Array.isArray(data.products) && data.products.length > 0) allProducts = data.products;
+                        if (Array.isArray(data.sales)) allSales = data.sales;
+                        if (Array.isArray(data.captains) && data.captains.length > 0) allCaptains = data.captains;
+                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) allCashiers = data.cashiers;
+                    }
+                    localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
+                        products: allProducts,
+                        sales: allSales,
+                        captains: allCaptains,
+                        cashiers: allCashiers
+                    }));
+                }
+            } catch (_) {
+                const cached = localStorage.getItem('gahiz_lightning_cache');
+                if (cached) {
+                    try {
+                        const c = JSON.parse(cached);
+                        if (Array.isArray(c.products) && c.products.length > 0) allProducts = c.products;
+                        if (Array.isArray(c.sales)) allSales = c.sales;
+                        if (Array.isArray(c.captains) && c.captains.length > 0) allCaptains = c.captains;
+                        if (Array.isArray(c.cashiers) && c.cashiers.length > 0) allCashiers = c.cashiers;
+                    } catch (_) {}
+                }
+            }
+            renderAllSections();
+            if (showAlert) alert('✅ تمت مزامنة البيانات بنجاح!');
         }
 
-        async function loadDashboardData() {
+        async function pushCloudState() {
+            localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
+                products: allProducts,
+                sales: allSales,
+                captains: allCaptains,
+                cashiers: allCashiers
+            }));
             try {
-                let res = await fetch(API_URL + "?t=" + new Date().getTime());
-                if(res.ok) {
-                    let data = await res.json();
-                    if(data && typeof data === 'object') {
-                        let newSales = Array.isArray(data.sales) ? data.sales : [];
-                        
-                        if (lastKnownOrdersCount > 0 && newSales.length > lastKnownOrdersCount) {
-                            playAlertSound();
-                        }
-                        lastKnownOrdersCount = newSales.length;
-
-                        // إذا كانت المنتجات السحابية فارغة، نستخدم المنتجات المستعادة الافتراضية ونحفظها تلقائياً
-                        if (Array.isArray(data.products) && data.products.length > 0) {
-                            allProducts = data.products;
-                        } else {
-                            await saveDataToCloud();
-                        }
-
-                        allSales = newSales;
-                        if (Array.isArray(data.captains) && data.captains.length > 0) {
-                            allCaptains = data.captains;
-                        }
-                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) {
-                            allCashiers = data.cashiers;
-                        }
-                        activeWhatsAppGlobal = data.activeWhatsApp || "201042377974";
+                let cloudObj = {};
+                const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
+                if (res.ok) {
+                    const existing = await res.json();
+                    if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
+                        cloudObj = existing;
                     }
                 }
-            } catch(e) {}
+                cloudObj.products = allProducts;
+                cloudObj.sales = allSales;
+                cloudObj.captains = allCaptains;
+                cloudObj.cashiers = allCashiers;
 
-            updateAdminKPIs();
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cloudObj)
+                });
+            } catch (_) {}
+        }
+
+        function renderAllSections() {
+            updateStatsAndKpis();
             renderCashiersTable();
             renderCaptainsTable();
             renderProductsTable();
             renderSalesTable();
-
-            setTimeout(loadDashboardData, 10000);
         }
 
-        async function saveDataToCloud() {
-            try {
-                let payload = {
-                    products: allProducts,
-                    sales: allSales,
-                    captains: allCaptains,
-                    cashiers: allCashiers,
-                    activeWhatsApp: activeWhatsAppGlobal
-                };
-                let res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                return res.ok;
-            } catch(e) {
-                alert('⚠️ حدث خطأ أثناء الاتصال بالسحابة وحفظ البيانات.');
-                return false;
-            }
-        }
+        function updateStatsAndKpis() {
+            const ordersCount = allSales.length;
+            const totalRevenue = allSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+            const estimatedProfit = allSales.reduce((sum, s) => {
+                const orderTotal = parseFloat(s.total) || 0;
+                const fee = parseFloat(s.deliveryFee) || 0;
+                const netItems = Math.max(0, orderTotal - fee);
+                return sum + (netItems * 0.22);
+            }, 0);
 
-        function updateAdminKPIs() {
-            let totalOrdersElem = document.getElementById('kpiTotalOrders');
-            let totalRevElem = document.getElementById('kpiTotalRevenue');
-            let totalCustElem = document.getElementById('kpiTotalCustomers');
+            const uniqueCustomers = new Set(
+                allSales.map(s => (s.customerPhone || s.customerName || "").trim()).filter(Boolean)
+            ).size;
 
-            if (totalOrdersElem) totalOrdersElem.innerText = allSales.length;
-            
-            let totalRevenue = allSales.reduce((sum, order) => sum + (order.total || order.subTotal || 0), 0);
-            if (totalRevElem) totalRevElem.innerText = totalRevenue + ' ج.م';
+            document.getElementById('kpiTotalOrders').innerText = ordersCount.toLocaleString('ar-EG');
+            document.getElementById('kpiTotalCustomers').innerText = uniqueCustomers.toLocaleString('ar-EG');
+            document.getElementById('kpiTotalRevenue').innerText = `${totalRevenue.toLocaleString('ar-EG')} ج.م`;
 
-            let uniqueCustomers = new Set(allSales.map(o => o.customerPhone)).size;
-            if (totalCustElem) totalCustElem.innerText = uniqueCustomers > 0 ? uniqueCustomers : allProducts.length * 3;
-        }
-
-        function getTodayDateString() {
-            let d = new Date();
-            let year = d.getFullYear();
-            let month = String(d.getMonth() + 1).padStart(2, '0');
-            let day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function getFilteredSales() {
-            let filterVal = document.getElementById('salesFilterSelect') ? document.getElementById('salesFilterSelect').value : 'all';
-            let todayStr = getTodayDateString();
-
-            if (filterVal === 'today') {
-                return allSales.filter(s => {
-                    if (!s.timestamp) return false;
-                    return s.timestamp.startsWith(todayStr);
-                });
-            }
-            return allSales;
-        }
-
-        function updateFinancialStats() {
-            updateAdminKPIs();
-            let targetSales = getFilteredSales();
-            let totalSales = 0;
-            let totalProfit = 0;
-            let ordersCount = targetSales.length;
-
-            targetSales.forEach(order => {
-                let orderSubTotal = order.subTotal || order.total || 0;
-                totalSales += orderSubTotal;
-
-                let orderProfit = 0;
-                if (order.items && Array.isArray(order.items)) {
-                    order.items.forEach(item => {
-                        let matchedProd = allProducts.find(p => p.name === item.name);
-                        let itemCost = (matchedProd && matchedProd.cost) ? matchedProd.cost : (item.price * 0.8);
-                        let itemProfit = (item.price - itemCost) * item.qty;
-                        orderProfit += itemProfit > 0 ? itemProfit : 0;
-                    });
-                } else {
-                    orderProfit = orderSubTotal * 0.2;
-                }
-                totalProfit += orderProfit;
-            });
-
-            document.getElementById('statTotalSales').innerText = totalSales.toLocaleString() + ' ج.م';
-            document.getElementById('statTotalProfit').innerText = Math.round(totalProfit).toLocaleString() + ' ج.م';
-            document.getElementById('statOrdersCount').innerText = ordersCount;
+            document.getElementById('statTotalSales').innerText = `${totalRevenue.toLocaleString('ar-EG')} ج.م`;
+            document.getElementById('statTotalProfit').innerText = `${Math.round(estimatedProfit).toLocaleString('ar-EG')} ج.م`;
+            document.getElementById('statOrdersCount').innerText = ordersCount.toLocaleString('ar-EG');
         }
 
         function calculateDrawerTotal() {
-            let cash = parseFloat(document.getElementById('drawerCash').value) || 0;
-            let wallets = parseFloat(document.getElementById('drawerWallets').value) || 0;
-            let floatMoney = parseFloat(document.getElementById('drawerStartFloat').value) || 0;
-            let finalTotal = (cash + wallets) - floatMoney;
-            document.getElementById('drawerFinalTotal').innerText = finalTotal >= 0 ? finalTotal.toLocaleString() : '0';
+            const cash = parseFloat(document.getElementById('drawerCash').value) || 0;
+            const wallets = parseFloat(document.getElementById('drawerWallets').value) || 0;
+            const startFloat = parseFloat(document.getElementById('drawerStartFloat').value) || 0;
+            const finalTotal = Math.max(0, (cash + wallets) - startFloat);
+            document.getElementById('drawerFinalTotal').innerText = finalTotal.toLocaleString('ar-EG');
         }
 
-        function exportCaptainsReportToExcel() {
-            if (allCaptains.length === 0) {
-                alert('⚠️ لا توجد بيانات كباتن لتصديرها حالياً.');
-                return;
-            }
-
-            let csvContent = "\uFEFFاسم الكابتن,رقم الهاتف,فودافون كاش,إنستا باي,عدد الأوردرات,إجمالي المبيعات,مستحقات التوصيل\n";
-            allCaptains.forEach(cap => {
-                let capOrdersCount = 0;
-                let capSalesTotal = 0;
-                allSales.forEach(order => {
-                    if (order.assignedCaptain === cap.name) {
-                        capOrdersCount++;
-                        capSalesTotal += (order.subTotal || order.total || 0);
+        function getSectionSales(sectionLabel) {
+            const key = sectionLabel.includes('سوبر') ? 'سوبر'
+                      : sectionLabel.includes('هابي') ? 'هابي'
+                      : sectionLabel.includes('فول') ? 'فول'
+                      : sectionLabel.includes('سمك') ? 'سمك' : '';
+            if (!key) return 0;
+            return allSales.reduce((sum, sale) => {
+                const items = Array.isArray(sale.items) ? sale.items : [];
+                const matchSum = items.reduce((iSum, item) => {
+                    const cat = (item.category || '').toString();
+                    const nm = (item.name || '').toString();
+                    if (cat.includes(key) || nm.includes(key)) {
+                        return iSum + ((parseFloat(item.price) || 0) * (parseInt(item.qty, 10) || 1));
                     }
-                });
-                let capDues = capOrdersCount * 10;
-                csvContent += `"${cap.name}","${cap.phone}","${cap.vodafoneCash || ''}","${cap.instaPay || ''}","${capOrdersCount}","${capSalesTotal} ج.م","${capDues} ج.م"\n`;
-            });
-
-            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `captains_profit_report_${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+                    return iSum;
+                }, 0);
+                return sum + matchSum;
+            }, 0);
         }
 
-        async function updateOrderStatus(orderIndex, newStatus) {
-            if (allSales[orderIndex]) {
-                allSales[orderIndex].status = newStatus;
-                await saveDataToCloud();
-                renderSalesTable();
-
-                let s = allSales[orderIndex];
-                let sendWa = confirm(`✅ تم تحديث حالة الطلب إلى (${newStatus}).\nهل تريد إرسال إشعار واتساب للعميل (${s.customerName}) الآن؟`);
-                if (sendWa && s.customerPhone) {
-                    let cleanPhone = s.customerPhone.replace(/\D/g, '');
-                    if (cleanPhone.startsWith('0')) cleanPhone = '2' + cleanPhone;
-                    let msg = `مرحباً بك يا ${s.customerName} 🛒\nتحديث من منصة "جاهز": تم تغيير حالة طلبك رقم (#${s.orderId}) إلى: *${newStatus}*.\nشكراً لتعاملكم معنا!`;
-                    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-                }
-            }
-        }
-
-        async function updateOrderCaptain(orderIndex, captainName) {
-            if (allSales[orderIndex]) {
-                allSales[orderIndex].assignedCaptain = captainName;
-                await saveDataToCloud();
-                renderSalesTable();
-
-                let s = allSales[orderIndex];
-                alert(`✅ تم إسناد الطلب رقم (#${s.orderId}) للكابتن: (${captainName || 'بدون مندوب'}) بنجاح!`);
-
-                if (captainName) {
-                    let matchedCap = allCaptains.find(c => c.name === captainName);
-                    if (matchedCap && matchedCap.phone) {
-                        let sendWaCap = confirm(`هل تريد إرسال تفاصيل الأوردر واتساب للكابتن (${captainName}) الآن؟`);
-                        if (sendWaCap) {
-                            let cleanCapPhone = matchedCap.phone.replace(/\D/g, '');
-                            if (cleanCapPhone.startsWith('0')) cleanCapPhone = '2' + cleanCapPhone;
-                            let capMsg = `🛵 كابتن ${captainName}، تم إسناد أوردر جديد إليك من منصة "جاهز":\n\n- رقم الأوردر: #${s.orderId}\n- العميل: ${s.customerName}\n- الهاتف: ${s.customerPhone}\n- العنوان: ${s.customerAddress}\n- الإجمالي: ${s.total || s.subTotal} ج.م`;
-                            window.open(`https://wa.me/${cleanCapPhone}?text=${encodeURIComponent(capMsg)}`, '_blank');
-                        }
-                    }
-                }
-            }
-        }
-
-        async function deleteOrder(orderIndex) {
-            if (confirm('⚠️ هل أنت متأكد من حذف هذا الأوردر من السجل؟')) {
-                allSales.splice(orderIndex, 1);
-                await saveDataToCloud();
-                renderSalesTable();
-            }
-        }
-
-        function renderSalesTable() {
-            updateFinancialStats();
-            let targetSales = getFilteredSales();
-            let tbody = document.getElementById('salesTableBody');
-            
-            if (targetSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>`;
-                return;
-            }
-
-            let html = '';
-            targetSales.forEach((s, idx) => {
-                let actualIndex = allSales.findIndex(item => item.orderId === s.orderId);
-                let dateFormatted = s.timestamp ? s.timestamp.replace('T', ' ').substring(0, 16) : '---';
-                let itemsList = '';
-                if (s.items && Array.isArray(s.items)) {
-                    s.items.forEach(i => {
-                        itemsList += `• ${i.name} (×${i.qty})<br>`;
-                    });
-                }
-
-                let captainsOptions = `<option value="">-- اختر الكابتن --</option>`;
-                allCaptains.forEach(c => {
-                    let sel = (s.assignedCaptain === c.name) ? 'selected' : '';
-                    captainsOptions += `<option value="${c.name}" ${sel}>🛵 ${c.name}</option>`;
-                });
-
-                html += `
-                    <tr>
-                        <td><b>#${s.orderId || '---'}</b></td>
-                        <td style="font-size: 12px; color: var(--text-muted);">${dateFormatted}</td>
-                        <td><b>${s.customerName || '---'}</b></td>
-                        <td>📞 ${s.customerPhone || '---'}<br><span style="font-size:12px; color:var(--text-muted);">📍 ${s.customerAddress || '---'}</span></td>
-                        <td>
-                            <b style="color:var(--secondary);">${s.total || s.subTotal || 0} ج.م</b><br>
-                            <span style="font-size:12px; color:var(--text-muted);">${s.paymentMethod || 'كاش'}</span>
-                            <div style="font-size: 11px; margin-top:4px; background:#f1f5f9; padding:4px; border-radius:4px;">${itemsList}</div>
-                        </td>
-                        <td>
-                            <select onchange="updateOrderCaptain(${actualIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
-                                ${captainsOptions}
-                            </select>
-                        </td>
-                        <td>
-                            <select onchange="updateOrderStatus(${actualIndex}, this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 13px; background:${s.status && s.status.includes('مكتمل') ? '#d1fae5' : '#fef3c7'};">
-                                <option value="قيد الانتظار ⏳" ${s.status && s.status.includes('انتظار') ? 'selected' : ''}>قيد الانتظار ⏳</option>
-                                <option value="جاري التجهيز 👨🍳" ${s.status && s.status.includes('تجهيز') ? 'selected' : ''}>جاري التجهيز 👨🍳</option>
-                                <option value="جاري التوصيل 🛵" ${s.status && s.status.includes('توصيل') ? 'selected' : ''}>جاري التوصيل 🛵</option>
-                                <option value="تم التوصيل بنجاح ✅" ${s.status && s.status.includes('نجاح') ? 'selected' : ''}>تم التوصيل بنجاح ✅</option>
-                                <option value="تم إلغاء الطلب ❌" ${s.status && s.status.includes('إلغاء') ? 'selected' : ''}>تم إلغاء الطلب ❌</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn" onclick="deleteOrder(${actualIndex})" style="background:#ef4444; padding: 6px 10px; font-size: 12px;">🗑️ حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function printSalesReport() {
-            window.print();
-        }
-
-        // كاشيري الأقسام والشفتات
         async function addCashier() {
-            let name = document.getElementById('cashierName').value.trim();
-            let phone = document.getElementById('cashierPhone').value.trim();
-            let section = document.getElementById('cashierSection').value;
-            let shift = document.getElementById('cashierShift').value;
-            let wallet = document.getElementById('cashierWallet').value.trim();
+            const name = document.getElementById('cashierName').value.trim();
+            const phone = document.getElementById('cashierPhone').value.trim();
+            const section = document.getElementById('cashierSection').value;
+            const shift = document.getElementById('cashierShift').value;
+            const walletAccount = document.getElementById('cashierWallet').value.trim();
 
-            if (!name) {
-                alert('⚠️ يرجى إدخال اسم الكاشير.');
+            if (!name || !phone) {
+                alert('⚠️ يرجى إدخال اسم الكاشير ورقم الواتساب.');
                 return;
             }
 
-            allCashiers.push({ name, phone, section, shift, walletAccount: wallet });
-            await saveDataToCloud();
-            renderCashiersTable();
+            const existingIdx = allCashiers.findIndex(c => c.section === section && c.shift === shift);
+            const record = { name, phone, section, shift, walletAccount: walletAccount || phone };
+
+            if (existingIdx >= 0) {
+                allCashiers[existingIdx] = record;
+            } else {
+                allCashiers.push(record);
+            }
 
             document.getElementById('cashierName').value = '';
             document.getElementById('cashierPhone').value = '';
             document.getElementById('cashierWallet').value = '';
-            alert('✅ تمت إضافة الكاشير والشفت بنجاح!');
+
+            renderCashiersTable();
+            await pushCloudState();
         }
 
         async function deleteCashier(idx) {
+            if (!confirm('هل تريد حذف هذا الكاشير؟')) return;
             allCashiers.splice(idx, 1);
-            await saveDataToCloud();
             renderCashiersTable();
+            await pushCloudState();
         }
 
         function renderCashiersTable() {
-            let tbody = document.getElementById('cashiersTableBody');
-            if (allCashiers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كاشيرين مسجلين حالياً.</td></tr>`;
+            const tbody = document.getElementById('cashiersTableBody');
+            if (!allCashiers.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">لا يوجد كاشير مضافون حالياً.</td></tr>`;
                 return;
             }
-
-            let html = '';
-            allCashiers.forEach((c, idx) => {
-                let sectionSales = 0;
-                allSales.forEach(order => {
-                    if (order.items && Array.isArray(order.items)) {
-                        order.items.forEach(item => {
-                            if (item.category && item.category.includes(c.section.replace(/[^أ-ي]/g, ''))) {
-                                sectionSales += (item.price * item.qty);
-                            }
-                        });
-                    }
-                });
-
-                html += `
+            tbody.innerHTML = allCashiers.map((c, idx) => {
+                const isEvening = (c.shift || '').includes('مسائي');
+                const badgeClass = isEvening ? 'badge-shift-evening' : 'badge-shift';
+                const secSales = getSectionSales(c.section || '');
+                return `
                     <tr>
                         <td><b>${c.name}</b></td>
-                        <td>${c.section}</td>
-                        <td><span class="${c.shift.includes('مسائي') ? 'badge-shift-evening' : 'badge-shift'}">${c.shift}</span></td>
-                        <td>${c.phone || '---'}</td>
-                        <td>${c.walletAccount || '---'}</td>
-                        <td style="font-weight: bold; color: var(--secondary);">${sectionSales} ج.م</td>
-                        <td><button class="btn" onclick="deleteCashier(${idx})" style="background:#ef4444; padding:4px 8px; font-size:12px;">حذف</button></td>
+                        <td>${c.section || '-'}</td>
+                        <td><span class="${badgeClass}">${c.shift || '-'}</span></td>
+                        <td>${c.phone || '-'}</td>
+                        <td>${c.walletAccount || '-'}</td>
+                        <td><b>${secSales.toLocaleString('ar-EG')} ج.م</b></td>
+                        <td><button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCashier(${idx})">حذف</button></td>
                     </tr>
                 `;
-            });
-            tbody.innerHTML = html;
+            }).join('');
         }
 
-        // إدارة الكباتن
-        async function saveCaptainData() {
-            let idx = parseInt(document.getElementById('editCaptainIndex').value);
-            let name = document.getElementById('captainNameInput').value.trim();
-            let phone = document.getElementById('captainPhoneInput').value.trim();
-            let vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
-            let instaPay = document.getElementById('captainInstaInput').value.trim();
-
-            if (!name) {
-                alert('⚠️ يرجى إدخال اسم الكابتن.');
-                return;
-            }
-
-            if (idx >= 0) {
-                allCaptains[idx] = { ...allCaptains[idx], name, phone, vodafoneCash, instaPay };
-            } else {
-                allCaptains.push({ name, phone, vodafoneCash, instaPay, address: '' });
-            }
-
-            await saveDataToCloud();
-            renderCaptainsTable();
-            resetCaptainForm();
-            alert('✅ تم حفظ بيانات الكابتن بنجاح!');
+        function getCaptainStats(capName) {
+            const matched = allSales.filter(s => (s.assignedCaptain || '').trim() === capName.trim());
+            const ordersCount = matched.length;
+            const totalSales = matched.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+            const deliveryEarnings = ordersCount * 10;
+            return { ordersCount, totalSales, deliveryEarnings };
         }
 
         function editCaptain(idx) {
-            let c = allCaptains[idx];
+            const cap = allCaptains[idx];
+            if (!cap) return;
             document.getElementById('editCaptainIndex').value = idx;
-            document.getElementById('captainNameInput').value = c.name;
-            document.getElementById('captainPhoneInput').value = c.phone || '';
-            document.getElementById('captainVodafoneInput').value = c.vodafoneCash || '';
-            document.getElementById('captainInstaInput').value = c.instaPay || '';
-            document.getElementById('saveCaptainBtn').innerText = '💾 تحديث بيانات الكابتن';
+            document.getElementById('captainNameInput').value = cap.name || '';
+            document.getElementById('captainPhoneInput').value = cap.phone || '';
+            document.getElementById('captainVodafoneInput').value = cap.vodafoneCash || '';
+            document.getElementById('captainInstaInput').value = cap.instaPay || '';
         }
 
-        function resetCaptainForm() {
-            document.getElementById('editCaptainIndex').value = '-1';
+        async function saveCaptainData() {
+            const idx = parseInt(document.getElementById('editCaptainIndex').value, 10);
+            const name = document.getElementById('captainNameInput').value.trim();
+            const phone = document.getElementById('captainPhoneInput').value.trim();
+            const vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
+            const instaPay = document.getElementById('captainInstaInput').value.trim();
+
+            if (!name || !phone) {
+                alert('⚠️ يرجى إدخال اسم الكابتن ورقم الهاتف.');
+                return;
+            }
+
+            const capObj = { name, phone, vodafoneCash, instaPay };
+            if (idx >= 0 && allCaptains[idx]) {
+                allCaptains[idx] = capObj;
+            } else {
+                allCaptains.push(capObj);
+            }
+
+            document.getElementById('editCaptainIndex').value = "-1";
             document.getElementById('captainNameInput').value = '';
             document.getElementById('captainPhoneInput').value = '';
             document.getElementById('captainVodafoneInput').value = '';
             document.getElementById('captainInstaInput').value = '';
-            document.getElementById('saveCaptainBtn').innerText = '💾 حفظ بيانات الكابتن';
+
+            renderCaptainsTable();
+            renderSalesTable();
+            await pushCloudState();
         }
 
         async function deleteCaptain(idx) {
-            if (confirm('⚠️ هل أنت متأكد من حذف هذا الكابتن؟')) {
-                allCaptains.splice(idx, 1);
-                await saveDataToCloud();
-                renderCaptainsTable();
-            }
+            if (!confirm('هل تريد حذف هذا الكابتن؟')) return;
+            allCaptains.splice(idx, 1);
+            renderCaptainsTable();
+            renderSalesTable();
+            await pushCloudState();
         }
 
         function renderCaptainsTable() {
-            let tbody = document.getElementById('captainsTableBody');
-            if (allCaptains.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا يوجد كباتن مسجلين حالياً.</td></tr>`;
+            const tbody = document.getElementById('captainsTableBody');
+            if (!allCaptains.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">لا يوجد كباتن مسجلون حالياً.</td></tr>`;
                 return;
             }
-
-            let html = '';
-            allCaptains.forEach((c, idx) => {
-                let capOrdersCount = 0;
-                let capSalesTotal = 0;
-                allSales.forEach(order => {
-                    if (order.assignedCaptain === c.name) {
-                        capOrdersCount++;
-                        capSalesTotal += (order.subTotal || order.total || 0);
-                    }
-                });
-                let capDues = capOrdersCount * 10;
-
-                html += `
+            tbody.innerHTML = allCaptains.map((cap, idx) => {
+                const st = getCaptainStats(cap.name);
+                return `
                     <tr>
-                        <td><b>${c.name}</b></td>
-                        <td>${c.phone || '---'}</td>
-                        <td>📱 ${c.vodafoneCash || '---'}<br>💳 ${c.instaPay || '---'}</td>
-                        <td><b>${capOrdersCount}</b> أوردر</td>
-                        <td style="font-weight: bold; color: var(--primary);">${capSalesTotal} ج.م</td>
-                        <td style="font-weight: bold; color: var(--secondary);">${capDues} ج.م</td>
+                        <td><b>${cap.name}</b></td>
+                        <td>${cap.phone || '-'}</td>
+                        <td>${cap.vodafoneCash || '-'} / ${cap.instaPay || '-'}</td>
+                        <td>${st.ordersCount}</td>
+                        <td>${st.totalSales.toLocaleString('ar-EG')} ج.م</td>
+                        <td><b style="color:var(--secondary);">${st.deliveryEarnings.toLocaleString('ar-EG')} ج.م</b></td>
                         <td>
-                            <button class="btn" onclick="editCaptain(${idx})" style="padding:4px 8px; font-size:12px; margin-left:4px;">تعديل</button>
-                            <button class="btn" onclick="deleteCaptain(${idx})" style="background:#ef4444; padding:4px 8px; font-size:12px;">حذف</button>
+                            <div class="action-group">
+                                <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editCaptain(${idx})">تعديل</button>
+                                <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCaptain(${idx})">حذف</button>
+                            </div>
                         </td>
                     </tr>
                 `;
-            });
-            tbody.innerHTML = html;
+            }).join('');
         }
 
-        // إدارة المنتجات
-        async function saveProduct() {
-            let idx = parseInt(document.getElementById('editIndex').value);
-            let name = document.getElementById('prodName').value.trim();
-            let price = parseFloat(document.getElementById('prodPrice').value) || 0;
-            let cost = parseFloat(document.getElementById('prodCost').value) || (price * 0.8);
-            let oldPrice = parseFloat(document.getElementById('prodOldPrice').value) || null;
-            let category = document.getElementById('prodCategory').value;
-            let image = document.getElementById('prodImage').value.trim() || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';
-            let outOfStock = document.getElementById('prodStock').value === 'true';
-            let isOffer = document.getElementById('prodIsOffer').value === 'true';
-
-            if (!name || price <= 0) {
-                alert('⚠️ يرجى إدخال اسم المنتج وسعر صحيح.');
-                return;
-            }
-
-            let productObj = { name, price, cost, oldPrice, category, image, outOfStock, isOffer };
-
-            if (idx >= 0) {
-                allProducts[idx] = productObj;
-            } else {
-                allProducts.push(productObj);
-            }
-
-            await saveDataToCloud();
-            renderProductsTable();
-            resetProductForm();
-            alert('✅ تم حفظ المنتج بنجاح!');
+        function exportCaptainsReportToExcel() {
+            const rows = [["اسم الكابتن", "الهاتف", "فودافون كاش", "انستا باي", "عدد الأوردرات", "إجمالي المبيعات", "مستحقات التوصيل"]];
+            allCaptains.forEach(cap => {
+                const st = getCaptainStats(cap.name);
+                rows.push([
+                    cap.name || "",
+                    cap.phone || "",
+                    cap.vodafoneCash || "",
+                    cap.instaPay || "",
+                    st.ordersCount,
+                    st.totalSales,
+                    st.deliveryEarnings
+                ]);
+            });
+            const csvContent = "\uFEFF" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "captains_report_gahiz.csv";
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function editProduct(idx) {
-            let p = allProducts[idx];
+            const p = allProducts[idx];
+            if (!p) return;
             document.getElementById('editIndex').value = idx;
-            document.getElementById('prodName').value = p.name;
-            document.getElementById('prodPrice').value = p.price;
-            document.getElementById('prodCost').value = p.cost || '';
-            document.getElementById('prodOldPrice').value = p.oldPrice || '';
+            document.getElementById('prodName').value = p.name || '';
+            document.getElementById('prodPrice').value = p.price ?? '';
+            document.getElementById('prodCost').value = p.cost ?? '';
+            document.getElementById('prodOldPrice').value = p.oldPrice ?? '';
             document.getElementById('prodCategory').value = p.category || 'عام';
             document.getElementById('prodImage').value = p.image || '';
-            document.getElementById('prodStock').value = p.outOfStock ? 'true' : 'false';
-            document.getElementById('prodIsOffer').value = p.isOffer ? 'true' : 'false';
-
-            document.getElementById('saveProdBtn').innerText = '💾 تحديث المنتج';
-            document.getElementById('cancelEditBtn').style.display = 'inline-block';
-            window.scrollTo({ top: 400, behavior: 'smooth' });
+            document.getElementById('prodStock').value = p.outOfStock ? "true" : "false";
+            document.getElementById('prodIsOffer').value = p.isOffer ? "true" : "false";
+            document.getElementById('saveProdBtn').innerText = "💾 حفظ تعديل المنتج";
+            document.getElementById('cancelEditBtn').style.display = "inline-flex";
         }
 
         function resetProductForm() {
-            document.getElementById('editIndex').value = '-1';
+            document.getElementById('editIndex').value = "-1";
             document.getElementById('prodName').value = '';
             document.getElementById('prodPrice').value = '';
             document.getElementById('prodCost').value = '';
             document.getElementById('prodOldPrice').value = '';
             document.getElementById('prodImage').value = '';
-            document.getElementById('prodStock').value = 'false';
-            document.getElementById('prodIsOffer').value = 'false';
-            document.getElementById('saveProdBtn').innerText = '➕ إضافة منتج جديد';
-            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('prodStock').value = "false";
+            document.getElementById('prodIsOffer').value = "false";
+            document.getElementById('saveProdBtn').innerText = "➕ إضافة منتج جديد";
+            document.getElementById('cancelEditBtn').style.display = "none";
         }
 
-        async function deleteProduct(idx) {
-            if (confirm('⚠️ هل أنت متأكد من حذف هذا المنتج؟')) {
-                allProducts.splice(idx, 1);
-                await saveDataToCloud();
-                renderProductsTable();
-            }
-        }
+        async function saveProduct() {
+            const idx = parseInt(document.getElementById('editIndex').value, 10);
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const cost = parseFloat(document.getElementById('prodCost').value);
+            const oldPriceRaw = document.getElementById('prodOldPrice').value.trim();
+            const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : null;
+            const category = document.getElementById('prodCategory').value;
+            const image = document.getElementById('prodImage').value.trim() || DEFAULT_PROD_IMAGE;
+            const outOfStock = document.getElementById('prodStock').value === "true";
+            const isOffer = document.getElementById('prodIsOffer').value === "true";
 
-        function renderProductsTable() {
-            let tbody = document.getElementById('productsTableBody');
-            if (allProducts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">لا توجد منتجات مسجلة حالياً.</td></tr>`;
+            if (!name || isNaN(price)) {
+                alert('⚠️ يرجى إدخال اسم المنتج وسعر البيع.');
                 return;
             }
 
-            let html = '';
-            allProducts.forEach((p, idx) => {
-                let profitMargin = p.price - (p.cost || (p.price * 0.8));
-                let stockBadge = p.outOfStock ? '<span style="color:#ef4444; font-weight:700;">🔴 نفذت</span>' : '<span style="color:#10b981; font-weight:700;">🟢 متوفر</span>';
-                let offerBadge = p.isOffer ? ' 🔥' : '';
+            const prodObj = {
+                name,
+                price,
+                cost: isNaN(cost) ? Math.round(price * 0.78) : cost,
+                oldPrice,
+                category,
+                image,
+                outOfStock,
+                isOffer
+            };
 
-                html += `
+            if (idx >= 0 && allProducts[idx]) {
+                allProducts[idx] = prodObj;
+            } else {
+                allProducts.push(prodObj);
+            }
+
+            resetProductForm();
+            renderProductsTable();
+            await pushCloudState();
+        }
+
+        async function deleteProduct(idx) {
+            if (!confirm('هل تريد حذف هذا المنتج؟')) return;
+            allProducts.splice(idx, 1);
+            renderProductsTable();
+            await pushCloudState();
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            if (!allProducts.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = allProducts.map((p, idx) => {
+                const costVal = parseFloat(p.cost) || 0;
+                const margin = (parseFloat(p.price) || 0) - costVal;
+                const statusBadge = p.outOfStock
+                    ? `<span style="color:#dc2626; font-weight:700;">🔴 نفذت الكمية</span>`
+                    : `<span style="color:#059669; font-weight:700;">🟢 متوفر</span>`;
+                return `
                     <tr>
-                        <td><b>#${idx + 1}</b></td>
-                        <td><b>${p.name}</b>${offerBadge}</td>
+                        <td>${idx + 1}</td>
+                        <td><b>${p.name}</b> ${p.isOffer ? '🔥' : ''}</td>
                         <td>${p.price} ج.م</td>
-                        <td style="color:var(--secondary); font-weight:bold;">+${Math.round(profitMargin)} ج.م</td>
-                        <td style="font-size:13px; color:var(--text-muted);">${p.category || 'عام'}</td>
-                        <td>${stockBadge}</td>
+                        <td>${margin.toFixed(1)} ج.م</td>
+                        <td>${p.category || '-'}</td>
+                        <td>${statusBadge}</td>
                         <td>
-                            <button class="btn" onclick="editProduct(${idx})" style="padding:4px 8px; font-size:12px; margin-left:4px;">تعديل</button>
-                            <button class="btn" onclick="deleteProduct(${idx})" style="background:#ef4444; padding:4px 8px; font-size:12px;">حذف</button>
+                            <div class="action-group">
+                                <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editProduct(${idx})">تعديل</button>
+                                <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteProduct(${idx})">حذف</button>
+                            </div>
                         </td>
                     </tr>
                 `;
+            }).join('');
+        }
+
+        async function updateOrderStatus(orderIdx, newStatus) {
+            if (!allSales[orderIdx]) return;
+            allSales[orderIdx].status = newStatus;
+            updateStatsAndKpis();
+            renderSalesTable();
+            await pushCloudState();
+        }
+
+        async function assignOrderCaptain(orderIdx, capName) {
+            if (!allSales[orderIdx]) return;
+            allSales[orderIdx].assignedCaptain = capName;
+            renderCaptainsTable();
+            renderSalesTable();
+            await pushCloudState();
+        }
+
+        function notifyCustomerWhatsApp(orderIdx) {
+            const sale = allSales[orderIdx];
+            if (!sale) return;
+            const cleanPhone = (sale.customerPhone || '').replace(/\D/g, '');
+            const targetPhone = cleanPhone.startsWith('2') ? cleanPhone : (cleanPhone ? '2' + cleanPhone : '');
+            const text = `مرحباً ${sale.customerName || 'عميلنا العزيز'} 👋\nتحديث بخصوص طلبك رقم #${sale.orderId || ''} من منصة جاهز:\nالحالة الحالية: ${sale.status || 'قيد التجهيز'}\nالكابتن المسند: ${sale.assignedCaptain || 'جاري التعيين'}`;
+            const url = targetPhone
+                ? `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`
+                : `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function renderSalesTable() {
+            const tbody = document.getElementById('salesTableBody');
+            const filterVal = document.getElementById('salesFilterSelect')?.value || 'all';
+            const now = new Date();
+
+            const list = allSales.map((s, realIdx) => ({ s, realIdx })).filter(({ s }) => {
+                if (filterVal !== 'today') return true;
+                if (!s.timestamp) return false;
+                const d = new Date(s.timestamp);
+                return d.getFullYear() === now.getFullYear() &&
+                       d.getMonth() === now.getMonth() &&
+                       d.getDate() === now.getDate();
             });
-            tbody.innerHTML = html;
+
+            if (!list.length) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>`;
+                return;
+            }
+
+            const captainOptions = [`<option value="">-- اختر كابتن --</option>`]
+                .concat(allCaptains.map(c => `<option value="${c.name}">${c.name}</option>`))
+                .join('');
+
+            tbody.innerHTML = list.map(({ s, realIdx }) => {
+                const dtStr = s.timestamp ? new Date(s.timestamp).toLocaleString('ar-EG') : '-';
+                const capSelectHtml = `
+                    <select onchange="assignOrderCaptain(${realIdx}, this.value)" class="filter-select">
+                        ${captainOptions.replace(`value="${s.assignedCaptain || ''}"`, `value="${s.assignedCaptain || ''}" selected`)}
+                    </select>
+                `;
+                const statuses = ["قيد الانتظار ⏳", "جاري التجهيز 👨‍🍳", "خرج للتوصيل 🛵", "تم التسليم ✅", "ملغي ❌"];
+                const statusSelectHtml = `
+                    <select onchange="updateOrderStatus(${realIdx}, this.value)" class="filter-select">
+                        ${statuses.map(st => `<option value="${st}" ${s.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+                    </select>
+                `;
+                return `
+                    <tr>
+                        <td><b>#${s.orderId || '-'}</b></td>
+                        <td>${dtStr}</td>
+                        <td><b>${s.customerName || '-'}</b></td>
+                        <td>${s.customerPhone || '-'}<br><small style="color:var(--text-muted);">${s.customerAddress || ''}</small></td>
+                        <td><b>${(parseFloat(s.total) || 0).toLocaleString('ar-EG')} ج.م</b><br><small style="color:var(--text-muted);">${s.paymentMethod || ''}</small></td>
+                        <td>${capSelectHtml}</td>
+                        <td>${statusSelectHtml}</td>
+                        <td><button class="btn-sm" style="background:#25d366; color:#fff;" onclick="notifyCustomerWhatsApp(${realIdx})">واتساب 📱</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function printSalesReport() {
+            window.print();
         }
     </script>
 </body>
-</html>ذذذذذ
+</html>
