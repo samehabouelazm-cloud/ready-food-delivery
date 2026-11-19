@@ -112,19 +112,22 @@
 
         .cat-header-title-wrap { display: flex; align-items: center; gap: 14px; min-width: 0; }
         .cat-header-title-wrap span { line-height: 1.35; }
+        /* حجم موحد كبير ومميز لجميع شعارات الأقسام الرئيسية */
         .cat-logo-img {
-            width: 56px; height: 56px; border-radius: 14px; object-fit: cover;
-            border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18); background: #fff; flex-shrink: 0;
-        }
-        /* تكبير لوجو هابي ميلز ليشمل المربع الخاص به باحترافية */
-        .main-cat-card:nth-child(2) .cat-logo-img {
             width: 74px; height: 74px; border-radius: 16px; object-fit: cover;
-            padding: 0; border: 2px solid #ef4444; background: #fff;
+            padding: 0; border: 2px solid #bae6fd; background: #fff;
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.2);
+            transition: transform 0.25s ease, box-shadow 0.25s ease; flex-shrink: 0;
+        }
+        .main-cat-header:hover .cat-logo-img {
+            transform: scale(1.04);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.28);
+        }
+        .main-cat-card:nth-child(2) .cat-logo-img {
+            border-color: #ef4444;
             box-shadow: 0 6px 16px rgba(220, 38, 38, 0.24);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         .main-cat-card:nth-child(2) .main-cat-header:hover .cat-logo-img {
-            transform: scale(1.04);
             box-shadow: 0 8px 20px rgba(220, 38, 38, 0.32);
         }
         .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; flex-shrink: 0; margin-right: 10px; }
@@ -374,6 +377,8 @@
         const FIXED_WHATSAPP_NUMBER = "201042377974"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
         const HAPPY_MEALS_LOGO = "https://i.postimg.cc/3rGmm6vq/lwjw-haby-mylz.jpg";
+        const FOUL_TAMEYA_LOGO = "https://i.postimg.cc/C5Z4yLPv/aʿlan-ftwr-jahz-balfwl.png";
+        const GRILLED_FISH_LOGO = "https://i.postimg.cc/2y47jXY7/aʿlan-smkt-mshwyt-mn-jahz.png";
 
         let allProducts = [];
         let allSales = [];
@@ -386,8 +391,8 @@
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
             "🍗 قسم هابي ميلز (الوجبات والمشويات)": HAPPY_MEALS_LOGO,
-            "🍳 قسم فول وطعمية": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=100",
-            "🐟 قسم سمكة مشوية": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=100"
+            "🍳 قسم فول وطعمية": FOUL_TAMEYA_LOGO,
+            "🐟 قسم سمكة مشوية": GRILLED_FISH_LOGO
         };
 
         const storeHierarchy = {
