@@ -112,8 +112,14 @@
 
         .cat-header-title-wrap { display: flex; align-items: center; gap: 14px; }
         .cat-logo-img {
-            width: 52px; height: 52px; border-radius: 12px; object-fit: cover;
+            width: 56px; height: 56px; border-radius: 14px; object-fit: cover;
             border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18); background: #fff; flex-shrink: 0;
+        }
+        /* تنسيق مميز لشعار قسم هابي ميلز */
+        .main-cat-card:nth-child(2) .cat-logo-img {
+            width: 64px; height: 64px; border-radius: 16px; object-fit: contain;
+            padding: 3px; border: 2px solid #fca5a5; background: #fff;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.18);
         }
         .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; }
         .main-cat-card.active .main-cat-arrow { transform: rotate(180deg); }
