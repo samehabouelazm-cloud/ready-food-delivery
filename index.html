@@ -110,18 +110,24 @@
         }
         .main-cat-header:hover { background: #e0f2fe; }
 
-        .cat-header-title-wrap { display: flex; align-items: center; gap: 14px; }
+        .cat-header-title-wrap { display: flex; align-items: center; gap: 14px; min-width: 0; }
+        .cat-header-title-wrap span { line-height: 1.35; }
         .cat-logo-img {
             width: 56px; height: 56px; border-radius: 14px; object-fit: cover;
             border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.18); background: #fff; flex-shrink: 0;
         }
-        /* تنسيق مميز لشعار قسم هابي ميلز */
+        /* تكبير لوجو هابي ميلز ليشمل المربع الخاص به باحترافية */
         .main-cat-card:nth-child(2) .cat-logo-img {
-            width: 64px; height: 64px; border-radius: 16px; object-fit: contain;
-            padding: 3px; border: 2px solid #fca5a5; background: #fff;
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.18);
+            width: 74px; height: 74px; border-radius: 16px; object-fit: cover;
+            padding: 0; border: 2px solid #ef4444; background: #fff;
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.24);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; }
+        .main-cat-card:nth-child(2) .main-cat-header:hover .cat-logo-img {
+            transform: scale(1.04);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.32);
+        }
+        .main-cat-arrow { font-size: 14px; transition: transform 0.3s ease; flex-shrink: 0; margin-right: 10px; }
         .main-cat-card.active .main-cat-arrow { transform: rotate(180deg); }
 
         .main-cat-content { display: none; padding: 16px; background: #fafafa; border-top: 1px solid #e2e8f0; }
