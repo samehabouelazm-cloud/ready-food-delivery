@@ -22,6 +22,7 @@
             --radius-sm: 8px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
         }
 
         * {
@@ -75,12 +76,103 @@
             padding: 0 16px;
         }
 
+        /* شريط التحكم بالفترة الزمنية والبدء من اليوم للبطاقات الأربع */
+        .kpi-section-wrapper {
+            margin-bottom: 22px;
+        }
+
+        .kpi-header-bar {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .kpi-start-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .kpi-start-badge {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .kpi-toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .kpi-period-tabs {
+            display: inline-flex;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            gap: 3px;
+        }
+
+        .kpi-period-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 5px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .kpi-period-btn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+        }
+
+        .kpi-edit-trigger {
+            background: #0f172a;
+            color: #fff;
+            border: none;
+            padding: 7px 13px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s ease;
+        }
+
+        .kpi-edit-trigger:hover {
+            background: #1e293b;
+        }
+
         /* لوحة مؤشرات الأداء KPIs للإدارة */
         .kpi-dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
             gap: 15px;
-            margin-bottom: 22px;
         }
 
         .kpi-card {
@@ -91,13 +183,39 @@
             border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: space-between;
+            gap: 14px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .kpi-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
+        }
+
+        .kpi-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .kpi-info h4 {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+            font-weight: 700;
+        }
+
+        .kpi-info span {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
         }
 
         .kpi-icon {
@@ -110,19 +228,6 @@
             justify-content: center;
             border-radius: 12px;
             flex-shrink: 0;
-        }
-
-        .kpi-info h4 {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            font-weight: 700;
-        }
-
-        .kpi-info span {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-dark);
         }
 
         .stats-grid {
@@ -384,6 +489,55 @@
             font-weight: 700;
         }
 
+        /* نافذة تعديل المؤشرات الأربعة يومياً / شهرياً / سنوياً */
+        .kpi-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 16px;
+        }
+
+        .kpi-modal-card {
+            background: var(--surface);
+            width: 100%;
+            max-width: 480px;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .kpi-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .kpi-modal-head h3 {
+            margin-bottom: 0;
+            font-size: 17px;
+            color: var(--primary-dark);
+        }
+
+        .kpi-modal-close {
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+
         #authOverlay {
             position: fixed;
             top: 0;
@@ -445,12 +599,14 @@
 
         @media print {
             #authOverlay,
+            .kpi-modal-overlay,
             .header,
             .btn,
             .btn-sm,
             .filter-controls,
             .captain-form-box,
-            .drawer-box .form-row {
+            .drawer-box .form-row,
+            .kpi-toolbar-actions {
                 display: none !important;
             }
             body {
@@ -458,7 +614,8 @@
                 padding-bottom: 0;
             }
             .card,
-            .kpi-card {
+            .kpi-card,
+            .kpi-header-bar {
                 box-shadow: none;
                 border: 1px solid #cbd5e1;
                 break-inside: avoid;
@@ -490,37 +647,58 @@
 
     <div class="container">
 
-        <!-- لوحة مؤشرات الأداء الحصرية للإدارة (KPI Dashboard) -->
-        <div class="kpi-dashboard">
-            <div class="kpi-card">
-                <div class="kpi-icon">📦</div>
-                <div class="kpi-info">
-                    <h4>إجمالي الطلبات</h4>
-                    <span id="kpiTotalOrders">0</span>
+        <!-- لوحة مؤشرات الأداء الحصرية للإدارة (KPI Dashboard) مع التعديل يومياً / شهرياً / سنوياً بدءاً من اليوم -->
+        <section class="kpi-section-wrapper" aria-label="لوحة مؤشرات الأداء">
+            <div class="kpi-header-bar">
+                <div class="kpi-start-info">
+                    <span>📌 المؤشرات الزمنية</span>
+                    <span class="kpi-start-badge" id="kpiStartFromBadge">بدء من اليوم: 20 نوفمبر 2026</span>
+                </div>
+                <div class="kpi-toolbar-actions">
+                    <div class="kpi-period-tabs" role="tablist" aria-label="اختيار الفترة الزمنية">
+                        <button type="button" class="kpi-period-btn active" id="kpiBtn-daily" onclick="switchAdminKpiPeriod('daily')">يومي</button>
+                        <button type="button" class="kpi-period-btn" id="kpiBtn-monthly" onclick="switchAdminKpiPeriod('monthly')">شهري</button>
+                        <button type="button" class="kpi-period-btn" id="kpiBtn-yearly" onclick="switchAdminKpiPeriod('yearly')">سنوي</button>
+                    </div>
+                    <button type="button" class="kpi-edit-trigger" onclick="openAdminKpiEditModal()">✏️ تعديل المؤشرات</button>
                 </div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">👥</div>
-                <div class="kpi-info">
-                    <h4>العملاء والزوار</h4>
-                    <span id="kpiTotalCustomers">0</span>
+
+            <div class="kpi-dashboard">
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h4>إجمالي الإيرادات</h4>
+                        <span id="kpiTotalRevenue" style="color: var(--primary);">0 ج.م</span>
+                        <small class="kpi-sub" id="kpiRevenueSub">يومي • بدء من اليوم</small>
+                    </div>
+                    <div class="kpi-icon">💰</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h4>متوسط سرعة التوصيل</h4>
+                        <span id="kpiDeliverySpeed" style="color: var(--secondary);">25 دقيقة</span>
+                        <small class="kpi-sub" id="kpiSpeedSub">يومي • بدء من اليوم</small>
+                    </div>
+                    <div class="kpi-icon">⚡</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h4>العملاء والزوار</h4>
+                        <span id="kpiTotalCustomers">0</span>
+                        <small class="kpi-sub" id="kpiCustomersSub">يومي • بدء من اليوم</small>
+                    </div>
+                    <div class="kpi-icon">👥</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h4>إجمالي الطلبات</h4>
+                        <span id="kpiTotalOrders">0</span>
+                        <small class="kpi-sub" id="kpiOrdersSub">يومي • بدء من اليوم</small>
+                    </div>
+                    <div class="kpi-icon">📦</div>
                 </div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">⚡</div>
-                <div class="kpi-info">
-                    <h4>متوسط سرعة التوصيل</h4>
-                    <span style="color: var(--secondary);">25 دقيقة</span>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">💰</div>
-                <div class="kpi-info">
-                    <h4>إجمالي الإيرادات</h4>
-                    <span id="kpiTotalRevenue" style="color: var(--primary);">0 ج.م</span>
-                </div>
-            </div>
-        </div>
+        </section>
 
         <!-- قسم الإحصائيات والتقارير المالية اليومية -->
         <div class="stats-grid">
@@ -813,11 +991,55 @@
 
     </div>
 
+    <!-- نافذة تعديل المؤشرات الأربعة (يومي / شهري / سنوي بدءاً من اليوم) -->
+    <div class="kpi-modal-overlay" id="adminKpiEditModal">
+        <div class="kpi-modal-card">
+            <div class="kpi-modal-head">
+                <h3>✏️ تعديل المؤشرات (يومي / شهري / سنوي)</h3>
+                <span class="kpi-modal-close" onclick="closeAdminKpiEditModal()">✕</span>
+            </div>
+
+            <div class="form-group">
+                <label>الفترة الزمنية:</label>
+                <select id="adminKpiPeriodSelect" onchange="populateAdminKpiForm()">
+                    <option value="daily">يومي</option>
+                    <option value="monthly">شهري</option>
+                    <option value="yearly">سنوي</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>إجمالي الإيرادات (ج.م):</label>
+                <input type="number" step="any" id="adminKpiRevenueInput" placeholder="مثال: 1265">
+            </div>
+
+            <div class="form-group">
+                <label>متوسط سرعة التوصيل (دقيقة):</label>
+                <input type="number" step="any" id="adminKpiSpeedInput" placeholder="مثال: 25">
+            </div>
+
+            <div class="form-group">
+                <label>العملاء والزوار:</label>
+                <input type="number" step="1" id="adminKpiCustomersInput" placeholder="مثال: 3">
+            </div>
+
+            <div class="form-group">
+                <label>إجمالي الطلبات:</label>
+                <input type="number" step="1" id="adminKpiOrdersInput" placeholder="مثال: 4">
+            </div>
+
+            <button type="button" class="btn" style="width:100%; margin-top:6px;" onclick="saveAdminKpiOverrides()">💾 حفظ تعديل المؤشرات</button>
+            <button type="button" class="btn btn-secondary-muted" style="width:100%; margin:8px 0 0 0;" onclick="resetAdminKpiPeriod()">🔄 استعادة الحساب التلقائي لهذه الفترة</button>
+            <button type="button" class="btn-sm" style="width:100%; margin-top:8px; padding:10px; background:#fee2e2; color:#dc2626;" onclick="closeAdminKpiEditModal()">إغلاق</button>
+        </div>
+    </div>
+
     <script>
         const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890";
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         const DEFAULT_PROD_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
         const AUTH_SESSION_KEY = "gahiz_admin_auth_v1";
+        const ADMIN_KPI_STORAGE_KEY = "gahiz_admin_kpi_overrides_v1";
 
         let allProducts = [
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
@@ -862,13 +1084,188 @@
             { name: "سعيد علي (سمكة مشوية)", phone: "01077778888", section: "🐟 قسم سمكة مشوية", shift: "🌙 شفت مسائي", walletAccount: "01077778888" }
         ];
 
+        let adminKpiStartDate = new Date().toISOString();
+        let activeAdminKpiPeriod = "daily";
+        let adminKpiOverrides = {
+            daily: { revenue: null, speed: null, customers: null, orders: null },
+            monthly: { revenue: null, speed: null, customers: null, orders: null },
+            yearly: { revenue: null, speed: null, customers: null, orders: null }
+        };
+
+        const adminPeriodMeta = {
+            daily: { label: "يومي" },
+            monthly: { label: "شهري" },
+            yearly: { label: "سنوي" }
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_SESSION_KEY) === "1") {
                 document.getElementById('authOverlay').style.display = 'none';
             }
+            loadAdminKpiOverrides();
             renderAllSections();
             syncAllData(false);
         });
+
+        function formatStartFromTodayLabel(isoStr) {
+            const d = isoStr ? new Date(isoStr) : new Date();
+            const safeDate = isNaN(d.getTime()) ? new Date() : d;
+            const formatted = safeDate.toLocaleDateString('ar-EG', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            return `بدء من اليوم: ${formatted}`;
+        }
+
+        function loadAdminKpiOverrides() {
+            try {
+                const raw = localStorage.getItem(ADMIN_KPI_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.startDate) adminKpiStartDate = parsed.startDate;
+                        ["daily", "monthly", "yearly"].forEach(p => {
+                            if (parsed[p] && typeof parsed[p] === 'object') {
+                                adminKpiOverrides[p] = {
+                                    revenue: parsed[p].revenue ?? null,
+                                    speed: parsed[p].speed ?? null,
+                                    customers: parsed[p].customers ?? null,
+                                    orders: parsed[p].orders ?? null
+                                };
+                            }
+                        });
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function saveAdminKpiOverridesLocal() {
+            try {
+                localStorage.setItem(ADMIN_KPI_STORAGE_KEY, JSON.stringify({
+                    startDate: adminKpiStartDate,
+                    daily: adminKpiOverrides.daily,
+                    monthly: adminKpiOverrides.monthly,
+                    yearly: adminKpiOverrides.yearly
+                }));
+            } catch (_) {}
+        }
+
+        function filterSalesFromStartDate(period) {
+            if (!Array.isArray(allSales) || allSales.length === 0) return [];
+            const startBoundary = new Date(adminKpiStartDate);
+            const startDay = new Date(startBoundary.getFullYear(), startBoundary.getMonth(), startBoundary.getDate());
+            const now = new Date();
+
+            return allSales.filter(sale => {
+                if (!sale || !sale.timestamp) return false;
+                const d = new Date(sale.timestamp);
+                if (isNaN(d.getTime())) return false;
+                if (d < startDay) return false;
+
+                if (period === "daily") {
+                    return d.getFullYear() === now.getFullYear() &&
+                           d.getMonth() === now.getMonth() &&
+                           d.getDate() === now.getDate();
+                }
+                if (period === "monthly") {
+                    return d.getFullYear() === now.getFullYear() &&
+                           d.getMonth() === now.getMonth();
+                }
+                return d.getFullYear() === now.getFullYear();
+            });
+        }
+
+        function computeAutoAdminKpis(period) {
+            const scopedSales = filterSalesFromStartDate(period);
+            const ordersCount = scopedSales.length;
+            const revenueSum = scopedSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+
+            const speeds = scopedSales
+                .map(s => parseFloat(s.deliveryMinutes || s.avgDeliveryTime || s.deliveryTime))
+                .filter(v => !isNaN(v) && v > 0);
+            const avgSpeed = speeds.length > 0
+                ? Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length)
+                : 25;
+
+            const uniqueCustomers = new Set(
+                scopedSales.map(s => (s.customerPhone || s.customerName || "").trim()).filter(Boolean)
+            ).size;
+
+            return {
+                revenue: revenueSum,
+                speed: avgSpeed,
+                customers: uniqueCustomers,
+                orders: ordersCount
+            };
+        }
+
+        function switchAdminKpiPeriod(period) {
+            if (!["daily", "monthly", "yearly"].includes(period)) return;
+            activeAdminKpiPeriod = period;
+            ["daily", "monthly", "yearly"].forEach(p => {
+                const btn = document.getElementById(`kpiBtn-${p}`);
+                if (btn) btn.classList.toggle("active", p === period);
+            });
+            updateStatsAndKpis();
+        }
+
+        function openAdminKpiEditModal() {
+            const sel = document.getElementById("adminKpiPeriodSelect");
+            if (sel) sel.value = activeAdminKpiPeriod;
+            populateAdminKpiForm();
+            document.getElementById("adminKpiEditModal").style.display = "flex";
+        }
+
+        function closeAdminKpiEditModal() {
+            document.getElementById("adminKpiEditModal").style.display = "none";
+        }
+
+        function populateAdminKpiForm() {
+            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
+            const autoVals = computeAutoAdminKpis(period);
+            const ov = adminKpiOverrides[period] || {};
+
+            document.getElementById("adminKpiRevenueInput").value =
+                (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? ov.revenue : autoVals.revenue;
+            document.getElementById("adminKpiSpeedInput").value =
+                (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? ov.speed : autoVals.speed;
+            document.getElementById("adminKpiCustomersInput").value =
+                (ov.customers !== null && ov.customers !== undefined && ov.customers !== "") ? ov.customers : autoVals.customers;
+            document.getElementById("adminKpiOrdersInput").value =
+                (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? ov.orders : autoVals.orders;
+        }
+
+        async function saveAdminKpiOverrides() {
+            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
+            const revRaw = document.getElementById("adminKpiRevenueInput").value.trim();
+            const spdRaw = document.getElementById("adminKpiSpeedInput").value.trim();
+            const custRaw = document.getElementById("adminKpiCustomersInput").value.trim();
+            const ordRaw = document.getElementById("adminKpiOrdersInput").value.trim();
+
+            adminKpiOverrides[period] = {
+                revenue: revRaw === "" ? null : parseFloat(revRaw),
+                speed: spdRaw === "" ? null : parseFloat(spdRaw),
+                customers: custRaw === "" ? null : parseInt(custRaw, 10),
+                orders: ordRaw === "" ? null : parseInt(ordRaw, 10)
+            };
+
+            saveAdminKpiOverridesLocal();
+            switchAdminKpiPeriod(period);
+            closeAdminKpiEditModal();
+            await pushCloudState();
+            alert('✅ تم حفظ تعديل المؤشرات بنجاح!');
+        }
+
+        async function resetAdminKpiPeriod() {
+            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
+            adminKpiOverrides[period] = { revenue: null, speed: null, customers: null, orders: null };
+            saveAdminKpiOverridesLocal();
+            populateAdminKpiForm();
+            switchAdminKpiPeriod(period);
+            await pushCloudState();
+            alert('🔄 تمت استعادة الحساب التلقائي لهذه الفترة.');
+        }
 
         function checkAdminPassword() {
             const input = document.getElementById('adminPasswordInput').value;
@@ -899,6 +1296,20 @@
                         if (Array.isArray(data.sales)) allSales = data.sales;
                         if (Array.isArray(data.captains) && data.captains.length > 0) allCaptains = data.captains;
                         if (Array.isArray(data.cashiers) && data.cashiers.length > 0) allCashiers = data.cashiers;
+                        if (data.adminKpiConfig && typeof data.adminKpiConfig === 'object') {
+                            if (data.adminKpiConfig.startDate) adminKpiStartDate = data.adminKpiConfig.startDate;
+                            ["daily", "monthly", "yearly"].forEach(p => {
+                                if (data.adminKpiConfig[p]) {
+                                    adminKpiOverrides[p] = {
+                                        revenue: data.adminKpiConfig[p].revenue ?? null,
+                                        speed: data.adminKpiConfig[p].speed ?? null,
+                                        customers: data.adminKpiConfig[p].customers ?? null,
+                                        orders: data.adminKpiConfig[p].orders ?? null
+                                    };
+                                }
+                            });
+                            saveAdminKpiOverridesLocal();
+                        }
                     }
                     localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
                         products: allProducts,
@@ -930,6 +1341,7 @@
                 captains: allCaptains,
                 cashiers: allCashiers
             }));
+            saveAdminKpiOverridesLocal();
             try {
                 let cloudObj = {};
                 const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
@@ -943,6 +1355,12 @@
                 cloudObj.sales = allSales;
                 cloudObj.captains = allCaptains;
                 cloudObj.cashiers = allCashiers;
+                cloudObj.adminKpiConfig = {
+                    startDate: adminKpiStartDate,
+                    daily: adminKpiOverrides.daily,
+                    monthly: adminKpiOverrides.monthly,
+                    yearly: adminKpiOverrides.yearly
+                };
 
                 await fetch(API_URL, {
                     method: 'POST',
@@ -961,6 +1379,34 @@
         }
 
         function updateStatsAndKpis() {
+            const startBadgeEl = document.getElementById('kpiStartFromBadge');
+            if (startBadgeEl) startBadgeEl.innerText = formatStartFromTodayLabel(adminKpiStartDate);
+
+            const period = activeAdminKpiPeriod;
+            const periodText = (adminPeriodMeta[period] || adminPeriodMeta.daily).label;
+            const autoKpis = computeAutoAdminKpis(period);
+            const ov = adminKpiOverrides[period] || {};
+
+            const revVal = (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? Number(ov.revenue) : autoKpis.revenue;
+            const spdVal = (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? Number(ov.speed) : autoKpis.speed;
+            const custVal = (ov.customers !== null && ov.customers !== undefined && ov.customers !== "") ? Number(ov.customers) : autoKpis.customers;
+            const ordVal = (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? Number(ov.orders) : autoKpis.orders;
+
+            document.getElementById('kpiTotalRevenue').innerText = `${revVal.toLocaleString('ar-EG')} ج.م`;
+            document.getElementById('kpiDeliverySpeed').innerText = `${spdVal.toLocaleString('ar-EG')} دقيقة`;
+            document.getElementById('kpiTotalCustomers').innerText = custVal.toLocaleString('ar-EG');
+            document.getElementById('kpiTotalOrders').innerText = ordVal.toLocaleString('ar-EG');
+
+            const revCustom = ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "";
+            const spdCustom = ov.speed !== null && ov.speed !== undefined && ov.speed !== "";
+            const custCustom = ov.customers !== null && ov.customers !== undefined && ov.customers !== "";
+            const ordCustom = ov.orders !== null && ov.orders !== undefined && ov.orders !== "";
+
+            document.getElementById('kpiRevenueSub').innerText = `${periodText} • ${revCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
+            document.getElementById('kpiSpeedSub').innerText = `${periodText} • ${spdCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
+            document.getElementById('kpiCustomersSub').innerText = `${periodText} • ${custCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
+            document.getElementById('kpiOrdersSub').innerText = `${periodText} • ${ordCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
+
             const ordersCount = allSales.length;
             const totalRevenue = allSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
             const estimatedProfit = allSales.reduce((sum, s) => {
@@ -969,14 +1415,6 @@
                 const netItems = Math.max(0, orderTotal - fee);
                 return sum + (netItems * 0.22);
             }, 0);
-
-            const uniqueCustomers = new Set(
-                allSales.map(s => (s.customerPhone || s.customerName || "").trim()).filter(Boolean)
-            ).size;
-
-            document.getElementById('kpiTotalOrders').innerText = ordersCount.toLocaleString('ar-EG');
-            document.getElementById('kpiTotalCustomers').innerText = uniqueCustomers.toLocaleString('ar-EG');
-            document.getElementById('kpiTotalRevenue').innerText = `${totalRevenue.toLocaleString('ar-EG')} ج.م`;
 
             document.getElementById('statTotalSales').innerText = `${totalRevenue.toLocaleString('ar-EG')} ج.م`;
             document.getElementById('statTotalProfit').innerText = `${Math.round(estimatedProfit).toLocaleString('ar-EG')} ج.م`;
