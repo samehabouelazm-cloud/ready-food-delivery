@@ -88,7 +88,7 @@
             color: #fff;
             border-radius: var(--radius-lg);
             padding: 20px 24px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -108,11 +108,62 @@
             opacity: 0.95;
         }
 
+        .custom-order-banner {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 1px solid #fcd34d;
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .custom-order-banner h4 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #92400e;
+        }
+
+        .custom-order-banner p {
+            font-size: 12px;
+            color: #78350f;
+            font-weight: 600;
+        }
+
+        .delivery-rates-strip {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .delivery-rate-tag {
+            background: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
         .store-controls {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             align-items: center;
         }
 
@@ -244,6 +295,18 @@
             border-bottom: 1px solid var(--border-color);
             gap: 10px;
             flex-wrap: wrap;
+        }
+
+        .cart-summary-box {
+            margin-top: 14px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         /* شريط التحكم بالفترة الزمنية والبدء من اليوم للبطاقات الأربع */
@@ -522,7 +585,8 @@
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 10px 12px;
             border-radius: var(--radius-sm);
@@ -534,7 +598,8 @@
         }
 
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             border-color: var(--primary);
             background: #ffffff;
         }
@@ -705,7 +770,7 @@
             font-weight: 700;
         }
 
-        /* نوافذ منبثقة للإدارة وتعديل الطلبات */
+        /* نوافذ منبثقة للإدارة وتعديل الطلبات والطلب الخاص */
         .kpi-modal-overlay {
             display: none;
             position: fixed;
@@ -854,7 +919,7 @@
     <header class="header">
         <div class="brand">
             <h2 id="headerTitleText">🛒 جاهز - متجر العملاء والطلبات</h2>
-            <small id="headerSubText">توصيل سريع داخل بلطيم • متابعة محدثة على مدار الساعة</small>
+            <small id="headerSubText">توصيل سريع داخل وخارج بلطيم • متابعة محدثة على مدار الساعة</small>
         </div>
         <div class="header-actions">
             <button type="button" onclick="switchViewMode('customer')" id="navCustomerBtn" style="background:#0284c7; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">🛒 صفحة العملاء</button>
@@ -869,10 +934,30 @@
         <section class="store-hero">
             <div>
                 <h1>أهلاً بك في متجر جاهز 🛒</h1>
-                <p>اطلب احتياجاتك من السوبر ماركت، هابي ميلز، فول وطعمية، وسمكة مشوية — التوصيل السريع لحد باب بيتك.</p>
+                <p>اطلب احتياجاتك من السوبر ماركت، هابي ميلز، فول وطعمية، وسمكة مشوية — التوصيل داخل وخارج بلطيم.</p>
             </div>
-            <button type="button" class="btn" style="background:#10b981;" onclick="scrollToCart()">🛍️ السلة (<span id="customerCartCountBadge">0</span>)</button>
+            <div class="action-group">
+                <button type="button" class="btn" style="background:#f59e0b; color:#0f172a;" onclick="openSpecialRequestModal()">📝 اطلب اللي تحتاجه (طلب خاص)</button>
+                <button type="button" class="btn" style="background:#10b981;" onclick="scrollToCart()">🛍️ السلة (<span id="customerCartCountBadge">0</span>)</button>
+            </div>
         </section>
+
+        <!-- بانر طلب خاص: اطلب اللي تحتاجه -->
+        <section class="custom-order-banner" aria-label="اطلب اللي تحتاجه طلب خاص">
+            <div>
+                <h4>📝 اطلب اللي تحتاجه (طلب خاص)</h4>
+                <p>مش لاقي صنف معين أو محتاج طلب مخصص من أي مكان؟ اكتب طلبك وسنوفّره ونوصله لك.</p>
+            </div>
+            <button type="button" class="btn" style="background:#d97706;" onclick="openSpecialRequestModal()">➕ إضافة طلب خاص للسلة</button>
+        </section>
+
+        <div class="delivery-rates-strip">
+            <span>🛵 أسعار التوصيل المعتمدة:</span>
+            <span class="delivery-rate-tag">داخل مدينة بلطيم: 20 ج.م</span>
+            <span class="delivery-rate-tag">الشهابية / البرلس: 35 ج.م</span>
+            <span class="delivery-rate-tag">الرياض: 45 ج.م</span>
+            <span class="delivery-rate-tag">كفر الشيخ: 60 ج.م</span>
+        </div>
 
         <div class="store-controls">
             <input type="text" id="customerSearchInput" class="store-search" placeholder="ابحث عن منتج أو وجبة..." oninput="renderCustomerStore()">
@@ -890,12 +975,20 @@
         <div class="products-grid" id="customerProductsGrid"></div>
 
         <section id="customerCartSection" class="cart-panel">
-            <h3>🛍️ سلة الطلبات وإتمام الطلب</h3>
-            <div id="customerCartItems">
-                <p style="color:var(--text-muted); font-size:14px;">السلة فارغة حالياً — اختر منتجات من القائمة بالأعلى.</p>
+            <div class="card-header-flex">
+                <h3 style="margin-bottom:0;">🛍️ سلة الطلبات وإتمام الطلب</h3>
+                <button type="button" class="btn-sm" style="background:#fef3c7; color:#92400e; padding:8px 12px;" onclick="openSpecialRequestModal()">📝 + طلب خاص</button>
             </div>
-            <div style="margin-top:12px; font-weight:800; font-size:16px; color:var(--primary-dark);">
-                الإجمالي شامل التوصيل (20 ج.م): <span id="customerCartGrandTotal">0</span> ج.م
+            <div id="customerCartItems">
+                <p style="color:var(--text-muted); font-size:14px;">السلة فارغة حالياً — اختر منتجات من القائمة أو أضف طلباً خاصاً.</p>
+            </div>
+
+            <div class="cart-summary-box">
+                <div>قيمة المنتجات والطلبات الخاصة: <b id="customerItemsSubtotal">0</b> ج.م</div>
+                <div>رسوم التوصيل (<span id="customerSelectedZoneLabel">داخل مدينة بلطيم</span>): <b id="customerDeliveryFeeText">20</b> ج.م</div>
+                <div style="font-size:16px; color:var(--primary-dark); margin-top:4px;">
+                    الإجمالي النهائي: <span id="customerCartGrandTotal">20</span> ج.م
+                </div>
             </div>
 
             <div class="form-row" style="margin-top:16px;">
@@ -906,6 +999,15 @@
                 <div class="form-group">
                     <label>رقم الهاتف / الواتساب:</label>
                     <input type="tel" id="custOrderPhone" placeholder="01xxxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label>منطقة التوصيل (داخل / خارج بلطيم):</label>
+                    <select id="custDeliveryZone" onchange="renderCustomerCart()">
+                        <option value="داخل مدينة بلطيم|20">داخل مدينة بلطيم (20 ج.م)</option>
+                        <option value="الشهابية / البرلس|35">خارج بلطيم — الشهابية / البرلس (35 ج.م)</option>
+                        <option value="الرياض|45">خارج بلطيم — الرياض (45 ج.م)</option>
+                        <option value="كفر الشيخ|60">خارج بلطيم — كفر الشيخ (60 ج.م)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>العنوان التفصيلي:</label>
@@ -923,6 +1025,34 @@
             <button type="button" class="btn" style="background:#10b981;" onclick="submitCustomerOrder()">✅ تأكيد وإرسال الطلب</button>
         </section>
     </main>
+
+    <!-- نافذة اطلب اللي تحتاجه (طلب خاص) -->
+    <div class="kpi-modal-overlay" id="specialRequestModal">
+        <div class="kpi-modal-card">
+            <div class="kpi-modal-head">
+                <h3>📝 اطلب اللي تحتاجه (طلب خاص)</h3>
+                <span class="kpi-modal-close" onclick="closeSpecialRequestModal()">✕</span>
+            </div>
+
+            <div class="form-group">
+                <label>ما الذي تحتاجه؟ (اسم الصنف أو تفاصيل الطلب):</label>
+                <input type="text" id="specialReqName" placeholder="مثال: دواء معين، صنف سوبر ماركت، وجبة خاصة...">
+            </div>
+
+            <div class="form-group">
+                <label>ملاحظات إضافية أو اسم المكان / المحل (اختياري):</label>
+                <textarea id="specialReqNotes" rows="3" placeholder="اكتب أي تفاصيل تساعدنا في توفير طلبك بدقة..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>سعر تقديري متوقع (ج.م — اختياري):</label>
+                <input type="number" step="any" id="specialReqPrice" placeholder="0 (يتم تحديده عند التوفير إن تُرك 0)">
+            </div>
+
+            <button type="button" class="btn" style="width:100%; background:#d97706; margin-top:6px;" onclick="addSpecialRequestToCart()">➕ إضافة الطلب الخاص إلى السلة</button>
+            <button type="button" class="btn-sm" style="width:100%; margin-top:8px; padding:10px; background:#fee2e2; color:#dc2626;" onclick="closeSpecialRequestModal()">إغلاق</button>
+        </div>
+    </div>
 
     <!-- ==================== لوحة الإدارة ==================== -->
     <div id="adminView" class="container" style="display:none;">
@@ -1501,6 +1631,56 @@
             }, 60000);
         });
 
+        function openSpecialRequestModal() {
+            document.getElementById('specialReqName').value = '';
+            document.getElementById('specialReqNotes').value = '';
+            document.getElementById('specialReqPrice').value = '';
+            document.getElementById('specialRequestModal').style.display = 'flex';
+        }
+
+        function closeSpecialRequestModal() {
+            document.getElementById('specialRequestModal').style.display = 'none';
+        }
+
+        function addSpecialRequestToCart() {
+            const reqName = document.getElementById('specialReqName').value.trim();
+            const reqNotes = document.getElementById('specialReqNotes').value.trim();
+            const reqPriceVal = parseFloat(document.getElementById('specialReqPrice').value);
+
+            if (!reqName) {
+                alert('⚠️ يرجى كتابة اسم الصنف أو تفاصيل الطلب الخاص.');
+                return;
+            }
+
+            const price = !isNaN(reqPriceVal) && reqPriceVal > 0 ? reqPriceVal : 0;
+            const fullLabel = reqNotes
+                ? `طلب خاص: ${reqName} (${reqNotes})`
+                : `طلب خاص: ${reqName}`;
+
+            customerCart.push({
+                name: fullLabel,
+                price,
+                category: "طلب خاص",
+                isSpecialRequest: true,
+                qty: 1
+            });
+
+            closeSpecialRequestModal();
+            renderCustomerCart();
+            scrollToCart();
+        }
+
+        function getSelectedDeliveryZone() {
+            const raw = document.getElementById('custDeliveryZone')?.value || "داخل مدينة بلطيم|20";
+            const parts = raw.split("|");
+            const zone = parts[0] || "داخل مدينة بلطيم";
+            const fee = parseFloat(parts[1]);
+            return {
+                zone,
+                fee: isNaN(fee) ? 20 : fee
+            };
+        }
+
         function switchViewMode(mode) {
             const customerEl = document.getElementById('customerView');
             const adminEl = document.getElementById('adminView');
@@ -1525,7 +1705,7 @@
                 adminEl.style.display = 'none';
                 customerEl.style.display = 'block';
                 headerTitle.innerText = "🛒 جاهز - متجر العملاء والطلبات";
-                headerSub.innerText = "توصيل سريع داخل بلطيم • متابعة محدثة على مدار الساعة";
+                headerSub.innerText = "توصيل سريع داخل وخارج بلطيم • متابعة محدثة على مدار الساعة";
                 if (logoutBtn) logoutBtn.style.display = 'none';
                 recordCustomerPageVisit("صفحة العملاء", false);
                 renderCustomerStore();
@@ -1573,7 +1753,7 @@
             });
 
             if (!filtered.length) {
-                grid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted);">لا توجد منتجات مطابقة للبحث الحالي.</div>`;
+                grid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; color:var(--text-muted);">لا توجد منتجات مطابقة للبحث الحالي — يمكنك استخدام «اطلب اللي تحتاجه (طلب خاص)» بالأعلى.</div>`;
                 return;
             }
 
@@ -1608,7 +1788,7 @@
         function addToCustomerCart(prodIdx) {
             const prod = allProducts[prodIdx];
             if (!prod || prod.outOfStock) return;
-            const existing = customerCart.find(i => i.name === prod.name);
+            const existing = customerCart.find(i => i.name === prod.name && !i.isSpecialRequest);
             if (existing) {
                 existing.qty += 1;
             } else {
@@ -1633,37 +1813,53 @@
 
         function renderCustomerCart() {
             const container = document.getElementById('customerCartItems');
+            const subtotalEl = document.getElementById('customerItemsSubtotal');
+            const zoneLabelEl = document.getElementById('customerSelectedZoneLabel');
+            const feeEl = document.getElementById('customerDeliveryFeeText');
             const totalEl = document.getElementById('customerCartGrandTotal');
             const badgeEl = document.getElementById('customerCartCountBadge');
 
             const totalQty = customerCart.reduce((s, i) => s + (i.qty || 1), 0);
             const itemsSum = customerCart.reduce((s, i) => s + ((parseFloat(i.price) || 0) * (i.qty || 1)), 0);
-            const deliveryFee = customerCart.length > 0 ? 20 : 0;
+            const zoneInfo = getSelectedDeliveryZone();
+            const deliveryFee = customerCart.length > 0 ? zoneInfo.fee : 0;
             const grandTotal = itemsSum + deliveryFee;
 
             if (badgeEl) badgeEl.innerText = totalQty.toLocaleString('ar-EG');
+            if (subtotalEl) subtotalEl.innerText = itemsSum.toLocaleString('ar-EG');
+            if (zoneLabelEl) zoneLabelEl.innerText = zoneInfo.zone;
+            if (feeEl) feeEl.innerText = deliveryFee.toLocaleString('ar-EG');
             if (totalEl) totalEl.innerText = grandTotal.toLocaleString('ar-EG');
 
             if (!container) return;
             if (!customerCart.length) {
-                container.innerHTML = `<p style="color:var(--text-muted); font-size:14px;">السلة فارغة حالياً — اختر منتجات من القائمة بالأعلى.</p>`;
+                container.innerHTML = `<p style="color:var(--text-muted); font-size:14px;">السلة فارغة حالياً — اختر منتجات من القائمة أو أضف طلباً خاصاً.</p>`;
                 return;
             }
 
-            container.innerHTML = customerCart.map((item, idx) => `
-                <div class="cart-item-row">
-                    <div>
-                        <b>${item.name}</b>
-                        <small style="color:var(--text-muted);">(${item.price} ج.م)</small>
+            container.innerHTML = customerCart.map((item, idx) => {
+                const badgeSpecial = item.isSpecialRequest
+                    ? `<span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:800; margin-right:6px;">طلب خاص</span>`
+                    : "";
+                const priceLabel = item.price > 0
+                    ? `${(item.price * item.qty).toLocaleString('ar-EG')} ج.م`
+                    : `حسب التوفير`;
+                return `
+                    <div class="cart-item-row">
+                        <div>
+                            <b>${item.name}</b>
+                            ${badgeSpecial}
+                            <small style="color:var(--text-muted);">(${item.price > 0 ? item.price + ' ج.م' : 'طلب خاص'})</small>
+                        </div>
+                        <div class="action-group">
+                            <button type="button" class="btn-sm" style="background:#e2e8f0; color:#0f172a;" onclick="updateCustomerCartQty(${idx}, -1)">-</button>
+                            <b>${item.qty}</b>
+                            <button type="button" class="btn-sm" style="background:#e2e8f0; color:#0f172a;" onclick="updateCustomerCartQty(${idx}, 1)">+</button>
+                            <span style="font-weight:800; color:var(--secondary); margin-right:6px;">${priceLabel}</span>
+                        </div>
                     </div>
-                    <div class="action-group">
-                        <button type="button" class="btn-sm" style="background:#e2e8f0; color:#0f172a;" onclick="updateCustomerCartQty(${idx}, -1)">-</button>
-                        <b>${item.qty}</b>
-                        <button type="button" class="btn-sm" style="background:#e2e8f0; color:#0f172a;" onclick="updateCustomerCartQty(${idx}, 1)">+</button>
-                        <span style="font-weight:800; color:var(--secondary); margin-right:6px;">${(item.price * item.qty).toLocaleString('ar-EG')} ج.م</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function scrollToCart() {
@@ -1672,23 +1868,25 @@
 
         async function submitCustomerOrder() {
             if (!customerCart.length) {
-                alert('⚠️ السلة فارغة، يرجى إضافة منتج واحد على الأقل.');
+                alert('⚠️ السلة فارغة، يرجى إضافة منتج أو طلب خاص واحد على الأقل.');
                 return;
             }
             const customerName = document.getElementById('custOrderName').value.trim();
             const customerPhone = document.getElementById('custOrderPhone').value.trim();
-            const customerAddress = document.getElementById('custOrderAddress').value.trim();
+            const zoneInfo = getSelectedDeliveryZone();
+            const rawAddress = document.getElementById('custOrderAddress').value.trim();
             const paymentMethod = document.getElementById('custOrderPayment').value;
 
-            if (!customerName || !customerPhone || !customerAddress) {
+            if (!customerName || !customerPhone || !rawAddress) {
                 alert('⚠️ يرجى إدخال الاسم ورقم الهاتف والعنوان لإتمام الطلب.');
                 return;
             }
 
             const itemsSum = customerCart.reduce((s, i) => s + ((parseFloat(i.price) || 0) * (i.qty || 1)), 0);
-            const deliveryFee = 20;
+            const deliveryFee = zoneInfo.fee;
             const total = itemsSum + deliveryFee;
             const orderId = String(Math.floor(100000 + Math.random() * 900000));
+            const customerAddress = `${zoneInfo.zone} (توصيل: ${deliveryFee} جنيه) - ${rawAddress}`;
 
             allSales.unshift({
                 orderId,
@@ -1696,6 +1894,7 @@
                 customerName,
                 customerPhone,
                 customerAddress,
+                deliveryZone: zoneInfo.zone,
                 paymentMethod,
                 deliveryFee,
                 total,
@@ -1712,7 +1911,7 @@
             renderCustomerCart();
             renderAllSections();
             await pushCloudState();
-            alert(`✅ تم تسجيل طلبك رقم #${orderId} بنجاح!`);
+            alert(`✅ تم تسجيل طلبك رقم #${orderId} بنجاح (التوصيل إلى ${zoneInfo.zone}: ${deliveryFee} ج.م)!`);
         }
 
         function getOrCreateVisitorUid() {
@@ -2603,6 +2802,9 @@
 
             tbody.innerHTML = list.map(({ s, realIdx }) => {
                 const dtStr = s.timestamp ? new Date(s.timestamp).toLocaleString('ar-EG') : '-';
+                const itemsSummary = Array.isArray(s.items) && s.items.length
+                    ? `<br><small style="color:#0369a1; font-weight:700;">الأصناف: ${s.items.map(i => `${i.name} (${i.qty})`).join('، ')}</small>`
+                    : '';
                 const capSelectHtml = `
                     <select onchange="assignOrderCaptain(${realIdx}, this.value)" class="filter-select">
                         ${captainOptions.replace(`value="${s.assignedCaptain || ''}"`, `value="${s.assignedCaptain || ''}" selected`)}
@@ -2618,7 +2820,7 @@
                     <tr>
                         <td><b>#${s.orderId || '-'}</b></td>
                         <td>${dtStr}</td>
-                        <td><b>${s.customerName || '-'}</b></td>
+                        <td><b>${s.customerName || '-'}</b>${itemsSummary}</td>
                         <td>${s.customerPhone || '-'}<br><small style="color:var(--text-muted);">${s.customerAddress || ''}</small></td>
                         <td><b>${(parseFloat(s.total) || 0).toLocaleString('ar-EG')} ج.م</b><br><small style="color:var(--text-muted);">${s.paymentMethod || ''}</small></td>
                         <td>${capSelectHtml}</td>
