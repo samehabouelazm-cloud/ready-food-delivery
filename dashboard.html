@@ -302,6 +302,10 @@
             margin-bottom: 14px;
         }
 
+        .form-group {
+            margin-bottom: 10px;
+        }
+
         .form-group label {
             display: block;
             font-size: 13px;
@@ -378,6 +382,10 @@
             cursor: pointer;
             font-weight: 700;
             transition: opacity 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
         }
 
         .btn-sm:hover {
@@ -470,6 +478,7 @@
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .filter-controls {
@@ -489,7 +498,7 @@
             font-weight: 700;
         }
 
-        /* نافذة تعديل المؤشرات الأربعة يومياً / شهرياً / سنوياً */
+        /* نوافذ منبثقة للإدارة وتعديل الطلبات */
         .kpi-modal-overlay {
             display: none;
             position: fixed;
@@ -955,7 +964,7 @@
             </div>
         </div>
 
-        <!-- متابعة الطلبات مع إشعارات الواتساب، تغيير الحالة، وإسناد الكابتن -->
+        <!-- متابعة الطلبات مع إشعارات الواتساب، تغيير الحالة، وإسناد الكابتن، وتعديل وحذف الطلب -->
         <div class="card">
             <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
@@ -989,6 +998,62 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- نافذة تعديل بيانات الطلب -->
+    <div class="kpi-modal-overlay" id="editOrderModal">
+        <div class="kpi-modal-card">
+            <div class="kpi-modal-head">
+                <h3>✏️ تعديل بيانات الطلب <span id="editOrderIdBadge"></span></h3>
+                <span class="kpi-modal-close" onclick="closeEditOrderModal()">✕</span>
+            </div>
+
+            <input type="hidden" id="editOrderIndex" value="-1">
+
+            <div class="form-group">
+                <label>اسم العميل:</label>
+                <input type="text" id="editOrderCustomerName" placeholder="اسم العميل">
+            </div>
+
+            <div class="form-group">
+                <label>رقم الهاتف:</label>
+                <input type="tel" id="editOrderCustomerPhone" placeholder="01xxxxxxxxx">
+            </div>
+
+            <div class="form-group">
+                <label>العنوان التفصيلي:</label>
+                <input type="text" id="editOrderCustomerAddress" placeholder="العنوان">
+            </div>
+
+            <div class="form-group">
+                <label>الإجمالي (ج.م):</label>
+                <input type="number" step="any" id="editOrderTotal" placeholder="0">
+            </div>
+
+            <div class="form-group">
+                <label>طريقة الدفع:</label>
+                <input type="text" id="editOrderPaymentMethod" placeholder="الدفع نقداً عند الاستلام">
+            </div>
+
+            <div class="form-group">
+                <label>حالة الطلب:</label>
+                <select id="editOrderStatus">
+                    <option value="قيد الانتظار ⏳">قيد الانتظار ⏳</option>
+                    <option value="جاري التجهيز 👨‍🍳">جاري التجهيز 👨‍🍳</option>
+                    <option value="خرج للتوصيل 🛵">خرج للتوصيل 🛵</option>
+                    <option value="تم التسليم ✅">تم التسليم ✅</option>
+                    <option value="ملغي ❌">ملغي ❌</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>مندوب التوصيل (الكابتن):</label>
+                <select id="editOrderCaptain"></select>
+            </div>
+
+            <button type="button" class="btn" style="width:100%; margin-top:6px;" onclick="saveOrderEdit()">💾 حفظ تعديل الطلب</button>
+            <button type="button" class="btn-sm" style="width:100%; margin-top:8px; padding:10px; background:#fee2e2; color:#dc2626;" onclick="closeEditOrderModal()">إلغاء</button>
+        </div>
     </div>
 
     <!-- نافذة تعديل المؤشرات الأربعة (يومي / شهري / سنوي بدءاً من اليوم) -->
@@ -1738,6 +1803,73 @@
             await pushCloudState();
         }
 
+        function openEditOrderModal(orderIdx) {
+            const sale = allSales[orderIdx];
+            if (!sale) return;
+
+            document.getElementById('editOrderIndex').value = orderIdx;
+            document.getElementById('editOrderIdBadge').innerText = sale.orderId ? `#${sale.orderId}` : '';
+            document.getElementById('editOrderCustomerName').value = sale.customerName || '';
+            document.getElementById('editOrderCustomerPhone').value = sale.customerPhone || '';
+            document.getElementById('editOrderCustomerAddress').value = sale.customerAddress || '';
+            document.getElementById('editOrderTotal').value = sale.total ?? 0;
+            document.getElementById('editOrderPaymentMethod').value = sale.paymentMethod || '';
+            document.getElementById('editOrderStatus').value = sale.status || 'قيد الانتظار ⏳';
+
+            const capSelect = document.getElementById('editOrderCaptain');
+            const optionsHtml = [`<option value="">-- اختر كابتن --</option>`]
+                .concat(allCaptains.map(c => `<option value="${c.name}">${c.name}</option>`))
+                .join('');
+            capSelect.innerHTML = optionsHtml;
+            capSelect.value = sale.assignedCaptain || '';
+
+            document.getElementById('editOrderModal').style.display = 'flex';
+        }
+
+        function closeEditOrderModal() {
+            document.getElementById('editOrderModal').style.display = 'none';
+        }
+
+        async function saveOrderEdit() {
+            const idx = parseInt(document.getElementById('editOrderIndex').value, 10);
+            if (isNaN(idx) || !allSales[idx]) return;
+
+            const name = document.getElementById('editOrderCustomerName').value.trim();
+            const phone = document.getElementById('editOrderCustomerPhone').value.trim();
+            const address = document.getElementById('editOrderCustomerAddress').value.trim();
+            const total = parseFloat(document.getElementById('editOrderTotal').value) || 0;
+            const paymentMethod = document.getElementById('editOrderPaymentMethod').value.trim();
+            const status = document.getElementById('editOrderStatus').value;
+            const assignedCaptain = document.getElementById('editOrderCaptain').value;
+
+            allSales[idx] = {
+                ...allSales[idx],
+                customerName: name,
+                customerPhone: phone,
+                customerAddress: address,
+                total,
+                paymentMethod,
+                status,
+                assignedCaptain
+            };
+
+            closeEditOrderModal();
+            renderAllSections();
+            await pushCloudState();
+            alert('✅ تم حفظ تعديل الطلب بنجاح!');
+        }
+
+        async function deleteOrder(orderIdx) {
+            const sale = allSales[orderIdx];
+            if (!sale) return;
+            const label = sale.orderId ? `الطلب #${sale.orderId}` : 'هذا الطلب';
+            if (!confirm(`هل أنت متأكد من حذف ${label}؟`)) return;
+
+            allSales.splice(orderIdx, 1);
+            renderAllSections();
+            await pushCloudState();
+        }
+
         function notifyCustomerWhatsApp(orderIdx) {
             const sale = allSales[orderIdx];
             if (!sale) return;
@@ -1795,7 +1927,13 @@
                         <td><b>${(parseFloat(s.total) || 0).toLocaleString('ar-EG')} ج.م</b><br><small style="color:var(--text-muted);">${s.paymentMethod || ''}</small></td>
                         <td>${capSelectHtml}</td>
                         <td>${statusSelectHtml}</td>
-                        <td><button class="btn-sm" style="background:#25d366; color:#fff;" onclick="notifyCustomerWhatsApp(${realIdx})">واتساب 📱</button></td>
+                        <td>
+                            <div class="action-group">
+                                <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="notifyCustomerWhatsApp(${realIdx})">واتساب 📱</button>
+                                <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="openEditOrderModal(${realIdx})">تعديل ✏️</button>
+                                <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteOrder(${realIdx})">حذف 🗑️</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
