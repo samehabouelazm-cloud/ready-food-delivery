@@ -21,7 +21,7 @@
             --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
             --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
         }
-- { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
 
         .header { 
@@ -261,6 +261,7 @@
             <a href="dashboard.html" class="admin-link admin-btn">لوحة التحكم ⚙️</a>
         </div>
     </header>
+
     <div class="container">
         <div class="hero-banner">
             <div class="hero-text">
@@ -270,8 +271,9 @@
             </div>
         </div>
 
-        <div style="margin: 20px 0; display: none;" id="dailyOffersSection">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <section class="kpi-panel" id="kpiPanel">
+            <div class="kpi-toolbar">
+                <div class="kpi-title-wrap">
                 <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark);">🔥 العروض اليومية والخصومات الخاصة</h3>
                 <span style="font-size: 13px; color: var(--text-muted); font-weight: 700;">اسحب للمزيد ➔</span>
             </div>
