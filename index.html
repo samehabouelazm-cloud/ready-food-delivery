@@ -274,6 +274,60 @@
         <section class="kpi-panel" id="kpiPanel">
             <div class="kpi-toolbar">
                 <div class="kpi-title-wrap">
+                    <h3>📊 مؤشرات الأداء والمتابعة</h3>
+                    <span class="kpi-period-badge" id="kpiPeriodBadge">النظام اليومي</span>
+                </div>
+                <div class="kpi-controls-right">
+                    <div class="period-tabs" role="tablist" aria-label="الفترة الزمنية للمؤشرات">
+                        <button type="button" class="period-tab-btn active" id="periodTab-daily" onclick="switchKpiPeriod('daily')">يومي</button>
+                        <button type="button" class="period-tab-btn" id="periodTab-monthly" onclick="switchKpiPeriod('monthly')">شهري</button>
+                        <button type="button" class="period-tab-btn" id="periodTab-yearly" onclick="switchKpiPeriod('yearly')">سنوي</button>
+                    </div>
+                    <button type="button" class="edit-kpi-btn" onclick="openKpiEditModal()">✏️ تعديل المؤشرات</button>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card revenue">
+                    <div class="kpi-card-top">
+                        <span class="kpi-label">إجمالي الإيرادات</span>
+                        <span class="kpi-icon">💰</span>
+                    </div>
+                    <div class="kpi-value" id="kpiRevenueValue">0 ج.م</div>
+                    <div class="kpi-meta" id="kpiRevenueMeta">تحديث تلقائي / يدوي</div>
+                </div>
+
+                <div class="kpi-card speed">
+                    <div class="kpi-card-top">
+                        <span class="kpi-label">متوسط سرعة التوصيل</span>
+                        <span class="kpi-icon">⚡</span>
+                    </div>
+                    <div class="kpi-value" id="kpiSpeedValue">0 دقيقة</div>
+                    <div class="kpi-meta" id="kpiSpeedMeta">متوسط زمن وصول الطلب</div>
+                </div>
+
+                <div class="kpi-card visitors">
+                    <div class="kpi-card-top">
+                        <span class="kpi-label">العملاء والزوار</span>
+                        <span class="kpi-icon">👥</span>
+                    </div>
+                    <div class="kpi-value" id="kpiVisitorsValue">0</div>
+                    <div class="kpi-meta" id="kpiVisitorsMeta">إجمالي المتفاعلين والعملاء</div>
+                </div>
+
+                <div class="kpi-card orders">
+                    <div class="kpi-card-top">
+                        <span class="kpi-label">إجمالي الطلبات</span>
+                        <span class="kpi-icon">📦</span>
+                    </div>
+                    <div class="kpi-value" id="kpiOrdersValue">0</div>
+                    <div class="kpi-meta" id="kpiOrdersMeta">عدد الطلبات المسجلة</div>
+                </div>
+            </div>
+        </section>
+
+        <div style="margin: 20px 0; display: none;" id="dailyOffersSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark);">🔥 العروض اليومية والخصومات الخاصة</h3>
                 <span style="font-size: 13px; color: var(--text-muted); font-weight: 700;">اسحب للمزيد ➔</span>
             </div>
