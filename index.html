@@ -84,62 +84,6 @@
         }
         .hero-btn:hover { transform: scale(1.05); }
 
-        /* قسم المؤشرات القابلة للتعديل يومياً / شهرياً / سنوياً */
-        .kpi-panel {
-            background: var(--surface); border-radius: var(--radius-lg); padding: 18px 20px;
-            margin: 18px 0; border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm);
-        }
-        .kpi-toolbar {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 12px; margin-bottom: 14px;
-        }
-        .kpi-title-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .kpi-title-wrap h3 { font-size: 17px; font-weight: 800; color: var(--text-dark); }
-        .kpi-period-badge {
-            background: #e0f2fe; color: var(--primary-dark); font-size: 12px;
-            font-weight: 800; padding: 4px 10px; border-radius: 20px;
-        }
-        .kpi-controls-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .period-tabs {
-            display: inline-flex; background: #f1f5f9; padding: 4px;
-            border-radius: 10px; border: 1px solid #e2e8f0; gap: 4px;
-        }
-        .period-tab-btn {
-            border: none; background: transparent; color: var(--text-muted);
-            padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 800;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .period-tab-btn.active {
-            background: var(--primary); color: #fff;
-            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
-        }
-        .edit-kpi-btn {
-            background: linear-gradient(135deg, #0f172a, #334155); color: #fff;
-            border: none; padding: 8px 14px; border-radius: 10px; font-size: 13px;
-            font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-            transition: transform 0.2s;
-        }
-        .edit-kpi-btn:hover { transform: translateY(-1px); }
-
-        .kpi-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;
-        }
-        .kpi-card {
-            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);
-            padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
-            position: relative; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
-        .kpi-card-top { display: flex; justify-content: space-between; align-items: center; }
-        .kpi-label { font-size: 13px; font-weight: 700; color: var(--text-muted); }
-        .kpi-icon { font-size: 20px; }
-        .kpi-value { font-size: 21px; font-weight: 800; color: var(--text-dark); }
-        .kpi-card.revenue .kpi-value { color: var(--secondary); }
-        .kpi-card.speed .kpi-value { color: var(--primary-dark); }
-        .kpi-card.visitors .kpi-value { color: #7c3aed; }
-        .kpi-card.orders .kpi-value { color: #d97706; }
-        .kpi-meta { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-
         .offers-slider-container {
             display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; scroll-behavior: smooth;
             scrollbar-width: thin; scrollbar-color: var(--accent) #e2e8f0;
@@ -273,62 +217,6 @@
             </div>
         </div>
 
-        <!-- لوحة المؤشرات القابلة للتعديل يومياً / شهرياً / سنوياً -->
-        <section class="kpi-panel" id="kpiPanel">
-            <div class="kpi-toolbar">
-                <div class="kpi-title-wrap">
-                    <h3>📊 مؤشرات الأداء والمتابعة</h3>
-                    <span class="kpi-period-badge" id="kpiPeriodBadge">النظام اليومي</span>
-                </div>
-                <div class="kpi-controls-right">
-                    <div class="period-tabs" role="tablist" aria-label="الفترة الزمنية للمؤشرات">
-                        <button type="button" class="period-tab-btn active" id="periodTab-daily" onclick="switchKpiPeriod('daily')">يومي</button>
-                        <button type="button" class="period-tab-btn" id="periodTab-monthly" onclick="switchKpiPeriod('monthly')">شهري</button>
-                        <button type="button" class="period-tab-btn" id="periodTab-yearly" onclick="switchKpiPeriod('yearly')">سنوي</button>
-                    </div>
-                    <button type="button" class="edit-kpi-btn" onclick="openKpiEditModal()">✏️ تعديل المؤشرات</button>
-                </div>
-            </div>
-
-            <div class="kpi-grid">
-                <div class="kpi-card revenue">
-                    <div class="kpi-card-top">
-                        <span class="kpi-label">إجمالي الإيرادات</span>
-                        <span class="kpi-icon">💰</span>
-                    </div>
-                    <div class="kpi-value" id="kpiRevenueValue">0 ج.م</div>
-                    <div class="kpi-meta" id="kpiRevenueMeta">تحديث تلقائي / يدوي</div>
-                </div>
-
-                <div class="kpi-card speed">
-                    <div class="kpi-card-top">
-                        <span class="kpi-label">متوسط سرعة التوصيل</span>
-                        <span class="kpi-icon">⚡</span>
-                    </div>
-                    <div class="kpi-value" id="kpiSpeedValue">0 دقيقة</div>
-                    <div class="kpi-meta" id="kpiSpeedMeta">متوسط زمن وصول الطلب</div>
-                </div>
-
-                <div class="kpi-card visitors">
-                    <div class="kpi-card-top">
-                        <span class="kpi-label">العملاء والزوار</span>
-                        <span class="kpi-icon">👥</span>
-                    </div>
-                    <div class="kpi-value" id="kpiVisitorsValue">0</div>
-                    <div class="kpi-meta" id="kpiVisitorsMeta">إجمالي المتفاعلين والعملاء</div>
-                </div>
-
-                <div class="kpi-card orders">
-                    <div class="kpi-card-top">
-                        <span class="kpi-label">إجمالي الطلبات</span>
-                        <span class="kpi-icon">📦</span>
-                    </div>
-                    <div class="kpi-value" id="kpiOrdersValue">0</div>
-                    <div class="kpi-meta" id="kpiOrdersMeta">عدد الطلبات المسجلة</div>
-                </div>
-            </div>
-        </section>
-
         <div style="margin: 20px 0; display: none;" id="dailyOffersSection">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark);">🔥 العروض اليومية والخصومات الخاصة</h3>
@@ -356,49 +244,6 @@
 
         <div id="accordionContainer">
             <div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:700;">جاري تحميل تنظيم الأقسام والمنتجات... ⚡</div>
-        </div>
-    </div>
-
-    <!-- نافذة تعديل المؤشرات (يومي / شهري / سنوي) -->
-    <div class="modal-overlay" id="kpiEditModal">
-        <div class="modal-body">
-            <div class="modal-header">
-                <h3>✏️ تعديل المؤشرات حسب الفترة الزمنية</h3>
-                <span class="close-icon" onclick="closeModal('kpiEditModal')">✕</span>
-            </div>
-
-            <div class="form-group">
-                <label>اختر الفترة المراد تعديلها:</label>
-                <select id="kpiEditPeriodSelect" onchange="populateKpiFormForPeriod()">
-                    <option value="daily">يومي</option>
-                    <option value="monthly">شهري</option>
-                    <option value="yearly">سنوي</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>إجمالي الإيرادات (ج.م):</label>
-                <input type="number" step="any" id="kpiInputRevenue" placeholder="مثال: 4500">
-            </div>
-
-            <div class="form-group">
-                <label>متوسط سرعة التوصيل (دقيقة):</label>
-                <input type="number" step="any" id="kpiInputSpeed" placeholder="مثال: 25">
-            </div>
-
-            <div class="form-group">
-                <label>العملاء والزوار:</label>
-                <input type="number" step="1" id="kpiInputVisitors" placeholder="مثال: 320">
-            </div>
-
-            <div class="form-group">
-                <label>إجمالي الطلبات:</label>
-                <input type="number" step="1" id="kpiInputOrders" placeholder="مثال: 85">
-            </div>
-
-            <button type="button" class="btn-submit" onclick="saveKpiOverrides()">💾 حفظ التعديلات</button>
-            <button type="button" class="btn-neutral" onclick="resetCurrentKpiPeriodToAuto()">🔄 استعادة الحساب التلقائي لهذه الفترة</button>
-            <button type="button" class="btn-cancel" onclick="closeModal('kpiEditModal')">إغلاق</button>
         </div>
     </div>
 
@@ -535,7 +380,6 @@
         const HAPPY_MEALS_LOGO = "https://i.postimg.cc/3rGmm6vq/lwjw-haby-mylz.jpg";
         const FOUL_TAMEYA_LOGO = "https://i.postimg.cc/C5Z4yLPv/aʿlan-ftwr-jahz-balfwl.png";
         const GRILLED_FISH_LOGO = "https://i.postimg.cc/2y47jXY7/aʿlan-smkt-mshwyt-mn-jahz.png";
-        const KPI_STORAGE_KEY = "gahiz_kpi_overrides_v1";
 
         let allProducts = [];
         let allSales = [];
@@ -544,18 +388,6 @@
         let activeWhatsAppGlobal = FIXED_WHATSAPP_NUMBER;
         let cart = [];
         let productQuantities = {};
-        let currentKpiPeriod = "daily";
-        let kpiOverrides = {
-            daily: { revenue: null, speed: null, visitors: null, orders: null },
-            monthly: { revenue: null, speed: null, visitors: null, orders: null },
-            yearly: { revenue: null, speed: null, visitors: null, orders: null }
-        };
-
-        const kpiPeriodLabels = {
-            daily: { badge: "النظام اليومي", suffix: "اليوم" },
-            monthly: { badge: "النظام الشهري", suffix: "هذا الشهر" },
-            yearly: { badge: "النظام السنوي", suffix: "هذا العام" }
-        };
 
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
@@ -589,206 +421,8 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => {
-            loadLocalKpiOverrides();
-            renderKpis();
             loadStoreProducts(false);
         });
-
-        function loadLocalKpiOverrides() {
-            try {
-                let saved = localStorage.getItem(KPI_STORAGE_KEY);
-                if (saved) {
-                    let parsed = JSON.parse(saved);
-                    ["daily", "monthly", "yearly"].forEach(p => {
-                        if (parsed && parsed[p]) {
-                            kpiOverrides[p] = {
-                                revenue: parsed[p].revenue ?? null,
-                                speed: parsed[p].speed ?? null,
-                                visitors: parsed[p].visitors ?? null,
-                                orders: parsed[p].orders ?? null
-                            };
-                        }
-                    });
-                }
-            } catch (_) {}
-        }
-
-        function saveLocalKpiOverrides() {
-            try {
-                localStorage.setItem(KPI_STORAGE_KEY, JSON.stringify(kpiOverrides));
-            } catch (_) {}
-        }
-
-        function filterSalesByPeriod(period) {
-            if (!Array.isArray(allSales) || allSales.length === 0) return [];
-            let now = new Date();
-            return allSales.filter(sale => {
-                if (!sale || !sale.timestamp) return period === "yearly";
-                let d = new Date(sale.timestamp);
-                if (isNaN(d.getTime())) return period === "yearly";
-                if (period === "daily") {
-                    return d.getFullYear() === now.getFullYear() &&
-                           d.getMonth() === now.getMonth() &&
-                           d.getDate() === now.getDate();
-                }
-                if (period === "monthly") {
-                    return d.getFullYear() === now.getFullYear() &&
-                           d.getMonth() === now.getMonth();
-                }
-                return d.getFullYear() === now.getFullYear();
-            });
-        }
-
-        function computeAutoKpis(period) {
-            let periodSales = filterSalesByPeriod(period);
-            let fallbackSales = (periodSales.length === 0 && Array.isArray(allSales)) ? allSales : periodSales;
-            let ordersCount = periodSales.length > 0 ? periodSales.length : fallbackSales.length;
-            let revenueSum = (periodSales.length > 0 ? periodSales : fallbackSales).reduce((acc, s) => acc + (parseFloat(s.total) || 0), 0);
-
-            let speedValues = (periodSales.length > 0 ? periodSales : fallbackSales)
-                .map(s => parseFloat(s.deliveryMinutes || s.avgDeliveryTime || s.deliveryTime))
-                .filter(v => !isNaN(v) && v > 0);
-            let avgSpeed = speedValues.length > 0
-                ? Math.round(speedValues.reduce((a, b) => a + b, 0) / speedValues.length)
-                : (ordersCount > 0 ? 28 : 0);
-
-            let uniquePhones = new Set(
-                (periodSales.length > 0 ? periodSales : fallbackSales)
-                    .map(s => (s.customerPhone || "").trim())
-                    .filter(Boolean)
-            );
-            let visitorsCount = uniquePhones.size > 0 ? uniquePhones.size : ordersCount;
-
-            return {
-                revenue: revenueSum,
-                speed: avgSpeed,
-                visitors: visitorsCount,
-                orders: ordersCount
-            };
-        }
-
-        function switchKpiPeriod(period) {
-            if (!["daily", "monthly", "yearly"].includes(period)) return;
-            currentKpiPeriod = period;
-            ["daily", "monthly", "yearly"].forEach(p => {
-                let btn = document.getElementById(`periodTab-${p}`);
-                if (btn) btn.classList.toggle("active", p === period);
-            });
-            renderKpis();
-        }
-
-        function renderKpis() {
-            let period = currentKpiPeriod;
-            let autoVals = computeAutoKpis(period);
-            let ov = kpiOverrides[period] || {};
-            let labelInfo = kpiPeriodLabels[period] || kpiPeriodLabels.daily;
-
-            let badgeEl = document.getElementById("kpiPeriodBadge");
-            if (badgeEl) badgeEl.innerText = labelInfo.badge;
-
-            let revVal = (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? Number(ov.revenue) : autoVals.revenue;
-            let spdVal = (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? Number(ov.speed) : autoVals.speed;
-            let visVal = (ov.visitors !== null && ov.visitors !== undefined && ov.visitors !== "") ? Number(ov.visitors) : autoVals.visitors;
-            let ordVal = (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? Number(ov.orders) : autoVals.orders;
-
-            document.getElementById("kpiRevenueValue").innerText = `${revVal.toLocaleString("ar-EG")} ج.م`;
-            document.getElementById("kpiSpeedValue").innerText = `${spdVal.toLocaleString("ar-EG")} دقيقة`;
-            document.getElementById("kpiVisitorsValue").innerText = `${visVal.toLocaleString("ar-EG")}`;
-            document.getElementById("kpiOrdersValue").innerText = `${ordVal.toLocaleString("ar-EG")}`;
-
-            let isRevCustom = ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "";
-            let isSpdCustom = ov.speed !== null && ov.speed !== undefined && ov.speed !== "";
-            let isVisCustom = ov.visitors !== null && ov.visitors !== undefined && ov.visitors !== "";
-            let isOrdCustom = ov.orders !== null && ov.orders !== undefined && ov.orders !== "";
-
-            document.getElementById("kpiRevenueMeta").innerText = `${isRevCustom ? "معدّل يدوياً" : "محسوب تلقائياً"} • ${labelInfo.suffix}`;
-            document.getElementById("kpiSpeedMeta").innerText = `${isSpdCustom ? "معدّل يدوياً" : "تقدير تلقائي"} • ${labelInfo.suffix}`;
-            document.getElementById("kpiVisitorsMeta").innerText = `${isVisCustom ? "معدّل يدوياً" : "محسوب تلقائياً"} • ${labelInfo.suffix}`;
-            document.getElementById("kpiOrdersMeta").innerText = `${isOrdCustom ? "معدّل يدوياً" : "محسوب تلقائياً"} • ${labelInfo.suffix}`;
-        }
-
-        function openKpiEditModal() {
-            let selectEl = document.getElementById("kpiEditPeriodSelect");
-            if (selectEl) selectEl.value = currentKpiPeriod;
-            populateKpiFormForPeriod();
-            document.getElementById("kpiEditModal").style.display = "flex";
-        }
-
-        function populateKpiFormForPeriod() {
-            let period = document.getElementById("kpiEditPeriodSelect").value || "daily";
-            let autoVals = computeAutoKpis(period);
-            let ov = kpiOverrides[period] || {};
-
-            document.getElementById("kpiInputRevenue").value =
-                (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? ov.revenue : autoVals.revenue;
-            document.getElementById("kpiInputSpeed").value =
-                (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? ov.speed : autoVals.speed;
-            document.getElementById("kpiInputVisitors").value =
-                (ov.visitors !== null && ov.visitors !== undefined && ov.visitors !== "") ? ov.visitors : autoVals.visitors;
-            document.getElementById("kpiInputOrders").value =
-                (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? ov.orders : autoVals.orders;
-        }
-
-        async function saveKpiOverrides() {
-            let period = document.getElementById("kpiEditPeriodSelect").value || currentKpiPeriod;
-            let revRaw = document.getElementById("kpiInputRevenue").value.trim();
-            let spdRaw = document.getElementById("kpiInputSpeed").value.trim();
-            let visRaw = document.getElementById("kpiInputVisitors").value.trim();
-            let ordRaw = document.getElementById("kpiInputOrders").value.trim();
-
-            kpiOverrides[period] = {
-                revenue: revRaw === "" ? null : parseFloat(revRaw),
-                speed: spdRaw === "" ? null : parseFloat(spdRaw),
-                visitors: visRaw === "" ? null : parseInt(visRaw, 10),
-                orders: ordRaw === "" ? null : parseInt(ordRaw, 10)
-            };
-
-            saveLocalKpiOverrides();
-            switchKpiPeriod(period);
-            closeModal("kpiEditModal");
-
-            try {
-                let res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
-                if (res.ok) {
-                    let cloudData = await res.json();
-                    if (cloudData && typeof cloudData === "object" && !Array.isArray(cloudData)) {
-                        cloudData.kpiOverrides = kpiOverrides;
-                        await fetch(API_URL, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(cloudData)
-                        });
-                    }
-                }
-            } catch (_) {}
-
-            alert("✅ تم حفظ تعديلات المؤشرات بنجاح!");
-        }
-
-        async function resetCurrentKpiPeriodToAuto() {
-            let period = document.getElementById("kpiEditPeriodSelect").value || currentKpiPeriod;
-            kpiOverrides[period] = { revenue: null, speed: null, visitors: null, orders: null };
-            saveLocalKpiOverrides();
-            populateKpiFormForPeriod();
-            switchKpiPeriod(period);
-
-            try {
-                let res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
-                if (res.ok) {
-                    let cloudData = await res.json();
-                    if (cloudData && typeof cloudData === "object" && !Array.isArray(cloudData)) {
-                        cloudData.kpiOverrides = kpiOverrides;
-                        await fetch(API_URL, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(cloudData)
-                        });
-                    }
-                }
-            } catch (_) {}
-
-            alert("🔄 تمت استعادة الحساب التلقائي لهذه الفترة.");
-        }
 
         function getDeliveryFee() {
             let areaSelect = document.getElementById('outsideAreaKm');
@@ -833,20 +467,13 @@
                         allCaptains = Array.isArray(data.captains) ? data.captains : [];
                         allCashiers = Array.isArray(data.cashiers) ? data.cashiers : [];
                         activeWhatsAppGlobal = data.activeWhatsApp || FIXED_WHATSAPP_NUMBER;
-                        if (data.kpiOverrides && typeof data.kpiOverrides === 'object') {
-                            ["daily", "monthly", "yearly"].forEach(p => {
-                                if (data.kpiOverrides[p]) {
-                                    kpiOverrides[p] = {
-                                        revenue: data.kpiOverrides[p].revenue ?? null,
-                                        speed: data.kpiOverrides[p].speed ?? null,
-                                        visitors: data.kpiOverrides[p].visitors ?? null,
-                                        orders: data.kpiOverrides[p].orders ?? null
-                                    };
-                                }
-                            });
-                            saveLocalKpiOverrides();
-                        }
                     }
+                    try {
+                        localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
+                            products: allProducts,
+                            timestamp: Date.now()
+                        }));
+                    } catch (_) {}
                 }
             } catch (e) {
                 let cached = localStorage.getItem('gahiz_lightning_cache');
@@ -858,7 +485,6 @@
                 }
             }
 
-            renderKpis();
             renderDailyOffers();
             renderAccordionStore(allProducts);
             if (showAlert) alert('✅ تم تحديث بيانات المتجر بنجاح!');
@@ -1255,4 +881,3 @@
     </script>
 </body>
 </html>
-
