@@ -76,7 +76,6 @@
             padding: 0 16px;
         }
 
-        /* شريط التحكم بالفترة الزمنية والبدء من اليوم للبطاقات الأربع */
         .kpi-section-wrapper {
             margin-bottom: 22px;
         }
@@ -168,7 +167,6 @@
             background: #1e293b;
         }
 
-        /* لوحة مؤشرات الأداء KPIs للإدارة */
         .kpi-dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
@@ -392,6 +390,36 @@
             opacity: 0.9;
         }
 
+        .stock-badge-ok {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .stock-badge-low {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .stock-badge-out {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-block;
+        }
+
         .table-responsive {
             overflow-x: auto;
             margin-top: 12px;
@@ -498,7 +526,6 @@
             font-weight: 700;
         }
 
-        /* نوافذ منبثقة للإدارة وتعديل الطلبات */
         .kpi-modal-overlay {
             display: none;
             position: fixed;
@@ -656,7 +683,6 @@
 
     <div class="container">
 
-        <!-- لوحة مؤشرات الأداء الحصرية للإدارة (KPI Dashboard) مع التعديل يومياً / شهرياً / سنوياً بدءاً من اليوم -->
         <section class="kpi-section-wrapper" aria-label="لوحة مؤشرات الأداء">
             <div class="kpi-header-bar">
                 <div class="kpi-start-info">
@@ -709,7 +735,6 @@
             </div>
         </section>
 
-        <!-- قسم الإحصائيات والتقارير المالية اليومية -->
         <div class="stats-grid">
             <div class="card stat-banner sales">
                 <div class="stat-banner-label">🛒 إجمالي مبيعات الطلبات</div>
@@ -725,7 +750,6 @@
             </div>
         </div>
 
-        <!-- إدارة كاشيري الأقسام والشفتات مع حاسبة العهدة النقدية -->
         <div class="card">
             <h3>👥 إدارة كاشيري الأقسام وشفتات العمل</h3>
             <div class="form-row">
@@ -779,7 +803,6 @@
                 </table>
             </div>
 
-            <!-- حاسبة إجمالية لعهد ودرج الكاشير -->
             <div class="drawer-box">
                 <h4>🧮 حاسبة عهدة ونقدية الكاشير (إغلاق الشفت)</h4>
                 <div class="form-row" style="margin-bottom: 8px;">
@@ -802,7 +825,6 @@
             </div>
         </div>
 
-        <!-- إدارة الكباتن وتقرير أرباحهم مع زر تصدير Excel (CSV) -->
         <div class="card">
             <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن) وتقرير الأرباح</h3>
@@ -852,14 +874,13 @@
             </div>
         </div>
 
-        <!-- إدارة المنتجات والأصناف -->
         <div class="card">
-            <h3>📦 إدارة المنتجات والأصناف والأقسام</h3>
+            <h3>📦 إدارة المنتجات والأصناف والمخزون</h3>
             <input type="hidden" id="editIndex" value="-1">
             <div class="form-row">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="prodName" placeholder="اسم المنتج">
+                    <input type="text" id="prodName" placeholder="مثال: بيبسي كولا دايت">
                 </div>
                 <div class="form-group">
                     <label>سعر البيع الحالي (ج.م):</label>
@@ -872,6 +893,10 @@
                 <div class="form-group">
                     <label>السعر القديم / قبل البيع (اختياري للشطب):</label>
                     <input type="number" id="prodOldPrice" placeholder="السعر قبل الخصم">
+                </div>
+                <div class="form-group">
+                    <label>الكمية المتوفرة في المخزون:</label>
+                    <input type="number" id="prodStockQty" min="0" value="100" placeholder="مثال: 100">
                 </div>
                 <div class="form-group">
                     <label>القسم الفرعي والرئيسي:</label>
@@ -952,19 +977,19 @@
                             <th>المنتج</th>
                             <th>السعر الحالي</th>
                             <th>هامش الربح</th>
+                            <th>المتبقي / المخزون</th>
                             <th>القسم</th>
                             <th>الحالة</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
-                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
+                        <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- متابعة الطلبات مع إشعارات الواتساب، تغيير الحالة، وإسناد الكابتن، وتعديل وحذف الطلب -->
         <div class="card">
             <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
@@ -1000,7 +1025,6 @@
 
     </div>
 
-    <!-- نافذة تعديل بيانات الطلب -->
     <div class="kpi-modal-overlay" id="editOrderModal">
         <div class="kpi-modal-card">
             <div class="kpi-modal-head">
@@ -1039,7 +1063,7 @@
                 <label>حالة الطلب:</label>
                 <select id="editOrderStatus">
                     <option value="قيد الانتظار ⏳">قيد الانتظار ⏳</option>
-                    <option value="جاري التجهيز 👨‍🍳">جاري التجهيز 👨‍🍳</option>
+                    <option value="جاري التجهيز 👨🍳">جاري التجهيز 👨🍳</option>
                     <option value="خرج للتوصيل 🛵">خرج للتوصيل 🛵</option>
                     <option value="تم التسليم ✅">تم التسليم ✅</option>
                     <option value="ملغي ❌">ملغي ❌</option>
@@ -1056,7 +1080,6 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل المؤشرات الأربعة (يومي / شهري / سنوي بدءاً من اليوم) -->
     <div class="kpi-modal-overlay" id="adminKpiEditModal">
         <div class="kpi-modal-card">
             <div class="kpi-modal-head">
@@ -1107,33 +1130,33 @@
         const ADMIN_KPI_STORAGE_KEY = "gahiz_admin_kpi_overrides_v1";
 
         let allProducts = [
-            { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
-            { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
-            { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, category: "سوبر ماركت - السمن", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
-            { name: "سكر الأبيض الممتلز 1 كجم", price: 35, cost: 30, oldPrice: 40, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c5db3cb?w=500", outOfStock: false, isOffer: false },
-            { name: "شاي العروسة 250 جم", price: 60, cost: 50, oldPrice: 70, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500", outOfStock: false, isOffer: false },
-            { name: "مكرونة الملكة / حبة و نص 400 جم", price: 22, cost: 18, oldPrice: 25, category: "سوبر ماركت - المكرونة", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=500", outOfStock: false, isOffer: true },
-            { name: "جبنة براميلي إسطنبولي 500 جم", price: 55, cost: 45, oldPrice: 65, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=500", outOfStock: false, isOffer: false },
-            { name: "حليب جهينة / المراعي 1 لتر", price: 42, cost: 36, oldPrice: 48, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500", outOfStock: false, isOffer: false },
-            { name: "شيبسي عائلي طماطم / كباب", price: 10, cost: 8, oldPrice: 12, category: "سوبر ماركت - الشيبسي", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500", outOfStock: false, isOffer: false },
-            { name: "بسكويت أولكر بيمبو / اولكر شوكولاتة", price: 6, cost: 4.5, oldPrice: 7, category: "سوبر ماركت - البسكويت والفطائر", image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500", outOfStock: false, isOffer: false },
-            { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, category: "سوبر ماركت - العصائر والمياه", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
-            { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, category: "سوبر ماركت - مياه غازية", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
-            { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, category: "سوبر ماركت - شيكولاتة ونوتيلا", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
-            { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, category: "فرايد تشيكن", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
-            { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, category: "تشيكن تندر", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
-            { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, category: "شاورما - قسم الساندوتشات", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
-            { name: "فتة شاورما دجاج عائلي بالصلصة والثومية", price: 130, cost: 98, oldPrice: 150, category: "شاورما - فتة", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", outOfStock: false, isOffer: false },
-            { name: "كريب دجاج زنگر حادق مع الموتزاريلا", price: 85, cost: 62, oldPrice: 95, category: "كريب - قسم الكريب الحادق", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500", outOfStock: false, isOffer: false },
-            { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, category: "كريب - قسم الكريب الحلو", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
+            { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
+            { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
+            { name: "سمنة روابي / عبلة 1.5 كيلو", price: 135, cost: 115, oldPrice: 150, stock: 100, initialStock: 100, category: "سوبر ماركت - السمن", image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500", outOfStock: false, isOffer: false },
+            { name: "سكر الأبيض الممتلز 1 كجم", price: 35, cost: 30, oldPrice: 40, stock: 100, initialStock: 100, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1581441363689-1f3c3c5db3cb?w=500", outOfStock: false, isOffer: false },
+            { name: "شاي العروسة 250 جم", price: 60, cost: 50, oldPrice: 70, stock: 100, initialStock: 100, category: "سوبر ماركت - الشاي والسكر", image: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500", outOfStock: false, isOffer: false },
+            { name: "مكرونة الملكة / حبة و نص 400 جم", price: 22, cost: 18, oldPrice: 25, stock: 100, initialStock: 100, category: "سوبر ماركت - المكرونة", image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281298?w=500", outOfStock: false, isOffer: true },
+            { name: "جبنة براميلي إسطنبولي 500 جم", price: 55, cost: 45, oldPrice: 65, stock: 100, initialStock: 100, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=500", outOfStock: false, isOffer: false },
+            { name: "حليب جهينة / المراعي 1 لتر", price: 42, cost: 36, oldPrice: 48, stock: 100, initialStock: 100, category: "سوبر ماركت - الأجبان والألبان", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500", outOfStock: false, isOffer: false },
+            { name: "شيبسي عائلي طماطم / كباب", price: 10, cost: 8, oldPrice: 12, stock: 100, initialStock: 100, category: "سوبر ماركت - الشيبسي", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500", outOfStock: false, isOffer: false },
+            { name: "بسكويت أولكر بيمبو / اولكر شوكولاتة", price: 6, cost: 4.5, oldPrice: 7, stock: 100, initialStock: 100, category: "سوبر ماركت - البسكويت والفطائر", image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500", outOfStock: false, isOffer: false },
+            { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, stock: 100, initialStock: 100, category: "سوبر ماركت - العصائر والمياه", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
+            { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, stock: 100, initialStock: 100, category: "سوبر ماركت - مياه غازية", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
+            { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, stock: 100, initialStock: 100, category: "سوبر ماركت - شيكولاتة ونوتيلا", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
+            { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, stock: 100, initialStock: 100, category: "فرايد تشيكن", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
+            { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, stock: 100, initialStock: 100, category: "تشيكن تندر", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
+            { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, stock: 100, initialStock: 100, category: "شاورما - قسم الساندوتشات", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
+            { name: "فتة شاورما دجاج عائلي بالصلصة والثومية", price: 130, cost: 98, oldPrice: 150, stock: 100, initialStock: 100, category: "شاورما - فتة", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", outOfStock: false, isOffer: false },
+            { name: "كريب دجاج زنگر حادق مع الموتزاريلا", price: 85, cost: 62, oldPrice: 95, stock: 100, initialStock: 100, category: "كريب - قسم الكريب الحادق", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500", outOfStock: false, isOffer: false },
+            { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, stock: 100, initialStock: 100, category: "كريب - قسم الكريب الحلو", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
             { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, category: "قسم البيتزا", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
-            { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, category: "فطير هابي ميلز - فطير اسكندراني", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
-            { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-            { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-            { name: "عجينة طعمية فريش (نصف كيلو)", price: 15, cost: 10, oldPrice: 18, category: "فول وطعمية - عجينة وقلي", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
-            { name: "كيلو سمك بلطي مشوي ريزو طازج", price: 110, cost: 85, oldPrice: 125, category: "سمكة مشوية - أسماك طازجة ومشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: true },
-            { name: "سمك بوري سنجاري طازج (كيلو)", price: 160, cost: 130, oldPrice: 180, category: "سمكة مشوية - سي فود وسنجاري", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: false },
-            { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, category: "سمكة مشوية - أرز ووربات وشوربة", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
+            { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, stock: 100, initialStock: 100, category: "فطير هابي ميلز - فطير اسكندراني", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
+            { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, stock: 100, initialStock: 100, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
+            { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, stock: 100, initialStock: 100, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
+            { name: "عجينة طعمية فريش (نصف كيلو)", price: 15, cost: 10, oldPrice: 18, stock: 100, initialStock: 100, category: "فول وطعمية - عجينة وقلي", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
+            { name: "كيلو سمك بلطي مشوي ريزو طازج", price: 110, cost: 85, oldPrice: 125, stock: 100, initialStock: 100, category: "سمكة مشوية - أسماك طازجة ومشويات", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: true },
+            { name: "سمك بوري سنجاري طازج (كيلو)", price: 160, cost: 130, oldPrice: 180, stock: 100, initialStock: 100, category: "سمكة مشوية - سي فود وسنجاري", image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500", outOfStock: false, isOffer: false },
+            { name: "أرز صيادية بالبصل والبهارات (طبق)", price: 30, cost: 20, oldPrice: 35, stock: 100, initialStock: 100, category: "سمكة مشوية - أرز ووربات وشوربة", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500", outOfStock: false, isOffer: false }
         ];
 
         let allSales = [];
@@ -1163,10 +1186,38 @@
             yearly: { label: "سنوي" }
         };
 
+        function normalizeProductStock(p) {
+            const rawStock = Number(p.stock);
+            const stock = Number.isFinite(rawStock) ? Math.max(0, Math.floor(rawStock)) : (p.outOfStock ? 0 : 100);
+            const rawInitial = Number(p.initialStock);
+            const initialStock = Number.isFinite(rawInitial) && rawInitial > 0 ? Math.floor(rawInitial) : Math.max(stock, 100);
+            p.stock = stock;
+            p.initialStock = initialStock;
+            p.outOfStock = Boolean(p.outOfStock) || stock <= 0;
+            return p;
+        }
+
+        function deductStockForItems(items = []) {
+            if (!Array.isArray(items) || !items.length) return false;
+            let changed = false;
+            items.forEach(soldItem => {
+                const qty = Math.max(0, parseInt(soldItem.qty, 10) || 0);
+                if (qty <= 0) return;
+                const prod = allProducts.find(p => p && p.name === soldItem.name);
+                if (!prod) return;
+                normalizeProductStock(prod);
+                prod.stock = Math.max(0, prod.stock - qty);
+                prod.outOfStock = prod.stock <= 0;
+                changed = true;
+            });
+            return changed;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem(AUTH_SESSION_KEY) === "1") {
                 document.getElementById('authOverlay').style.display = 'none';
             }
+            allProducts.forEach(normalizeProductStock);
             loadAdminKpiOverrides();
             renderAllSections();
             syncAllData(false);
@@ -1376,6 +1427,19 @@
                             saveAdminKpiOverridesLocal();
                         }
                     }
+                    allProducts.forEach(normalizeProductStock);
+                    let anyStockDeducted = false;
+                    allSales.forEach(sale => {
+                        if (sale && !sale.stockDeducted && Array.isArray(sale.items)) {
+                            if (deductStockForItems(sale.items)) {
+                                sale.stockDeducted = true;
+                                anyStockDeducted = true;
+                            }
+                        }
+                    });
+                    if (anyStockDeducted) {
+                        await pushCloudState();
+                    }
                     localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
                         products: allProducts,
                         sales: allSales,
@@ -1392,14 +1456,16 @@
                         if (Array.isArray(c.sales)) allSales = c.sales;
                         if (Array.isArray(c.captains) && c.captains.length > 0) allCaptains = c.captains;
                         if (Array.isArray(c.cashiers) && c.cashiers.length > 0) allCashiers = c.cashiers;
+                        allProducts.forEach(normalizeProductStock);
                     } catch (_) {}
                 }
             }
             renderAllSections();
-            if (showAlert) alert('✅ تمت مزامنة البيانات بنجاح!');
+            if (showAlert) alert('✅ تمت مزامنة البيانات والمخزون بنجاح!');
         }
 
         async function pushCloudState() {
+            allProducts.forEach(normalizeProductStock);
             localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
                 products: allProducts,
                 sales: allSales,
@@ -1684,11 +1750,13 @@
         function editProduct(idx) {
             const p = allProducts[idx];
             if (!p) return;
+            normalizeProductStock(p);
             document.getElementById('editIndex').value = idx;
             document.getElementById('prodName').value = p.name || '';
             document.getElementById('prodPrice').value = p.price ?? '';
             document.getElementById('prodCost').value = p.cost ?? '';
             document.getElementById('prodOldPrice').value = p.oldPrice ?? '';
+            document.getElementById('prodStockQty').value = p.stock ?? 0;
             document.getElementById('prodCategory').value = p.category || 'عام';
             document.getElementById('prodImage').value = p.image || '';
             document.getElementById('prodStock').value = p.outOfStock ? "true" : "false";
@@ -1703,6 +1771,7 @@
             document.getElementById('prodPrice').value = '';
             document.getElementById('prodCost').value = '';
             document.getElementById('prodOldPrice').value = '';
+            document.getElementById('prodStockQty').value = '100';
             document.getElementById('prodImage').value = '';
             document.getElementById('prodStock').value = "false";
             document.getElementById('prodIsOffer').value = "false";
@@ -1717,9 +1786,12 @@
             const cost = parseFloat(document.getElementById('prodCost').value);
             const oldPriceRaw = document.getElementById('prodOldPrice').value.trim();
             const oldPrice = oldPriceRaw ? parseFloat(oldPriceRaw) : null;
+            const stockQtyRaw = parseInt(document.getElementById('prodStockQty').value, 10);
+            const stockQty = Number.isFinite(stockQtyRaw) ? Math.max(0, stockQtyRaw) : 0;
             const category = document.getElementById('prodCategory').value;
             const image = document.getElementById('prodImage').value.trim() || DEFAULT_PROD_IMAGE;
-            const outOfStock = document.getElementById('prodStock').value === "true";
+            const manualOutOfStock = document.getElementById('prodStock').value === "true";
+            const outOfStock = manualOutOfStock || stockQty <= 0;
             const isOffer = document.getElementById('prodIsOffer').value === "true";
 
             if (!name || isNaN(price)) {
@@ -1727,24 +1799,49 @@
                 return;
             }
 
+            const existingProd = (idx >= 0 && allProducts[idx]) ? allProducts[idx] : null;
+            const initialStock = existingProd
+                ? Math.max(stockQty, Number(existingProd.initialStock) || stockQty)
+                : stockQty;
+
             const prodObj = {
                 name,
                 price,
                 cost: isNaN(cost) ? Math.round(price * 0.78) : cost,
                 oldPrice,
+                stock: outOfStock && !manualOutOfStock ? 0 : stockQty,
+                initialStock,
                 category,
                 image,
                 outOfStock,
                 isOffer
             };
 
-            if (idx >= 0 && allProducts[idx]) {
+            if (existingProd) {
                 allProducts[idx] = prodObj;
             } else {
                 allProducts.push(prodObj);
             }
 
             resetProductForm();
+            renderProductsTable();
+            await pushCloudState();
+        }
+
+        async function restockProduct(idx) {
+            const p = allProducts[idx];
+            if (!p) return;
+            normalizeProductStock(p);
+            const input = prompt(`أدخل الكمية الجديدة المتوفرة لـ "${p.name}" (المتبقي حالياً: ${p.stock} من أصل ${p.initialStock}):`, String(p.initialStock || 100));
+            if (input === null) return;
+            const newStock = parseInt(input, 10);
+            if (!Number.isFinite(newStock) || newStock < 0) {
+                alert('⚠️ يرجى إدخال رقم صحيح غير سالب.');
+                return;
+            }
+            p.stock = newStock;
+            p.initialStock = Math.max(newStock, Number(p.initialStock) || newStock);
+            p.outOfStock = newStock <= 0;
             renderProductsTable();
             await pushCloudState();
         }
@@ -1756,13 +1853,26 @@
             await pushCloudState();
         }
 
+        function getStockStatusBadge(p) {
+            normalizeProductStock(p);
+            const soldCount = Math.max(0, p.initialStock - p.stock);
+            if (p.stock <= 0 || p.outOfStock) {
+                return `<span class="stock-badge-out">نفد (0 / ${p.initialStock}) • مباع: ${soldCount}</span>`;
+            }
+            if (p.stock <= 15) {
+                return `<span class="stock-badge-low">متبقي: ${p.stock} / ${p.initialStock} • مباع: ${soldCount}</span>`;
+            }
+            return `<span class="stock-badge-ok">متبقي: ${p.stock} / ${p.initialStock} • مباع: ${soldCount}</span>`;
+        }
+
         function renderProductsTable() {
             const tbody = document.getElementById('productsTableBody');
             if (!allProducts.length) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">لا توجد منتجات مسجلة.</td></tr>`;
                 return;
             }
             tbody.innerHTML = allProducts.map((p, idx) => {
+                normalizeProductStock(p);
                 const costVal = parseFloat(p.cost) || 0;
                 const margin = (parseFloat(p.price) || 0) - costVal;
                 const statusBadge = p.outOfStock
@@ -1774,10 +1884,12 @@
                         <td><b>${p.name}</b> ${p.isOffer ? '🔥' : ''}</td>
                         <td>${p.price} ج.م</td>
                         <td>${margin.toFixed(1)} ج.م</td>
+                        <td>${getStockStatusBadge(p)}</td>
                         <td>${p.category || '-'}</td>
                         <td>${statusBadge}</td>
                         <td>
                             <div class="action-group">
+                                <button class="btn-sm" style="background:#dcfce7; color:#15803d;" onclick="restockProduct(${idx})">📦 كمية</button>
                                 <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editProduct(${idx})">تعديل</button>
                                 <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteProduct(${idx})">حذف</button>
                             </div>
@@ -1788,9 +1900,16 @@
         }
 
         async function updateOrderStatus(orderIdx, newStatus) {
-            if (!allSales[orderIdx]) return;
-            allSales[orderIdx].status = newStatus;
+            const sale = allSales[orderIdx];
+            if (!sale) return;
+            sale.status = newStatus;
+            if (newStatus !== "ملغي ❌" && !sale.stockDeducted && Array.isArray(sale.items)) {
+                if (deductStockForItems(sale.items)) {
+                    sale.stockDeducted = true;
+                }
+            }
             updateStatsAndKpis();
+            renderProductsTable();
             renderSalesTable();
             await pushCloudState();
         }
@@ -1842,8 +1961,15 @@
             const status = document.getElementById('editOrderStatus').value;
             const assignedCaptain = document.getElementById('editOrderCaptain').value;
 
+            const currentSale = allSales[idx];
+            if (status !== "ملغي ❌" && !currentSale.stockDeducted && Array.isArray(currentSale.items)) {
+                if (deductStockForItems(currentSale.items)) {
+                    currentSale.stockDeducted = true;
+                }
+            }
+
             allSales[idx] = {
-                ...allSales[idx],
+                ...currentSale,
                 customerName: name,
                 customerPhone: phone,
                 customerAddress: address,
@@ -1912,7 +2038,7 @@
                         ${captainOptions.replace(`value="${s.assignedCaptain || ''}"`, `value="${s.assignedCaptain || ''}" selected`)}
                     </select>
                 `;
-                const statuses = ["قيد الانتظار ⏳", "جاري التجهيز 👨‍🍳", "خرج للتوصيل 🛵", "تم التسليم ✅", "ملغي ❌"];
+                const statuses = ["قيد الانتظار ⏳", "جاري التجهيز 👨🍳", "خرج للتوصيل 🛵", "تم التسليم ✅", "ملغي ❌"];
                 const statusSelectHtml = `
                     <select onchange="updateOrderStatus(${realIdx}, this.value)" class="filter-select">
                         ${statuses.map(st => `<option value="${st}" ${s.status === st ? 'selected' : ''}>${st}</option>`).join('')}
