@@ -768,6 +768,9 @@
                         <option value="🍗 قسم هابي ميلز">🍗 قسم هابي ميلز</option>
                         <option value="🍳 قسم فول وطعمية">🍳 قسم فول وطعمية</option>
                         <option value="🐟 قسم سمكة مشوية">🐟 قسم سمكة مشوية</option>
+                        <option value="📱 إلكترونيات جاهز Store">📱 إلكترونيات جاهز Store</option>
+                        <option value="🌿 عطارة جاهز Store">🌿 عطارة جاهز Store</option>
+                        <option value="💊 صيدلية جاهز Store">💊 صيدلية جاهز Store</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -945,6 +948,21 @@
                             <option value="سمكة مشوية - سي فود وسنجاري">سي فود وسنجاري</option>
                             <option value="سمكة مشوية - أرز ووربات وشوربة">أرز وشوربة</option>
                         </optgroup>
+                        <optgroup label="📱 إلكترونيات جاهز Store">
+                            <option value="إلكترونيات جاهز Store - شواحن وكابلات">إلكترونيات جاهز Store - شواحن وكابلات</option>
+                            <option value="إلكترونيات جاهز Store - سماعات وإكسسوارات">إلكترونيات جاهز Store - سماعات وإكسسوارات</option>
+                            <option value="إلكترونيات جاهز Store - أجهزة ومنوعات">إلكترونيات جاهز Store - أجهزة ومنوعات</option>
+                        </optgroup>
+                        <optgroup label="🌿 عطارة جاهز Store">
+                            <option value="عطارة جاهز Store - توابل وبهارات">عطارة جاهز Store - توابل وبهارات</option>
+                            <option value="عطارة جاهز Store - أعشاب ومشروبات">عطارة جاهز Store - أعشاب ومشروبات</option>
+                            <option value="عطارة جاهز Store - حبوب وبقوليات">عطارة جاهز Store - حبوب وبقوليات</option>
+                        </optgroup>
+                        <optgroup label="💊 صيدلية جاهز Store">
+                            <option value="صيدلية جاهز Store - مستلزمات طبية">صيدلية جاهز Store - مستلزمات طبية</option>
+                            <option value="صيدلية جاهز Store - عناية شخصية">صيدلية جاهز Store - عناية شخصية</option>
+                            <option value="صيدلية جاهز Store - أدوية ومنتجات عامة">صيدلية جاهز Store - أدوية ومنتجات عامة</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="form-group">
@@ -966,6 +984,7 @@
                     </select>
                 </div>
             </div>
+
             <button class="btn" id="saveProdBtn" onclick="saveProduct()">➕ إضافة منتج جديد</button>
             <button class="btn btn-secondary-muted" id="cancelEditBtn" onclick="resetProductForm()" style="display:none;">إلغاء التعديل</button>
 
@@ -1515,23 +1534,23 @@
 
             const period = activeAdminKpiPeriod;
             const periodText = (adminPeriodMeta[period] || adminPeriodMeta.daily).label;
-            const autoKpis = computeAutoAdminKpis(period);
+            const autoVals = computeAutoAdminKpis(period);
             const ov = adminKpiOverrides[period] || {};
-
-            const revVal = (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? Number(ov.revenue) : autoKpis.revenue;
-            const spdVal = (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? Number(ov.speed) : autoKpis.speed;
-            const custVal = (ov.customers !== null && ov.customers !== undefined && ov.customers !== "") ? Number(ov.customers) : autoKpis.customers;
-            const ordVal = (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? Number(ov.orders) : autoKpis.orders;
-
-            document.getElementById('kpiTotalRevenue').innerText = `${revVal.toLocaleString('ar-EG')} ج.م`;
-            document.getElementById('kpiDeliverySpeed').innerText = `${spdVal.toLocaleString('ar-EG')} دقيقة`;
-            document.getElementById('kpiTotalCustomers').innerText = custVal.toLocaleString('ar-EG');
-            document.getElementById('kpiTotalOrders').innerText = ordVal.toLocaleString('ar-EG');
 
             const revCustom = ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "";
             const spdCustom = ov.speed !== null && ov.speed !== undefined && ov.speed !== "";
             const custCustom = ov.customers !== null && ov.customers !== undefined && ov.customers !== "";
             const ordCustom = ov.orders !== null && ov.orders !== undefined && ov.orders !== "";
+
+            const revVal = revCustom ? Number(ov.revenue) : autoVals.revenue;
+            const spdVal = spdCustom ? Number(ov.speed) : autoVals.speed;
+            const custVal = custCustom ? Number(ov.customers) : autoVals.customers;
+            const ordVal = ordCustom ? Number(ov.orders) : autoVals.orders;
+
+            document.getElementById('kpiTotalRevenue').innerText = `${revVal.toLocaleString('ar-EG')} ج.م`;
+            document.getElementById('kpiDeliverySpeed').innerText = `${spdVal.toLocaleString('ar-EG')} دقيقة`;
+            document.getElementById('kpiTotalCustomers').innerText = `${custVal.toLocaleString('ar-EG')}`;
+            document.getElementById('kpiTotalOrders').innerText = `${ordVal.toLocaleString('ar-EG')}`;
 
             document.getElementById('kpiRevenueSub').innerText = `${periodText} • ${revCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
             document.getElementById('kpiSpeedSub').innerText = `${periodText} • ${spdCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
@@ -1564,7 +1583,10 @@
             const key = sectionLabel.includes('سوبر') ? 'سوبر'
                       : sectionLabel.includes('هابي') ? 'هابي'
                       : sectionLabel.includes('فول') ? 'فول'
-                      : sectionLabel.includes('سمك') ? 'سمك' : '';
+                      : sectionLabel.includes('سمك') ? 'سمك'
+                      : sectionLabel.includes('إلكترونيات') ? 'إلكترونيات'
+                      : sectionLabel.includes('عطارة') ? 'عطارة'
+                      : sectionLabel.includes('صيدلية') ? 'صيدلية' : '';
             if (!key) return 0;
             return allSales.reduce((sum, sale) => {
                 const items = Array.isArray(sale.items) ? sale.items : [];
