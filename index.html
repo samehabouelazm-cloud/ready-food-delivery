@@ -372,6 +372,11 @@
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         const FIXED_WHATSAPP_NUMBER = "201042377974"; 
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
+        
+        // روابط الشعارات الجديدة المخصصة لكل قسم
+        const LOGO_ELECTRONICS = "https://i.postimg.cc/kXhYQ8P3/aʿlan-elektroniat-jahz.png";
+        const LOGO_ATTAra = "https://i.postimg.cc/4yW5K8tK/aʿlan-ʿatart-jahz.png";
+        const LOGO_PHARMACY = "https://i.postimg.cc/R6mHkR1w/aʿlan-saydlit-jahz.png";
         const HAPPY_MEALS_LOGO = "https://i.postimg.cc/3rGmm6vq/lwjw-haby-mylz.jpg";
         const FOUL_TAMEYA_LOGO = "https://i.postimg.cc/C5Z4yLPv/aʿlan-ftwr-jahz-balfwl.png";
         const GRILLED_FISH_LOGO = "https://i.postimg.cc/2y47jXY7/aʿlan-smkt-mshwyt-mn-jahz.png";
@@ -384,11 +389,15 @@
         let cart = [];
         let productQuantities = {};
 
+        // تم تحديث الكائن هنا لاستخدام الشعارات الجديدة
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
             "🍗 قسم هابي ميلز (الوجبات والمشويات)": HAPPY_MEALS_LOGO,
             "🍳 قسم فول وطعمية": FOUL_TAMEYA_LOGO,
-            "🐟 قسم سمكة مشوية": GRILLED_FISH_LOGO
+            "🐟 قسم سمكة مشوية": GRILLED_FISH_LOGO,
+            "📱 إلكترونيات جاهز Store": LOGO_ELECTRONICS, // تم تحديث الشعار
+            "🌿 عطارة جاهز Store": LOGO_ATTAra,       // تم تحديث الشعار
+            "💊 صيدلية جاهز Store": LOGO_PHARMACY      // تم تحديث الشعار
         };
 
         const storeHierarchy = {
@@ -412,6 +421,21 @@
             ],
             "🐟 قسم سمكة مشوية": [
                 "سمكة مشوية - أسماك طازجة ومشويات", "سمكة مشوية - سي فود وسنجاري", "سمكة مشوية - أرز ووربات وشوربة", "سمكة مشوية - سلطات ومخللات"
+            ],
+            "📱 إلكترونيات جاهز Store": [
+                "إلكترونيات جاهز Store - شواحن وكابلات",
+                "إلكترونيات جاهز Store - سماعات وإكسسوارات",
+                "إلكترونيات جاهز Store - أجهزة ومنوعات"
+            ],
+            "🌿 عطارة جاهز Store": [
+                "عطارة جاهز Store - توابل وبهارات",
+                "عطارة جاهز Store - أعشاب ومشروبات",
+                "عطارة جاهز Store - حبوب وبقوليات"
+            ],
+            "💊 صيدلية جاهز Store": [
+                "صيدلية جاهز Store - مستلزمات طبية",
+                "صيدلية جاهز Store - عناية شخصية",
+                "صيدلية جاهز Store - أدوية ومنتجات عامة"
             ]
         };
 
