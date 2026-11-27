@@ -683,7 +683,7 @@
             <h3>🔒 دخول لوحة الإدارة المحمية</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">يرجى إدخال كلمة المرور المعتمدة للمتابعة:</p>
             <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور" autocomplete="current-password" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
-            <button id="adminLoginBtn" onclick="checkAdminPassword()">دخول آمن 🔓</button>
+            <button type="button" id="adminLoginBtn" onclick="checkAdminPassword()">دخول آمن 🔓</button>
         </div>
     </div>
 
@@ -692,8 +692,8 @@
             <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة والتحليلات</h2>
         </div>
         <div class="header-actions">
-            <button onclick="syncAllData(true)" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">🔄 مزامنة</button>
-            <button onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
+            <button type="button" onclick="syncAllData(true)" style="background:#10b981; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">🔄 مزامنة</button>
+            <button type="button" onclick="logoutAdmin()" style="background:#ef4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px;">تسجيل خروج 🔒</button>
             <a href="index.html" style="background:#0284c7; color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">العودة لصفحة المتجر 🛒</a>
         </div>
     </header>
@@ -704,7 +704,7 @@
             <div class="kpi-header-bar">
                 <div class="kpi-start-info">
                     <span>📌 المؤشرات الزمنية</span>
-                    <span class="kpi-start-badge" id="kpiStartFromBadge">بدء من اليوم: 20 نوفمبر 2026</span>
+                    <span class="kpi-start-badge" id="kpiStartFromBadge">بدء من اليوم: 28 نوفمبر 2026</span>
                 </div>
                 <div class="kpi-toolbar-actions">
                     <div class="kpi-period-tabs" role="tablist" aria-label="اختيار الفترة الزمنية">
@@ -802,7 +802,7 @@
                     <input type="text" id="cashierWallet" placeholder="010xxxxxxxx">
                 </div>
             </div>
-            <button class="btn" onclick="addCashier()">➕ إضافة أو تحديث الكاشير والشفت</button>
+            <button type="button" class="btn" onclick="addCashier()">➕ إضافة أو تحديث الكاشير والشفت</button>
 
             <div class="table-responsive">
                 <table>
@@ -848,7 +848,7 @@
         <div class="card">
             <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">🛵 إدارة مناديب التوصيل (الكباتن) وتقرير الأرباح</h3>
-                <button class="btn btn-export" onclick="exportCaptainsReportToExcel()">📥 تصدير تقرير أرباح الكباتن (Excel/CSV)</button>
+                <button type="button" class="btn btn-export" onclick="exportCaptainsReportToExcel()">📥 تصدير تقرير أرباح الكباتن (Excel/CSV)</button>
             </div>
 
             <input type="hidden" id="editCaptainIndex" value="-1">
@@ -870,7 +870,7 @@
                     <input type="text" id="captainInstaInput" placeholder="حساب انستا باي">
                 </div>
                 <div class="form-group" style="display: flex; align-items: flex-end;">
-                    <button class="btn" id="saveCaptainBtn" onclick="saveCaptainData()" style="width: 100%;">💾 حفظ بيانات الكابتن</button>
+                    <button type="button" class="btn" id="saveCaptainBtn" onclick="saveCaptainData()" style="width: 100%;">💾 حفظ بيانات الكابتن</button>
                 </div>
             </div>
 
@@ -897,7 +897,7 @@
         <div class="card">
             <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">⭐ ترتيب وتقييم كباتن جاهز (حسب رقم الأوردر ولكل كابتن على حدة)</h3>
-                <button class="btn" onclick="renderCaptainRatingsBoard()" style="padding: 7px 14px; font-size: 13px;">🔄 تحديث التقييمات</button>
+                <button type="button" class="btn" onclick="renderCaptainRatingsBoard()" style="padding: 7px 14px; font-size: 13px;">🔄 تحديث التقييمات</button>
             </div>
 
             <div class="form-row captain-form-box">
@@ -933,7 +933,7 @@
                     <input type="text" id="rateBoardComment" placeholder="ملاحظة مرتبطة بالأوردر (اختياري)">
                 </div>
                 <div class="form-group" style="display: flex; align-items: flex-end;">
-                    <button class="btn" onclick="submitAdminCaptainRating()" style="width: 100%;">➕ تسجيل تقييم الأوردر</button>
+                    <button type="button" class="btn" onclick="submitAdminCaptainRating()" style="width: 100%;">➕ تسجيل تقييم الأوردر</button>
                 </div>
             </div>
 
@@ -1064,8 +1064,8 @@
                 </div>
             </div>
 
-            <button class="btn" id="saveProdBtn" onclick="saveProduct()">➕ إضافة منتج جديد</button>
-            <button class="btn btn-secondary-muted" id="cancelEditBtn" onclick="resetProductForm()" style="display:none;">إلغاء التعديل</button>
+            <button type="button" class="btn" id="saveProdBtn" onclick="saveProduct()">➕ إضافة منتج جديد</button>
+            <button type="button" class="btn btn-secondary-muted" id="cancelEditBtn" onclick="resetProductForm()" style="display:none;">إلغاء التعديل</button>
 
             <div class="table-responsive">
                 <table>
@@ -1092,7 +1092,7 @@
             <div class="card-header-flex">
                 <h3 style="margin-bottom: 0;">📋 متابعة الطلبات والمبيعات</h3>
                 <div class="filter-controls">
-                    <button class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px;">🖨️ طباعة تقرير المبيعات</button>
+                    <button type="button" class="btn" onclick="printSalesReport()" style="background: var(--secondary); padding: 6px 14px; font-size: 13px;">🖨️ طباعة تقرير المبيعات</button>
                     <label for="salesFilterSelect" style="font-size: 13px; font-weight: 700;">فلتر العرض:</label>
                     <select id="salesFilterSelect" class="filter-select" onchange="renderSalesTable()">
                         <option value="all">📊 كافة الطلبات المسجلة</option>
@@ -1231,29 +1231,6 @@
         let isAdminAuthenticated = false;
         let activeAdminHash = "";
 
-        async function hashPasswordSha256(plainText) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(plainText);
-            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-        }
-
-        function setAdminWorkspaceVisible(visible) {
-            const overlay = document.getElementById("authOverlay");
-            const header = document.getElementById("adminHeader");
-            const container = document.getElementById("adminMainContainer");
-            if (visible) {
-                overlay.style.display = "none";
-                header.hidden = false;
-                container.hidden = false;
-            } else {
-                header.hidden = true;
-                container.hidden = true;
-                overlay.style.display = "flex";
-            }
-        }
-
         let allProducts = [
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
             { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
@@ -1312,6 +1289,97 @@
             yearly: { label: "سنوي" }
         };
 
+        function fallbackSimpleHash(str) {
+            let h = 2166136261;
+            for (let i = 0; i < str.length; i++) {
+                h ^= str.charCodeAt(i);
+                h = Math.imul(h, 16777619);
+            }
+            return "fb_" + (h >>> 0).toString(16);
+        }
+
+        async function hashPasswordSha256(plainText) {
+            try {
+                if (window.crypto && window.crypto.subtle && typeof TextEncoder !== "undefined") {
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(plainText);
+                    const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+                }
+            } catch (_) {}
+            return fallbackSimpleHash(plainText);
+        }
+
+        function setAdminWorkspaceVisible(visible) {
+            const overlay = document.getElementById("authOverlay");
+            const header = document.getElementById("adminHeader");
+            const container = document.getElementById("adminMainContainer");
+
+            if (visible) {
+                if (overlay) overlay.style.display = "none";
+                if (header) {
+                    header.hidden = false;
+                    header.style.display = "flex";
+                }
+                if (container) {
+                    container.hidden = false;
+                    container.style.display = "block";
+                }
+            } else {
+                if (header) header.hidden = true;
+                if (container) container.hidden = true;
+                if (overlay) overlay.style.display = "flex";
+            }
+        }
+
+        async function checkAdminPassword() {
+            const inputEl = document.getElementById("adminPasswordInput");
+            if (!inputEl) return;
+
+            const input = inputEl.value;
+            if (!input) {
+                alert("⚠️ يرجى إدخال كلمة المرور أولاً.");
+                inputEl.focus();
+                return;
+            }
+
+            if (!activeAdminHash) {
+                activeAdminHash = await hashPasswordSha256(ADMIN_SECRET_PHRASE);
+            }
+
+            const hashedInput = await hashPasswordSha256(input);
+            if (hashedInput === activeAdminHash) {
+                isAdminAuthenticated = true;
+                try {
+                    sessionStorage.setItem(AUTH_SESSION_KEY, activeAdminHash);
+                } catch (_) {}
+
+                inputEl.value = "";
+                setAdminWorkspaceVisible(true);
+                allProducts.forEach(normalizeProductStock);
+                loadAdminKpiOverrides();
+                renderAllSections();
+                syncAllData(false);
+            } else {
+                alert("❌ كلمة المرور غير صحيحة!");
+                inputEl.select();
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            try {
+                sessionStorage.removeItem(AUTH_SESSION_KEY);
+            } catch (_) {}
+            const inputEl = document.getElementById("adminPasswordInput");
+            if (inputEl) inputEl.value = "";
+            setAdminWorkspaceVisible(false);
+        }
+
+        window.checkAdminPassword = checkAdminPassword;
+        window.logoutAdmin = logoutAdmin;
+
         function normalizeProductStock(p) {
             const rawStock = Number(p.stock);
             const stock = Number.isFinite(rawStock) ? Math.max(0, Math.floor(rawStock)) : (p.outOfStock ? 0 : 100);
@@ -1337,6 +1405,166 @@
                 changed = true;
             });
             return changed;
+        }
+
+        function formatStartFromTodayLabel(isoStr) {
+            const d = isoStr ? new Date(isoStr) : new Date();
+            const safeDate = isNaN(d.getTime()) ? new Date() : d;
+            const formatted = safeDate.toLocaleDateString('ar-EG', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            return `بدء من اليوم: ${formatted}`;
+        }
+
+        function loadAdminKpiOverrides() {
+            try {
+                const raw = localStorage.getItem(ADMIN_KPI_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.startDate) adminKpiStartDate = parsed.startDate;
+                        ["daily", "monthly", "yearly"].forEach(p => {
+                            if (parsed[p] && typeof parsed[p] === 'object') {
+                                adminKpiOverrides[p] = {
+                                    revenue: parsed[p].revenue ?? null,
+                                    speed: parsed[p].speed ?? null,
+                                    customers: parsed[p].customers ?? null,
+                                    orders: parsed[p].orders ?? null
+                                };
+                            }
+                        });
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function saveAdminKpiOverridesLocal() {
+            try {
+                localStorage.setItem(ADMIN_KPI_STORAGE_KEY, JSON.stringify({
+                    startDate: adminKpiStartDate,
+                    daily: adminKpiOverrides.daily,
+                    monthly: adminKpiOverrides.monthly,
+                    yearly: adminKpiOverrides.yearly
+                }));
+            } catch (_) {}
+        }
+
+        function filterSalesFromStartDate(period) {
+            if (!Array.isArray(allSales) || allSales.length === 0) return [];
+            const startBoundary = new Date(adminKpiStartDate);
+            const startDay = new Date(startBoundary.getFullYear(), startBoundary.getMonth(), startBoundary.getDate());
+            const now = new Date();
+
+            return allSales.filter(sale => {
+                if (!sale || !sale.timestamp) return false;
+                const d = new Date(sale.timestamp);
+                if (isNaN(d.getTime())) return false;
+                if (d < startDay) return false;
+
+                if (period === "daily") {
+                    return d.getFullYear() === now.getFullYear() &&
+                           d.getMonth() === now.getMonth() &&
+                           d.getDate() === now.getDate();
+                }
+                if (period === "monthly") {
+                    return d.getFullYear() === now.getFullYear() &&
+                           d.getMonth() === now.getMonth();
+                }
+                return d.getFullYear() === now.getFullYear();
+            });
+        }
+
+        function computeAutoAdminKpis(period) {
+            const scopedSales = filterSalesFromStartDate(period);
+            const ordersCount = scopedSales.length;
+            const revenueSum = scopedSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+
+            const speeds = scopedSales
+                .map(s => parseFloat(s.deliveryMinutes || s.avgDeliveryTime || s.deliveryTime))
+                .filter(v => !isNaN(v) && v > 0);
+            const avgSpeed = speeds.length > 0
+                ? Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length)
+                : 25;
+
+            const uniqueCustomers = new Set(
+                scopedSales.map(s => (s.customerPhone || s.customerName || "").trim()).filter(Boolean)
+            ).size;
+
+            return {
+                revenue: revenueSum,
+                speed: avgSpeed,
+                customers: uniqueCustomers,
+                orders: ordersCount
+            };
+        }
+
+        function switchAdminKpiPeriod(period) {
+            if (!["daily", "monthly", "yearly"].includes(period)) return;
+            activeAdminKpiPeriod = period;
+            ["daily", "monthly", "yearly"].forEach(p => {
+                const btn = document.getElementById(`kpiBtn-${p}`);
+                if (btn) btn.classList.toggle("active", p === period);
+            });
+            updateStatsAndKpis();
+        }
+
+        function openAdminKpiEditModal() {
+            const sel = document.getElementById("adminKpiPeriodSelect");
+            if (sel) sel.value = activeAdminKpiPeriod;
+            populateAdminKpiForm();
+            document.getElementById("adminKpiEditModal").style.display = "flex";
+        }
+
+        function closeAdminKpiEditModal() {
+            document.getElementById("adminKpiEditModal").style.display = "none";
+        }
+
+        function populateAdminKpiForm() {
+            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
+            const autoVals = computeAutoAdminKpis(period);
+            const ov = adminKpiOverrides[period] || {};
+
+            document.getElementById("adminKpiRevenueInput").value =
+                (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? ov.revenue : autoVals.revenue;
+            document.getElementById("adminKpiSpeedInput").value =
+                (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? ov.speed : autoVals.speed;
+            document.getElementById("adminKpiCustomersInput").value =
+                (ov.customers !== null && ov.customers !== undefined && ov.customers !== "") ? ov.customers : autoVals.customers;
+            document.getElementById("adminKpiOrdersInput").value =
+                (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? ov.orders : autoVals.orders;
+        }
+
+        async function saveAdminKpiOverrides() {
+            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
+            const revRaw = document.getElementById("adminKpiRevenueInput").value.trim();
+            const spdRaw = document.getElementById("adminKpiSpeedInput").value.trim();
+            const custRaw = document.getElementById("adminKpiCustomersInput").value.trim();
+            const ordRaw = document.getElementById("adminKpiOrdersInput").value.trim();
+
+            adminKpiOverrides[period] = {
+                revenue: revRaw === "" ? null : parseFloat(revRaw),
+                speed: spdRaw === "" ? null : parseFloat(spdRaw),
+                customers: custRaw === "" ? null : parseInt(custRaw, 10),
+                orders: ordRaw === "" ? null : parseInt(ordRaw, 10)
+            };
+
+            saveAdminKpiOverridesLocal();
+            switchAdminKpiPeriod(period);
+            closeAdminKpiEditModal();
+            await pushCloudState();
+            alert('✅ تم حفظ تعديل المؤشرات بنجاح!');
+        }
+
+        async function resetAdminKpiPeriod() {
+            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
+            adminKpiOverrides[period] = { revenue: null, speed: null, customers: null, orders: null };
+            saveAdminKpiOverridesLocal();
+            populateAdminKpiForm();
+            switchAdminKpiPeriod(period);
+            await pushCloudState();
+            alert('🔄 تمت استعادة الحساب التلقائي لهذه الفترة.');
         }
 
         function getCaptainStats(captainName) {
@@ -1538,7 +1766,7 @@
                         <td>${c.walletAccount || '-'}</td>
                         <td><b>${sectionSales.toLocaleString('ar-EG')} ج.م</b></td>
                         <td>
-                            <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCashier(${idx})">حذف</button>
+                            <button type="button" class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCashier(${idx})">حذف</button>
                         </td>
                     </tr>
                 `;
@@ -1624,8 +1852,8 @@
                         <td><b style="color:var(--secondary);">${st.deliveryEarnings.toLocaleString('ar-EG')} ج.م</b></td>
                         <td>
                             <div class="action-group">
-                                <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editCaptain(${idx})">تعديل</button>
-                                <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCaptain(${idx})">حذف</button>
+                                <button type="button" class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editCaptain(${idx})">تعديل</button>
+                                <button type="button" class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCaptain(${idx})">حذف</button>
                             </div>
                         </td>
                     </tr>
@@ -1903,9 +2131,9 @@
                         <td>${statusBadge}</td>
                         <td>
                             <div class="action-group">
-                                <button class="btn-sm" style="background:#dcfce7; color:#15803d;" onclick="restockProduct(${idx})">📦 كمية</button>
-                                <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editProduct(${idx})">تعديل</button>
-                                <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteProduct(${idx})">حذف</button>
+                                <button type="button" class="btn-sm" style="background:#dcfce7; color:#15803d;" onclick="restockProduct(${idx})">📦 كمية</button>
+                                <button type="button" class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="editProduct(${idx})">تعديل</button>
+                                <button type="button" class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteProduct(${idx})">حذف</button>
                             </div>
                         </td>
                     </tr>
@@ -2076,9 +2304,9 @@
                         <td>${statusSelectHtml}</td>
                         <td>
                             <div class="action-group">
-                                <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="notifyCustomerWhatsApp(${realIdx})">واتساب 📱</button>
-                                <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="openEditOrderModal(${realIdx})">تعديل ✏️</button>
-                                <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteOrder(${realIdx})">حذف 🗑️</button>
+                                <button type="button" class="btn-sm" style="background:#25d366; color:#fff;" onclick="notifyCustomerWhatsApp(${realIdx})">واتساب 📱</button>
+                                <button type="button" class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="openEditOrderModal(${realIdx})">تعديل ✏️</button>
+                                <button type="button" class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteOrder(${realIdx})">حذف 🗑️</button>
                             </div>
                         </td>
                     </tr>
@@ -2097,6 +2325,78 @@
             calculateDrawerTotal();
         }
 
+        async function syncAllData(showAlert = false) {
+            if (!isAdminAuthenticated) return;
+            try {
+                const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        allProducts = data;
+                    } else if (data && typeof data === 'object') {
+                        if (Array.isArray(data.products) && data.products.length > 0) allProducts = data.products;
+                        if (Array.isArray(data.sales)) allSales = data.sales;
+                        if (Array.isArray(data.captains) && data.captains.length > 0) allCaptains = data.captains;
+                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) allCashiers = data.cashiers;
+                        if (Array.isArray(data.captainRatings)) {
+                            allCaptainRatings = data.captainRatings;
+                        } else if (Array.isArray(data.captain_ratings)) {
+                            allCaptainRatings = data.captain_ratings;
+                        }
+                        if (data.adminKpiConfig && typeof data.adminKpiConfig === 'object') {
+                            if (data.adminKpiConfig.startDate) adminKpiStartDate = data.adminKpiConfig.startDate;
+                            ["daily", "monthly", "yearly"].forEach(p => {
+                                if (data.adminKpiConfig[p]) {
+                                    adminKpiOverrides[p] = {
+                                        revenue: data.adminKpiConfig[p].revenue ?? null,
+                                        speed: data.adminKpiConfig[p].speed ?? null,
+                                        customers: data.adminKpiConfig[p].customers ?? null,
+                                        orders: data.adminKpiConfig[p].orders ?? null
+                                    };
+                                }
+                            });
+                            saveAdminKpiOverridesLocal();
+                        }
+                    }
+                    allProducts.forEach(normalizeProductStock);
+                    let anyStockDeducted = false;
+                    allSales.forEach(sale => {
+                        if (sale && !sale.stockDeducted && Array.isArray(sale.items)) {
+                            if (deductStockForItems(sale.items)) {
+                                sale.stockDeducted = true;
+                                anyStockDeducted = true;
+                            }
+                        }
+                    });
+                    if (anyStockDeducted) {
+                        await pushCloudState();
+                    }
+                    localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
+                        products: allProducts,
+                        sales: allSales,
+                        captains: allCaptains,
+                        cashiers: allCashiers,
+                        captainRatings: allCaptainRatings
+                    }));
+                }
+            } catch (_) {
+                const cached = localStorage.getItem('gahiz_lightning_cache');
+                if (cached) {
+                    try {
+                        const c = JSON.parse(cached);
+                        if (Array.isArray(c.products) && c.products.length > 0) allProducts = c.products;
+                        if (Array.isArray(c.sales)) allSales = c.sales;
+                        if (Array.isArray(c.captains) && c.captains.length > 0) allCaptains = c.captains;
+                        if (Array.isArray(c.cashiers) && c.cashiers.length > 0) allCashiers = c.cashiers;
+                        if (Array.isArray(c.captainRatings)) allCaptainRatings = c.captainRatings;
+                        allProducts.forEach(normalizeProductStock);
+                    } catch (_) {}
+                }
+            }
+            renderAllSections();
+            if (showAlert) alert('✅ تمت مزامنة البيانات والمخزون بنجاح!');
+        }
+
         async function pushCloudState() {
             if (!isAdminAuthenticated) return;
             allProducts.forEach(normalizeProductStock);
@@ -2106,6 +2406,7 @@
                 captains: allCaptains,
                 cashiers: allCashiers,
                 captainRatings: allCaptainRatings,
+                captain_ratings: allCaptainRatings,
                 adminKpiConfig: {
                     startDate: adminKpiStartDate,
                     daily: adminKpiOverrides.daily,
@@ -2130,6 +2431,26 @@
         function printSalesReport() {
             window.print();
         }
+
+        window.addEventListener("DOMContentLoaded", async () => {
+            activeAdminHash = await hashPasswordSha256(ADMIN_SECRET_PHRASE);
+            let savedHash = "";
+            try {
+                savedHash = sessionStorage.getItem(AUTH_SESSION_KEY) || "";
+            } catch (_) {}
+
+            if (savedHash && savedHash === activeAdminHash) {
+                isAdminAuthenticated = true;
+                setAdminWorkspaceVisible(true);
+                allProducts.forEach(normalizeProductStock);
+                loadAdminKpiOverrides();
+                renderAllSections();
+                syncAllData(false);
+            } else {
+                isAdminAuthenticated = false;
+                setAdminWorkspaceVisible(false);
+            }
+        });
     </script>
 </body>
 </html>
