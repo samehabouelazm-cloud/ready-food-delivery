@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0284c7">
+    <title>سياسة الخصوصية - جاهز Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --secondary: #10b981;
+            --bg-light: #f1f5f9;
+            --surface: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --border-color: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            direction: rtl;
+            text-align: right;
+            line-height: 1.75;
+            padding-bottom: 48px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), #38bdf8);
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .brand-logo span.brand-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .brand-logo span.brand-title b {
+            color: var(--primary);
+        }
+
+        .back-btn {
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            transition: background 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        .policy-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .policy-hero {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+        }
+
+        .policy-hero h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+        }
+
+        .policy-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-top: 22px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        ul {
+            padding-right: 22px;
+            margin-bottom: 14px;
+        }
+
+        li {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        li strong {
+            color: var(--text-dark);
+        }
+
+        .contact-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            margin-top: 20px;
+        }
+
+        .contact-box p {
+            margin-bottom: 6px;
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .contact-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-box a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 800;
+        }
+
+        @media (max-width: 600px) {
+            .policy-card {
+                padding: 20px 16px;
+            }
+            .policy-hero h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="brand-logo">
+            <div class="logo-icon">جـ</div>
+            <span class="brand-title">جاهز <b>Store</b></span>
+        </a>
+        <a href="index.html" class="back-btn">العودة للمتجر 🛒</a>
+    </header>
+
+    <main class="container">
+        <article class="policy-card">
+            <div class="policy-hero">
+                <h1>سياسة الخصوصية — جاهز Store</h1>
+                <div class="policy-meta">تاريخ آخر تحديث: 27 نوفمبر 2026</div>
+            </div>
+
+            <p>
+                تلتزم منصة <strong>جاهز Store</strong> باحترام خصوصية مستخدميها وحماية البيانات التي يشاركونها عند استخدام التطبيق أو الموقع الإلكتروني لتصفح المنتجات والخدمات وطلب التوصيل أو التقديم كمناديب توصيل.
+            </p>
+
+            <h2>1. البيانات التي نقوم بجمعها</h2>
+            <ul>
+                <li><strong>بيانات الطلبات والعملاء:</strong> الاسم الكامل، رقم الهاتف/الواتساب، منطقة التوصيل، العنوان التفصيلي (الشارع، رقم العقار، الدور، الشقة)، تفاصيل الطلبات العادية أو الطلبات الخاصة، وطريقة الدفع المختارة.</li>
+                <li><strong>بيانات التقديم ككابتن توصيل:</strong> الاسم الكامل، رقم الهاتف/الواتساب، المنطقة/العنوان، وبيانات المحافظ الإلكترونية المقدمة طوعاً (مثل رقم فودافون كاش أو حساب إنستا باي) لتنظيم العمل والتسويات المالية.</li>
+                <li><strong>البيانات التقنية والتخزين المحلي:</strong> قد يتم حفظ بعض بيانات الجلسة أو السلة أو البيانات المؤقتة لتحسين سرعة التحميل واستقرار عرض المنتجات والطلبات.</li>
+            </ul>
+
+            <h2>2. كيفية استخدام البيانات</h2>
+            <ul>
+                <li>تجهيز الطلبات وتوصيلها إلى العنوان المحدد وتنسيق التواصل بشأنها عبر الواتساب أو الهاتف.</li>
+                <li>الرد على الطلبات الخاصة ("اطلب اللي تحتاجه") وتقديم الدعم للمستخدمين.</li>
+                <li>مراجعة طلبات الانضمام كمناديب توصيل وتنظيم عمليات التسليم والتسويات.</li>
+                <li>تحسين أداء المتجر وتحديث المنتجات والعروض وتجربة الاستخدام.</li>
+            </ul>
+
+            <h2>3. مشاركة البيانات والإرسال عبر الواتساب</h2>
+            <ul>
+                <li>عند إرسال طلب أو طلب خاص أو طلب انضمام ككابتن، يتم توجيه تفاصيل الطلب إلى الجهة المختصة بالتشغيل والتوصيل (بما في ذلك فتح محادثة واتساب تحتوي على بيانات الطلب والعنوان لإتمام الخدمة).</li>
+                <li>لا نقوم ببيع بيانات المستخدمين الشخصية لأطراف ثالثة لأغراض دعائية خارجية.</li>
+                <li>قد يتم حفظ أو مزامنة بيانات التشغيل والطلبات عبر خدمات سحابية مرتبطة بالمنصة لتشغيل الخدمة ومتابعة الطلبات.</li>
+            </ul>
+
+            <h2>4. أمن البيانات والاحتفاظ بها</h2>
+            <ul>
+                <li>يتم نقل البيانات عبر اتصال مشفر (<code>HTTPS</code>) قدر الإمكان عند التواصل مع الخدمات الشبكية.</li>
+                <li>نحتفظ ببيانات الطلبات والسجلات التشغيلية للمدة اللازمة لإتمام الخدمة، ومتابعة الطلبات، والالتزام بالمتطلبات التشغيلية أو النظامية.</li>
+            </ul>
+
+            <h2>5. حقوق المستخدم والتواصل معنا</h2>
+            <p>
+                يحق للمستخدم طلب تحديث بياناته أو الاستفسار عن كيفية استخدامها أو طلب حذف بيانات التواصل المرتبطة به عبر قنوات التواصل الرسمية الخاصة بـ <strong>جاهز Store</strong>.
+            </p>
+
+            <div class="contact-box">
+                <p>جهة الإدارة: جاهز Store</p>
+                <p>رقم التواصل / الواتساب: 201042377974</p>
+                <p>رابط المنصة: <a href="https://ready-food-delivery-live.vercel.app/" target="_blank" rel="noopener noreferrer">https://ready-food-delivery-live.vercel.app/</a></p>
+            </div>
+        </article>
+    </main>
+</body>
+</html>
