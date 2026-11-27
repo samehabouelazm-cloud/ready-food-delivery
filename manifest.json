@@ -1,0 +1,22 @@
+{
+  "name": "جاهز Store - التسوق والطلبات الشاملة",
+  "short_name": "جاهز Store",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0284c7",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
