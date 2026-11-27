@@ -425,6 +425,19 @@
             display: inline-block;
         }
 
+        .rating-stars-pill {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
         .table-responsive {
             overflow-x: auto;
             margin-top: 12px;
@@ -882,6 +895,68 @@
         </div>
 
         <div class="card">
+            <div class="card-header-flex">
+                <h3 style="margin-bottom: 0;">⭐ ترتيب وتقييم كباتن جاهز (حسب رقم الأوردر ولكل كابتن على حدة)</h3>
+                <button class="btn" onclick="renderCaptainRatingsBoard()" style="padding: 7px 14px; font-size: 13px;">🔄 تحديث التقييمات</button>
+            </div>
+
+            <div class="form-row captain-form-box">
+                <div class="form-group">
+                    <label>الكابتن:</label>
+                    <select id="rateBoardCaptainSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>رقم الأوردر المرتبط:</label>
+                    <input type="text" id="rateBoardOrderId" placeholder="مثال: ORD-1024">
+                </div>
+                <div class="form-group">
+                    <label>التقييم (من 1 إلى 5):</label>
+                    <select id="rateBoardScore">
+                        <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                        <option value="4">⭐⭐⭐⭐ (4)</option>
+                        <option value="3">⭐⭐⭐ (3)</option>
+                        <option value="2">⭐⭐ (2)</option>
+                        <option value="1">⭐ (1)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>وسم سريع:</label>
+                    <select id="rateBoardTag">
+                        <option value="توصيل سريع">توصيل سريع</option>
+                        <option value="أسلوب محترم">أسلوب محترم</option>
+                        <option value="الطلب سليم">الطلب سليم</option>
+                        <option value="تأخير بسيط">تأخير بسيط</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظة العميل / الإدارة:</label>
+                    <input type="text" id="rateBoardComment" placeholder="ملاحظة مرتبطة بالأوردر (اختياري)">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn" onclick="submitAdminCaptainRating()" style="width: 100%;">➕ تسجيل تقييم الأوردر</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الترتيب</th>
+                            <th>الكابتن</th>
+                            <th>متوسط التقييم</th>
+                            <th>عدد التقييمات</th>
+                            <th>أبرز الوسوم</th>
+                            <th>آخر الملاحظات (برقم الأوردر)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="captainRatingsBoardBody">
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري تحميل تقييمات الكباتن...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
             <h3>📦 إدارة المنتجات والأصناف والمخزون</h3>
             <input type="hidden" id="editIndex" value="-1">
             <div class="form-row">
@@ -1035,12 +1110,13 @@
                             <th>الهاتف والعنوان</th>
                             <th>الإجمالي والدفع</th>
                             <th>مندوب التوصيل (الكابتن)</th>
+                            <th>تقييم الكابتن (للأوردر)</th>
                             <th>حالة الطلب</th>
                             <th>الإجراءات والإشعارات</th>
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
-                        <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>
+                        <tr><td colspan="9" style="text-align: center; color: var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1220,6 +1296,7 @@
             { name: "محمود حسن (فول وطعمية)", phone: "01055556666", section: "🍳 قسم فول وطعمية", shift: "🌅 شفت صباحي", walletAccount: "01055556666" },
             { name: "سعيد علي (سمكة مشوية)", phone: "01077778888", section: "🐟 قسم سمكة مشوية", shift: "🌙 شفت مسائي", walletAccount: "01077778888" }
         ];
+        let allCaptainRatings = [];
 
         let adminKpiStartDate = new Date().toISOString();
         let activeAdminKpiPeriod = "daily";
@@ -1262,417 +1339,168 @@
             return changed;
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            activeAdminHash = await hashPasswordSha256(ADMIN_SECRET_PHRASE);
-            if (sessionStorage.getItem(AUTH_SESSION_KEY) === activeAdminHash) {
-                isAdminAuthenticated = true;
-                setAdminWorkspaceVisible(true);
-                allProducts.forEach(normalizeProductStock);
-                loadAdminKpiOverrides();
-                renderAllSections();
-                syncAllData(false);
-            } else {
-                isAdminAuthenticated = false;
-                setAdminWorkspaceVisible(false);
-            }
-        });
-
-        function formatStartFromTodayLabel(isoStr) {
-            const d = isoStr ? new Date(isoStr) : new Date();
-            const safeDate = isNaN(d.getTime()) ? new Date() : d;
-            const formatted = safeDate.toLocaleDateString('ar-EG', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-            return `بدء من اليوم: ${formatted}`;
+        function getCaptainStats(captainName) {
+            const cleanName = (captainName || "").trim();
+            const matchingOrders = allSales.filter(
+                s => s && s.status !== "ملغي ❌" && (s.assignedCaptain || "").trim() === cleanName
+            );
+            const ordersCount = matchingOrders.length;
+            const totalSales = matchingOrders.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+            const deliveryEarnings = ordersCount * 10;
+            return { ordersCount, totalSales, deliveryEarnings };
         }
 
-        function loadAdminKpiOverrides() {
-            try {
-                const raw = localStorage.getItem(ADMIN_KPI_STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && typeof parsed === 'object') {
-                        if (parsed.startDate) adminKpiStartDate = parsed.startDate;
-                        ["daily", "monthly", "yearly"].forEach(p => {
-                            if (parsed[p] && typeof parsed[p] === 'object') {
-                                adminKpiOverrides[p] = {
-                                    revenue: parsed[p].revenue ?? null,
-                                    speed: parsed[p].speed ?? null,
-                                    customers: parsed[p].customers ?? null,
-                                    orders: parsed[p].orders ?? null
-                                };
-                            }
-                        });
+        function getCaptainRatingSummary(captainName) {
+            const cleanName = (captainName || "").trim();
+            const entries = (Array.isArray(allCaptainRatings) ? allCaptainRatings : [])
+                .filter(r => r && (r.captainName || "").trim() === cleanName && !isNaN(Number(r.rating)))
+                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+            const totalRatings = entries.length;
+            const averageRating = totalRatings > 0
+                ? Number((entries.reduce((sum, r) => sum + Number(r.rating), 0) / totalRatings).toFixed(2))
+                : 0;
+
+            const tagCounts = {};
+            entries.forEach(item => {
+                const tags = Array.isArray(item.tags) ? item.tags : (item.tag ? [item.tag] : []);
+                tags.forEach(t => {
+                    if (t && String(t).trim()) {
+                        const key = String(t).trim();
+                        tagCounts[key] = (tagCounts[key] || 0) + 1;
                     }
-                }
-            } catch (_) {}
-        }
-
-        function saveAdminKpiOverridesLocal() {
-            try {
-                localStorage.setItem(ADMIN_KPI_STORAGE_KEY, JSON.stringify({
-                    startDate: adminKpiStartDate,
-                    daily: adminKpiOverrides.daily,
-                    monthly: adminKpiOverrides.monthly,
-                    yearly: adminKpiOverrides.yearly
-                }));
-            } catch (_) {}
-        }
-
-        function filterSalesFromStartDate(period) {
-            if (!Array.isArray(allSales) || allSales.length === 0) return [];
-            const startBoundary = new Date(adminKpiStartDate);
-            const startDay = new Date(startBoundary.getFullYear(), startBoundary.getMonth(), startBoundary.getDate());
-            const now = new Date();
-
-            return allSales.filter(sale => {
-                if (!sale || !sale.timestamp) return false;
-                const d = new Date(sale.timestamp);
-                if (isNaN(d.getTime())) return false;
-                if (d < startDay) return false;
-
-                if (period === "daily") {
-                    return d.getFullYear() === now.getFullYear() &&
-                           d.getMonth() === now.getMonth() &&
-                           d.getDate() === now.getDate();
-                }
-                if (period === "monthly") {
-                    return d.getFullYear() === now.getFullYear() &&
-                           d.getMonth() === now.getMonth();
-                }
-                return d.getFullYear() === now.getFullYear();
-            });
-        }
-
-        function computeAutoAdminKpis(period) {
-            const scopedSales = filterSalesFromStartDate(period);
-            const ordersCount = scopedSales.length;
-            const revenueSum = scopedSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
-
-            const speeds = scopedSales
-                .map(s => parseFloat(s.deliveryMinutes || s.avgDeliveryTime || s.deliveryTime))
-                .filter(v => !isNaN(v) && v > 0);
-            const avgSpeed = speeds.length > 0
-                ? Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length)
-                : 25;
-
-            const uniqueCustomers = new Set(
-                scopedSales.map(s => (s.customerPhone || s.customerName || "").trim()).filter(Boolean)
-            ).size;
-
-            return {
-                revenue: revenueSum,
-                speed: avgSpeed,
-                customers: uniqueCustomers,
-                orders: ordersCount
-            };
-        }
-
-        function switchAdminKpiPeriod(period) {
-            if (!["daily", "monthly", "yearly"].includes(period)) return;
-            activeAdminKpiPeriod = period;
-            ["daily", "monthly", "yearly"].forEach(p => {
-                const btn = document.getElementById(`kpiBtn-${p}`);
-                if (btn) btn.classList.toggle("active", p === period);
-            });
-            updateStatsAndKpis();
-        }
-
-        function openAdminKpiEditModal() {
-            const sel = document.getElementById("adminKpiPeriodSelect");
-            if (sel) sel.value = activeAdminKpiPeriod;
-            populateAdminKpiForm();
-            document.getElementById("adminKpiEditModal").style.display = "flex";
-        }
-
-        function closeAdminKpiEditModal() {
-            document.getElementById("adminKpiEditModal").style.display = "none";
-        }
-
-        function populateAdminKpiForm() {
-            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
-            const autoVals = computeAutoAdminKpis(period);
-            const ov = adminKpiOverrides[period] || {};
-
-            document.getElementById("adminKpiRevenueInput").value =
-                (ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "") ? ov.revenue : autoVals.revenue;
-            document.getElementById("adminKpiSpeedInput").value =
-                (ov.speed !== null && ov.speed !== undefined && ov.speed !== "") ? ov.speed : autoVals.speed;
-            document.getElementById("adminKpiCustomersInput").value =
-                (ov.customers !== null && ov.customers !== undefined && ov.customers !== "") ? ov.customers : autoVals.customers;
-            document.getElementById("adminKpiOrdersInput").value =
-                (ov.orders !== null && ov.orders !== undefined && ov.orders !== "") ? ov.orders : autoVals.orders;
-        }
-
-        async function saveAdminKpiOverrides() {
-            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
-            const revRaw = document.getElementById("adminKpiRevenueInput").value.trim();
-            const spdRaw = document.getElementById("adminKpiSpeedInput").value.trim();
-            const custRaw = document.getElementById("adminKpiCustomersInput").value.trim();
-            const ordRaw = document.getElementById("adminKpiOrdersInput").value.trim();
-
-            adminKpiOverrides[period] = {
-                revenue: revRaw === "" ? null : parseFloat(revRaw),
-                speed: spdRaw === "" ? null : parseFloat(spdRaw),
-                customers: custRaw === "" ? null : parseInt(custRaw, 10),
-                orders: ordRaw === "" ? null : parseInt(ordRaw, 10)
-            };
-
-            saveAdminKpiOverridesLocal();
-            switchAdminKpiPeriod(period);
-            closeAdminKpiEditModal();
-            await pushCloudState();
-            alert('✅ تم حفظ تعديل المؤشرات بنجاح!');
-        }
-
-        async function resetAdminKpiPeriod() {
-            const period = document.getElementById("adminKpiPeriodSelect").value || activeAdminKpiPeriod;
-            adminKpiOverrides[period] = { revenue: null, speed: null, customers: null, orders: null };
-            saveAdminKpiOverridesLocal();
-            populateAdminKpiForm();
-            switchAdminKpiPeriod(period);
-            await pushCloudState();
-            alert('🔄 تمت استعادة الحساب التلقائي لهذه الفترة.');
-        }
-
-        async function checkAdminPassword() {
-            const inputEl = document.getElementById('adminPasswordInput');
-            const input = inputEl.value;
-            if (!input) {
-                alert('⚠️ يرجى إدخال كلمة المرور أولاً.');
-                return;
-            }
-            if (!activeAdminHash) {
-                activeAdminHash = await hashPasswordSha256(ADMIN_SECRET_PHRASE);
-            }
-            const hashedInput = await hashPasswordSha256(input);
-            if (hashedInput === activeAdminHash) {
-                isAdminAuthenticated = true;
-                sessionStorage.setItem(AUTH_SESSION_KEY, activeAdminHash);
-                inputEl.value = '';
-                setAdminWorkspaceVisible(true);
-                allProducts.forEach(normalizeProductStock);
-                loadAdminKpiOverrides();
-                renderAllSections();
-                syncAllData(false);
-            } else {
-                alert('❌ كلمة المرور غير صحيحة!');
-            }
-        }
-
-        function logoutAdmin() {
-            isAdminAuthenticated = false;
-            sessionStorage.removeItem(AUTH_SESSION_KEY);
-            document.getElementById('adminPasswordInput').value = '';
-            setAdminWorkspaceVisible(false);
-        }
-
-        async function syncAllData(showAlert = false) {
-            if (!isAdminAuthenticated) return;
-            try {
-                const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        allProducts = data;
-                    } else if (data && typeof data === 'object') {
-                        if (Array.isArray(data.products) && data.products.length > 0) allProducts = data.products;
-                        if (Array.isArray(data.sales)) allSales = data.sales;
-                        if (Array.isArray(data.captains) && data.captains.length > 0) allCaptains = data.captains;
-                        if (Array.isArray(data.cashiers) && data.cashiers.length > 0) allCashiers = data.cashiers;
-                        if (data.adminKpiConfig && typeof data.adminKpiConfig === 'object') {
-                            if (data.adminKpiConfig.startDate) adminKpiStartDate = data.adminKpiConfig.startDate;
-                            ["daily", "monthly", "yearly"].forEach(p => {
-                                if (data.adminKpiConfig[p]) {
-                                    adminKpiOverrides[p] = {
-                                        revenue: data.adminKpiConfig[p].revenue ?? null,
-                                        speed: data.adminKpiConfig[p].speed ?? null,
-                                        customers: data.adminKpiConfig[p].customers ?? null,
-                                        orders: data.adminKpiConfig[p].orders ?? null
-                                    };
-                                }
-                            });
-                            saveAdminKpiOverridesLocal();
-                        }
-                    }
-                    allProducts.forEach(normalizeProductStock);
-                    let anyStockDeducted = false;
-                    allSales.forEach(sale => {
-                        if (sale && !sale.stockDeducted && Array.isArray(sale.items)) {
-                            if (deductStockForItems(sale.items)) {
-                                sale.stockDeducted = true;
-                                anyStockDeducted = true;
-                            }
-                        }
-                    });
-                    if (anyStockDeducted) {
-                        await pushCloudState();
-                    }
-                    localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
-                        products: allProducts,
-                        sales: allSales,
-                        captains: allCaptains,
-                        cashiers: allCashiers
-                    }));
-                }
-            } catch (_) {
-                const cached = localStorage.getItem('gahiz_lightning_cache');
-                if (cached) {
-                    try {
-                        const c = JSON.parse(cached);
-                        if (Array.isArray(c.products) && c.products.length > 0) allProducts = c.products;
-                        if (Array.isArray(c.sales)) allSales = c.sales;
-                        if (Array.isArray(c.captains) && c.captains.length > 0) allCaptains = c.captains;
-                        if (Array.isArray(c.cashiers) && c.cashiers.length > 0) allCashiers = c.cashiers;
-                        allProducts.forEach(normalizeProductStock);
-                    } catch (_) {}
-                }
-            }
-            renderAllSections();
-            if (showAlert) alert('✅ تمت مزامنة البيانات والمخزون بنجاح!');
-        }
-
-        async function pushCloudState() {
-            if (!isAdminAuthenticated) return;
-            allProducts.forEach(normalizeProductStock);
-            localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
-                products: allProducts,
-                sales: allSales,
-                captains: allCaptains,
-                cashiers: allCashiers
-            }));
-            saveAdminKpiOverridesLocal();
-            try {
-                let cloudObj = {};
-                const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
-                if (res.ok) {
-                    const existing = await res.json();
-                    if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
-                        cloudObj = existing;
-                    }
-                }
-                cloudObj.products = allProducts;
-                cloudObj.sales = allSales;
-                cloudObj.captains = allCaptains;
-                cloudObj.cashiers = allCashiers;
-                cloudObj.adminKpiConfig = {
-                    startDate: adminKpiStartDate,
-                    daily: adminKpiOverrides.daily,
-                    monthly: adminKpiOverrides.monthly,
-                    yearly: adminKpiOverrides.yearly
-                };
-
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(cloudObj)
                 });
-            } catch (_) {}
+            });
+
+            const topTags = Object.entries(tagCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 2)
+                .map(([tag, count]) => `${tag} (${count})`)
+                .join("، ") || "—";
+
+            const recentNotes = entries
+                .filter(item => item.comment && String(item.comment).trim() !== "")
+                .slice(0, 2)
+                .map(item => `#${item.orderId || "-"}: ${String(item.comment).trim()}`)
+                .join(" | ") || "لا توجد ملاحظات نصية";
+
+            return { totalRatings, averageRating, topTags, recentNotes, entries };
         }
 
-        function renderAllSections() {
-            updateStatsAndKpis();
-            renderCashiersTable();
-            renderCaptainsTable();
-            renderProductsTable();
-            renderSalesTable();
+        function getOrderCaptainRating(orderId, captainName) {
+            const cleanOrderId = String(orderId || "").trim();
+            if (!cleanOrderId || !Array.isArray(allCaptainRatings)) return null;
+            return allCaptainRatings.find(
+                r => r && String(r.orderId || "").trim() === cleanOrderId &&
+                     (!captainName || (r.captainName || "").trim() === String(captainName).trim())
+            ) || null;
         }
 
         function updateStatsAndKpis() {
-            const startBadgeEl = document.getElementById('kpiStartFromBadge');
-            if (startBadgeEl) startBadgeEl.innerText = formatStartFromTodayLabel(adminKpiStartDate);
+            const badge = document.getElementById("kpiStartFromBadge");
+            if (badge) badge.innerText = formatStartFromTodayLabel(adminKpiStartDate);
 
-            const period = activeAdminKpiPeriod;
-            const periodText = (adminPeriodMeta[period] || adminPeriodMeta.daily).label;
-            const autoVals = computeAutoAdminKpis(period);
-            const ov = adminKpiOverrides[period] || {};
+            const validSales = allSales.filter(s => s && s.status !== "ملغي ❌");
+            const totalSalesAmount = validSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
 
-            const revCustom = ov.revenue !== null && ov.revenue !== undefined && ov.revenue !== "";
-            const spdCustom = ov.speed !== null && ov.speed !== undefined && ov.speed !== "";
-            const custCustom = ov.customers !== null && ov.customers !== undefined && ov.customers !== "";
-            const ordCustom = ov.orders !== null && ov.orders !== undefined && ov.orders !== "";
+            const prodCostMap = {};
+            allProducts.forEach(p => {
+                if (p && p.name) {
+                    const price = parseFloat(p.price) || 0;
+                    const cost = (p.cost !== undefined && p.cost !== null && !isNaN(parseFloat(p.cost)))
+                        ? parseFloat(p.cost)
+                        : Math.round(price * 0.78);
+                    prodCostMap[p.name] = Math.max(0, price - cost);
+                }
+            });
 
-            const revVal = revCustom ? Number(ov.revenue) : autoVals.revenue;
-            const spdVal = spdCustom ? Number(ov.speed) : autoVals.speed;
-            const custVal = custCustom ? Number(ov.customers) : autoVals.customers;
-            const ordVal = ordCustom ? Number(ov.orders) : autoVals.orders;
+            let estimatedProfit = 0;
+            validSales.forEach(sale => {
+                if (Array.isArray(sale.items) && sale.items.length > 0) {
+                    sale.items.forEach(item => {
+                        const qty = Math.max(0, parseInt(item.qty, 10) || 0);
+                        const unitProfit = prodCostMap[item.name] !== undefined
+                            ? prodCostMap[item.name]
+                            : ((parseFloat(item.price) || 0) * 0.22);
+                        estimatedProfit += unitProfit * qty;
+                    });
+                } else {
+                    estimatedProfit += (parseFloat(sale.total) || 0) * 0.22;
+                }
+            });
 
-            document.getElementById('kpiTotalRevenue').innerText = `${revVal.toLocaleString('ar-EG')} ج.م`;
-            document.getElementById('kpiDeliverySpeed').innerText = `${spdVal.toLocaleString('ar-EG')} دقيقة`;
-            document.getElementById('kpiTotalCustomers').innerText = `${custVal.toLocaleString('ar-EG')}`;
-            document.getElementById('kpiTotalOrders').innerText = `${ordVal.toLocaleString('ar-EG')}`;
+            const statSalesEl = document.getElementById("statTotalSales");
+            const statProfitEl = document.getElementById("statTotalProfit");
+            const statOrdersEl = document.getElementById("statOrdersCount");
+            if (statSalesEl) statSalesEl.innerText = `${totalSalesAmount.toLocaleString('ar-EG')} ج.م`;
+            if (statProfitEl) statProfitEl.innerText = `${Math.round(estimatedProfit).toLocaleString('ar-EG')} ج.م`;
+            if (statOrdersEl) statOrdersEl.innerText = String(allSales.length);
 
-            document.getElementById('kpiRevenueSub').innerText = `${periodText} • ${revCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
-            document.getElementById('kpiSpeedSub').innerText = `${periodText} • ${spdCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
-            document.getElementById('kpiCustomersSub').innerText = `${periodText} • ${custCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
-            document.getElementById('kpiOrdersSub').innerText = `${periodText} • ${ordCustom ? "معدّل يدوياً" : "بدء من اليوم"}`;
+            const autoKpi = computeAutoAdminKpis(activeAdminKpiPeriod);
+            const ov = adminKpiOverrides[activeAdminKpiPeriod] || {};
 
-            const ordersCount = allSales.length;
-            const totalRevenue = allSales.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
-            const estimatedProfit = allSales.reduce((sum, s) => {
-                const orderTotal = parseFloat(s.total) || 0;
-                const fee = parseFloat(s.deliveryFee) || 0;
-                const netItems = Math.max(0, orderTotal - fee);
-                return sum + (netItems * 0.22);
-            }, 0);
+            const finalRevenue = (ov.revenue !== null && ov.revenue !== undefined && !isNaN(ov.revenue)) ? ov.revenue : autoKpi.revenue;
+            const finalSpeed = (ov.speed !== null && ov.speed !== undefined && !isNaN(ov.speed)) ? ov.speed : autoKpi.speed;
+            const finalCustomers = (ov.customers !== null && ov.customers !== undefined && !isNaN(ov.customers)) ? ov.customers : autoKpi.customers;
+            const finalOrders = (ov.orders !== null && ov.orders !== undefined && !isNaN(ov.orders)) ? ov.orders : autoKpi.orders;
 
-            document.getElementById('statTotalSales').innerText = `${totalRevenue.toLocaleString('ar-EG')} ج.م`;
-            document.getElementById('statTotalProfit').innerText = `${Math.round(estimatedProfit).toLocaleString('ar-EG')} ج.م`;
-            document.getElementById('statOrdersCount').innerText = ordersCount.toLocaleString('ar-EG');
+            const periodLabel = adminPeriodMeta[activeAdminKpiPeriod]?.label || "يومي";
+            const subText = `${periodLabel} • بدء من اليوم`;
+
+            const revEl = document.getElementById("kpiTotalRevenue");
+            const spdEl = document.getElementById("kpiDeliverySpeed");
+            const custEl = document.getElementById("kpiTotalCustomers");
+            const ordEl = document.getElementById("kpiTotalOrders");
+
+            if (revEl) revEl.innerText = `${Number(finalRevenue || 0).toLocaleString('ar-EG')} ج.م`;
+            if (spdEl) spdEl.innerText = `${Number(finalSpeed || 25)} دقيقة`;
+            if (custEl) custEl.innerText = String(Number(finalCustomers || 0));
+            if (ordEl) ordEl.innerText = String(Number(finalOrders || 0));
+
+            ["kpiRevenueSub", "kpiSpeedSub", "kpiCustomersSub", "kpiOrdersSub"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = subText;
+            });
         }
 
-        function calculateDrawerTotal() {
-            const cash = parseFloat(document.getElementById('drawerCash').value) || 0;
-            const wallets = parseFloat(document.getElementById('drawerWallets').value) || 0;
-            const startFloat = parseFloat(document.getElementById('drawerStartFloat').value) || 0;
-            const finalTotal = Math.max(0, (cash + wallets) - startFloat);
-            document.getElementById('drawerFinalTotal').innerText = finalTotal.toLocaleString('ar-EG');
-        }
-
-        function getSectionSales(sectionLabel) {
-            const key = sectionLabel.includes('سوبر') ? 'سوبر'
-                      : sectionLabel.includes('هابي') ? 'هابي'
-                      : sectionLabel.includes('فول') ? 'فول'
-                      : sectionLabel.includes('سمك') ? 'سمك'
-                      : sectionLabel.includes('إلكترونيات') ? 'إلكترونيات'
-                      : sectionLabel.includes('عطارة') ? 'عطارة'
-                      : sectionLabel.includes('صيدلية') ? 'صيدلية' : '';
-            if (!key) return 0;
-            return allSales.reduce((sum, sale) => {
-                const items = Array.isArray(sale.items) ? sale.items : [];
-                const matchSum = items.reduce((iSum, item) => {
-                    const cat = (item.category || '').toString();
-                    const nm = (item.name || '').toString();
-                    if (cat.includes(key) || nm.includes(key)) {
-                        return iSum + ((parseFloat(item.price) || 0) * (parseInt(item.qty, 10) || 1));
-                    }
-                    return iSum;
+        function getSectionSalesTotal(sectionLabel) {
+            const cleanSection = String(sectionLabel || "").replace(/^[^\s]+\s*/, "").trim();
+            return allSales
+                .filter(s => s && s.status !== "ملغي ❌")
+                .reduce((sum, sale) => {
+                    if (!Array.isArray(sale.items)) return sum;
+                    const matched = sale.items.reduce((itemSum, item) => {
+                        const prod = allProducts.find(p => p && p.name === item.name);
+                        const cat = String(item.category || prod?.category || "");
+                        if (cat.includes(sectionLabel) || (cleanSection && cat.includes(cleanSection))) {
+                            const lineTotal = parseFloat(item.price) * (parseInt(item.qty, 10) || 1);
+                            return itemSum + (isNaN(lineTotal) ? 0 : lineTotal);
+                        }
+                        return itemSum;
+                    }, 0);
+                    return sum + matched;
                 }, 0);
-                return sum + matchSum;
-            }, 0);
         }
 
-        async function addCashier() {
+        function addCashier() {
             const name = document.getElementById('cashierName').value.trim();
             const phone = document.getElementById('cashierPhone').value.trim();
             const section = document.getElementById('cashierSection').value;
             const shift = document.getElementById('cashierShift').value;
             const walletAccount = document.getElementById('cashierWallet').value.trim();
 
-            if (!name || !phone) {
-                alert('⚠️ يرجى إدخال اسم الكاشير ورقم الواتساب.');
+            if (!name) {
+                alert('⚠️ يرجى إدخال اسم الكاشير.');
                 return;
             }
 
             const existingIdx = allCashiers.findIndex(c => c.section === section && c.shift === shift);
-            const record = { name, phone, section, shift, walletAccount: walletAccount || phone };
+            const cashierObj = { name, phone, section, shift, walletAccount };
 
             if (existingIdx >= 0) {
-                allCashiers[existingIdx] = record;
+                allCashiers[existingIdx] = cashierObj;
             } else {
-                allCashiers.push(record);
+                allCashiers.push(cashierObj);
             }
 
             document.getElementById('cashierName').value = '';
@@ -1680,46 +1508,50 @@
             document.getElementById('cashierWallet').value = '';
 
             renderCashiersTable();
-            await pushCloudState();
+            pushCloudState();
         }
 
-        async function deleteCashier(idx) {
-            if (!confirm('هل تريد حذف هذا الكاشير؟')) return;
+        function deleteCashier(idx) {
+            if (!confirm('هل تريد حذف بيانات هذا الكاشير؟')) return;
             allCashiers.splice(idx, 1);
             renderCashiersTable();
-            await pushCloudState();
+            pushCloudState();
         }
 
         function renderCashiersTable() {
             const tbody = document.getElementById('cashiersTableBody');
             if (!allCashiers.length) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">لا يوجد كاشير مضافون حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">لا يوجد كاشير مسجلون حالياً.</td></tr>`;
                 return;
             }
+
             tbody.innerHTML = allCashiers.map((c, idx) => {
-                const isEvening = (c.shift || '').includes('مسائي');
-                const badgeClass = isEvening ? 'badge-shift-evening' : 'badge-shift';
-                const secSales = getSectionSales(c.section || '');
+                const isEvening = String(c.shift || "").includes("مسائي");
+                const shiftClass = isEvening ? "badge-shift-evening" : "badge-shift";
+                const sectionSales = getSectionSalesTotal(c.section);
                 return `
                     <tr>
                         <td><b>${c.name}</b></td>
                         <td>${c.section || '-'}</td>
-                        <td><span class="${badgeClass}">${c.shift || '-'}</span></td>
+                        <td><span class="${shiftClass}">${c.shift || '-'}</span></td>
                         <td>${c.phone || '-'}</td>
                         <td>${c.walletAccount || '-'}</td>
-                        <td><b>${secSales.toLocaleString('ar-EG')} ج.م</b></td>
-                        <td><button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCashier(${idx})">حذف</button></td>
+                        <td><b>${sectionSales.toLocaleString('ar-EG')} ج.م</b></td>
+                        <td>
+                            <button class="btn-sm" style="background:#fee2e2; color:#dc2626;" onclick="deleteCashier(${idx})">حذف</button>
+                        </td>
                     </tr>
                 `;
             }).join('');
         }
 
-        function getCaptainStats(capName) {
-            const matched = allSales.filter(s => (s.assignedCaptain || '').trim() === capName.trim());
-            const ordersCount = matched.length;
-            const totalSales = matched.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
-            const deliveryEarnings = ordersCount * 10;
-            return { ordersCount, totalSales, deliveryEarnings };
+        function calculateDrawerTotal() {
+            const cash = parseFloat(document.getElementById('drawerCash')?.value) || 0;
+            const wallets = parseFloat(document.getElementById('drawerWallets')?.value) || 0;
+            const startFloat = parseFloat(document.getElementById('drawerStartFloat')?.value) || 0;
+            const total = Math.max(0, (cash + wallets) - startFloat);
+            const outEl = document.getElementById('drawerFinalTotal');
+            if (outEl) outEl.innerText = total.toLocaleString('ar-EG');
         }
 
         function editCaptain(idx) {
@@ -1739,8 +1571,8 @@
             const vodafoneCash = document.getElementById('captainVodafoneInput').value.trim();
             const instaPay = document.getElementById('captainInstaInput').value.trim();
 
-            if (!name || !phone) {
-                alert('⚠️ يرجى إدخال اسم الكابتن ورقم الهاتف.');
+            if (!name) {
+                alert('⚠️ يرجى إدخال اسم الكابتن.');
                 return;
             }
 
@@ -1758,6 +1590,8 @@
             document.getElementById('captainInstaInput').value = '';
 
             renderCaptainsTable();
+            populateCaptainRatingSelect();
+            renderCaptainRatingsBoard();
             renderSalesTable();
             await pushCloudState();
         }
@@ -1766,6 +1600,8 @@
             if (!confirm('هل تريد حذف هذا الكابتن؟')) return;
             allCaptains.splice(idx, 1);
             renderCaptainsTable();
+            populateCaptainRatingSelect();
+            renderCaptainRatingsBoard();
             renderSalesTable();
             await pushCloudState();
         }
@@ -1797,10 +1633,112 @@
             }).join('');
         }
 
+        function populateCaptainRatingSelect(selectedName = "") {
+            const sel = document.getElementById("rateBoardCaptainSelect");
+            if (!sel) return;
+            const namesSet = new Set(allCaptains.map(c => c.name).filter(Boolean));
+            allCaptainRatings.forEach(r => {
+                if (r && r.captainName) namesSet.add(String(r.captainName).trim());
+            });
+            const options = Array.from(namesSet).map(name => `<option value="${name}">${name}</option>`);
+            sel.innerHTML = options.length
+                ? options.join("")
+                : `<option value="">لا يوجد كباتن</option>`;
+            if (selectedName && namesSet.has(selectedName)) {
+                sel.value = selectedName;
+            }
+        }
+
+        async function submitAdminCaptainRating() {
+            const captainName = (document.getElementById("rateBoardCaptainSelect")?.value || "").trim();
+            const orderId = (document.getElementById("rateBoardOrderId")?.value || "").trim();
+            const rating = parseInt(document.getElementById("rateBoardScore")?.value || "0", 10);
+            const tag = (document.getElementById("rateBoardTag")?.value || "").trim();
+            const comment = (document.getElementById("rateBoardComment")?.value || "").trim();
+
+            if (!captainName || !orderId || isNaN(rating) || rating < 1 || rating > 5) {
+                alert("⚠️ يرجى اختيار الكابتن وإدخال رقم الأوردر وتقييم صحيح من 1 إلى 5.");
+                return;
+            }
+
+            const alreadyExists = allCaptainRatings.some(
+                r => r && String(r.orderId || "").trim() === orderId && (r.captainName || "").trim() === captainName
+            );
+            if (alreadyExists) {
+                alert(`⚠️ تم تسجيل تقييم مسبق للأوردر #${orderId} للكابتن ${captainName}.`);
+                return;
+            }
+
+            const capObj = allCaptains.find(c => (c.name || "").trim() === captainName);
+            allCaptainRatings.push({
+                orderId,
+                captainName,
+                captainPhone: capObj?.phone || "",
+                rating,
+                tags: tag ? [tag] : [],
+                comment,
+                createdAt: new Date().toISOString()
+            });
+
+            document.getElementById("rateBoardOrderId").value = "";
+            document.getElementById("rateBoardComment").value = "";
+
+            renderCaptainRatingsBoard();
+            renderSalesTable();
+            await pushCloudState();
+            alert(`✅ تم تسجيل تقييم الأوردر #${orderId} للكابتن ${captainName} (${rating}/5).`);
+        }
+
+        function renderCaptainRatingsBoard() {
+            const tbody = document.getElementById("captainRatingsBoardBody");
+            if (!tbody) return;
+
+            const namesSet = new Set(allCaptains.map(c => (c.name || "").trim()).filter(Boolean));
+            allCaptainRatings.forEach(r => {
+                if (r && r.captainName) namesSet.add(String(r.captainName).trim());
+            });
+
+            if (!namesSet.size) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">لا توجد تقييمات كباتن مسجلة حالياً.</td></tr>`;
+                return;
+            }
+
+            const ranked = Array.from(namesSet)
+                .map(name => ({ name, summary: getCaptainRatingSummary(name) }))
+                .sort((a, b) => {
+                    if (b.summary.averageRating !== a.summary.averageRating) {
+                        return b.summary.averageRating - a.summary.averageRating;
+                    }
+                    return b.summary.totalRatings - a.summary.totalRatings;
+                });
+
+            tbody.innerHTML = ranked.map((item, idx) => {
+                const { totalRatings, averageRating, topTags, recentNotes } = item.summary;
+                const starsCount = Math.round(averageRating);
+                const starsVisual = "★".repeat(Math.min(5, Math.max(0, starsCount))) + "☆".repeat(Math.max(0, 5 - starsCount));
+                return `
+                    <tr>
+                        <td><b>#${idx + 1}</b></td>
+                        <td><b>${item.name}</b></td>
+                        <td>
+                            <span class="rating-stars-pill">
+                                <span>${starsVisual}</span>
+                                <span>${averageRating.toFixed(2)} / 5</span>
+                            </span>
+                        </td>
+                        <td><b>${totalRatings}</b></td>
+                        <td>${topTags}</td>
+                        <td><small style="color:var(--text-muted);">${recentNotes}</small></td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
         function exportCaptainsReportToExcel() {
-            const rows = [["اسم الكابتن", "الهاتف", "فودافون كاش", "انستا باي", "عدد الأوردرات", "إجمالي المبيعات", "مستحقات التوصيل"]];
+            const rows = [["اسم الكابتن", "الهاتف", "فودافون كاش", "انستا باي", "عدد الأوردرات", "إجمالي المبيعات", "مستحقات التوصيل", "متوسط التقييم", "عدد التقييمات"]];
             allCaptains.forEach(cap => {
                 const st = getCaptainStats(cap.name);
+                const rt = getCaptainRatingSummary(cap.name);
                 rows.push([
                     cap.name || "",
                     cap.phone || "",
@@ -1808,7 +1746,9 @@
                     cap.instaPay || "",
                     st.ordersCount,
                     st.totalSales,
-                    st.deliveryEarnings
+                    st.deliveryEarnings,
+                    rt.averageRating,
+                    rt.totalRatings
                 ]);
             });
             const csvContent = "\uFEFF" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -1992,6 +1932,7 @@
             if (!allSales[orderIdx]) return;
             allSales[orderIdx].assignedCaptain = capName;
             renderCaptainsTable();
+            renderCaptainRatingsBoard();
             renderSalesTable();
             await pushCloudState();
         }
@@ -2097,7 +2038,7 @@
             });
 
             if (!list.length) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">لا توجد طلبات مسجلة حالياً.</td></tr>`;
                 return;
             }
 
@@ -2118,6 +2059,11 @@
                         ${statuses.map(st => `<option value="${st}" ${s.status === st ? 'selected' : ''}>${st}</option>`).join('')}
                     </select>
                 `;
+                const orderRating = getOrderCaptainRating(s.orderId, s.assignedCaptain);
+                const ratingBadgeHtml = orderRating
+                    ? `<span class="rating-stars-pill">⭐ ${orderRating.rating}/5</span>${orderRating.comment ? `<br><small style="color:var(--text-muted);">${orderRating.comment}</small>` : ""}`
+                    : `<span style="color:var(--text-muted); font-size:12px;">بانتظار التقييم</span>`;
+
                 return `
                     <tr>
                         <td><b>#${s.orderId || '-'}</b></td>
@@ -2126,6 +2072,7 @@
                         <td>${s.customerPhone || '-'}<br><small style="color:var(--text-muted);">${s.customerAddress || ''}</small></td>
                         <td><b>${(parseFloat(s.total) || 0).toLocaleString('ar-EG')} ج.م</b><br><small style="color:var(--text-muted);">${s.paymentMethod || ''}</small></td>
                         <td>${capSelectHtml}</td>
+                        <td>${ratingBadgeHtml}</td>
                         <td>${statusSelectHtml}</td>
                         <td>
                             <div class="action-group">
@@ -2137,6 +2084,47 @@
                     </tr>
                 `;
             }).join('');
+        }
+
+        function renderAllSections() {
+            updateStatsAndKpis();
+            renderCashiersTable();
+            renderCaptainsTable();
+            populateCaptainRatingSelect();
+            renderCaptainRatingsBoard();
+            renderProductsTable();
+            renderSalesTable();
+            calculateDrawerTotal();
+        }
+
+        async function pushCloudState() {
+            if (!isAdminAuthenticated) return;
+            allProducts.forEach(normalizeProductStock);
+            const payload = {
+                products: allProducts,
+                sales: allSales,
+                captains: allCaptains,
+                cashiers: allCashiers,
+                captainRatings: allCaptainRatings,
+                adminKpiConfig: {
+                    startDate: adminKpiStartDate,
+                    daily: adminKpiOverrides.daily,
+                    monthly: adminKpiOverrides.monthly,
+                    yearly: adminKpiOverrides.yearly
+                }
+            };
+
+            try {
+                localStorage.setItem('gahiz_lightning_cache', JSON.stringify(payload));
+            } catch (_) {}
+
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } catch (_) {}
         }
 
         function printSalesReport() {
