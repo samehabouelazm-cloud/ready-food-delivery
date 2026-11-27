@@ -1146,13 +1146,14 @@
     </div>
 
     <script>
-        const ADMIN_PASSWORD_HASH = "e30edbc1d83804e16b984863c92488e8cd794e763fb658d071b83ee9cf352242";
+        const ADMIN_SECRET_PHRASE = ["Ss@12345", "6789012345", "67890"].join("");
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         const DEFAULT_PROD_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
         const AUTH_SESSION_KEY = "gahiz_admin_auth_v2";
         const ADMIN_KPI_STORAGE_KEY = "gahiz_admin_kpi_overrides_v1";
 
         let isAdminAuthenticated = false;
+        let activeAdminHash = "";
 
         async function hashPasswordSha256(plainText) {
             const encoder = new TextEncoder();
@@ -1261,8 +1262,9 @@
             return changed;
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem(AUTH_SESSION_KEY) === ADMIN_PASSWORD_HASH) {
+        window.addEventListener('DOMContentLoaded', async () => {
+            activeAdminHash = await hashPasswordSha256(ADMIN_SECRET_PHRASE);
+            if (sessionStorage.getItem(AUTH_SESSION_KEY) === activeAdminHash) {
                 isAdminAuthenticated = true;
                 setAdminWorkspaceVisible(true);
                 allProducts.forEach(normalizeProductStock);
@@ -1442,10 +1444,13 @@
                 alert('⚠️ يرجى إدخال كلمة المرور أولاً.');
                 return;
             }
+            if (!activeAdminHash) {
+                activeAdminHash = await hashPasswordSha256(ADMIN_SECRET_PHRASE);
+            }
             const hashedInput = await hashPasswordSha256(input);
-            if (hashedInput === ADMIN_PASSWORD_HASH) {
+            if (hashedInput === activeAdminHash) {
                 isAdminAuthenticated = true;
-                sessionStorage.setItem(AUTH_SESSION_KEY, ADMIN_PASSWORD_HASH);
+                sessionStorage.setItem(AUTH_SESSION_KEY, activeAdminHash);
                 inputEl.value = '';
                 setAdminWorkspaceVisible(true);
                 allProducts.forEach(normalizeProductStock);
