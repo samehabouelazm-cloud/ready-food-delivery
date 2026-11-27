@@ -57,6 +57,11 @@
             z-index: 100;
         }
 
+        .header[hidden],
+        .container[hidden] {
+            display: none !important;
+        }
+
         .brand h2 {
             font-size: 20px;
             font-weight: 800;
@@ -580,8 +585,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(6px);
+            background: #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -665,12 +669,12 @@
         <div class="auth-box">
             <h3>🔒 دخول لوحة الإدارة المحمية</h3>
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">يرجى إدخال كلمة المرور المعتمدة للمتابعة:</p>
-            <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
-            <button onclick="checkAdminPassword()">دخول آمن 🔓</button>
+            <input type="password" id="adminPasswordInput" placeholder="أدخل كلمة المرور" autocomplete="current-password" onkeydown="if(event.key === 'Enter') checkAdminPassword()">
+            <button id="adminLoginBtn" onclick="checkAdminPassword()">دخول آمن 🔓</button>
         </div>
     </div>
 
-    <header class="header">
+    <header class="header" id="adminHeader" hidden>
         <div class="brand">
             <h2>⚙️ لوحة تحكم جاهز - الإدارة الشاملة والتحليلات</h2>
         </div>
@@ -681,7 +685,7 @@
         </div>
     </header>
 
-    <div class="container">
+    <div class="container" id="adminMainContainer" hidden>
 
         <section class="kpi-section-wrapper" aria-label="لوحة مؤشرات الأداء">
             <div class="kpi-header-bar">
@@ -1142,11 +1146,36 @@
     </div>
 
     <script>
-        const CORRECT_ADMIN_PASSWORD = "Ss@12345678901234567890";
+        const ADMIN_PASSWORD_HASH = "e30edbc1d83804e16b984863c92488e8cd794e763fb658d071b83ee9cf352242";
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
         const DEFAULT_PROD_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
-        const AUTH_SESSION_KEY = "gahiz_admin_auth_v1";
+        const AUTH_SESSION_KEY = "gahiz_admin_auth_v2";
         const ADMIN_KPI_STORAGE_KEY = "gahiz_admin_kpi_overrides_v1";
+
+        let isAdminAuthenticated = false;
+
+        async function hashPasswordSha256(plainText) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(plainText);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        function setAdminWorkspaceVisible(visible) {
+            const overlay = document.getElementById("authOverlay");
+            const header = document.getElementById("adminHeader");
+            const container = document.getElementById("adminMainContainer");
+            if (visible) {
+                overlay.style.display = "none";
+                header.hidden = false;
+                container.hidden = false;
+            } else {
+                header.hidden = true;
+                container.hidden = true;
+                overlay.style.display = "flex";
+            }
+        }
 
         let allProducts = [
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
@@ -1168,7 +1197,7 @@
             { name: "فتة شاورما دجاج عائلي بالصلصة والثومية", price: 130, cost: 98, oldPrice: 150, stock: 100, initialStock: 100, category: "شاورما - فتة", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", outOfStock: false, isOffer: false },
             { name: "كريب دجاج زنگر حادق مع الموتزاريلا", price: 85, cost: 62, oldPrice: 95, stock: 100, initialStock: 100, category: "كريب - قسم الكريب الحادق", image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500", outOfStock: false, isOffer: false },
             { name: "كريب شوكولاتة نوتيلا وموز حليبي", price: 60, cost: 42, oldPrice: 70, stock: 100, initialStock: 100, category: "كريب - قسم الكريب الحلو", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500", outOfStock: false, isOffer: false },
-            { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, category: "قسم البيتزا", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
+            { name: "بيتزا مكس جبن وعليها قطع دجاج (وسط)", price: 110, cost: 80, oldPrice: 130, stock: 100, initialStock: 100, category: "قسم البيتزا", image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", outOfStock: false, isOffer: false },
             { name: "فطير اسكندراني بالسجق والجبنة الموتزاريلا", price: 115, cost: 85, oldPrice: 130, stock: 100, initialStock: 100, category: "فطير هابي ميلز - فطير اسكندراني", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
             { name: "ساندوتش فول بالزيت الحار / الإسكندراني", price: 10, cost: 6, oldPrice: 12, stock: 100, initialStock: 100, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
             { name: "طعمية مسخنة مقرمشة (قرص ساخن)", price: 3, cost: 1.5, oldPrice: 4, stock: 100, initialStock: 100, category: "فول وطعمية - الأطباق والساندوتشات", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500", outOfStock: false, isOffer: false },
@@ -1233,13 +1262,17 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem(AUTH_SESSION_KEY) === "1") {
-                document.getElementById('authOverlay').style.display = 'none';
+            if (sessionStorage.getItem(AUTH_SESSION_KEY) === ADMIN_PASSWORD_HASH) {
+                isAdminAuthenticated = true;
+                setAdminWorkspaceVisible(true);
+                allProducts.forEach(normalizeProductStock);
+                loadAdminKpiOverrides();
+                renderAllSections();
+                syncAllData(false);
+            } else {
+                isAdminAuthenticated = false;
+                setAdminWorkspaceVisible(false);
             }
-            allProducts.forEach(normalizeProductStock);
-            loadAdminKpiOverrides();
-            renderAllSections();
-            syncAllData(false);
         });
 
         function formatStartFromTodayLabel(isoStr) {
@@ -1402,11 +1435,22 @@
             alert('🔄 تمت استعادة الحساب التلقائي لهذه الفترة.');
         }
 
-        function checkAdminPassword() {
-            const input = document.getElementById('adminPasswordInput').value;
-            if (input === CORRECT_ADMIN_PASSWORD) {
-                sessionStorage.setItem(AUTH_SESSION_KEY, "1");
-                document.getElementById('authOverlay').style.display = 'none';
+        async function checkAdminPassword() {
+            const inputEl = document.getElementById('adminPasswordInput');
+            const input = inputEl.value;
+            if (!input) {
+                alert('⚠️ يرجى إدخال كلمة المرور أولاً.');
+                return;
+            }
+            const hashedInput = await hashPasswordSha256(input);
+            if (hashedInput === ADMIN_PASSWORD_HASH) {
+                isAdminAuthenticated = true;
+                sessionStorage.setItem(AUTH_SESSION_KEY, ADMIN_PASSWORD_HASH);
+                inputEl.value = '';
+                setAdminWorkspaceVisible(true);
+                allProducts.forEach(normalizeProductStock);
+                loadAdminKpiOverrides();
+                renderAllSections();
                 syncAllData(false);
             } else {
                 alert('❌ كلمة المرور غير صحيحة!');
@@ -1414,12 +1458,14 @@
         }
 
         function logoutAdmin() {
+            isAdminAuthenticated = false;
             sessionStorage.removeItem(AUTH_SESSION_KEY);
             document.getElementById('adminPasswordInput').value = '';
-            document.getElementById('authOverlay').style.display = 'flex';
+            setAdminWorkspaceVisible(false);
         }
 
         async function syncAllData(showAlert = false) {
+            if (!isAdminAuthenticated) return;
             try {
                 const res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
                 if (res.ok) {
@@ -1484,6 +1530,7 @@
         }
 
         async function pushCloudState() {
+            if (!isAdminAuthenticated) return;
             allProducts.forEach(normalizeProductStock);
             localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
                 products: allProducts,
