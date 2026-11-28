@@ -1001,5 +1001,381 @@
             });
         }
     </script>
+    <!-- طبقة التكامل والمزامنة لصفحة عملاء جاهز Store (مخبوزات جاهز + الأقسام الديناميكية + تقييم الكابتن) -->
+<style>
+  #gahizCaptainRatingModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9998;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    direction: rtl;
+    text-align: right;
+  }
+  .gahiz-rate-card {
+    background: #ffffff;
+    color: #0f172a;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e2e8f0;
+    font-family: 'Tajawal', sans-serif;
+  }
+  .gahiz-rate-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .gahiz-rate-head h4 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: #0369a1;
+  }
+  .gahiz-rate-close {
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 800;
+    color: #64748b;
+    line-height: 1;
+  }
+  .gahiz-rate-field {
+    margin-bottom: 12px;
+  }
+  .gahiz-rate-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .gahiz-rate-field input,
+  .gahiz-rate-field select,
+  .gahiz-rate-field textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 14px;
+    font-family: 'Tajawal', sans-serif;
+    outline: none;
+  }
+  .gahiz-rate-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .gahiz-rate-tag-btn {
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+  }
+  .gahiz-rate-tag-btn.active {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+  }
+  .gahiz-rate-submit {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    background: #0284c7;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+  }
+  .gahiz-rate-submit:hover {
+    background: #0369a1;
+  }
+</style>
+
+<div id="gahizCaptainRatingModal" role="dialog" aria-modal="true" aria-labelledby="gahizRateTitle">
+  <div class="gahiz-rate-card">
+    <div class="gahiz-rate-head">
+      <h4 id="gahizRateTitle">⭐ تقييم كابتن التوصيل</h4>
+      <span class="gahiz-rate-close" onclick="closeGahizCaptainRatingModal()">✕</span>
+    </div>
+
+    <div class="gahiz-rate-field">
+      <label for="gahizRateOrderId">رقم الأوردر:</label>
+      <input type="text" id="gahizRateOrderId" placeholder="مثال: ORD-1050">
+    </div>
+
+    <div class="gahiz-rate-field">
+      <label for="gahizRateCaptainName">اسم الكابتن:</label>
+      <input type="text" id="gahizRateCaptainName" list="gahizCaptainsDatalist" placeholder="اختر أو اكتب اسم الكابتن">
+      <datalist id="gahizCaptainsDatalist"></datalist>
+    </div>
+
+    <div class="gahiz-rate-field">
+      <label for="gahizRateScore">التقييم (من 1 إلى 5):</label>
+      <select id="gahizRateScore">
+        <option value="5">⭐⭐⭐⭐⭐ ممتاز (5 من 5)</option>
+        <option value="4">⭐⭐⭐⭐ جيد جداً (4 من 5)</option>
+        <option value="3">⭐⭐⭐ مقبول (3 من 5)</option>
+        <option value="2">⭐⭐ ضعيف (2 من 5)</option>
+        <option value="1">⭐ سيئ (1 من 5)</option>
+      </select>
+    </div>
+
+    <div class="gahiz-rate-field">
+      <label>أبرز الملاحظات السريعة:</label>
+      <div class="gahiz-rate-tags" id="gahizRateTagsBox">
+        <button type="button" class="gahiz-rate-tag-btn" data-tag="توصيل سريع">توصيل سريع</button>
+        <button type="button" class="gahiz-rate-tag-btn" data-tag="أسلوب محترم">أسلوب محترم</button>
+        <button type="button" class="gahiz-rate-tag-btn" data-tag="الطلب سليم">الطلب سليم</button>
+        <button type="button" class="gahiz-rate-tag-btn" data-tag="تأخير بسيط">تأخير بسيط</button>
+      </div>
+    </div>
+
+    <div class="gahiz-rate-field">
+      <label for="gahizRateComment">ملاحظة إضافية (اختياري):</label>
+      <textarea id="gahizRateComment" rows="2" placeholder="اكتب ملاحظتك حول التوصيل لهذا الأوردر..."></textarea>
+    </div>
+
+    <button type="button" class="gahiz-rate-submit" onclick="submitGahizCaptainRating()">✅ إرسال تقييم الكابتن</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const GAHIZ_CLOUD_URL = "https://api.npoint.io/d2a95067aede55eb6302";
+
+  const GAHIZ_BAKERY_TREE = {
+    id: "cat_bakery",
+    title: "🥐 مخبوزات جاهز Store",
+    subcategories: [
+      "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو",
+      "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق",
+      "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع",
+      "مخبوزات جاهز Store - المعلبات",
+      "مخبوزات جاهز Store - العيش",
+      "مخبوزات جاهز Store - البسكويت",
+      "مخبوزات جاهز Store - الكحك",
+      "مخبوزات جاهز Store - معجنات وباتيه",
+      "مخبوزات جاهز Store - حلويات وتورت"
+    ]
+  };
+
+  let latestCloudSnapshot = {
+    categoriesTree: [GAHIZ_BAKERY_TREE],
+    categoryAliases: {},
+    products: [],
+    sales: [],
+    captains: [],
+    cashiers: [],
+    captainRatings: [],
+    adminKpiConfig: null
+  };
+
+  function resolveCategoryLabel(catStr) {
+    if (!catStr) return "";
+    const aliases = latestCloudSnapshot.categoryAliases || {};
+    return aliases[catStr] || catStr;
+  }
+
+  function applyCategoriesAndBakerySync(data) {
+    if (!data || typeof data !== "object") return;
+
+    latestCloudSnapshot = {
+      ...latestCloudSnapshot,
+      ...data,
+      categoriesTree: Array.isArray(data.categoriesTree) && data.categoriesTree.length
+        ? data.categoriesTree
+        : (Array.isArray(latestCloudSnapshot.categoriesTree) && latestCloudSnapshot.categoriesTree.length
+            ? latestCloudSnapshot.categoriesTree
+            : [GAHIZ_BAKERY_TREE]),
+      categoryAliases: (data.categoryAliases && typeof data.categoryAliases === "object")
+        ? data.categoryAliases
+        : (latestCloudSnapshot.categoryAliases || {}),
+      captainRatings: Array.isArray(data.captainRatings)
+        ? data.captainRatings
+        : (Array.isArray(data.captain_ratings) ? data.captain_ratings : (latestCloudSnapshot.captainRatings || []))
+    };
+
+    const hasBakery = latestCloudSnapshot.categoriesTree.some(
+      c => c && (c.id === "cat_bakery" || String(c.title || "").includes("مخبوزات"))
+    );
+    if (!hasBakery) {
+      latestCloudSnapshot.categoriesTree.push(GAHIZ_BAKERY_TREE);
+    }
+
+    const candidateProductArrays = [
+      window.allProducts,
+      window.products,
+      data.products
+    ].filter(Array.isArray);
+
+    candidateProductArrays.forEach(arr => {
+      arr.forEach(item => {
+        if (item && item.category) {
+          item.category = resolveCategoryLabel(item.category);
+        }
+      });
+    });
+
+    const dl = document.getElementById("gahizCaptainsDatalist");
+    if (dl && Array.isArray(latestCloudSnapshot.captains)) {
+      dl.innerHTML = latestCloudSnapshot.captains
+        .filter(c => c && c.name)
+        .map(c => `<option value="${c.name}"></option>`)
+        .join("");
+    }
+
+    if (typeof window.renderStoreCategories === "function") {
+      window.renderStoreCategories(latestCloudSnapshot.categoriesTree, latestCloudSnapshot.categoryAliases);
+    }
+    if (typeof window.renderProducts === "function") {
+      window.renderProducts();
+    } else if (typeof window.renderAllProducts === "function") {
+      window.renderAllProducts();
+    }
+  }
+
+  async function pullLatestCloudSnapshot() {
+    try {
+      const res = await fetch(GAHIZ_CLOUD_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && typeof json === "object" && !Array.isArray(json)) {
+          applyCategoriesAndBakerySync(json);
+        }
+      }
+    } catch (_) {}
+  }
+
+  async function pushMergedCloudSnapshot(patchObj) {
+    let base = { ...latestCloudSnapshot };
+    try {
+      const res = await fetch(GAHIZ_CLOUD_URL + "?t=" + Date.now(), { cache: "no-store" });
+      if (res.ok) {
+        const liveData = await res.json();
+        if (liveData && typeof liveData === "object" && !Array.isArray(liveData)) {
+          base = { ...base, ...liveData };
+        }
+      }
+    } catch (_) {}
+
+    const mergedRatings = Array.isArray(patchObj.captainRatings)
+      ? patchObj.captainRatings
+      : (Array.isArray(base.captainRatings) ? base.captainRatings : (Array.isArray(base.captain_ratings) ? base.captain_ratings : []));
+
+    const payload = {
+      ...base,
+      ...patchObj,
+      captainRatings: mergedRatings,
+      captain_ratings: mergedRatings
+    };
+
+    latestCloudSnapshot = payload;
+
+    try {
+      await fetch(GAHIZ_CLOUD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (_) {}
+  }
+
+  document.querySelectorAll("#gahizRateTagsBox .gahiz-rate-tag-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
+    });
+  });
+
+  window.openGahizCaptainRatingModal = function (prefillOrderId = "", prefillCaptainName = "") {
+    pullLatestCloudSnapshot();
+    const orderInput = document.getElementById("gahizRateOrderId");
+    const capInput = document.getElementById("gahizRateCaptainName");
+    const scoreSel = document.getElementById("gahizRateScore");
+    const commentInput = document.getElementById("gahizRateComment");
+
+    if (orderInput) orderInput.value = prefillOrderId || "";
+    if (capInput) capInput.value = prefillCaptainName || "";
+    if (scoreSel) scoreSel.value = "5";
+    if (commentInput) commentInput.value = "";
+    document.querySelectorAll("#gahizRateTagsBox .gahiz-rate-tag-btn").forEach(b => b.classList.remove("active"));
+
+    const modal = document.getElementById("gahizCaptainRatingModal");
+    if (modal) modal.style.display = "flex";
+  };
+
+  window.closeGahizCaptainRatingModal = function () {
+    const modal = document.getElementById("gahizCaptainRatingModal");
+    if (modal) modal.style.display = "none";
+  };
+
+  window.submitGahizCaptainRating = async function () {
+    const orderId = (document.getElementById("gahizRateOrderId")?.value || "").trim();
+    const captainName = (document.getElementById("gahizRateCaptainName")?.value || "").trim();
+    const rating = parseInt(document.getElementById("gahizRateScore")?.value || "5", 10);
+    const comment = (document.getElementById("gahizRateComment")?.value || "").trim();
+    const tags = Array.from(document.querySelectorAll("#gahizRateTagsBox .gahiz-rate-tag-btn.active"))
+      .map(el => el.getAttribute("data-tag"))
+      .filter(Boolean);
+
+    if (!orderId || !captainName) {
+      alert("⚠️ يرجى إدخال رقم الأوردر واسم الكابتن.");
+      return;
+    }
+
+    await pullLatestCloudSnapshot();
+    const existing = Array.isArray(latestCloudSnapshot.captainRatings) ? latestCloudSnapshot.captainRatings : [];
+    const duplicate = existing.some(
+      r => r && String(r.orderId || "").trim() === orderId && String(r.captainName || "").trim() === captainName
+    );
+    if (duplicate) {
+      alert(`⚠️ تم تسجيل تقييم مسبق للأوردر #${orderId} للكابتن ${captainName}.`);
+      return;
+    }
+
+    const updatedRatings = existing.concat([{
+      orderId,
+      captainName,
+      rating,
+      tags,
+      comment,
+      createdAt: new Date().toISOString()
+    }]);
+
+    await pushMergedCloudSnapshot({ captainRatings: updatedRatings });
+    window.closeGahizCaptainRatingModal();
+    alert(`✅ تم إرسال تقييمك للكابتن ${captainName} على الأوردر #${orderId} (${rating}/5).`);
+  };
+
+  window.GahizStoreSync = {
+    getBakeryTree: () => JSON.parse(JSON.stringify(GAHIZ_BAKERY_TREE)),
+    resolveCategory: resolveCategoryLabel,
+    applySync: applyCategoriesAndBakerySync,
+    pull: pullLatestCloudSnapshot,
+    push: pushMergedCloudSnapshot,
+    openRatingModal: window.openGahizCaptainRatingModal
+  };
+
+  window.addEventListener("DOMContentLoaded", () => {
+    pullLatestCloudSnapshot();
+  });
+})();
+</script>
 </body>
 </html>
