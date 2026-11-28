@@ -438,6 +438,28 @@
             white-space: nowrap;
         }
 
+        .cat-pill-main {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            display: inline-block;
+        }
+
+        .cat-pill-sub {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 3px 9px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            margin: 2px;
+        }
+
         .table-responsive {
             overflow-x: auto;
             margin-top: 12px;
@@ -767,6 +789,72 @@
             </div>
         </div>
 
+        <!-- قسم إدارة وإعادة تسمية الأقسام الرئيسية والفرعية ومزامنتها مع صفحة العملاء -->
+        <div class="card">
+            <div class="card-header-flex">
+                <h3 style="margin-bottom: 0;">🗂️ إدارة وإعادة تسمية الأقسام الرئيسية والفرعية (مرتبطة بصفحة العملاء مباشرة)</h3>
+                <span class="kpi-start-badge">🔄 مزامنة فورية مع index.html</span>
+            </div>
+
+            <div class="form-row captain-form-box">
+                <div class="form-group">
+                    <label>1. إعادة تسمية قسم رئيسي:</label>
+                    <select id="renameMainCatSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>الاسم الجديد للقسم الرئيسي:</label>
+                    <input type="text" id="renameMainCatNewName" placeholder="اكتب الاسم الجديد للقسم الرئيسي">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" class="btn" onclick="renameMainCategory()" style="width: 100%;">✏️ حفظ اسم القسم الرئيسي</button>
+                </div>
+            </div>
+
+            <div class="form-row captain-form-box">
+                <div class="form-group">
+                    <label>2. إعادة تسمية قسم فرعي:</label>
+                    <select id="renameSubCatSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>الاسم الجديد للقسم الفرعي:</label>
+                    <input type="text" id="renameSubCatNewName" placeholder="اكتب الاسم الجديد للقسم الفرعي">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" class="btn" onclick="renameSubCategory()" style="width: 100%;">✏️ حفظ اسم القسم الفرعي</button>
+                </div>
+            </div>
+
+            <div class="form-row captain-form-box">
+                <div class="form-group">
+                    <label>3. إضافة قسم فرعي جديد تحت:</label>
+                    <select id="addSubCatMainSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>اسم القسم الفرعي الجديد:</label>
+                    <input type="text" id="newSubCatNameInput" placeholder="مثال: مخبوزات جاهز Store - كرواسون وباتيه">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" class="btn" style="background: var(--secondary); width: 100%;" onclick="addNewSubCategory()">➕ إضافة القسم الفرعي</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>القسم الرئيسي</th>
+                            <th>الأقسام الفرعية المندرجة تحته</th>
+                            <th>عدد المنتجات</th>
+                            <th>إجراء سريع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesManagerTableBody">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">جاري تحميل شجرة الأقسام...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="card">
             <h3>👥 إدارة كاشيري الأقسام وشفتات العمل</h3>
             <div class="form-row">
@@ -780,15 +868,7 @@
                 </div>
                 <div class="form-group">
                     <label>القسم المسؤول عنه:</label>
-                    <select id="cashierSection">
-                        <option value="🛒 قسم السوبر ماركت">🛒 قسم السوبر ماركت</option>
-                        <option value="🍗 قسم هابي ميلز">🍗 قسم هابي ميلز</option>
-                        <option value="🍳 قسم فول وطعمية">🍳 قسم فول وطعمية</option>
-                        <option value="🐟 قسم سمكة مشوية">🐟 قسم سمكة مشوية</option>
-                        <option value="📱 إلكترونيات جاهز Store">📱 إلكترونيات جاهز Store</option>
-                        <option value="🌿 عطارة جاهز Store">🌿 عطارة جاهز Store</option>
-                        <option value="💊 صيدلية جاهز Store">💊 صيدلية جاهز Store</option>
-                    </select>
+                    <select id="cashierSection"></select>
                 </div>
                 <div class="form-group">
                     <label>نوع الشفت:</label>
@@ -962,7 +1042,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="prodName" placeholder="مثال: بيبسي كولا دايت">
+                    <input type="text" id="prodName" placeholder="مثال: فطير مشلتت بلدي بالسمنة البلدي">
                 </div>
                 <div class="form-group">
                     <label>سعر البيع الحالي (ج.م):</label>
@@ -982,67 +1062,7 @@
                 </div>
                 <div class="form-group">
                     <label>القسم الفرعي والرئيسي:</label>
-                    <select id="prodCategory">
-                        <optgroup label="🛒 قسم السوبر ماركت">
-                            <option value="سوبر ماركت - الزيت">سوبر ماركت - الزيت</option>
-                            <option value="سوبر ماركت - السمن">سوبر ماركت - السمن</option>
-                            <option value="سوبر ماركت - الشاي والسكر">سوبر ماركت - الشاي والسكر</option>
-                            <option value="سوبر ماركت - الدقيق">سوبر ماركت - الدقيق</option>
-                            <option value="سوبر ماركت - المكرونة">سوبر ماركت - المكرونة</option>
-                            <option value="سوبر ماركت - الأجبان والألبان">سوبر ماركت - الأجبان والألبان</option>
-                            <option value="سوبر ماركت - الشيبسي">سوبر ماركت - الشيبسي</option>
-                            <option value="سوبر ماركت - البسكويت والفطائر">سوبر ماركت - البسكويت والفطائر</option>
-                            <option value="سوبر ماركت - العصائر والمياه">سوبر ماركت - العصائر والمياه</option>
-                            <option value="سوبر ماركت - مياه غازية">سوبر ماركت - مياه غازية</option>
-                            <option value="سوبر ماركت - شيكولاتة ونوتيلا">سوبر ماركت - شيكولاتة ونوتيلا</option>
-                            <option value="سوبر ماركت - عسل وطحينة">سوبر ماركت - عسل وطحينة</option>
-                            <option value="سوبر ماركت - خل">سوبر ماركت - خل</option>
-                            <option value="سوبر ماركت - صوصات">سوبر ماركت - صوصات</option>
-                            <option value="سوبر ماركت - مجمدات">سوبر ماركت - مجمدات</option>
-                            <option value="سوبر ماركت - مناديل">سوبر ماركت - مناديل</option>
-                            <option value="سوبر ماركت - منوعات">سوبر ماركت - منوعات</option>
-                        </optgroup>
-                        <optgroup label="🍗 قسم هابي ميلز">
-                            <option value="هابي ميلز">هابي ميلز</option>
-                            <option value="قسم الغربي">قسم الغربي</option>
-                            <option value="تشيكن تندر">تشيكن تندر</option>
-                            <option value="فرايد تشيكن">فرايد تشيكن</option>
-                            <option value="مشويات">مشويات</option>
-                            <option value="شاورما - قسم الساندوتشات">شاورما - ساندوتشات</option>
-                            <option value="شاورما - فتة">شاورما - فتة</option>
-                            <option value="شاورما - قسم الوجبات">شاورما - وجبات</option>
-                            <option value="كريب - قسم الكريب الحادق">كريب حادق</option>
-                            <option value="كريب - قسم الكريب الحلو">كريب حلو</option>
-                            <option value="قسم البيتزا">قسم البيتزا</option>
-                            <option value="فطير هابي ميلز - فطير اسكندراني">فطير اسكندراني</option>
-                            <option value="فطير هابي ميلز - فطير حلو">فطير حلو</option>
-                        </optgroup>
-                        <optgroup label="🍳 قسم فول وطعمية">
-                            <option value="فول وطعمية - الأطباق والساندوتشات">أطباق وساندوتشات فول وطعمية</option>
-                            <option value="فول وطعمية - عجينة وقلي">عجينة وقلي</option>
-                            <option value="فول وطعمية - سلطات ومخللات">سلطات ومخللات</option>
-                        </optgroup>
-                        <optgroup label="🐟 قسم سمكة مشوية">
-                            <option value="سمكة مشوية - أسماك طازجة ومشويات">أسماك طازجة ومشويات</option>
-                            <option value="سمكة مشوية - سي فود وسنجاري">سي فود وسنجاري</option>
-                            <option value="سمكة مشوية - أرز ووربات وشوربة">أرز وشوربة</option>
-                        </optgroup>
-                        <optgroup label="📱 إلكترونيات جاهز Store">
-                            <option value="إلكترونيات جاهز Store - شواحن وكابلات">إلكترونيات جاهز Store - شواحن وكابلات</option>
-                            <option value="إلكترونيات جاهز Store - سماعات وإكسسوارات">إلكترونيات جاهز Store - سماعات وإكسسوارات</option>
-                            <option value="إلكترونيات جاهز Store - أجهزة ومنوعات">إلكترونيات جاهز Store - أجهزة ومنوعات</option>
-                        </optgroup>
-                        <optgroup label="🌿 عطارة جاهز Store">
-                            <option value="عطارة جاهز Store - توابل وبهارات">عطارة جاهز Store - توابل وبهارات</option>
-                            <option value="عطارة جاهز Store - أعشاب ومشروبات">عطارة جاهز Store - أعشاب ومشروبات</option>
-                            <option value="عطارة جاهز Store - حبوب وبقوليات">عطارة جاهز Store - حبوب وبقوليات</option>
-                        </optgroup>
-                        <optgroup label="💊 صيدلية جاهز Store">
-                            <option value="صيدلية جاهز Store - مستلزمات طبية">صيدلية جاهز Store - مستلزمات طبية</option>
-                            <option value="صيدلية جاهز Store - عناية شخصية">صيدلية جاهز Store - عناية شخصية</option>
-                            <option value="صيدلية جاهز Store - أدوية ومنتجات عامة">صيدلية جاهز Store - أدوية ومنتجات عامة</option>
-                        </optgroup>
-                    </select>
+                    <select id="prodCategory"></select>
                 </div>
                 <div class="form-group">
                     <label>رابط الصورة:</label>
@@ -1231,6 +1251,114 @@
         let isAdminAuthenticated = false;
         let activeAdminHash = "";
 
+        const DEFAULT_CATEGORY_TREE = [
+            {
+                id: "cat_supermarket",
+                title: "🛒 قسم السوبر ماركت",
+                subcategories: [
+                    "سوبر ماركت - الزيت",
+                    "سوبر ماركت - السمن",
+                    "سوبر ماركت - الشاي والسكر",
+                    "سوبر ماركت - الدقيق",
+                    "سوبر ماركت - المكرونة",
+                    "سوبر ماركت - الأجبان والألبان",
+                    "سوبر ماركت - الشيبسي",
+                    "سوبر ماركت - البسكويت والفطائر",
+                    "سوبر ماركت - العصائر والمياه",
+                    "سوبر ماركت - مياه غازية",
+                    "سوبر ماركت - شيكولاتة ونوتيلا",
+                    "سوبر ماركت - عسل وطحينة",
+                    "سوبر ماركت - خل",
+                    "سوبر ماركت - صوصات",
+                    "سوبر ماركت - مجمدات",
+                    "سوبر ماركت - مناديل",
+                    "سوبر ماركت - منوعات"
+                ]
+            },
+            {
+                id: "cat_bakery",
+                title: "🥐 مخبوزات جاهز Store",
+                subcategories: [
+                    "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو",
+                    "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق",
+                    "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع",
+                    "مخبوزات جاهز Store - المعلبات",
+                    "مخبوزات جاهز Store - العيش",
+                    "مخبوزات جاهز Store - البسكويت",
+                    "مخبوزات جاهز Store - الكحك",
+                    "مخبوزات جاهز Store - معجنات وباتيه",
+                    "مخبوزات جاهز Store - حلويات وتورت"
+                ]
+            },
+            {
+                id: "cat_happymeals",
+                title: "🍗 قسم هابي ميلز",
+                subcategories: [
+                    "هابي ميلز",
+                    "قسم الغربي",
+                    "تشيكن تندر",
+                    "فرايد تشيكن",
+                    "مشويات",
+                    "شاورما - قسم الساندوتشات",
+                    "شاورما - فتة",
+                    "شاورما - قسم الوجبات",
+                    "كريب - قسم الكريب الحادق",
+                    "كريب - قسم الكريب الحلو",
+                    "قسم البيتزا",
+                    "فطير هابي ميلز - فطير اسكندراني",
+                    "فطير هابي ميلز - فطير حلو"
+                ]
+            },
+            {
+                id: "cat_foul",
+                title: "🍳 قسم فول وطعمية",
+                subcategories: [
+                    "فول وطعمية - الأطباق والساندوتشات",
+                    "فول وطعمية - عجينة وقلي",
+                    "فول وطعمية - سلطات ومخللات"
+                ]
+            },
+            {
+                id: "cat_fish",
+                title: "🐟 قسم سمكة مشوية",
+                subcategories: [
+                    "سمكة مشوية - أسماك طازجة ومشويات",
+                    "سمكة مشوية - سي فود وسنجاري",
+                    "سمكة مشوية - أرز ووربات وشوربة"
+                ]
+            },
+            {
+                id: "cat_electronics",
+                title: "📱 إلكترونيات جاهز Store",
+                subcategories: [
+                    "إلكترونيات جاهز Store - شواحن وكابلات",
+                    "إلكترونيات جاهز Store - سماعات وإكسسوارات",
+                    "إلكترونيات جاهز Store - أجهزة ومنوعات"
+                ]
+            },
+            {
+                id: "cat_herbs",
+                title: "🌿 عطارة جاهز Store",
+                subcategories: [
+                    "عطارة جاهز Store - توابل وبهارات",
+                    "عطارة جاهز Store - أعشاب ومشروبات",
+                    "عطارة جاهز Store - حبوب وبقوليات"
+                ]
+            },
+            {
+                id: "cat_pharmacy",
+                title: "💊 صيدلية جاهز Store",
+                subcategories: [
+                    "صيدلية جاهز Store - مستلزمات طبية",
+                    "صيدلية جاهز Store - عناية شخصية",
+                    "صيدلية جاهز Store - أدوية ومنتجات عامة"
+                ]
+            }
+        ];
+
+        let categoryTree = JSON.parse(JSON.stringify(DEFAULT_CATEGORY_TREE));
+        let categoryAliases = {};
+
         let allProducts = [
             { name: "زيت عافية ذرة 800 مل", price: 95, cost: 80, oldPrice: 105, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: true },
             { name: "زيت سلاست عباد الشمس 1 لتر", price: 75, cost: 65, oldPrice: 85, stock: 100, initialStock: 100, category: "سوبر ماركت - الزيت", image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500", outOfStock: false, isOffer: false },
@@ -1245,6 +1373,13 @@
             { name: "مياه معدنية نستله / أكوافينا 1.5 لتر", price: 12, cost: 9, oldPrice: 15, stock: 100, initialStock: 100, category: "سوبر ماركت - العصائر والمياه", image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=500", outOfStock: false, isOffer: false },
             { name: "بيبسي / كوكاكولا زجاجة 1 لتر", price: 25, cost: 20, oldPrice: 30, stock: 100, initialStock: 100, category: "سوبر ماركت - مياه غازية", image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500", outOfStock: false, isOffer: false },
             { name: "شيكولاتة نوتيلا برطمان 350 جم", price: 120, cost: 100, oldPrice: 140, stock: 100, initialStock: 100, category: "سوبر ماركت - شيكولاتة ونوتيلا", image: "https://images.unsplash.com/photo-1511381939415-e44015466834?w=500", outOfStock: false, isOffer: false },
+            { name: "فطير مشلتت حلو بالعسل والقشطة والمكسرات", price: 95, cost: 72, oldPrice: 110, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500", outOfStock: false, isOffer: true },
+            { name: "فطير مشلتت حادق بالسجق والجبن المشكل", price: 115, cost: 88, oldPrice: 130, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق", image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", outOfStock: false, isOffer: false },
+            { name: "فطير مشلتت بلدي سادة (وسط)", price: 75, cost: 55, oldPrice: 85, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500", outOfStock: false, isOffer: false },
+            { name: "علبة معلبات مربى / جبنة كريمي للمخبوزات", price: 38, cost: 30, oldPrice: 45, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - المعلبات", image: "https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=500", outOfStock: false, isOffer: false },
+            { name: "عيش فينو / بلدي طازج (ربطة 10 أرغفة)", price: 20, cost: 15, oldPrice: 25, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - العيش", image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=500", outOfStock: false, isOffer: false },
+            { name: "بسكويت نشادر / زبدة فاخر (نصف كيلو)", price: 65, cost: 48, oldPrice: 75, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - البسكويت", image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500", outOfStock: false, isOffer: false },
+            { name: "كحك العيد بالسمنة البلدي والملبن (نصف كيلو)", price: 85, cost: 64, oldPrice: 95, stock: 100, initialStock: 100, category: "مخبوزات جاهز Store - الكحك", image: "https://images.unsplash.com/photo-1519869325930-281384150729?w=500", outOfStock: false, isOffer: true },
             { name: "وجبة فرايد تشيكن كرسبي (3 قطع + أرز + كول سلو)", price: 145, cost: 110, oldPrice: 165, stock: 100, initialStock: 100, category: "فرايد تشيكن", image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500", outOfStock: false, isOffer: true },
             { name: "تشيكن تندر مقرمش (5 قطع مع الصوص والبطاطس)", price: 125, cost: 95, oldPrice: 140, stock: 100, initialStock: 100, category: "تشيكن تندر", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500", outOfStock: false, isOffer: false },
             { name: "شاورما دجاج ساندوتش وسط سوري", price: 65, cost: 48, oldPrice: 75, stock: 100, initialStock: 100, category: "شاورما - قسم الساندوتشات", image: "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=500", outOfStock: false, isOffer: false },
@@ -1269,6 +1404,7 @@
         ];
         let allCashiers = [
             { name: "محمد السيد (سوبر ماركت)", phone: "01011112222", section: "🛒 قسم السوبر ماركت", shift: "🌅 شفت صباحي", walletAccount: "01011112222" },
+            { name: "كريم طارق (مخبوزات جاهز)", phone: "01022223333", section: "🥐 مخبوزات جاهز Store", shift: "🌅 شفت صباحي", walletAccount: "01022223333" },
             { name: "إسلام محمود (هابي ميلز)", phone: "01033334444", section: "🍗 قسم هابي ميلز", shift: "🌙 شفت مسائي", walletAccount: "01033334444" },
             { name: "محمود حسن (فول وطعمية)", phone: "01055556666", section: "🍳 قسم فول وطعمية", shift: "🌅 شفت صباحي", walletAccount: "01055556666" },
             { name: "سعيد علي (سمكة مشوية)", phone: "01077778888", section: "🐟 قسم سمكة مشوية", shift: "🌙 شفت مسائي", walletAccount: "01077778888" }
@@ -1357,6 +1493,7 @@
 
                 inputEl.value = "";
                 setAdminWorkspaceVisible(true);
+                ensureCategoryTreeDefaults();
                 allProducts.forEach(normalizeProductStock);
                 loadAdminKpiOverrides();
                 renderAllSections();
@@ -1379,6 +1516,210 @@
 
         window.checkAdminPassword = checkAdminPassword;
         window.logoutAdmin = logoutAdmin;
+
+        function ensureCategoryTreeDefaults() {
+            if (!Array.isArray(categoryTree) || categoryTree.length === 0) {
+                categoryTree = JSON.parse(JSON.stringify(DEFAULT_CATEGORY_TREE));
+            }
+            DEFAULT_CATEGORY_TREE.forEach(defCat => {
+                const exists = categoryTree.find(c => c.id === defCat.id || c.title === defCat.title);
+                if (!exists) {
+                    categoryTree.push(JSON.parse(JSON.stringify(defCat)));
+                } else if (Array.isArray(defCat.subcategories)) {
+                    defCat.subcategories.forEach(sub => {
+                        const aliased = categoryAliases[sub] || sub;
+                        if (!exists.subcategories.includes(aliased) && !exists.subcategories.includes(sub)) {
+                            exists.subcategories.push(aliased);
+                        }
+                    });
+                }
+            });
+            allProducts.forEach(p => {
+                if (p && p.category && categoryAliases[p.category]) {
+                    p.category = categoryAliases[p.category];
+                }
+            });
+        }
+
+        function renderCategorySelectorsAndManager() {
+            ensureCategoryTreeDefaults();
+
+            const renameMainSel = document.getElementById("renameMainCatSelect");
+            const addSubMainSel = document.getElementById("addSubCatMainSelect");
+            const cashierSecSel = document.getElementById("cashierSection");
+            const renameSubSel = document.getElementById("renameSubCatSelect");
+            const prodCatSel = document.getElementById("prodCategory");
+
+            const prevCashierVal = cashierSecSel?.value || "";
+            const prevProdCatVal = prodCatSel?.value || "";
+
+            const mainOptionsHtml = categoryTree
+                .map(c => `<option value="${c.id}">${c.title}</option>`)
+                .join("");
+
+            if (renameMainSel) renameMainSel.innerHTML = mainOptionsHtml;
+            if (addSubMainSel) addSubMainSel.innerHTML = mainOptionsHtml;
+
+            if (cashierSecSel) {
+                cashierSecSel.innerHTML = categoryTree
+                    .map(c => `<option value="${c.title}">${c.title}</option>`)
+                    .join("");
+                if (prevCashierVal && categoryTree.some(c => c.title === prevCashierVal)) {
+                    cashierSecSel.value = prevCashierVal;
+                }
+            }
+
+            const optGroupsHtml = categoryTree.map(c => {
+                const subs = (c.subcategories || [])
+                    .map(sub => `<option value="${sub}">${sub}</option>`)
+                    .join("");
+                return `<optgroup label="${c.title}">${subs}</optgroup>`;
+            }).join("");
+
+            if (renameSubSel) renameSubSel.innerHTML = optGroupsHtml;
+            if (prodCatSel) {
+                prodCatSel.innerHTML = optGroupsHtml;
+                if (prevProdCatVal) {
+                    const allSubs = categoryTree.flatMap(c => c.subcategories || []);
+                    if (allSubs.includes(prevProdCatVal)) {
+                        prodCatSel.value = prevProdCatVal;
+                    }
+                }
+            }
+
+            const tbody = document.getElementById("categoriesManagerTableBody");
+            if (!tbody) return;
+
+            tbody.innerHTML = categoryTree.map((cat, idx) => {
+                const subs = Array.isArray(cat.subcategories) ? cat.subcategories : [];
+                const prodCount = allProducts.filter(p => p && subs.includes(p.category)).length;
+                const subsBadges = subs.map(s => `<span class="cat-pill-sub">${s}</span>`).join(" ");
+                return `
+                    <tr>
+                        <td><span class="cat-pill-main">${cat.title}</span></td>
+                        <td>${subsBadges || '<span style="color:var(--text-muted);">لا توجد فروع</span>'}</td>
+                        <td><b>${prodCount}</b></td>
+                        <td>
+                            <button type="button" class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="quickSelectMainCategoryForRename('${cat.id}')">✏️ إعادة تسمية</button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function quickSelectMainCategoryForRename(catId) {
+            const sel = document.getElementById("renameMainCatSelect");
+            const input = document.getElementById("renameMainCatNewName");
+            const cat = categoryTree.find(c => c.id === catId);
+            if (sel && cat) {
+                sel.value = cat.id;
+                if (input) {
+                    input.value = cat.title;
+                    input.focus();
+                }
+            }
+        }
+
+        async function renameMainCategory() {
+            const catId = document.getElementById("renameMainCatSelect")?.value;
+            const newTitle = (document.getElementById("renameMainCatNewName")?.value || "").trim();
+            if (!catId || !newTitle) {
+                alert("⚠️ يرجى اختيار القسم الرئيسي وكتابة الاسم الجديد.");
+                return;
+            }
+
+            const cat = categoryTree.find(c => c.id === catId);
+            if (!cat) return;
+
+            const oldTitle = cat.title;
+            if (oldTitle === newTitle) return;
+
+            const oldClean = oldTitle.replace(/^[^\s]+\s*/, "").trim();
+            const newClean = newTitle.replace(/^[^\s]+\s*/, "").trim();
+
+            cat.title = newTitle;
+            categoryAliases[oldTitle] = newTitle;
+
+            if (oldClean && newClean && oldClean !== newClean) {
+                cat.subcategories = (cat.subcategories || []).map(sub => {
+                    if (sub.startsWith(oldClean)) {
+                        const updatedSub = newClean + sub.slice(oldClean.length);
+                        categoryAliases[sub] = updatedSub;
+                        allProducts.forEach(p => {
+                            if (p && p.category === sub) p.category = updatedSub;
+                        });
+                        return updatedSub;
+                    }
+                    return sub;
+                });
+            }
+
+            allCashiers.forEach(c => {
+                if (c && c.section === oldTitle) c.section = newTitle;
+            });
+
+            document.getElementById("renameMainCatNewName").value = "";
+            renderAllSections();
+            await pushCloudState();
+            alert(`✅ تم تغيير اسم القسم الرئيسي من "${oldTitle}" إلى "${newTitle}" وتحديثه لصفحة العملاء.`);
+        }
+
+        async function renameSubCategory() {
+            const oldSub = document.getElementById("renameSubCatSelect")?.value;
+            const newSub = (document.getElementById("renameSubCatNewName")?.value || "").trim();
+            if (!oldSub || !newSub) {
+                alert("⚠️ يرجى اختيار القسم الفرعي وكتابة الاسم الجديد.");
+                return;
+            }
+            if (oldSub === newSub) return;
+
+            let updated = false;
+            categoryTree.forEach(cat => {
+                if (Array.isArray(cat.subcategories)) {
+                    const idx = cat.subcategories.indexOf(oldSub);
+                    if (idx >= 0) {
+                        cat.subcategories[idx] = newSub;
+                        updated = true;
+                    }
+                }
+            });
+
+            if (!updated) return;
+
+            categoryAliases[oldSub] = newSub;
+            allProducts.forEach(p => {
+                if (p && p.category === oldSub) p.category = newSub;
+            });
+
+            document.getElementById("renameSubCatNewName").value = "";
+            renderAllSections();
+            await pushCloudState();
+            alert(`✅ تم تغيير اسم القسم الفرعي من "${oldSub}" إلى "${newSub}" وربطه بصفحة العملاء.`);
+        }
+
+        async function addNewSubCategory() {
+            const catId = document.getElementById("addSubCatMainSelect")?.value;
+            const newSub = (document.getElementById("newSubCatNameInput")?.value || "").trim();
+            if (!catId || !newSub) {
+                alert("⚠️ يرجى اختيار القسم الرئيسي وكتابة اسم القسم الفرعي الجديد.");
+                return;
+            }
+
+            const cat = categoryTree.find(c => c.id === catId);
+            if (!cat) return;
+            if (!Array.isArray(cat.subcategories)) cat.subcategories = [];
+
+            if (cat.subcategories.includes(newSub)) {
+                alert("⚠️ هذا القسم الفرعي موجود بالفعل.");
+                return;
+            }
+
+            cat.subcategories.push(newSub);
+            document.getElementById("newSubCatNameInput").value = "";
+            renderAllSections();
+            await pushCloudState();
+            alert(`✅ تمت إضافة القسم الفرعي "${newSub}" تحت "${cat.title}" وتحديثه لصفحة العملاء.`);
+        }
 
         function normalizeProductStock(p) {
             const rawStock = Number(p.stock);
@@ -1999,7 +2340,17 @@
             document.getElementById('prodCost').value = p.cost ?? '';
             document.getElementById('prodOldPrice').value = p.oldPrice ?? '';
             document.getElementById('prodStockQty').value = p.stock ?? 0;
-            document.getElementById('prodCategory').value = p.category || 'عام';
+            const prodCatSel = document.getElementById('prodCategory');
+            if (prodCatSel) {
+                const hasOpt = Array.from(prodCatSel.options).some(o => o.value === p.category);
+                if (!hasOpt && p.category) {
+                    const opt = document.createElement("option");
+                    opt.value = p.category;
+                    opt.textContent = p.category;
+                    prodCatSel.appendChild(opt);
+                }
+                prodCatSel.value = p.category || '';
+            }
             document.getElementById('prodImage').value = p.image || '';
             document.getElementById('prodStock').value = p.outOfStock ? "true" : "false";
             document.getElementById('prodIsOffer').value = p.isOffer ? "true" : "false";
@@ -2066,6 +2417,7 @@
             }
 
             resetProductForm();
+            renderCategorySelectorsAndManager();
             renderProductsTable();
             await pushCloudState();
         }
@@ -2091,6 +2443,7 @@
         async function deleteProduct(idx) {
             if (!confirm('هل تريد حذف هذا المنتج؟')) return;
             allProducts.splice(idx, 1);
+            renderCategorySelectorsAndManager();
             renderProductsTable();
             await pushCloudState();
         }
@@ -2315,6 +2668,8 @@
         }
 
         function renderAllSections() {
+            ensureCategoryTreeDefaults();
+            renderCategorySelectorsAndManager();
             updateStatsAndKpis();
             renderCashiersTable();
             renderCaptainsTable();
@@ -2334,6 +2689,12 @@
                     if (Array.isArray(data)) {
                         allProducts = data;
                     } else if (data && typeof data === 'object') {
+                        if (Array.isArray(data.categoriesTree) && data.categoriesTree.length > 0) {
+                            categoryTree = data.categoriesTree;
+                        }
+                        if (data.categoryAliases && typeof data.categoryAliases === 'object') {
+                            categoryAliases = data.categoryAliases;
+                        }
                         if (Array.isArray(data.products) && data.products.length > 0) allProducts = data.products;
                         if (Array.isArray(data.sales)) allSales = data.sales;
                         if (Array.isArray(data.captains) && data.captains.length > 0) allCaptains = data.captains;
@@ -2358,6 +2719,7 @@
                             saveAdminKpiOverridesLocal();
                         }
                     }
+                    ensureCategoryTreeDefaults();
                     allProducts.forEach(normalizeProductStock);
                     let anyStockDeducted = false;
                     allSales.forEach(sale => {
@@ -2372,6 +2734,8 @@
                         await pushCloudState();
                     }
                     localStorage.setItem('gahiz_lightning_cache', JSON.stringify({
+                        categoriesTree: categoryTree,
+                        categoryAliases: categoryAliases,
                         products: allProducts,
                         sales: allSales,
                         captains: allCaptains,
@@ -2384,23 +2748,29 @@
                 if (cached) {
                     try {
                         const c = JSON.parse(cached);
+                        if (Array.isArray(c.categoriesTree) && c.categoriesTree.length > 0) categoryTree = c.categoriesTree;
+                        if (c.categoryAliases && typeof c.categoryAliases === 'object') categoryAliases = c.categoryAliases;
                         if (Array.isArray(c.products) && c.products.length > 0) allProducts = c.products;
                         if (Array.isArray(c.sales)) allSales = c.sales;
                         if (Array.isArray(c.captains) && c.captains.length > 0) allCaptains = c.captains;
                         if (Array.isArray(c.cashiers) && c.cashiers.length > 0) allCashiers = c.cashiers;
                         if (Array.isArray(c.captainRatings)) allCaptainRatings = c.captainRatings;
+                        ensureCategoryTreeDefaults();
                         allProducts.forEach(normalizeProductStock);
                     } catch (_) {}
                 }
             }
             renderAllSections();
-            if (showAlert) alert('✅ تمت مزامنة البيانات والمخزون بنجاح!');
+            if (showAlert) alert('✅ تمت مزامنة البيانات والأقسام والمخزون بنجاح!');
         }
 
         async function pushCloudState() {
             if (!isAdminAuthenticated) return;
+            ensureCategoryTreeDefaults();
             allProducts.forEach(normalizeProductStock);
             const payload = {
+                categoriesTree: categoryTree,
+                categoryAliases: categoryAliases,
                 products: allProducts,
                 sales: allSales,
                 captains: allCaptains,
@@ -2442,6 +2812,7 @@
             if (savedHash && savedHash === activeAdminHash) {
                 isAdminAuthenticated = true;
                 setAdminWorkspaceVisible(true);
+                ensureCategoryTreeDefaults();
                 allProducts.forEach(normalizeProductStock);
                 loadAdminKpiOverrides();
                 renderAllSections();
