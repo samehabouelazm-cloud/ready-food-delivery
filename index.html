@@ -1157,225 +1157,177 @@
 </div>
 
 <script>
+<script>
 (function () {
   const GAHIZ_CLOUD_URL = "https://api.npoint.io/d2a95067aede55eb6302";
 
-  const GAHIZ_BAKERY_TREE = {
-    id: "cat_bakery",
-    title: "🥐 مخبوزات جاهز Store",
-    subcategories: [
-      "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو",
-      "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق",
-      "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع",
-      "مخبوزات جاهز Store - المعلبات",
-      "مخبوزات جاهز Store - العيش",
-      "مخبوزات جاهز Store - البسكويت",
-      "مخبوزات جاهز Store - الكحك",
-      "مخبوزات جاهز Store - معجنات وباتيه",
-      "مخبوزات جاهز Store - حلويات وتورت"
-    ]
-  };
+  const GAHIZ_DEFAULT_CATEGORIES = [
+    {
+      id: "cat_bakery",
+      title: "🥐 مخبوزات جاهز Store",
+      subcategories: [
+        "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو",
+        "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق",
+        "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع",
+        "مخبوزات جاهز Store - المعلبات",
+        "مخبوزات جاهز Store - العيش",
+        "مخبوزات جاهز Store - البسكويت",
+        "مخبوزات جاهز Store - الكحك",
+        "مخبوزات جاهز Store - معجنات وباتيه",
+        "مخبوزات جاهز Store - حلويات وتورت"
+      ]
+    }
+  ];
 
-  let latestCloudSnapshot = {
-    categoriesTree: [GAHIZ_BAKERY_TREE],
+  let cloudState = {
+    categoriesTree: GAHIZ_DEFAULT_CATEGORIES,
     categoryAliases: {},
     products: [],
     sales: [],
     captains: [],
     cashiers: [],
-    captainRatings: [],
-    adminKpiConfig: null
+    captainRatings: []
   };
 
-  function resolveCategoryLabel(catStr) {
-    if (!catStr) return "";
-    const aliases = latestCloudSnapshot.categoryAliases || {};
-    return aliases[catStr] || catStr;
+  function mapCategoryName(cat) {
+    if (!cat) return "";
+    const aliases = cloudState.categoryAliases || {};
+    return aliases[cat] || cat;
   }
 
-  function applyCategoriesAndBakerySync(data) {
-    if (!data || typeof data !== "object") return;
+  function mergeProductsIntoStore(cloudProducts) {
+    if (!Array.isArray(cloudProducts) || cloudProducts.length === 0) return;
 
-    latestCloudSnapshot = {
-      ...latestCloudSnapshot,
+    const normalizedCloud = cloudProducts
+      .filter(p => p && p.name)
+      .map(p => ({ ...p, category: mapCategoryName(p.category) }));
+
+    // دمج منتجات الإدارة مع أي منتجات محلية دون فقدان الجديد
+    const existingLocal = Array.isArray(window.products)
+      ? window.products
+      : (Array.isArray(window.allProducts) ? window.allProducts : []);
+
+    const byName = new Map();
+    existingLocal.forEach(item => {
+      if (item && item.name) {
+        byName.set(item.name.trim(), { ...item, category: mapCategoryName(item.category) });
+      }
+    });
+    normalizedCloud.forEach(item => {
+      byName.set(item.name.trim(), item);
+    });
+
+    const mergedList = Array.from(byName.values());
+    window.products = mergedList;
+    window.allProducts = mergedList;
+
+    try {
+      localStorage.setItem("gahiz_store_products_sync", JSON.stringify(mergedList));
+    } catch (_) {}
+  }
+
+  function renderCategoriesIntoCustomerDom(tree, aliases) {
+    const finalTree = Array.isArray(tree) && tree.length ? tree : GAHIZ_DEFAULT_CATEGORIES;
+    const containers = document.querySelectorAll(
+      "#categories, #categoryTabs, #categoriesBar, .categories-bar, .category-tabs, .categories-list, [data-categories-container]"
+    );
+
+    if (typeof window.renderStoreCategories === "function") {
+      window.renderStoreCategories(finalTree, aliases);
+    }
+
+    if (containers.length > 0) {
+      containers.forEach(box => {
+        // لا نمسح الحاوية إلا إذا كانت مخصصة للأقسام وتحتوي على أزرار/روابط تصنيف أو كانت فارغة
+        const hasExistingButtons = box.querySelector("button, a, .category-btn, .cat-btn, .tab-btn");
+        if (!hasExistingButtons && box.children.length > 3) return;
+
+        const allBtn = `<button type="button" class="gahiz-dynamic-cat-btn" data-category="all" style="padding:7px 14px;border-radius:20px;border:1px solid #cbd5e1;background:#0284c7;color:#fff;font-weight:700;cursor:pointer;margin:3px;">الكل</button>`;
+        const mainBtns = finalTree.map(cat => {
+          const title = aliases[cat.title] || cat.title;
+          const cleanTitle = title.replace(/^[^\s]+\s*/, "").trim();
+          return `<button type="button" class="gahiz-dynamic-cat-btn" data-category="${cleanTitle}" style="padding:7px 14px;border-radius:20px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font-weight:700;cursor:pointer;margin:3px;">${title}</button>`;
+        }).join("");
+
+        box.innerHTML = allBtn + mainBtns;
+        box.querySelectorAll(".gahiz-dynamic-cat-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const selectedCat = btn.getAttribute("data-category");
+            if (typeof window.filterByCategory === "function") {
+              window.filterByCategory(selectedCat);
+            } else if (typeof window.filterProducts === "function") {
+              window.filterProducts(selectedCat);
+            } else {
+              renderFilteredProductsFallback(selectedCat);
+            }
+          });
+        });
+      });
+    }
+  }
+
+  function renderFilteredProductsFallback(selectedCat) {
+    const list = Array.isArray(window.products) ? window.products : [];
+    const filtered = (!selectedCat || selectedCat === "all")
+      ? list
+      : list.filter(p => String(p.category || "").includes(selectedCat));
+
+    if (typeof window.renderProducts === "function") {
+      window.renderProducts(filtered);
+    } else if (typeof window.displayProducts === "function") {
+      window.displayProducts(filtered);
+    }
+  }
+
+  function applyCloudDataToCustomerPage(data) {
+    if (!data || typeof data !== "object" || Array.isArray(data)) return;
+
+    cloudState = {
+      ...cloudState,
       ...data,
       categoriesTree: Array.isArray(data.categoriesTree) && data.categoriesTree.length
         ? data.categoriesTree
-        : (Array.isArray(latestCloudSnapshot.categoriesTree) && latestCloudSnapshot.categoriesTree.length
-            ? latestCloudSnapshot.categoriesTree
-            : [GAHIZ_BAKERY_TREE]),
+        : (Array.isArray(cloudState.categoriesTree) && cloudState.categoriesTree.length
+            ? cloudState.categoriesTree
+            : GAHIZ_DEFAULT_CATEGORIES),
       categoryAliases: (data.categoryAliases && typeof data.categoryAliases === "object")
         ? data.categoryAliases
-        : (latestCloudSnapshot.categoryAliases || {}),
-      captainRatings: Array.isArray(data.captainRatings)
-        ? data.captainRatings
-        : (Array.isArray(data.captain_ratings) ? data.captain_ratings : (latestCloudSnapshot.captainRatings || []))
+        : (cloudState.categoryAliases || {})
     };
 
-    const hasBakery = latestCloudSnapshot.categoriesTree.some(
-      c => c && (c.id === "cat_bakery" || String(c.title || "").includes("مخبوزات"))
-    );
-    if (!hasBakery) {
-      latestCloudSnapshot.categoriesTree.push(GAHIZ_BAKERY_TREE);
+    if (Array.isArray(data.products)) {
+      mergeProductsIntoStore(data.products);
     }
 
-    const candidateProductArrays = [
-      window.allProducts,
-      window.products,
-      data.products
-    ].filter(Array.isArray);
+    renderCategoriesIntoCustomerDom(cloudState.categoriesTree, cloudState.categoryAliases);
 
-    candidateProductArrays.forEach(arr => {
-      arr.forEach(item => {
-        if (item && item.category) {
-          item.category = resolveCategoryLabel(item.category);
-        }
-      });
-    });
-
-    const dl = document.getElementById("gahizCaptainsDatalist");
-    if (dl && Array.isArray(latestCloudSnapshot.captains)) {
-      dl.innerHTML = latestCloudSnapshot.captains
-        .filter(c => c && c.name)
-        .map(c => `<option value="${c.name}"></option>`)
-        .join("");
-    }
-
-    if (typeof window.renderStoreCategories === "function") {
-      window.renderStoreCategories(latestCloudSnapshot.categoriesTree, latestCloudSnapshot.categoryAliases);
-    }
     if (typeof window.renderProducts === "function") {
       window.renderProducts();
-    } else if (typeof window.renderAllProducts === "function") {
-      window.renderAllProducts();
+    } else if (typeof window.displayProducts === "function") {
+      window.displayProducts();
     }
   }
 
-  async function pullLatestCloudSnapshot() {
+  async function syncCustomerStoreNow() {
     try {
       const res = await fetch(GAHIZ_CLOUD_URL + "?t=" + Date.now(), { cache: "no-store" });
       if (res.ok) {
-        const json = await res.json();
-        if (json && typeof json === "object" && !Array.isArray(json)) {
-          applyCategoriesAndBakerySync(json);
-        }
+        const data = await res.json();
+        applyCloudDataToCustomerPage(data);
       }
     } catch (_) {}
   }
 
-  async function pushMergedCloudSnapshot(patchObj) {
-    let base = { ...latestCloudSnapshot };
-    try {
-      const res = await fetch(GAHIZ_CLOUD_URL + "?t=" + Date.now(), { cache: "no-store" });
-      if (res.ok) {
-        const liveData = await res.json();
-        if (liveData && typeof liveData === "object" && !Array.isArray(liveData)) {
-          base = { ...base, ...liveData };
-        }
-      }
-    } catch (_) {}
-
-    const mergedRatings = Array.isArray(patchObj.captainRatings)
-      ? patchObj.captainRatings
-      : (Array.isArray(base.captainRatings) ? base.captainRatings : (Array.isArray(base.captain_ratings) ? base.captain_ratings : []));
-
-    const payload = {
-      ...base,
-      ...patchObj,
-      captainRatings: mergedRatings,
-      captain_ratings: mergedRatings
-    };
-
-    latestCloudSnapshot = payload;
-
-    try {
-      await fetch(GAHIZ_CLOUD_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    } catch (_) {}
-  }
-
-  document.querySelectorAll("#gahizRateTagsBox .gahiz-rate-tag-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      btn.classList.toggle("active");
-    });
-  });
-
-  window.openGahizCaptainRatingModal = function (prefillOrderId = "", prefillCaptainName = "") {
-    pullLatestCloudSnapshot();
-    const orderInput = document.getElementById("gahizRateOrderId");
-    const capInput = document.getElementById("gahizRateCaptainName");
-    const scoreSel = document.getElementById("gahizRateScore");
-    const commentInput = document.getElementById("gahizRateComment");
-
-    if (orderInput) orderInput.value = prefillOrderId || "";
-    if (capInput) capInput.value = prefillCaptainName || "";
-    if (scoreSel) scoreSel.value = "5";
-    if (commentInput) commentInput.value = "";
-    document.querySelectorAll("#gahizRateTagsBox .gahiz-rate-tag-btn").forEach(b => b.classList.remove("active"));
-
-    const modal = document.getElementById("gahizCaptainRatingModal");
-    if (modal) modal.style.display = "flex";
-  };
-
-  window.closeGahizCaptainRatingModal = function () {
-    const modal = document.getElementById("gahizCaptainRatingModal");
-    if (modal) modal.style.display = "none";
-  };
-
-  window.submitGahizCaptainRating = async function () {
-    const orderId = (document.getElementById("gahizRateOrderId")?.value || "").trim();
-    const captainName = (document.getElementById("gahizRateCaptainName")?.value || "").trim();
-    const rating = parseInt(document.getElementById("gahizRateScore")?.value || "5", 10);
-    const comment = (document.getElementById("gahizRateComment")?.value || "").trim();
-    const tags = Array.from(document.querySelectorAll("#gahizRateTagsBox .gahiz-rate-tag-btn.active"))
-      .map(el => el.getAttribute("data-tag"))
-      .filter(Boolean);
-
-    if (!orderId || !captainName) {
-      alert("⚠️ يرجى إدخال رقم الأوردر واسم الكابتن.");
-      return;
-    }
-
-    await pullLatestCloudSnapshot();
-    const existing = Array.isArray(latestCloudSnapshot.captainRatings) ? latestCloudSnapshot.captainRatings : [];
-    const duplicate = existing.some(
-      r => r && String(r.orderId || "").trim() === orderId && String(r.captainName || "").trim() === captainName
-    );
-    if (duplicate) {
-      alert(`⚠️ تم تسجيل تقييم مسبق للأوردر #${orderId} للكابتن ${captainName}.`);
-      return;
-    }
-
-    const updatedRatings = existing.concat([{
-      orderId,
-      captainName,
-      rating,
-      tags,
-      comment,
-      createdAt: new Date().toISOString()
-    }]);
-
-    await pushMergedCloudSnapshot({ captainRatings: updatedRatings });
-    window.closeGahizCaptainRatingModal();
-    alert(`✅ تم إرسال تقييمك للكابتن ${captainName} على الأوردر #${orderId} (${rating}/5).`);
-  };
-
-  window.GahizStoreSync = {
-    getBakeryTree: () => JSON.parse(JSON.stringify(GAHIZ_BAKERY_TREE)),
-    resolveCategory: resolveCategoryLabel,
-    applySync: applyCategoriesAndBakerySync,
-    pull: pullLatestCloudSnapshot,
-    push: pushMergedCloudSnapshot,
-    openRatingModal: window.openGahizCaptainRatingModal
+  window.GahizCustomerSync = {
+    syncNow: syncCustomerStoreNow,
+    applyData: applyCloudDataToCustomerPage,
+    getState: () => cloudState
   };
 
   window.addEventListener("DOMContentLoaded", () => {
-    pullLatestCloudSnapshot();
+    syncCustomerStoreNow();
+    // إعادة المحاولة بعد ثانية لضمان تجاوز أي دالة تهيئة متأخرة في الصفحة
+    setTimeout(syncCustomerStoreNow, 1000);
   });
 })();
 </script>
-</body>
-</html>
