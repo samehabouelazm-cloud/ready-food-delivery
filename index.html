@@ -30,7 +30,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
         body { background: var(--bg-light); color: var(--text-dark); padding-bottom: 40px; direction: rtl; text-align: right; }
 
-        .header { 
+        .header {
             position: sticky; top: 0; z-index: 100;
             background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px);
             padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
@@ -198,9 +198,10 @@
             <h1>جاهز <span>Store</span></h1>
         </a>
         <div class="header-actions">
-            <button class="captain-btn" onclick="openCaptainModal()">🛵 انضم ككابتن</button>
-            <button class="refresh-btn" onclick="loadStoreProducts(true)">🔄 تحديث فوري</button>
-            <button class="cart-btn" onclick="openCart()">
+            <button type="button" class="captain-btn" onclick="openCaptainModal()">🛵 انضم ككابتن</button>
+            <button type="button" class="captain-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="openGahizCaptainRatingModal()">⭐ تقييم كابتن</button>
+            <button type="button" class="refresh-btn" onclick="loadStoreProducts(true)">🔄 تحديث فوري</button>
+            <button type="button" class="cart-btn" onclick="openCart()">
                 🛒 السلة <span class="cart-badge" id="cartCount">0</span>
             </button>
         </div>
@@ -210,8 +211,8 @@
         <div class="hero-banner">
             <div class="hero-text">
                 <h2>تسوق كل ما تحتاجه بأفضل الأسعار 🚀</h2>
-                <p>منتجات السوبرماركت، وجبات هابي ميلز الطازجة، وتوصيل سريع حتى باب المنزل من فرعنا ببلطيم.</p>
-                <button class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
+                <p>منتجات السوبرماركت، مخبوزات جاهز Store، وجبات هابي ميلز الطازجة، وتوصيل سريع حتى باب المنزل من فرعنا ببلطيم.</p>
+                <button type="button" class="hero-btn" onclick="document.getElementById('searchInput').focus()">تصفح المنتجات الآن</button>
             </div>
         </div>
 
@@ -229,7 +230,7 @@
                     <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">✨ مش لاقي اللي بتدور عليه؟ "اطلب أي حاجة"!</h3>
                     <p style="font-size: 14px; opacity: 0.95; line-height: 1.5;">اكتب لنا أي صنف أو طلب ناقصك، واحنا هنجهزه ويوصل لحد باب بيتك فوراً.</p>
                 </div>
-                <button onclick="openCustomOrderModal()" style="background: #fff; color: #d97706; border: none; padding: 11px 22px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <button type="button" onclick="openCustomOrderModal()" style="background: #fff; color: #d97706; border: none; padding: 11px 22px; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     📝 اطلب اللي تحتاجه الآن
                 </button>
             </div>
@@ -252,15 +253,15 @@
                 <span class="close-icon" onclick="closeModal('cartModal')">✕</span>
             </div>
             <div id="cartItemsList" style="max-height: 240px; overflow-y: auto; margin-bottom: 15px;"></div>
-            
+
             <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>المجموع الفرعي:</span><span id="subTotal" style="font-weight:700;">0 ج.م</span></div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>رسوم التوصيل:</span><span id="deliveryFeeDisplay" style="font-weight:700;">20 ج.م</span></div>
                 <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 16px; border-top: 1px dashed #cbd5e1; padding-top: 8px; color: var(--text-dark);"><span>الإجمالي الكلي:</span><span id="grandTotal" style="color: var(--secondary);">0 ج.م</span></div>
             </div>
 
-            <button class="btn-submit" onclick="goToCheckout()">إكمال الشراء وتحديد العنوان 📝</button>
-            <button class="btn-cancel" onclick="closeModal('cartModal')">متابعة التسوق</button>
+            <button type="button" class="btn-submit" onclick="goToCheckout()">إكمال الشراء وتحديد العنوان 📝</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('cartModal')">متابعة التسوق</button>
         </div>
     </div>
 
@@ -270,10 +271,10 @@
                 <h3>📝 بيانات العميل وتحديد منطقة التوصيل</h3>
                 <span class="close-icon" onclick="closeModal('checkoutModal')">✕</span>
             </div>
-            
+
             <div class="form-group"><label>الاسم الكامل:</label><input type="text" id="custName" placeholder="أدخل اسمك الكريم"></div>
             <div class="form-group"><label>رقم الجوال / الواتساب:</label><input type="tel" id="custPhone" placeholder="010xxxxxxx"></div>
-            
+
             <div class="form-group">
                 <label>منطقة التوصيل:</label>
                 <select id="outsideAreaKm" onchange="updateDeliveryFee()">
@@ -299,7 +300,7 @@
             </div>
 
             <div class="form-group"><label>العنوان بالتفصيل (الشارع / رقم العقار):</label><textarea id="custAddress" rows="2" placeholder="الشارع - الدور - رقم الشقة"></textarea></div>
-            
+
             <div class="form-group">
                 <label>طريقة الدفع:</label>
                 <select id="payMethod" onchange="checkPaymentMethod()">
@@ -313,8 +314,8 @@
                 </div>
             </div>
 
-            <button class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📱</button>
-            <button class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
+            <button type="button" class="btn-submit" style="background:#25d366;" onclick="submitOrderToWhatsApp()">إرسال الطلب عبر الواتساب 📱</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('checkoutModal')">رجوع</button>
         </div>
     </div>
 
@@ -332,8 +333,8 @@
             <div class="form-group"><label>رقم محفظة فودافون كاش:</label><input type="tel" id="capVodafoneCash" placeholder="010xxxxxxxx"></div>
             <div class="form-group"><label>عنوان إنستا باي:</label><input type="text" id="capInstaPay" placeholder="example@instapay"></div>
             <div class="form-group"><label>العنوان / المنطقة:</label><textarea id="capAddress" rows="2" placeholder="المنطقة"></textarea></div>
-            <button class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">تسجيل وربط المحفظة عبر الواتساب 🚀</button>
-            <button class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
+            <button type="button" class="btn-submit" style="background:#25d366;" onclick="submitCaptainToWhatsApp()">تسجيل وربط المحفظة عبر الواتساب 🚀</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('captainModal')">إلغاء</button>
         </div>
     </div>
 
@@ -362,15 +363,59 @@
                 </select>
             </div>
             <div class="form-group"><label>العنوان بالتفصيل:</label><textarea id="customAddress" rows="2" placeholder="العنوان بالتفصيل"></textarea></div>
-            <button class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص عبر الواتساب 🚀</button>
-            <button class="btn-cancel" onclick="closeModal('customOrderModal')">إلغاء</button>
+            <button type="button" class="btn-submit" style="background:#25d366;" onclick="submitCustomOrderToWhatsApp()">إرسال الطلب الخاص عبر الواتساب 🚀</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('customOrderModal')">إلغاء</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="gahizCaptainRatingModal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h3>⭐ تقييم كابتن التوصيل</h3>
+                <span class="close-icon" onclick="closeModal('gahizCaptainRatingModal')">✕</span>
+            </div>
+            <div class="form-group">
+                <label for="gahizRateOrderId">رقم الأوردر:</label>
+                <input type="text" id="gahizRateOrderId" placeholder="مثال: ORD-1050">
+            </div>
+            <div class="form-group">
+                <label for="gahizRateCaptainName">اسم الكابتن:</label>
+                <input type="text" id="gahizRateCaptainName" list="gahizCaptainsDatalist" placeholder="اختر أو اكتب اسم الكابتن">
+                <datalist id="gahizCaptainsDatalist"></datalist>
+            </div>
+            <div class="form-group">
+                <label for="gahizRateScore">التقييم (من 1 إلى 5):</label>
+                <select id="gahizRateScore">
+                    <option value="5">⭐⭐⭐⭐⭐ ممتاز (5 من 5)</option>
+                    <option value="4">⭐⭐⭐⭐ جيد جداً (4 من 5)</option>
+                    <option value="3">⭐⭐⭐ مقبول (3 من 5)</option>
+                    <option value="2">⭐⭐ ضعيف (2 من 5)</option>
+                    <option value="1">⭐ سيئ (1 من 5)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>أبرز الملاحظات السريعة:</label>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;" id="gahizRateTagsBox">
+                    <button type="button" class="sub-cat-pill" data-tag="توصيل سريع" onclick="this.classList.toggle('active')">توصيل سريع</button>
+                    <button type="button" class="sub-cat-pill" data-tag="أسلوب محترم" onclick="this.classList.toggle('active')">أسلوب محترم</button>
+                    <button type="button" class="sub-cat-pill" data-tag="الطلب سليم" onclick="this.classList.toggle('active')">الطلب سليم</button>
+                    <button type="button" class="sub-cat-pill" data-tag="تأخير بسيط" onclick="this.classList.toggle('active')">تأخير بسيط</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="gahizRateComment">ملاحظة إضافية (اختياري):</label>
+                <textarea id="gahizRateComment" rows="2" placeholder="اكتب ملاحظتك حول التوصيل لهذا الأوردر..."></textarea>
+            </div>
+            <button type="button" class="btn-submit" onclick="submitGahizCaptainRating()">✅ إرسال تقييم الكابتن</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('gahizCaptainRatingModal')">إغلاق</button>
         </div>
     </div>
 
     <script>
         const API_URL = "https://api.npoint.io/d2a95067aede55eb6302";
-        const FIXED_WHATSAPP_NUMBER = "201042377974"; 
+        const FIXED_WHATSAPP_NUMBER = "201042377974";
         const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500";
+        const BAKERY_LOGO = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500";
         const HAPPY_MEALS_LOGO = "https://i.postimg.cc/3rGmm6vq/lwjw-haby-mylz.jpg";
         const FOUL_TAMEYA_LOGO = "https://i.postimg.cc/C5Z4yLPv/aʿlan-ftwr-jahz-balfwl.png";
         const GRILLED_FISH_LOGO = "https://i.postimg.cc/2y47jXY7/aʿlan-smkt-mshwyt-mn-jahz.png";
@@ -378,16 +423,95 @@
         const ATTARA_LOGO = "https://i.postimg.cc/zDTK94xT/ʿtart-jahz.jpg";
         const PHARMACY_LOGO = "https://i.postimg.cc/yx2myzj7/sydlyt-jahz.jpg";
 
+        const DEFAULT_HIERARCHY_ENTRIES = [
+            [
+                "🛒 قسم السوبر ماركت",
+                [
+                    "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
+                    "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
+                    "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
+                    "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
+                    "سوبر ماركت - خل", "سوبر ماركت - صوصات", "سوبر ماركت - مجمدات",
+                    "سوبر ماركت - مناديل", "سوبر ماركت - منوعات", "عام"
+                ]
+            ],
+            [
+                "🥐 مخبوزات جاهز Store",
+                [
+                    "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو",
+                    "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق",
+                    "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع",
+                    "مخبوزات جاهز Store - المعلبات",
+                    "مخبوزات جاهز Store - العيش",
+                    "مخبوزات جاهز Store - البسكويت",
+                    "مخبوزات جاهز Store - الكحك",
+                    "مخبوزات جاهز Store - معجنات وباتيه",
+                    "مخبوزات جاهز Store - حلويات وتورت"
+                ]
+            ],
+            [
+                "🍗 قسم هابي ميلز (الوجبات والمشويات)",
+                [
+                    "هابي ميلز", "قسم الغربي", "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
+                    "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
+                    "كريب - قسم الكريب الحلو", "قسم البيتزا", "قسم المدخنات", "قسم الهوت دوج",
+                    "قسم النجرسكو", "فطير هابي ميلز - فطير اسكندراني", "فطير هابي ميلز - فطير حلو",
+                    "قسم إضافات", "قسم صواني هابي ميلز"
+                ]
+            ],
+            [
+                "🍳 قسم فول وطعمية",
+                [
+                    "فول وطعمية - الأطباق والساندوتشات", "فول وطعمية - عجينة وقلي", "فول وطعمية - سلطات ومخللات", "فول وطعمية - إضافات"
+                ]
+            ],
+            [
+                "🐟 قسم سمكة مشوية",
+                [
+                    "سمكة مشوية - أسماك طازجة ومشويات", "سمكة مشوية - سي فود وسنجاري", "سمكة مشوية - أرز ووربات وشوربة", "سمكة مشوية - سلطات ومخللات"
+                ]
+            ],
+            [
+                "📱 إلكترونيات جاهز Store",
+                [
+                    "إلكترونيات جاهز Store - شواحن وكابلات",
+                    "إلكترونيات جاهز Store - سماعات وإكسسوارات",
+                    "إلكترونيات جاهز Store - أجهزة ومنوعات"
+                ]
+            ],
+            [
+                "🌿 عطارة جاهز Store",
+                [
+                    "عطارة جاهز Store - توابل وبهارات",
+                    "عطارة جاهز Store - أعشاب ومشروبات",
+                    "عطارة جاهز Store - حبوب وبقوليات"
+                ]
+            ],
+            [
+                "💊 صيدلية جاهز Store",
+                [
+                    "صيدلية جاهز Store - مستلزمات طبية",
+                    "صيدلية جاهز Store - عناية شخصية",
+                    "صيدلية جاهز Store - أدوية ومنتجات عامة"
+                ]
+            ]
+        ];
+
         let allProducts = [];
         let allSales = [];
         let allCaptains = [];
         let allCashiers = [];
+        let allCaptainRatings = [];
+        let categoryAliases = {};
+        let rawCloudSnapshot = {};
         let activeWhatsAppGlobal = FIXED_WHATSAPP_NUMBER;
         let cart = [];
         let productQuantities = {};
+        let storeHierarchy = {};
 
         const categoryLogos = {
             "🛒 قسم السوبر ماركت": "https://i.postimg.cc/yNVGCfzD/tswq-mn-alswbr-markt.png",
+            "🥐 مخبوزات جاهز Store": BAKERY_LOGO,
             "🍗 قسم هابي ميلز (الوجبات والمشويات)": HAPPY_MEALS_LOGO,
             "🍳 قسم فول وطعمية": FOUL_TAMEYA_LOGO,
             "🐟 قسم سمكة مشوية": GRILLED_FISH_LOGO,
@@ -396,46 +520,68 @@
             "💊 صيدلية جاهز Store": PHARMACY_LOGO
         };
 
-        const storeHierarchy = {
-            "🛒 قسم السوبر ماركت": [
-                "سوبر ماركت - الزيت", "سوبر ماركت - السمن", "سوبر ماركت - الشاي والسكر",
-                "سوبر ماركت - الدقيق", "سوبر ماركت - المكرونة", "سوبر ماركت - الأجبان والألبان",
-                "سوبر ماركت - الشيبسي", "سوبر ماركت - البسكويت والفطائر", "سوبر ماركت - العصائر والمياه",
-                "سوبر ماركت - مياه غازية", "سوبر ماركت - شيكولاتة ونوتيلا", "سوبر ماركت - عسل وطحينة",
-                "سوبر ماركت - خل", "سوبر ماركت - صوصات", "سوبر ماركت - مجمدات", 
-                "سوبر ماركت - مناديل", "سوبر ماركت - منوعات", "عام"
-            ],
-            "🍗 قسم هابي ميلز (الوجبات والمشويات)": [
-                "هابي ميلز", "قسم الغربي", "تشيكن تندر", "فرايد تشيكن", "مشويات", "شاورما - قسم الساندوتشات",
-                "شاورما - فتة", "شاورما - قسم الوجبات", "شاورما بالوزن", "كريب - قسم الكريب الحادق",
-                "كريب - قسم الكريب الحلو", "قسم البيتزا", "قسم المدخنات", "قسم الهوت دوج",
-                "قسم النجرسكو", "فطير هابي ميلز - فطير اسكندراني", "فطير هابي ميلز - فطير حلو",
-                "قسم إضافات", "قسم صواني هابي ميلز"
-            ],
-            "🍳 قسم فول وطعمية": [
-                "فول وطعمية - الأطباق والساندوتشات", "فول وطعمية - عجينة وقلي", "فول وطعمية - سلطات ومخللات", "فول وطعمية - إضافات"
-            ],
-            "🐟 قسم سمكة مشوية": [
-                "سمكة مشوية - أسماك طازجة ومشويات", "سمكة مشوية - سي فود وسنجاري", "سمكة مشوية - أرز ووربات وشوربة", "سمكة مشوية - سلطات ومخللات"
-            ],
-            "📱 إلكترونيات جاهز Store": [
-                "إلكترونيات جاهز Store - شواحن وكابلات",
-                "إلكترونيات جاهز Store - سماعات وإكسسوارات",
-                "إلكترونيات جاهز Store - أجهزة ومنوعات"
-            ],
-            "🌿 عطارة جاهز Store": [
-                "عطارة جاهز Store - توابل وبهارات",
-                "عطارة جاهز Store - أعشاب ومشروبات",
-                "عطارة جاهز Store - حبوب وبقوليات"
-            ],
-            "💊 صيدلية جاهز Store": [
-                "صيدلية جاهز Store - مستلزمات طبية",
-                "صيدلية جاهز Store - عناية شخصية",
-                "صيدلية جاهز Store - أدوية ومنتجات عامة"
-            ]
-        };
+        function mapCategory(catName) {
+            if (!catName) return "";
+            return categoryAliases[catName] || catName;
+        }
+
+        function buildStoreHierarchyFromCloud(treeFromCloud) {
+            const entries = [];
+            const seenMain = new Set();
+
+            const pushCategory = (mainTitle, subsList) => {
+                const resolvedMain = mapCategory(mainTitle);
+                if (!resolvedMain || seenMain.has(resolvedMain)) return;
+                seenMain.add(resolvedMain);
+
+                if (!categoryLogos[resolvedMain] && categoryLogos[mainTitle]) {
+                    categoryLogos[resolvedMain] = categoryLogos[mainTitle];
+                }
+
+                const cleanSubs = [];
+                (Array.isArray(subsList) ? subsList : []).forEach(s => {
+                    const mappedSub = mapCategory(s);
+                    if (mappedSub && !cleanSubs.includes(mappedSub)) {
+                        cleanSubs.push(mappedSub);
+                    }
+                });
+                entries.push([resolvedMain, cleanSubs]);
+            };
+
+            if (Array.isArray(treeFromCloud) && treeFromCloud.length > 0) {
+                treeFromCloud.forEach(node => {
+                    if (node && node.title) {
+                        pushCategory(node.title, node.subcategories || []);
+                    }
+                });
+            }
+
+            DEFAULT_HIERARCHY_ENTRIES.forEach(([defMain, defSubs]) => {
+                const mappedMain = mapCategory(defMain);
+                const existingEntry = entries.find(([m]) => m === mappedMain || m === defMain);
+                if (!existingEntry) {
+                    pushCategory(mappedMain, defSubs);
+                } else {
+                    defSubs.forEach(s => {
+                        const ms = mapCategory(s);
+                        if (!existingEntry[1].includes(ms) && !existingEntry[1].includes(s)) {
+                            existingEntry[1].push(ms);
+                        }
+                    });
+                }
+            });
+
+            storeHierarchy = Object.fromEntries(entries);
+
+            allProducts.forEach(p => {
+                if (p && p.category) {
+                    p.category = mapCategory(p.category);
+                }
+            });
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
+            buildStoreHierarchyFromCloud(null);
             loadStoreProducts(false);
         });
 
@@ -456,7 +602,7 @@
             return areaSelect ? parseInt(areaSelect.value) || 20 : 20;
         }
 
-        function updateDeliveryFee() { 
+        function updateDeliveryFee() {
             let fee = getDeliveryFee();
             let feeDisplay = document.getElementById('deliveryFeeDisplay');
             if (feeDisplay) feeDisplay.innerText = fee + ' ج.م';
@@ -471,7 +617,7 @@
             let walletSpan = document.getElementById('dynamicWalletNumber');
             let targetWallet = FIXED_WHATSAPP_NUMBER;
             let hasHappyMeals = cart.some(item => (item.category && item.category.includes('هابي ميلز')) || (item.name && item.name.includes('هابي ميلز')));
-            
+
             if (hasHappyMeals && allCashiers.length > 0) {
                 let cashier = allCashiers.find(c => c.section && c.section.includes('هابي ميلز'));
                 if (cashier && cashier.walletAccount) targetWallet = cashier.walletAccount;
@@ -479,6 +625,15 @@
 
             if (walletSpan) walletSpan.innerText = targetWallet;
             infoBox.style.display = payMethod.includes('فودافون كاش') || payMethod.includes('انستا باي') ? 'block' : 'none';
+        }
+
+        function populateCaptainsDatalist() {
+            const dl = document.getElementById("gahizCaptainsDatalist");
+            if (!dl) return;
+            const names = new Set();
+            allCaptains.forEach(c => { if (c && c.name) names.add(String(c.name).trim()); });
+            allSales.forEach(s => { if (s && s.assignedCaptain) names.add(String(s.assignedCaptain).trim()); });
+            dl.innerHTML = Array.from(names).map(n => `<option value="${n}"></option>`).join("");
         }
 
         async function loadStoreProducts(showAlert = false) {
@@ -489,11 +644,21 @@
                     if (Array.isArray(data)) {
                         allProducts = data;
                     } else if (data && typeof data === 'object') {
+                        rawCloudSnapshot = data;
+                        if (data.categoryAliases && typeof data.categoryAliases === 'object') {
+                            categoryAliases = data.categoryAliases;
+                        }
                         allProducts = Array.isArray(data.products) ? data.products : [];
                         allSales = Array.isArray(data.sales) ? data.sales : [];
                         allCaptains = Array.isArray(data.captains) ? data.captains : [];
                         allCashiers = Array.isArray(data.cashiers) ? data.cashiers : [];
+                        if (Array.isArray(data.captainRatings)) {
+                            allCaptainRatings = data.captainRatings;
+                        } else if (Array.isArray(data.captain_ratings)) {
+                            allCaptainRatings = data.captain_ratings;
+                        }
                         activeWhatsAppGlobal = data.activeWhatsApp || FIXED_WHATSAPP_NUMBER;
+                        buildStoreHierarchyFromCloud(data.categoriesTree);
                     }
                 }
             } catch (e) {
@@ -501,14 +666,24 @@
                 if (cached) {
                     try {
                         let cData = JSON.parse(cached);
+                        if (cData.categoryAliases && typeof cData.categoryAliases === 'object') {
+                            categoryAliases = cData.categoryAliases;
+                        }
                         if (Array.isArray(cData.products)) allProducts = cData.products;
+                        if (Array.isArray(cData.sales)) allSales = cData.sales;
+                        if (Array.isArray(cData.captains)) allCaptains = cData.captains;
+                        if (Array.isArray(cData.cashiers)) allCashiers = cData.cashiers;
+                        if (Array.isArray(cData.captainRatings)) allCaptainRatings = cData.captainRatings;
+                        buildStoreHierarchyFromCloud(cData.categoriesTree);
                     } catch (_) {}
                 }
             }
 
+            buildStoreHierarchyFromCloud(rawCloudSnapshot?.categoriesTree);
+            populateCaptainsDatalist();
             renderDailyOffers();
             renderAccordionStore(allProducts);
-            if (showAlert) alert('✅ تم تحديث بيانات المتجر بنجاح!');
+            if (showAlert) alert('✅ تم تحديث الأقسام والمنتجات بنجاح!');
         }
 
         function changeProdQty(index, delta) {
@@ -595,11 +770,12 @@
                 let subContainersHtml = '';
 
                 subCats.forEach((subCat, subIdx) => {
-                    let matchingProducts = productsList.filter(p => p.category === subCat);
+                    let mappedSub = mapCategory(subCat);
+                    let matchingProducts = productsList.filter(p => mapCategory(p.category) === mappedSub);
                     let countBadge = matchingProducts.length > 0 ? ` (${matchingProducts.length})` : '';
                     let subId = `sub-${mainIndex}-${subIdx}`;
 
-                    subPillsHtml += `<button type="button" class="sub-cat-pill" id="pill-${subId}" onclick="toggleSubCategory('${mainIndex}', '${subId}')">${subCat}${countBadge}</button>`;
+                    subPillsHtml += `<button type="button" class="sub-cat-pill" id="pill-${subId}" onclick="toggleSubCategory('${mainIndex}', '${subId}')">${mappedSub}${countBadge}</button>`;
 
                     let cardsHtml = '';
                     if (matchingProducts.length > 0) {
@@ -672,7 +848,7 @@
 
             let filtered = allProducts.filter(p =>
                 (p.name && p.name.toLowerCase().includes(query)) ||
-                (p.category && p.category.toLowerCase().includes(query))
+                (p.category && mapCategory(p.category).toLowerCase().includes(query))
             );
 
             if (filtered.length === 0) {
@@ -724,7 +900,7 @@
                 cart.push({
                     name: prod.name,
                     price: prod.price,
-                    category: prod.category || '',
+                    category: mapCategory(prod.category) || '',
                     qty: qty
                 });
             }
@@ -855,6 +1031,54 @@
             window.open(url, '_blank');
         }
 
+        async function pushMergedCloudData(patchObj) {
+            let base = {
+                ...rawCloudSnapshot,
+                categoriesTree: rawCloudSnapshot?.categoriesTree,
+                categoryAliases: categoryAliases,
+                products: allProducts,
+                sales: allSales,
+                captains: allCaptains,
+                cashiers: allCashiers,
+                captainRatings: allCaptainRatings,
+                captain_ratings: allCaptainRatings
+            };
+
+            try {
+                let res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
+                if (res.ok) {
+                    let latest = await res.json();
+                    if (latest && typeof latest === 'object' && !Array.isArray(latest)) {
+                        base = { ...base, ...latest };
+                    }
+                }
+            } catch (_) {}
+
+            const mergedRatings = Array.isArray(patchObj.captainRatings)
+                ? patchObj.captainRatings
+                : (Array.isArray(base.captainRatings) ? base.captainRatings : (Array.isArray(base.captain_ratings) ? base.captain_ratings : allCaptainRatings));
+
+            const payload = {
+                ...base,
+                ...patchObj,
+                captainRatings: mergedRatings,
+                captain_ratings: mergedRatings
+            };
+
+            rawCloudSnapshot = payload;
+            try {
+                localStorage.setItem('gahiz_lightning_cache', JSON.stringify(payload));
+            } catch (_) {}
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (_) {}
+        }
+
         async function submitOrderToWhatsApp() {
             let name = document.getElementById('custName').value.trim();
             let phone = document.getElementById('custPhone').value.trim();
@@ -880,15 +1104,18 @@
                 return;
             }
 
-            let cloudData = null;
             try {
                 let res = await fetch(API_URL + "?t=" + new Date().getTime(), { cache: "no-store" });
                 if (res.ok) {
                     let latest = await res.json();
                     if (latest && typeof latest === 'object' && !Array.isArray(latest)) {
-                        cloudData = latest;
+                        rawCloudSnapshot = latest;
+                        if (latest.categoryAliases && typeof latest.categoryAliases === 'object') {
+                            categoryAliases = latest.categoryAliases;
+                        }
                         if (Array.isArray(latest.products) && latest.products.length > 0) {
                             allProducts = latest.products;
+                            buildStoreHierarchyFromCloud(latest.categoriesTree);
                             if (!validateCartStockAgainstProducts(allProducts)) {
                                 renderDailyOffers();
                                 renderAccordionStore(allProducts);
@@ -897,13 +1124,14 @@
                                 return;
                             }
                         }
+                        if (Array.isArray(latest.sales)) allSales = latest.sales;
                     }
                 }
             } catch (_) {}
 
             let subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             let grandTotal = subTotal + fee;
-            let orderId = Math.floor(100000 + Math.random() * 900000);
+            let orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
 
             let itemsLines = cart.map(i => `• ${i.name} (×${i.qty}) - ${i.price * i.qty} ج.م`).join('\n');
             let msg = `🛒 *طلب جديد من منصة جاهز - رقم #${orderId}*\n\n` +
@@ -917,31 +1145,25 @@
                       `🛵 *رسوم التوصيل:* ${fee} ج.م\n` +
                       `✅ *الإجمالي الكلي:* *${grandTotal} ج.م*`;
 
-            try {
-                if (cloudData) {
-                    let salesArr = Array.isArray(cloudData.sales) ? cloudData.sales : [];
-                    salesArr.unshift({
-                        orderId,
-                        timestamp: new Date().toISOString(),
-                        customerName: name,
-                        customerPhone: phone,
-                        customerAddress: `${areaText} - ${address}`,
-                        paymentMethod: payMethod,
-                        subTotal,
-                        deliveryFee: fee,
-                        total: grandTotal,
-                        items: cart,
-                        status: "قيد الانتظار ⏳",
-                        assignedCaptain: ""
-                    });
-                    cloudData.sales = salesArr;
-                    await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(cloudData)
-                    });
+            const updatedSales = [
+                {
+                    orderId,
+                    timestamp: new Date().toISOString(),
+                    customerName: name,
+                    customerPhone: phone,
+                    customerAddress: `${areaText} - ${address}`,
+                    paymentMethod: payMethod,
+                    subTotal,
+                    deliveryFee: fee,
+                    total: grandTotal,
+                    items: cart,
+                    status: "قيد الانتظار ⏳",
+                    assignedCaptain: ""
                 }
-            } catch (_) {}
+            ].concat(Array.isArray(allSales) ? allSales : []);
+
+            allSales = updatedSales;
+            await pushMergedCloudData({ sales: updatedSales });
 
             cart = [];
             updateCartBadge();
@@ -995,339 +1217,62 @@
             sendWhatsAppMessage(msg);
         }
 
+        function openGahizCaptainRatingModal(prefillOrderId = "", prefillCaptainName = "") {
+            populateCaptainsDatalist();
+            const orderEl = document.getElementById("gahizRateOrderId");
+            const capEl = document.getElementById("gahizRateCaptainName");
+            const scoreEl = document.getElementById("gahizRateScore");
+            const commentEl = document.getElementById("gahizRateComment");
+            if (orderEl) orderEl.value = prefillOrderId || "";
+            if (capEl) capEl.value = prefillCaptainName || "";
+            if (scoreEl) scoreEl.value = "5";
+            if (commentEl) commentEl.value = "";
+            document.querySelectorAll("#gahizRateTagsBox .sub-cat-pill").forEach(b => b.classList.remove("active"));
+            document.getElementById("gahizCaptainRatingModal").style.display = "flex";
+        }
+
+        async function submitGahizCaptainRating() {
+            const orderId = (document.getElementById("gahizRateOrderId")?.value || "").trim();
+            const captainName = (document.getElementById("gahizRateCaptainName")?.value || "").trim();
+            const rating = parseInt(document.getElementById("gahizRateScore")?.value || "5", 10);
+            const comment = (document.getElementById("gahizRateComment")?.value || "").trim();
+            const tags = Array.from(document.querySelectorAll("#gahizRateTagsBox .sub-cat-pill.active"))
+                .map(el => el.getAttribute("data-tag"))
+                .filter(Boolean);
+
+            if (!orderId || !captainName) {
+                alert("⚠️ يرجى إدخال رقم الأوردر واسم الكابتن.");
+                return;
+            }
+
+            await loadStoreProducts(false);
+            const duplicate = allCaptainRatings.some(
+                r => r && String(r.orderId || "").trim() === orderId && String(r.captainName || "").trim() === captainName
+            );
+            if (duplicate) {
+                alert(`⚠️ تم تسجيل تقييم مسبق للأوردر #${orderId} للكابتن ${captainName}.`);
+                return;
+            }
+
+            allCaptainRatings.push({
+                orderId,
+                captainName,
+                rating,
+                tags,
+                comment,
+                createdAt: new Date().toISOString()
+            });
+
+            await pushMergedCloudData({ captainRatings: allCaptainRatings });
+            closeModal("gahizCaptainRatingModal");
+            alert(`✅ تم إرسال تقييمك للكابتن ${captainName} على الأوردر #${orderId} (${rating}/5).`);
+        }
+
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register("sw.js").catch(() => {});
             });
         }
     </script>
-    <!-- طبقة التكامل والمزامنة لصفحة عملاء جاهز Store (مخبوزات جاهز + الأقسام الديناميكية + تقييم الكابتن) -->
-<style>
-  #gahizCaptainRatingModal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(4px);
-    z-index: 9998;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    direction: rtl;
-    text-align: right;
-  }
-  .gahiz-rate-card {
-    background: #ffffff;
-    color: #0f172a;
-    width: 100%;
-    max-width: 440px;
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
-    border: 1px solid #e2e8f0;
-    font-family: 'Tajawal', sans-serif;
-  }
-  .gahiz-rate-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  .gahiz-rate-head h4 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 800;
-    color: #0369a1;
-  }
-  .gahiz-rate-close {
-    cursor: pointer;
-    font-size: 20px;
-    font-weight: 800;
-    color: #64748b;
-    line-height: 1;
-  }
-  .gahiz-rate-field {
-    margin-bottom: 12px;
-  }
-  .gahiz-rate-field label {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-  .gahiz-rate-field input,
-  .gahiz-rate-field select,
-  .gahiz-rate-field textarea {
-    width: 100%;
-    padding: 9px 12px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background: #f8fafc;
-    font-size: 14px;
-    font-family: 'Tajawal', sans-serif;
-    outline: none;
-  }
-  .gahiz-rate-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
-  }
-  .gahiz-rate-tag-btn {
-    border: 1px solid #cbd5e1;
-    background: #f1f5f9;
-    color: #334155;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: 'Tajawal', sans-serif;
-  }
-  .gahiz-rate-tag-btn.active {
-    background: #0284c7;
-    color: #ffffff;
-    border-color: #0284c7;
-  }
-  .gahiz-rate-submit {
-    width: 100%;
-    padding: 11px;
-    border: none;
-    border-radius: 10px;
-    background: #0284c7;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: 'Tajawal', sans-serif;
-  }
-  .gahiz-rate-submit:hover {
-    background: #0369a1;
-  }
-</style>
-
-<div id="gahizCaptainRatingModal" role="dialog" aria-modal="true" aria-labelledby="gahizRateTitle">
-  <div class="gahiz-rate-card">
-    <div class="gahiz-rate-head">
-      <h4 id="gahizRateTitle">⭐ تقييم كابتن التوصيل</h4>
-      <span class="gahiz-rate-close" onclick="closeGahizCaptainRatingModal()">✕</span>
-    </div>
-
-    <div class="gahiz-rate-field">
-      <label for="gahizRateOrderId">رقم الأوردر:</label>
-      <input type="text" id="gahizRateOrderId" placeholder="مثال: ORD-1050">
-    </div>
-
-    <div class="gahiz-rate-field">
-      <label for="gahizRateCaptainName">اسم الكابتن:</label>
-      <input type="text" id="gahizRateCaptainName" list="gahizCaptainsDatalist" placeholder="اختر أو اكتب اسم الكابتن">
-      <datalist id="gahizCaptainsDatalist"></datalist>
-    </div>
-
-    <div class="gahiz-rate-field">
-      <label for="gahizRateScore">التقييم (من 1 إلى 5):</label>
-      <select id="gahizRateScore">
-        <option value="5">⭐⭐⭐⭐⭐ ممتاز (5 من 5)</option>
-        <option value="4">⭐⭐⭐⭐ جيد جداً (4 من 5)</option>
-        <option value="3">⭐⭐⭐ مقبول (3 من 5)</option>
-        <option value="2">⭐⭐ ضعيف (2 من 5)</option>
-        <option value="1">⭐ سيئ (1 من 5)</option>
-      </select>
-    </div>
-
-    <div class="gahiz-rate-field">
-      <label>أبرز الملاحظات السريعة:</label>
-      <div class="gahiz-rate-tags" id="gahizRateTagsBox">
-        <button type="button" class="gahiz-rate-tag-btn" data-tag="توصيل سريع">توصيل سريع</button>
-        <button type="button" class="gahiz-rate-tag-btn" data-tag="أسلوب محترم">أسلوب محترم</button>
-        <button type="button" class="gahiz-rate-tag-btn" data-tag="الطلب سليم">الطلب سليم</button>
-        <button type="button" class="gahiz-rate-tag-btn" data-tag="تأخير بسيط">تأخير بسيط</button>
-      </div>
-    </div>
-
-    <div class="gahiz-rate-field">
-      <label for="gahizRateComment">ملاحظة إضافية (اختياري):</label>
-      <textarea id="gahizRateComment" rows="2" placeholder="اكتب ملاحظتك حول التوصيل لهذا الأوردر..."></textarea>
-    </div>
-
-    <button type="button" class="gahiz-rate-submit" onclick="submitGahizCaptainRating()">✅ إرسال تقييم الكابتن</button>
-  </div>
-</div>
-
-<script>
-<script>
-(function () {
-  const GAHIZ_CLOUD_URL = "https://api.npoint.io/d2a95067aede55eb6302";
-
-  const GAHIZ_DEFAULT_CATEGORIES = [
-    {
-      id: "cat_bakery",
-      title: "🥐 مخبوزات جاهز Store",
-      subcategories: [
-        "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحلو",
-        "مخبوزات جاهز Store - الفطير المشلتت - الفطير الحادق",
-        "مخبوزات جاهز Store - الفطير المشلتت - فطير منوع",
-        "مخبوزات جاهز Store - المعلبات",
-        "مخبوزات جاهز Store - العيش",
-        "مخبوزات جاهز Store - البسكويت",
-        "مخبوزات جاهز Store - الكحك",
-        "مخبوزات جاهز Store - معجنات وباتيه",
-        "مخبوزات جاهز Store - حلويات وتورت"
-      ]
-    }
-  ];
-
-  let cloudState = {
-    categoriesTree: GAHIZ_DEFAULT_CATEGORIES,
-    categoryAliases: {},
-    products: [],
-    sales: [],
-    captains: [],
-    cashiers: [],
-    captainRatings: []
-  };
-
-  function mapCategoryName(cat) {
-    if (!cat) return "";
-    const aliases = cloudState.categoryAliases || {};
-    return aliases[cat] || cat;
-  }
-
-  function mergeProductsIntoStore(cloudProducts) {
-    if (!Array.isArray(cloudProducts) || cloudProducts.length === 0) return;
-
-    const normalizedCloud = cloudProducts
-      .filter(p => p && p.name)
-      .map(p => ({ ...p, category: mapCategoryName(p.category) }));
-
-    // دمج منتجات الإدارة مع أي منتجات محلية دون فقدان الجديد
-    const existingLocal = Array.isArray(window.products)
-      ? window.products
-      : (Array.isArray(window.allProducts) ? window.allProducts : []);
-
-    const byName = new Map();
-    existingLocal.forEach(item => {
-      if (item && item.name) {
-        byName.set(item.name.trim(), { ...item, category: mapCategoryName(item.category) });
-      }
-    });
-    normalizedCloud.forEach(item => {
-      byName.set(item.name.trim(), item);
-    });
-
-    const mergedList = Array.from(byName.values());
-    window.products = mergedList;
-    window.allProducts = mergedList;
-
-    try {
-      localStorage.setItem("gahiz_store_products_sync", JSON.stringify(mergedList));
-    } catch (_) {}
-  }
-
-  function renderCategoriesIntoCustomerDom(tree, aliases) {
-    const finalTree = Array.isArray(tree) && tree.length ? tree : GAHIZ_DEFAULT_CATEGORIES;
-    const containers = document.querySelectorAll(
-      "#categories, #categoryTabs, #categoriesBar, .categories-bar, .category-tabs, .categories-list, [data-categories-container]"
-    );
-
-    if (typeof window.renderStoreCategories === "function") {
-      window.renderStoreCategories(finalTree, aliases);
-    }
-
-    if (containers.length > 0) {
-      containers.forEach(box => {
-        // لا نمسح الحاوية إلا إذا كانت مخصصة للأقسام وتحتوي على أزرار/روابط تصنيف أو كانت فارغة
-        const hasExistingButtons = box.querySelector("button, a, .category-btn, .cat-btn, .tab-btn");
-        if (!hasExistingButtons && box.children.length > 3) return;
-
-        const allBtn = `<button type="button" class="gahiz-dynamic-cat-btn" data-category="all" style="padding:7px 14px;border-radius:20px;border:1px solid #cbd5e1;background:#0284c7;color:#fff;font-weight:700;cursor:pointer;margin:3px;">الكل</button>`;
-        const mainBtns = finalTree.map(cat => {
-          const title = aliases[cat.title] || cat.title;
-          const cleanTitle = title.replace(/^[^\s]+\s*/, "").trim();
-          return `<button type="button" class="gahiz-dynamic-cat-btn" data-category="${cleanTitle}" style="padding:7px 14px;border-radius:20px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font-weight:700;cursor:pointer;margin:3px;">${title}</button>`;
-        }).join("");
-
-        box.innerHTML = allBtn + mainBtns;
-        box.querySelectorAll(".gahiz-dynamic-cat-btn").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const selectedCat = btn.getAttribute("data-category");
-            if (typeof window.filterByCategory === "function") {
-              window.filterByCategory(selectedCat);
-            } else if (typeof window.filterProducts === "function") {
-              window.filterProducts(selectedCat);
-            } else {
-              renderFilteredProductsFallback(selectedCat);
-            }
-          });
-        });
-      });
-    }
-  }
-
-  function renderFilteredProductsFallback(selectedCat) {
-    const list = Array.isArray(window.products) ? window.products : [];
-    const filtered = (!selectedCat || selectedCat === "all")
-      ? list
-      : list.filter(p => String(p.category || "").includes(selectedCat));
-
-    if (typeof window.renderProducts === "function") {
-      window.renderProducts(filtered);
-    } else if (typeof window.displayProducts === "function") {
-      window.displayProducts(filtered);
-    }
-  }
-
-  function applyCloudDataToCustomerPage(data) {
-    if (!data || typeof data !== "object" || Array.isArray(data)) return;
-
-    cloudState = {
-      ...cloudState,
-      ...data,
-      categoriesTree: Array.isArray(data.categoriesTree) && data.categoriesTree.length
-        ? data.categoriesTree
-        : (Array.isArray(cloudState.categoriesTree) && cloudState.categoriesTree.length
-            ? cloudState.categoriesTree
-            : GAHIZ_DEFAULT_CATEGORIES),
-      categoryAliases: (data.categoryAliases && typeof data.categoryAliases === "object")
-        ? data.categoryAliases
-        : (cloudState.categoryAliases || {})
-    };
-
-    if (Array.isArray(data.products)) {
-      mergeProductsIntoStore(data.products);
-    }
-
-    renderCategoriesIntoCustomerDom(cloudState.categoriesTree, cloudState.categoryAliases);
-
-    if (typeof window.renderProducts === "function") {
-      window.renderProducts();
-    } else if (typeof window.displayProducts === "function") {
-      window.displayProducts();
-    }
-  }
-
-  async function syncCustomerStoreNow() {
-    try {
-      const res = await fetch(GAHIZ_CLOUD_URL + "?t=" + Date.now(), { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        applyCloudDataToCustomerPage(data);
-      }
-    } catch (_) {}
-  }
-
-  window.GahizCustomerSync = {
-    syncNow: syncCustomerStoreNow,
-    applyData: applyCloudDataToCustomerPage,
-    getState: () => cloudState
-  };
-
-  window.addEventListener("DOMContentLoaded", () => {
-    syncCustomerStoreNow();
-    // إعادة المحاولة بعد ثانية لضمان تجاوز أي دالة تهيئة متأخرة في الصفحة
-    setTimeout(syncCustomerStoreNow, 1000);
-  });
-})();
-</script>
+</body>
+</html>
